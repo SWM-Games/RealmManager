@@ -1899,6 +1899,65 @@ function weeklyRankIncome(tierId, position) {
   return tier.tributeBase;
 }
 
+// ─── HERO STAT GROWTH ────────────────────────────────────────────────────────
+// Called on level-up. Grows each non-hidden stat toward potential.
+// Barracks building gives a small bonus to growth rolls.
+function growHeroStats(hero, newLevel, buildings) {
+  const hasBarracks = buildings?.find(b=>b.id==="barracks"&&b.built);
+  const potential = hero.stats.Potential || 50;
+  const levelsGained = newLevel - (hero.level || 0);
+  const newStats = {...hero.stats};
+  PHYSICAL_STATS.concat(MENTAL_STATS).concat(["Charisma","Negotiation","Intimidation","Reputation"]).forEach(s => {
+    if(s === "Potential" || s === "Form" || s === "Reputation") return;
+    const current = newStats[s] || 10;
+    if(current >= potential) return; // already at cap
+    // Each level gives 1-3 points, capped at potential, barracks gives +1 max
+    const maxGain = hasBarracks ? 4 : 3;
+    const gain = levelsGained * rand(1, maxGain);
+    newStats[s] = Math.min(potential, current + gain);
+  });
+  return newStats;
+}
+
+// ─── LEAGUE SIMULATION ───────────────────────────────────────────────────────
+// Simulates AI town results for the week — updates their win/loss records
+function simulateEnemyWeek(week, playerTownName, leagueTable, tierEnemyTowns) {
+  if(!tierEnemyTowns || !leagueTable) return { updated: leagueTable || {}, results: [] };
+  const updated = {...leagueTable};
+  const results = [];
+  // Each AI town plays one match — 50% base win rate with small variance
+  tierEnemyTowns.forEach(town => {
+    if(!updated[town.name]) updated[town.name] = {wins:0, losses:0, power:town.power};
+    const won = Math.random() < 0.5;
+    updated[town.name] = {
+      ...updated[town.name],
+      wins:   updated[town.name].wins   + (won ? 1 : 0),
+      losses: updated[town.name].losses + (won ? 0 : 1),
+    };
+    results.push({ name: town.name, won });
+  });
+  return { updated, results };
+}
+
+// ─── SCHEDULED OPPONENT ──────────────────────────────────────────────────────
+// Picks the next AI opponent from the league table for the scheduled match
+function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
+  if(!tierEnemyTowns || tierEnemyTowns.length === 0) return null;
+  // Pick a random town from the tier — weight toward towns with similar records
+  const idx = Math.floor(Math.random() * tierEnemyTowns.length);
+  const town = tierEnemyTowns[idx];
+  const tier = TIERS[tierId] || TIERS.iron;
+  return {
+    name:           town.name,
+    power:          town.power || rand(tier.powerMin, tier.powerMax),
+    difficulty:     tier.difficulty,
+    tierId,
+    treasury:       rand(3000, 10000),
+    specialisation: Math.random() < 0.35 ? pick(SPECIALISATIONS) : null,
+    abilities:      town.abilities || [],
+  };
+}
+
 const WEEKS_PER_CONTRACT_YEAR = 12;
 const ROSTER_CAP = 12; // max heroes on squad at any time
 
@@ -5606,6 +5665,7 @@ export default function App(){
   const [emissaryFiredThisSeason,setEmissaryFiredThisSeason] = useState(saved?.emissaryFiredThisSeason ?? false);
   const [hintDismissed,setHintDismissed]       = useState(saved?.hintDismissed ?? false);
   const [signDiscount,setSignDiscount]         = useState(saved?.signDiscount ?? 0); // 0–1 discount on next signing // pending random event // recent enemy-vs-enemy results
+  const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
   const [transferBids,setTransferBids]         = useState(saved?.transferBids ?? []);
 
