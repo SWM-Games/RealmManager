@@ -1890,9 +1890,6 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const potBonus=Math.max(0,stats.Potential-50)*5;
   const baseValue=Math.floor(avgStat * 7 * (1 + 0 * 0.32) + potBonus*0.3 + rand(-30,30));
   const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
-  // Standard Prospect level 0s are free — unproven and pre-career
-  const isFreeProsepct = !elite && !premium && stage === "prospect" && heroLevel === 0;
-  const value = isFreeProsepct ? 0 : Math.max(100,Math.floor(baseValue*valueMult));
   // Contract length appropriate to career stage — veterans don't sign 4-year deals
   const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
   const maxYears = STAGE_CONTRACT_MAX[stage] || 3;
@@ -1907,6 +1904,9 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const tierLvBonus = elite?rand(2,3):premium?rand(1,2):0;
   const heroLevel = Math.min(MAX_LEVEL, rand(lvMin,lvMax)+tierLvBonus);
   const heroXP = xpForLevel(heroLevel);
+  // Standard Prospect level 0s are free — unproven and pre-career
+  const isFreeProsepct = !elite && !premium && stage === "prospect" && heroLevel === 0;
+  const value = isFreeProsepct ? 0 : Math.max(100,Math.floor(baseValue*valueMult));
 
   return {
     id, name:`${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`, race, role,
