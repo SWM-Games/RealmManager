@@ -1875,13 +1875,22 @@ function calcSpecPenalty(spec, formation) {
   return { penalty: spec.penalty, reason: spec.reason, injuryBonus: spec.injuryBonus || 0 };
 }
 
-// Derives current table position from wins/losses vs league table
+// Derives current table position from the league table (object keyed by town name)
 function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
-  if(!leagueTable || leagueTable.length === 0) return 4;
-  // Sort table by wins descending, count how many are ahead of the player
-  const sorted = [...leagueTable].sort((a,b) => b.wins - a.wins);
+  if(!leagueTable || typeof leagueTable !== 'object') return 4;
+  const entries = Object.entries(leagueTable);
+  if(entries.length === 0) return 4;
+  // Sort all entries by wins descending, player is the one marked isPlayer
+  const sorted = entries
+    .map(([name, data]) => ({name, ...data}))
+    .sort((a,b) => b.wins - a.wins);
   const playerIdx = sorted.findIndex(t => t.isPlayer);
-  return playerIdx >= 0 ? playerIdx + 1 : 4;
+  // If player not in table yet, estimate from wins count
+  if(playerIdx < 0) {
+    const ahead = sorted.filter(t => t.wins > wins).length;
+    return Math.min(8, ahead + 1);
+  }
+  return playerIdx + 1;
 }
 
 // Weekly tribute income — now flat per tier (no position bonus)
