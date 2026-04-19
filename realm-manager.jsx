@@ -1855,6 +1855,41 @@ const TOWN_COLORS = [
   { label:"Rose",    value:"#ff6eb4" },
 ];
 
+// Enemy specialisations — apply a power penalty if the formation doesn't counter them
+const SPECIALISATIONS = [
+  { id:"guerrilla",  label:"Guerrilla Tactics",  counter:"Skirmisher", penalty:0.12, injuryBonus:0.08, reason:"Formation lacks Skirmisher depth to counter fast flankers" },
+  { id:"siege",      label:"Siege Formation",    counter:"Vanguard",   penalty:0.10, injuryBonus:0.00, reason:"Heavy front line overwhelms a weak Vanguard" },
+  { id:"arcane",     label:"Arcane Assault",     counter:"Arbiter",    penalty:0.14, injuryBonus:0.00, reason:"Magical barrage without Arbiter-level counterspell" },
+  { id:"ambush",     label:"Ambush Predators",   counter:"Skirmisher", penalty:0.10, injuryBonus:0.12, reason:"Ambush tactics inflict extra injuries without agile counters" },
+  { id:"phalanx",    label:"Phalanx",            counter:"Vanguard",   penalty:0.08, injuryBonus:0.00, reason:"Shield wall breaks an unprepared Vanguard" },
+  { id:"sorcery",    label:"War Sorcery",        counter:"Arbiter",    penalty:0.16, injuryBonus:0.00, reason:"Sorcery unchecked by Arbiter power is devastating" },
+];
+
+// Returns penalty object if formation doesn't counter the specialisation, else null
+function calcSpecPenalty(spec, formation) {
+  if(!spec) return null;
+  const counterPos = spec.counter;
+  const counterHeroes = (formation[counterPos]||[]).filter(Boolean);
+  // Countered if at least 1 hero in the counter position
+  if(counterHeroes.length >= 1) return null;
+  return { penalty: spec.penalty, reason: spec.reason, injuryBonus: spec.injuryBonus || 0 };
+}
+
+// Derives current table position from wins/losses vs league table
+function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
+  if(!leagueTable || leagueTable.length === 0) return 4;
+  // Sort table by wins descending, count how many are ahead of the player
+  const sorted = [...leagueTable].sort((a,b) => b.wins - a.wins);
+  const playerIdx = sorted.findIndex(t => t.isPlayer);
+  return playerIdx >= 0 ? playerIdx + 1 : 4;
+}
+
+// Weekly tribute income — now flat per tier (no position bonus)
+function weeklyRankIncome(tierId, position) {
+  const tier = TIERS[tierId] || TIERS.iron;
+  return tier.tributeBase;
+}
+
 const WEEKS_PER_CONTRACT_YEAR = 12;
 const ROSTER_CAP = 12; // max heroes on squad at any time
 
