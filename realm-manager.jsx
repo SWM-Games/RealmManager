@@ -1843,6 +1843,18 @@ function rollPotential(premium=false, elite=false, tierId="iron"){
 }
 
 // Contract weeks per year
+const DEFAULT_TOWN_COLOR = "#ffd966";
+const TOWN_COLORS = [
+  { label:"Gold",    value:"#ffd966" },
+  { label:"Emerald", value:"#a8ff78" },
+  { label:"Sapphire",value:"#78c8ff" },
+  { label:"Crimson", value:"#ff7878" },
+  { label:"Violet",  value:"#a78bfa" },
+  { label:"Amber",   value:"#ff9f43" },
+  { label:"Silver",  value:"#c0c0c0" },
+  { label:"Rose",    value:"#ff6eb4" },
+];
+
 const WEEKS_PER_CONTRACT_YEAR = 12;
 const ROSTER_CAP = 12; // max heroes on squad at any time
 
