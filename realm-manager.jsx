@@ -1093,7 +1093,7 @@ const ACHIEVEMENTS = [
   {
     id:       "synergy_master",
     name:     "Synergy Master",
-    desc:     "Win raids with 3 different race synergies active in one run",
+    desc:     "Win battles with 3 different race synergies active in one run",
     icon:     "✨",
     check:    (data)=>Object.keys(data.raceSynergyUsage||{}).length>=3,
     boon: {
@@ -1178,51 +1178,76 @@ function generateStartingSquad() {
   });
 
   // ── RANDOM NORMAL HEROES (slots 4–7) ─────────────────────────────────────
-  // Prospect to early Rising — raw but varied
+  // Prospect — raw, unproven, level 0
+  const RACES_LIST = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
   for(let i=4; i<8; i++){
-    const h = generateHero(i);
-    const isSolid = Math.random() < 0.25;
-    const pot = isSolid ? rand(48,60) : rand(35,50);
-    const cw = isSolid
-      ? stageToCareerWeek("rising", rand(0, 50))
-      : stageToCareerWeek("prospect", rand(30, 90));
+    const pot = rand(35,55);
+    const cw = stageToCareerWeek("prospect", rand(20, 80));
     const { stage, stageProgress } = careerWeekToStage(cw);
-    const stats = {...h.stats, Potential: pot};
+    const stats = {};
     ALL_STATS.forEach(s => {
-      if(["Potential","Form"].includes(s)) return;
+      if(s==="Potential"){ stats[s]=pot; return; }
+      if(s==="Form"){ return; }
       const lo = Math.max(10, Math.floor(pot*0.25));
-      const hi = Math.max(lo, Math.floor(pot*0.50));
+      const hi = Math.max(lo, Math.floor(pot*0.45));
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
-    stats.Form = rand(3,7);
-    squad.push({...h, stage, stageProgress, stats, level:1, xp:0});
+    stats.Form = rand(2,6);
+    const avgStat = Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
+    squad.push({
+      id: Date.now()+i+rand(0,9999),
+      name: `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`,
+      race: pick(RACES_LIST), role: pick(ROLES),
+      stage, stageProgress, stats,
+      traits: pickTraits(rand(1,2)),
+      level: 0, xp: 0,
+      salary: Math.floor(avgStat*rand(11,14)/10),
+      value: 0,
+      morale: rand(55,85),
+      contractYears: 1,
+      contractWeeks: WEEKS_PER_CONTRACT_YEAR,
+      contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
+      injured: false, injuryWeeks: 0, retired: false,
+      fatigue: 0, weeksUnplayed: 0, weeksInSquad: 0,
+      weeksInFormation: 0, potentialRevealed: false,
+      negotiationPending: false, negotiationIgnoredWeeks: 0,
+      marketTier: "standard", mentorBonus: null,
+    });
   }
 
   // ── FODDER (slots 8–9) ────────────────────────────────────────────────────
-  // Prospect — clearly throwaway
+  // Prospect — clearly throwaway, free to sign
   for(let i=8; i<10; i++){
-    const h = generateHero(Date.now()+i);
     const fodderPot = rand(18, 30);
     const cw = stageToCareerWeek("prospect", rand(10, 60));
     const { stage, stageProgress } = careerWeekToStage(cw);
-    const fodderStats = {...h.stats, Potential: fodderPot};
+    const fodderStats = {};
     ALL_STATS.forEach(s => {
-      if(["Potential","Form"].includes(s)) return;
+      if(s==="Potential"){ fodderStats[s]=fodderPot; return; }
+      if(s==="Form"){ return; }
       fodderStats[s] = Math.max(10, Math.min(fodderPot, Math.floor(fodderPot*rand(25,50)/100)));
     });
     fodderStats.Form = rand(2,5);
     const fodderAvg = Object.values(fodderStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
     squad.push({
-      ...h,
+      id: Date.now()+i+100+rand(0,9999),
+      name: `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`,
+      race: pick(RACES_LIST), role: pick(ROLES),
       stage, stageProgress,
       stats: fodderStats,
       traits: pickTraits(1),
       level: 0, xp: 0,
       salary: Math.floor(fodderAvg*rand(11,14)/10),
       value: 0,
+      morale: rand(50,75),
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
+      injured: false, injuryWeeks: 0, retired: false,
+      fatigue: 0, weeksUnplayed: 0, weeksInSquad: 0,
+      weeksInFormation: 0, potentialRevealed: false,
+      negotiationPending: false, negotiationIgnoredWeeks: 0,
+      marketTier: "standard", mentorBonus: null,
       fodder: true,
     });
   }
@@ -1276,9 +1301,9 @@ function fatigueLabel(f) {
 }
 
 const POSITIONS = {
-  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin","Half-Orc","Dwarf"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel. Mages & Clerics suffer here." },
-  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue","Elf","Tiefling"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel. Heavy classes are sluggish here." },
-  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric","Gnome","Dragonborn"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate. Warriors have no place here." },
+  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel. Mages & Clerics suffer here." },
+  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
+  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
 };
 const POS_KEYS = Object.keys(POSITIONS);
 
@@ -1435,7 +1460,7 @@ function calcHeroCombatScore(hero, pos) {
   // No penalty for wrong role — the weights already punish it naturally.
   if(pos && POSITIONS[pos]) {
     const pd = POSITIONS[pos];
-    const isIdeal = pd.ideal.includes(hero.role) || pd.ideal.includes(hero.race);
+    const isIdeal = pd.ideal.includes(hero.role);
     if(isIdeal) score *= 1.10;
   }
 
@@ -1481,11 +1506,10 @@ function analyseFormation(formation){
     (formation[pos]||[]).forEach(h=>{
       if(!h)return;
       const isIdeal=pd.ideal.includes(h.role);
-      const isPenalty=pd.penalty.includes(h.role);
       heroMods[h.id]={
-        fit: isIdeal?"ideal":isPenalty?"penalty":"neutral",
+        fit: isIdeal?"ideal":"neutral",
         statMult: isIdeal?1.10:1.0,
-        label: isIdeal?"Natural Fit ✓":isPenalty?"Wrong Position ✗":"Neutral",
+        label: isIdeal?"Natural Fit ✓":"Neutral",
       };
     });
   });
@@ -1805,6 +1829,9 @@ const TRAIT_CONFLICTS = [
   ["Glass Cannon","Resilient"], // opposite injury profile
   ["Hot-headed","Iron Will"],   // walkout behaviour contradicts
   ["Blessed","Cursed"],     // direct opposites
+  ["Loyal","Stubborn"],     // both contract traits, contradictory disposition
+  ["Loyal","Hot-headed"],   // calm vs volatile
+  ["Iron Will","Hot-headed"], // redundant with existing but explicit
 ];
 
 function pickTraits(n) {
@@ -2126,8 +2153,8 @@ const ENEMY_ABILITIES = [
     id:'war_of_attrition',   name:'War of Attrition',         icon:'⏳',
     stat:'Endurance',        scope:'squad',
     desc:'A grinding fight that drains every hero.',
-    softDesc: (t)=>`All raiding heroes: +10 fatigue.`,
-    hardDesc: (t)=>`All raiding heroes: +20 fatigue, −8 morale each.`,
+    softDesc: (t)=>`All heroes in formation: +10 fatigue.`,
+    hardDesc: (t)=>`All heroes in formation: +20 fatigue, −8 morale each.`,
     softEffect: { fatigue:{pos:'all',amt:10} },
     hardEffect: { fatigue:{pos:'all',amt:20}, morale:{pos:'all',amt:-8} },
     thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
@@ -2760,7 +2787,7 @@ function analyseWeakLinks(formation, analysis) {
       const mod = analysis.heroMods[h.id];
       const issues = [];
 
-      if(mod?.fit === "penalty") {
+      if(false) { // penalty fit removed — wrong role is neutral not penalised
         issues.push({ severity:"warning", reason:`Off-position — ${h.role} in ${pos} (better fit: ${pd.ideal.filter(x=>ROLES.includes(x)).join(", ")})`, stat:"Position", impact:-15 });
       }
       if(h.stats.Form < 4) {
@@ -2777,7 +2804,7 @@ function analyseWeakLinks(formation, analysis) {
       }
       // Check primary stat fit
       const primaryAvg = pd.primaryStats.reduce((a,s)=>a+(h.stats[s]||0),0)/pd.primaryStats.length;
-      if(primaryAvg < 35 && mod?.fit !== "penalty") {
+      if(primaryAvg < 35) {
         issues.push({ severity:"warning", reason:`Low primary stats for this position (avg ${Math.round(primaryAvg)})`, stat:"Stats", impact:-10 });
       }
       // Declining hero in physical position
@@ -3347,7 +3374,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
   if(chronicle){
     const c = chronicle;
     narrativeParts.push(`In ${c.totalSeasons} season${c.totalSeasons>1?"s":""}, ${townName} climbed from Iron to conquer the Platinum League.`);
-    if(c.totalRaids>0) narrativeParts.push(`You won ${c.totalWins} of ${c.totalRaids} raids across the campaign.`);
+    if(c.totalRaids>0) narrativeParts.push(`You won ${c.totalWins} of ${c.totalRaids} battles across the campaign.`);
     if(c.builtCount>0) narrativeParts.push(`${c.builtCount} building${c.builtCount>1?"s were":"was"} constructed to strengthen your realm.`);
     if(c.biggestUpset) narrativeParts.push(`Your greatest upset came against ${c.biggestUpset.enemy} at just ${Math.round(c.biggestUpset.winChance*100)}% win chance in Season ${c.biggestUpset.season}.`);
     if(c.longestStreak?.count>=3) narrativeParts.push(`A ${c.longestStreak.count}-battle winning streak in Season ${c.longestStreak.season} will be remembered.`);
@@ -4534,9 +4561,8 @@ function TacticsTab({heroes,formation,setFormation}){
     // Include all non-retired, non-injured heroes (injured shown but disabled)
     const list=heroes.filter(h=>!h.retired).map(h=>{
       const isIdeal  =pd.ideal.includes(h.role);
-      const isPenalty=pd.penalty.includes(h.role);
-      const fit      =isIdeal?"ideal":isPenalty?"penalty":"neutral";
-      const fitScore =isIdeal?0:isPenalty?2:1;
+      const fit      =isIdeal?"ideal":"neutral";
+      const fitScore =isIdeal?0:1;
       const primaryAvg=pd.primaryStats.reduce((a,s)=>a+(h.stats[s]||0),0)/pd.primaryStats.length;
       const alreadyHere=(formation[pickerOpen.pos]||[])[pickerOpen.slotIdx]?.id===h.id;
       // Is this hero in a *different* slot (will be moved, not copied)?
@@ -4553,8 +4579,8 @@ function TacticsTab({heroes,formation,setFormation}){
     return list.sort(sorts[pickerSort]||sorts.fit);
   },[pickerOpen,heroes,formation,pickerSort]);
 
-  const fitColor=f=>f==="ideal"?"#a8ff78":f==="penalty"?"#ff7878":"#888";
-  const fitLabel=f=>f==="ideal"?"✓ Perfect fit":f==="penalty"?"✗ Wrong position":"– Neutral";
+  const fitColor=f=>f==="ideal"?"#a8ff78":"#888";
+  const fitLabel=f=>f==="ideal"?"✓ Natural fit":"– Neutral";
 
   return(
     <div className="rm-tactics-grid" style={{display:"grid",gridTemplateColumns:"1fr 330px",gap:18}}>
@@ -4568,15 +4594,57 @@ function TacticsTab({heroes,formation,setFormation}){
           </div>
         </div>
 
-        {/* Rating summary */}
-        <div style={{marginBottom:12,padding:"9px 13px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.06)",display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-          {[["BASE",raw,"#78c8ff"],["→",null,"#333"],["EFFECTIVE",effective,effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"]].map(([l,v,c],i)=>(
-            v===null?<div key={i} style={{color:c,fontSize:18}}>→</div>:
-            <div key={l} style={{textAlign:"center"}}><div style={{fontSize:8,color:"#888"}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div></div>
-          ))}
-          <div style={{flex:1}}/>
-          {analysis.raceSynergy&&<div style={{fontSize:10,color:analysis.raceSynergy.color,background:`${analysis.raceSynergy.color}14`,padding:"3px 8px",borderRadius:6,border:`1px solid ${analysis.raceSynergy.color}33`}}>{analysis.raceSynergy.icon} {analysis.raceSynergy.name}</div>}
-        </div>
+        {/* Rating summary with expandable multiplier breakdown */}
+        {(()=>{
+          const [showBreakdown,setShowBreakdown]=React.useState(false);
+          // Build multiplier list
+          const mults=[];
+          analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
+          if(analysis.raceSynergy) mults.push({label:analysis.raceSynergy.name,icon:analysis.raceSynergy.icon,mult:analysis.raceSynergy.ratingMult,col:analysis.raceSynergy.color});
+          // Count role pairings active
+          POS_KEYS.forEach(pos=>{
+            const heroes2=(formation[pos]||[]).filter(Boolean);
+            if(heroes2.length===2){
+              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&heroes2.every(h=>p.roles.includes(h.role)));
+              if(pp) mults.push({label:`${heroes2.map(h=>h.role).join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
+            }
+          });
+          const netMult=mults.reduce((a,m)=>a*m.mult,1.0);
+          return(
+            <div style={{marginBottom:12,padding:"9px 13px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+                {[["BASE",raw,"#78c8ff"],["→",null,"#333"],["EFFECTIVE",effective,effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"]].map(([l,v,c],i)=>(
+                  v===null?<div key={i} style={{color:c,fontSize:18}}>→</div>:
+                  <div key={l} style={{textAlign:"center"}}><div style={{fontSize:8,color:"#888"}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div></div>
+                ))}
+                <div style={{flex:1}}/>
+                {analysis.raceSynergy&&<div style={{fontSize:10,color:analysis.raceSynergy.color,background:`${analysis.raceSynergy.color}14`,padding:"3px 8px",borderRadius:6,border:`1px solid ${analysis.raceSynergy.color}33`}}>{analysis.raceSynergy.icon} {analysis.raceSynergy.name}</div>}
+                <button onClick={()=>setShowBreakdown(s=>!s)} style={{fontSize:9,padding:"3px 8px",borderRadius:5,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"#888",cursor:"pointer"}}>{showBreakdown?"▲ Hide":"▼ Breakdown"}</button>
+              </div>
+              {showBreakdown&&(
+                <div style={{marginTop:9,paddingTop:9,borderTop:"1px solid rgba(255,255,255,0.05)"}}>
+                  <div style={{fontSize:9,color:"#888",marginBottom:5,letterSpacing:1}}>RATING MULTIPLIERS</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#888"}}>
+                      <span>Base avg hero score</span><span style={{color:"#78c8ff",fontWeight:700}}>{raw}</span>
+                    </div>
+                    {mults.length===0&&<div style={{fontSize:10,color:"#555"}}>No synergy bonuses active</div>}
+                    {mults.map((m,i)=>(
+                      <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10}}>
+                        <span style={{color:"#888"}}>{m.icon} {m.label}</span>
+                        <span style={{color:m.col,fontWeight:700}}>×{m.mult.toFixed(2)}</span>
+                      </div>
+                    ))}
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:11,fontWeight:700,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:4,marginTop:2}}>
+                      <span style={{color:"#f0e6d3"}}>Effective rating</span>
+                      <span style={{color:effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"}}>{effective} <span style={{fontSize:9,color:"#888",fontWeight:400}}>(×{netMult.toFixed(2)})</span></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Active race synergy inline */}
         {analysis.raceSynergy&&(
@@ -4610,7 +4678,7 @@ function TacticsTab({heroes,formation,setFormation}){
                 {[0,1].map(slotIdx=>{
                   const h=slots[slotIdx];
                   const fit=h?analysis.heroMods[h.id]:null;
-                  const fc=fit?.fit==="ideal"?"#a8ff78":fit?.fit==="penalty"?"#ff7878":"rgba(255,255,255,0.12)";
+                  const fc=fit?.fit==="ideal"?"#a8ff78":"rgba(255,255,255,0.12)";
                   const isPickerTarget=pickerOpen?.pos===pos&&pickerOpen?.slotIdx===slotIdx;
                   return(
                     <div key={slotIdx}>
@@ -4622,7 +4690,7 @@ function TacticsTab({heroes,formation,setFormation}){
                             <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
                             <div style={{fontSize:9,color:"#999"}}>{ROLE_ICONS[h.role]} {h.role} · Lv {h.level}</div>
                           </div>
-                          <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":fit?.fit==="penalty"?"✗":"–"}</div>
+                          <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":"–"}</div>
                         </div>
                       ):(
                         <button onClick={()=>setPickerOpen({pos,slotIdx})}
@@ -4635,8 +4703,7 @@ function TacticsTab({heroes,formation,setFormation}){
                 })}
               </div>
               <div style={{marginTop:6,fontSize:9,color:"#888"}}>
-                <span style={{color:"#a8ff7866"}}>✓ {pd.ideal.join(", ")}</span>
-                <span style={{marginLeft:8,color:"#ff787866"}}>✗ {pd.penalty.join(", ")}</span>
+                <span style={{color:"#a8ff7866"}}>✓ Ideal: {pd.ideal.join(", ")}</span>
               </div>
             </div>
           );
@@ -5279,7 +5346,7 @@ function SetupScreen({ onComplete }) {
           </div>
           <div style={{fontSize:10,color:"#999",letterSpacing:2,marginBottom:12}}>FANTASY SQUAD SIMULATOR</div>
           <div style={{fontSize:12,color:"#888",lineHeight:1.6,maxWidth:340,margin:"0 auto 16px"}}>
-            Build a dynasty of heroes. Send them on raids. Watch them rise, peak, and retire as legends. Climb from Iron to Platinum — or fall trying.
+            Build a dynasty of heroes. Send them to battle. Watch them rise, peak, and retire as legends. Climb from Iron to Platinum — or fall trying.
           </div>
           {/* Three pillars */}
           <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:4}}>
@@ -5466,69 +5533,89 @@ function GuideTab(){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:700,color:"#78c8ff",marginBottom:14}}>📖 How to Play</div>
 
       <Section id="loop" icon="⚔️" title="The Core Loop">
-        <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#f0e6d3"}}>set your formation</b>, <b style={{color:"#f0e6d3"}}>launch a battle</b>, and manage the aftermath. Win battles to earn gold. Use gold to sign heroes, build your town, and develop your squad.</p>
-        <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#f0e6d3"}}>{SEASON_LENGTH()} weeks</b>. At the end of each season, the <b style={{color:"#ffd966"}}>top 2 teams promote</b> to the next league tier and the <b style={{color:"#ff7878"}}>bottom 2 relegate</b>.</p>
-        <p style={{margin:0}}>You win by <b style={{color:"#ffd966"}}>finishing 1st in the Platinum League</b>. The path is Iron → Bronze → Silver → Gold → Platinum.</p>
+        <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#f0e6d3"}}>set your formation</b>, <b style={{color:"#f0e6d3"}}>fight a battle</b>, and manage the aftermath. Winning earns gold and XP. Use gold to sign heroes, build your town, and grow your squad.</p>
+        <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#f0e6d3"}}>{SEASON_LENGTH()} weeks</b>. At the end of each season the <b style={{color:"#a8ff78"}}>top 2 teams promote</b> to the next tier and the <b style={{color:"#ff7878"}}>bottom 2 relegate</b>. The 5 tiers are Iron → Bronze → Silver → Gold → Platinum.</p>
+        <p style={{margin:0}}>You win by <b style={{color:"#ffd966"}}>finishing 1st in the Platinum League</b>. Each promotion unlocks new buildings and stronger heroes.</p>
       </Section>
 
-      <Section id="league" icon="🏆" title="League Tiers & Promotion">
-        <p style={{margin:"0 0 8px"}}>There are 5 tiers — each with 8 teams (you + 7 AI). Opponents are generated fresh for each tier and their power is <b style={{color:"#f0e6d3"}}>randomised each season</b>, so the same team may be easy one season and dangerous the next.</p>
-        {[
-          ["⚙️ Iron",    "Entry level. Tavern & Barracks unlock here."],
-          ["🥉 Bronze",  "Infirmary & Recovery Lodge unlock on arrival."],
-          ["🥈 Silver",  "Training Grounds, Talent Network & Trading Post unlock on arrival."],
-          ["🥇 Gold",    "Grand Bazaar (premium heroes) & Observatory (pre-hire scouting) unlock."],
-          ["💎 Platinum","Elite Sanctum unlocks. Finish 1st to win the campaign."],
-        ].map(([t,d])=>(
-          <span key={t} style={{display:"block",marginBottom:4}}>
-            <b style={{color:"#ffd966"}}>{t}</b> — <span style={{color:"#888"}}>{d}</span>
-          </span>
-        ))}
-        <p style={{margin:"8px 0 0"}}>A <b style={{color:"#a8ff78"}}>500g promotion bonus</b> is paid when you move up to help with the transition.</p>
+      <Section id="battle" icon="🗡️" title="How Battles Work">
+        <p style={{margin:"0 0 8px"}}>Every battle is decided across <b style={{color:"#f0e6d3"}}>3 phases</b> — Vanguard, Skirmisher, and Arbiter. Win 2 of 3 phases to win the battle. Each phase compares your heroes' combined score in that lane against the enemy's power share for that position.</p>
+        <p style={{margin:"0 0 8px"}}>Win chance per phase is <b style={{color:"#f0e6d3"}}>capped at 77% and floored at 27%</b> — even a dominant squad can lose a phase, and an underdog can always steal one.</p>
+        <p style={{margin:"0 0 8px"}}>Some opponents have a <b style={{color:"#ff9f43"}}>Specialisation</b> — a tactical style that boosts their power unless your formation counters it. The Battle tab shows what spec they're running and whether you're countering it.</p>
+        <p style={{margin:0}}>After a battle the <b style={{color:"#78c8ff"}}>debrief</b> shows exactly which phase you won or lost and why. Use it to identify your weak lane.</p>
       </Section>
 
       <Section id="formation" icon="🎯" title="Formation & Positions">
-        <p style={{margin:"0 0 8px"}}>Your formation has three lanes — <b style={{color:"#ff7878"}}>Vanguard</b> (front, 2 slots), <b style={{color:"#ffd966"}}>Skirmisher</b> (flank, 2 slots), <b style={{color:"#78c8ff"}}>Arbiter</b> (command, 2 slots). You can field 1–6 heroes.</p>
-        <p style={{margin:"0 0 8px"}}>Each position has <b style={{color:"#a8ff78"}}>ideal roles and races</b> that earn a bonus — and <b style={{color:"#ff7878"}}>penalty roles</b> that hurt. A Warrior or Half-Orc in Vanguard is ideal. An Elf or Tiefling in Skirmisher excels. A Mage in Vanguard is a liability.</p>
-        <p style={{margin:0}}>You win a battle by <b style={{color:"#ffd966"}}>winning 2 of 3 phases</b>. Each phase is won by your heroes' combined score in that lane vs the enemy's power share. Win chance is capped at 77% and floored at 27% — there's always some risk.</p>
+        <p style={{margin:"0 0 8px"}}>Three positions, 2 slots each. <b style={{color:"#ff7878"}}>Vanguard</b> — frontline brawlers (Warriors, Paladins). <b style={{color:"#ffd966"}}>Skirmisher</b> — flankers and ambushers (Rangers, Rogues). <b style={{color:"#78c8ff"}}>Arbiter</b> — rear command (Mages, Clerics).</p>
+        <p style={{margin:"0 0 8px"}}>Placing the <b style={{color:"#a8ff78"}}>ideal role</b> in the right position gives +10% to that hero's combat score. Pairing two ideal roles together (e.g. Warrior + Paladin in Vanguard) gives a further +7% pairing bonus. These are shown in the Tactics tab multiplier breakdown.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a78bfa"}}>Race synergies</b> are separate — they apply to your whole formation rating when you have 3+ of compatible races, or 6 of the same race. Check the Race Composition panel in Tactics.</p>
+        <p style={{margin:0}}>The Tactics tab shows <b style={{color:"#78c8ff"}}>Base → Effective</b> rating with a full multiplier breakdown. Click "Breakdown" to see exactly what's boosting or hurting your rating.</p>
       </Section>
 
       <Section id="heroes" icon="🧑" title="Hero Management">
-        <p style={{margin:"0 0 6px"}}><b style={{color:"#ff9f43"}}>Fatigue</b> builds each battle and recovers on the bench. Above 88%, heroes underperform and risk injury. Rotate your squad to manage it.</p>
-        <p style={{margin:"0 0 6px"}}><b style={{color:"#a78bfa"}}>Morale</b> affects performance and contract demands. Wins raise it, losses lower it. It decays slightly each week — bench heroes too long and they grow unhappy. Below 20 morale with an expired contract they may walk out.</p>
-        <p style={{margin:0}}><b style={{color:"#78c8ff"}}>Contracts</b> expire after 1–4 seasons depending on career stage. Accept, counter-offer, or renew early. Releasing a hero at contract end has no morale penalty.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#ff9f43"}}>Fatigue</b> builds every battle (+15–25) and recovers on the bench (-25/week). Above 88 fatigue heroes lose effectiveness and risk injury. Rotate your bench regularly — the Recovery Lodge speeds this up.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a78bfa"}}>Morale</b> swings up on wins, down on losses, and decays −0.5/week passively. A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#78c8ff"}}>Contracts</b> last 1–4 seasons depending on career stage. A warning fires 6 weeks before expiry. You can renew early within 2 seasons of expiry. Releasing a hero at contract end costs no morale penalty — plan your releases around expiry dates.</p>
+        <p style={{margin:0}}><b style={{color:"#ffd966"}}>Traits</b> give small bonuses and penalties — combat (+5–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
       </Section>
 
-      <Section id="economy" icon="💰" title="Hero Economy — Buy, Develop, Sell">
-        <p style={{margin:"0 0 8px"}}>Heroes grow in value as they level up. A raw Lv0 prospect costs ~300g. The same hero developed to Lv6 is worth ~1,400g — and a good bid can push that further.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> grows with battle appearances (+0.3–0.8 per battle) and decays slowly on the bench. A hero in Form 9 commands a <b style={{color:"#a8ff78"}}>+17% offer premium</b>.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle (+0.4) and never decays. High Reputation increases bid frequency and quality — scouts remember who they've watched.</p>
-        <p style={{margin:0}}>The <b style={{color:"#ffd966"}}>Career Arc</b> panel in each hero's detail view tells you exactly when to sell — Peak is the sweet spot, Prime is fading, Declining means offers dry up fast.</p>
+      <Section id="economy" icon="💰" title="Hero Economy — Sign, Develop, Sell">
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Level 0 Prospects</b> are free to sign. Develop them through battles to raise their level, Form, and Reputation — then sell at Peak for a significant profit. This is your primary income cycle.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#ffd966"}}>Potential</b> is hidden until a hero has played 8–10 battles. The Hidden stats tab shows a progress bar. Build the <b style={{color:"#78c8ff"}}>Observatory</b> (Gold tier) to see the potential bucket (Low/Med/High/Elite) before you even sign a market hero.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to transfer bids. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much scouts bid.</p>
+        <p style={{margin:0}}>The <b style={{color:"#ffd966"}}>Career Arc</b> panel in each hero's detail shows exactly where they are: Prospect → Rising → Peak → Fading → Veteran. Sell at Peak. Once Fading, bids drop to 60% of value.</p>
       </Section>
 
-      <Section id="synergies" icon="✨" title="Synergies & Penalties">
-        <p style={{margin:"0 0 8px"}}>Certain role combinations in the right positions trigger <b style={{color:"#a8ff78"}}>positive synergies</b> — formation rating boosts and win chance bonuses. Warrior + Paladin in Vanguard = Iron Wall. Mage + Cleric in Arbiter = Arcane Chorus.</p>
-        <p style={{margin:0}}>Wrong roles trigger <b style={{color:"#ff7878"}}>penalties</b> — a Mage in Vanguard (Chaos Front) dramatically reduces your rating. Check the Tactics tab — the ACTIVE NOW panel shows exactly what's firing before you battle.</p>
-      </Section>
-
-      <Section id="objectives" icon="📋" title="Season Objectives & Events">
-        <p style={{margin:"0 0 8px"}}>Each season you get <b style={{color:"#78c8ff"}}>3 random objectives</b> from a pool of 40. Complete them mid-season for gameplay buffs — XP boosts, morale bonuses, fatigue reductions, enemy power debuffs.</p>
-        <p style={{margin:0}}><b style={{color:"#a78bfa"}}>Random events</b> fire every ~3 weeks when a hero meets the stat requirements. Sending heroes on events earns gold, XP, and stat boosts — but they're away for 2–4 weeks. Accept most of them — event gold is the second-biggest income source in early seasons.</p>
-      </Section>
-
-      <Section id="tips" icon="💡" title="Tips & Tricks">
+      <Section id="buildings" icon="🏰" title="Buildings">
         {[
-          "Rest fatigued heroes before big battles — above 88% fatigue they lose 40% effectiveness and risk injury.",
-          "Counter your opponent's specialisation (shown in the Battle tab) to neutralise their power bonus.",
-          "A Fading hero still has value as Squad Leader — their tenure scales morale and XP bonuses for the whole squad.",
-          "Sell heroes at Peak — once they hit Fading, offers drop sharply and become rare.",
-          "Form and Reputation both show as progress bars in the hero detail — watch them to time your sales.",
-          "Accept the Legendary Challenge (Gold tier+) for exhibition gold — no league impact if you lose.",
-          "Objectives are visible in the Battle tab before you fight — adjust your formation to hit them.",
-          "The phase breakdown in the debrief shows exactly which lane lost you the battle. That's where to invest.",
-          "Events fire every 3–8 weeks — send heroes when available. Each event adds meaningful gold and XP on top of your weekly income.",
-          "Potential is hidden for the first 8–10 battles. Watch the progress bar in the Hidden stats tab before committing to long contracts.",
-          "Promotion to a new tier unlocks buildings immediately — check the Town tab after every promotion.",
+          ["⚙️ Iron",    [["🏰 Barracks","Heroes earn +20% XP per battle."],["🍺 Tavern","All heroes +3 morale each week."]]],
+          ["🥉 Bronze",  [["⚕️ Infirmary","Injuries heal 1 week faster."],["🛖 Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
+          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Listed heroes sell at 120% value, bids 50% more frequent."]]],
+          ["🥇 Gold",    [["🏪 Grand Bazaar","Unlocks premium heroes in the market."],["🌠 Observatory","Shows potential bucket for all market heroes before signing."]]],
+          ["💎 Platinum",[["💎 Elite Sanctum","Unlocks elite heroes in the market."],["🏛️ Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
+        ].map(([tier,buildings])=>(
+          <div key={tier} style={{marginBottom:8}}>
+            <div style={{fontSize:10,color:"#ffd966",fontWeight:700,marginBottom:3}}>{tier}</div>
+            {buildings.map(([name,desc])=>(
+              <div key={name} style={{marginBottom:2,paddingLeft:8}}>
+                <span style={{color:"#f0e6d3"}}>{name}</span><span style={{color:"#888"}}> — {desc}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </Section>
+
+      <Section id="synergies" icon="✨" title="Race Synergies & Duo Pacts">
+        <p style={{margin:"0 0 8px"}}>Race synergies boost your whole formation rating — they stack on top of role placement bonuses. Only one synergy can be active at a time (the best one).</p>
+        {[
+          ["Mono-Race","6 heroes of the same race. The strongest synergies — each race has a unique bonus and trade-off (e.g. 6 Dwarves = near-impenetrable Vanguard but weak Skirmishers)."],
+          ["Rainbow","6 heroes all of different races. A balanced +5% bonus with no weaknesses."],
+          ["Duo Pact","3+ of one race and 3+ of a compatible race (e.g. Dwarf + Half-Orc = Iron Warbond). Shown in the Tactics tab Race Composition panel with exact race requirements."],
+        ].map(([name,desc])=>(
+          <div key={name} style={{marginBottom:6,paddingLeft:8,borderLeft:"2px solid rgba(255,255,255,0.1)"}}>
+            <span style={{color:"#a8ff78",fontWeight:700}}>{name}</span><span style={{color:"#888"}}> — {desc}</span>
+          </div>
+        ))}
+        <p style={{margin:"8px 0 0",color:"#888"}}>Role pairings are separate from race synergies and apply at the position level. Both can be active simultaneously.</p>
+      </Section>
+
+      <Section id="objectives" icon="📋" title="Objectives & Events">
+        <p style={{margin:"0 0 8px"}}>Each season you get <b style={{color:"#78c8ff"}}>3 objectives</b>. Complete them for gameplay buffs — XP boosts, morale bonuses, fatigue reductions. They're visible in the Battle tab before you fight so you can adapt your formation.</p>
+        <p style={{margin:0}}><b style={{color:"#a78bfa"}}>Random events</b> fire every few weeks when a hero has the required stats. Heroes sent away earn gold, XP, and stat bonuses — but miss battles for 2–4 weeks. Events are worth accepting in most cases and provide reliable supplementary income.</p>
+      </Section>
+
+      <Section id="tips" icon="💡" title="Tips & Common Mistakes">
+        {[
+          "Don't field heroes above 88 fatigue — they lose 40% effectiveness. Rotate before big matches.",
+          "Release heroes at contract end, not mid-contract — no morale hit and no penalty.",
+          "Potential is hidden for 8–10 battles. Don't sign long contracts until you know what you have.",
+          "The phase breakdown in the battle debrief shows your weak lane — that's where to invest next.",
+          "Counter the opponent's specialisation in the Battle tab — ignoring it gives them a free power boost.",
+          "Sell heroes at Peak. A Fading hero at 60% value is often worth less than a free Prospect you develop.",
+          "Build the Observatory before spending big on market signings — knowing the bucket prevents expensive mistakes.",
+          "The Tactics multiplier breakdown shows every bonus active. Use it to understand exactly what's driving your rating.",
+          "Squad Leader bonus scales with tenure — a long-serving Fading hero in that role still adds real value.",
+          "Check the Squad composition panel at the top of the Squad tab to spot race synergy opportunities.",
         ].map((tip,i)=>(
           <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(120,200,255,0.2)"}}>💡 {tip}</p>
         ))}
@@ -5591,7 +5678,13 @@ export default function App(){
   const [week,setWeek]               = useState(saved?.week ?? 1);
   // Migrate any legacy Bard heroes to Cleric — Bard removed in favour of 6-class system
   const migrateBards = (hs) => hs.map(h => h.role === "Bard" ? {...h, role:"Cleric"} : h);
-  const [heroes,setHeroes] = useState(()=> migrateBards(saved?.heroes ?? generateStartingSquad()));
+  // Migrate any hero whose level doesn't match their xp (saves from before xpForLevel fix)
+  const migrateLevels = (hs) => hs.map(h => {
+    const correctLevel = Math.min(15, Math.max(0, typeof h.level==="number" ? h.level : 0));
+    const correctXP = xpForLevel(correctLevel);
+    return (h.xp==null||h.xp<correctXP) ? {...h, xp:correctXP} : h;
+  });
+  const [heroes,setHeroes] = useState(()=> migrateLevels(migrateBards(saved?.heroes ?? generateStartingSquad())));
   const [buildings,setBuildings]     = useState(()=> saved?.buildings ?? BUILDINGS.map(b=>({...b,built:false})));
   const [formation,setFormation]     = useState(()=>{
     if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, saved.heroes);
@@ -5625,7 +5718,7 @@ export default function App(){
   const [levelUps,setLevelUps]       = useState([]);
   const [showMore,setShowMore] = useState(false);
   const [enemy,setEnemy]             = useState(null);
-  const [filter,setFilter]           = useState({role:"All",race:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
+  const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
   const [marketFilter,setMarketFilter] = useState({role:"All",stage:"All",sortBy:"Value"});
   const [retirees,setRetirees]       = useState([]);
   const [negotiationQueue,setNegotiationQueue] = useState(saved?.negotiationQueue ?? []);
@@ -6913,6 +7006,11 @@ export default function App(){
   const filtered=useMemo(()=>{
     let h=[...heroes];
     if(filter.role!=="All")h=h.filter(x=>x.role===filter.role);
+    // Position filter — which lane is hero assigned to
+    if(filter.position!=="All"){
+      const posHeroIds=new Set((formation[filter.position]||[]).filter(Boolean).map(x=>x.id));
+      h=h.filter(x=>posHeroIds.has(x.id));
+    }
     if(filter.race!=="All")h=h.filter(x=>x.race===filter.race);
     if(filter.status==="Fit")h=h.filter(x=>!x.injured);
     if(filter.status==="Injured")h=h.filter(x=>x.injured);
@@ -7077,7 +7175,7 @@ export default function App(){
                 {3-bankruptcyWeeks} week{3-bankruptcyWeeks>1?"s":""} remaining
               </div>
               <div style={{fontSize:9,color:"#aaa",marginTop:2}}>
-                The realm cannot meet its wage bill. Sell heroes, win raids, or the campaign ends.
+                The realm cannot meet its wage bill. Sell heroes, win battles, or the campaign ends.
               </div>
             </div>
           </div>
@@ -7102,7 +7200,7 @@ export default function App(){
                   {[
                     {step:"1", label:"Set your formation", sub:"Tactics tab → drag heroes into Vanguard, Skirmisher & Arbiter slots", tab:"Tactics", col:"#a8ff78"},
                     {step:"2", label:"Launch a battle",      sub:"Battle tab → review your opponent, check win chance, then fight",       tab:"Battle",    col:"#ffd966"},
-                    {step:"3", label:"Manage your squad",  sub:"Keep heroes happy, renew contracts, watch fatigue after raids",        tab:"Squad",   col:"#a78bfa"},
+                    {step:"3", label:"Manage your squad",  sub:"Keep heroes happy, renew contracts, watch fatigue after battles",        tab:"Squad",   col:"#a78bfa"},
                   ].map(({step,label,sub,tab:target,col})=>(
                     <div key={step} onClick={()=>setTab(target)}
                       style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",
@@ -7259,10 +7357,64 @@ export default function App(){
                 </div>
               );
             })()}
+
+            {/* Squad composition summary */}
+            {(()=>{
+              const active = heroes.filter(h=>!h.retired&&!h.injured);
+              // Race counts
+              const raceCounts={};
+              active.forEach(h=>{raceCounts[h.race]=(raceCounts[h.race]||0)+1;});
+              // Role counts
+              const roleCounts={};
+              active.forEach(h=>{roleCounts[h.role]=(roleCounts[h.role]||0)+1;});
+              // Position counts (from formation)
+              const posCounts={};
+              POS_KEYS.forEach(pos=>{
+                posCounts[pos]=(formation[pos]||[]).filter(Boolean).length;
+              });
+              return(
+                <div style={{marginBottom:12,padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.05)"}}>
+                  <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
+                    {/* Positions */}
+                    <div style={{flex:1,minWidth:120}}>
+                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>FORMATION</div>
+                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                        {POS_KEYS.map(pos=>{
+                          const pd=POSITIONS[pos];
+                          const n=posCounts[pos]||0;
+                          const col=n===2?"#a8ff78":n===1?"#ffd966":"#555";
+                          return <span key={pos} style={{fontSize:10,color:col}}>{pd.icon} {pos.substring(0,3)} {n}/2</span>;
+                        })}
+                      </div>
+                    </div>
+                    {/* Roles */}
+                    <div style={{flex:1,minWidth:150}}>
+                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>ROLES</div>
+                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                        {ROLES.map(r=>{
+                          const n=roleCounts[r]||0;
+                          return n>0?<span key={r} style={{fontSize:10,color:"#aaa"}}>{ROLE_ICONS[r]} {r.substring(0,3)} ×{n}</span>:null;
+                        })}
+                      </div>
+                    </div>
+                    {/* Races */}
+                    <div style={{flex:2,minWidth:180}}>
+                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>RACES</div>
+                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                        {Object.entries(raceCounts).sort((a,b)=>b[1]-a[1]).map(([race,n])=>(
+                          <span key={race} style={{fontSize:10,color:"#aaa"}}>{RACE_ICONS[race]} {race} ×{n}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             <div className="rm-filter-bar" style={{marginBottom:12}}>
               <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:155,minWidth:0,maxWidth:"100%"}}/>
               <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option>All</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
               <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option>All</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r}>{r}</option>)}</select>
+              <select value={filter.position} onChange={e=>setFilter(f=>({...f,position:e.target.value}))} style={IS}><option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
               <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}>{["All","Fit","Injured","Unhappy","Contract"].map(v=><option key={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
@@ -7282,7 +7434,7 @@ export default function App(){
         {/* DOMINION */}
         {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier,currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
 
-        {/* RAID */}
+        {/* BATTLE */}
         {tab==="Battle"&&(
           <div className="rm-two-col" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
 
@@ -7368,7 +7520,7 @@ export default function App(){
                           <div style={{fontSize:10,color:"#888",padding:"4px 0"}}>Empty slot</div>
                         ):assigned.map(h=>{
                           const fit=formAnalysis.heroMods[h.id];
-                          const fitCol=fit?.fit==="ideal"?"#a8ff78":fit?.fit==="penalty"?"#ff7878":"#888";
+                          const fitCol=fit?.fit==="ideal"?"#a8ff78":"#888";
                           const pwr=Math.round(calcHeroCombatScore(h,pos));
                           const {color:fatCol}=fatigueLabel(h.fatigue||0);
                           const pwrCol=pwr>=40?"#a8ff78":pwr>=25?"#78c8ff":"#ffd966";
@@ -7392,7 +7544,7 @@ export default function App(){
                                 </div>
                                 <div style={{flex:1,background:"rgba(255,255,255,0.04)",borderRadius:4,padding:"3px 0",textAlign:"center"}}>
                                   <div style={{fontSize:8,color:fitCol}}>FIT</div>
-                                  <div style={{fontSize:9,fontWeight:700,color:fitCol,lineHeight:1.2}}>{fit?.fit==="ideal"?"✓":fit?.fit==="penalty"?"✗":"—"}</div>
+                                  <div style={{fontSize:9,fontWeight:700,color:fitCol,lineHeight:1.2}}>{fit?.fit==="ideal"?"✓":"—"}</div>
                                 </div>
                               </div>
                               {h.injured&&<div style={{fontSize:8,color:"#ff7878",marginTop:3}}>🩸 Injured</div>}
@@ -7509,7 +7661,7 @@ export default function App(){
                     {/* Opponent card */}
                     <div style={{padding:"14px 16px",background:"rgba(255,159,67,0.06)",borderRadius:10,border:"1px solid rgba(255,159,67,0.25)",marginBottom:12}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                        <span style={{fontSize:28}}>{spec.icon}</span>
+                        <span style={{fontSize:28}}>{spec?.icon||"⚔️"}</span>
                         <div style={{flex:1}}>
                           <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,color:"#f0e6d3"}}>{opp.name}</div>
                           <div style={{fontSize:10,color:oppStarCol}}>{renderStars(oppStars)}
@@ -7548,7 +7700,7 @@ export default function App(){
                       <div style={{fontSize:9,color:"#888",textAlign:"center",marginBottom:10}}>Win 2 of 3 phases to win the battle</div>
 
                       {/* Specialisation */}
-                      {(()=>{
+                      {spec&&(()=>{
                         const penCol=pen?"#ff9f43":"#a8ff78";
                         return(
                           <div style={{padding:"8px 10px",background:"rgba(255,255,255,0.04)",borderRadius:7,border:`1px solid ${penCol}33`,marginBottom:8}}>
