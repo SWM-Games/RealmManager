@@ -4531,6 +4531,7 @@ function TacticsTab({heroes,formation,setFormation}){
   // pickerOpen = { pos, slotIdx } | null
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
+  const [showBreakdown,setShowBreakdown]=useState(false);
 
   const {analysis,effective,raw}=calcFormationRating(formation);
   const assignedIds=new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
@@ -4596,7 +4597,6 @@ function TacticsTab({heroes,formation,setFormation}){
 
         {/* Rating summary with expandable multiplier breakdown */}
         {(()=>{
-          const [showBreakdown,setShowBreakdown]=React.useState(false);
           // Build multiplier list
           const mults=[];
           analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
@@ -7367,23 +7367,33 @@ export default function App(){
               // Role counts
               const roleCounts={};
               active.forEach(h=>{roleCounts[h.role]=(roleCounts[h.role]||0)+1;});
-              // Position counts (from formation)
-              const posCounts={};
+              // Position affinity — count heroes whose role is ideal for each position
+              const posSuited={};
               POS_KEYS.forEach(pos=>{
-                posCounts[pos]=(formation[pos]||[]).filter(Boolean).length;
+                posSuited[pos]=active.filter(h=>POSITIONS[pos].ideal.includes(h.role)).length;
               });
+              // Also track how many are assigned
+              const posAssigned={};
+              POS_KEYS.forEach(pos=>{posAssigned[pos]=(formation[pos]||[]).filter(Boolean).length;});
               return(
                 <div style={{marginBottom:12,padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.05)"}}>
                   <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
                     {/* Positions */}
-                    <div style={{flex:1,minWidth:120}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>FORMATION</div>
+                    <div style={{flex:1,minWidth:130}}>
+                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>POSITION DEPTH</div>
                       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                         {POS_KEYS.map(pos=>{
                           const pd=POSITIONS[pos];
-                          const n=posCounts[pos]||0;
-                          const col=n===2?"#a8ff78":n===1?"#ffd966":"#555";
-                          return <span key={pos} style={{fontSize:10,color:col}}>{pd.icon} {pos.substring(0,3)} {n}/2</span>;
+                          const suited=posSuited[pos]||0;
+                          const assigned=posAssigned[pos]||0;
+                          const col=suited>=2?"#a8ff78":suited===1?"#ffd966":"#ff7878";
+                          return(
+                            <div key={pos} style={{display:"flex",alignItems:"center",gap:3}}>
+                              <span style={{fontSize:10}}>{pd.icon}</span>
+                              <span style={{fontSize:10,color:col}}>{suited} suited</span>
+                              {assigned>0&&<span style={{fontSize:9,color:"#555"}}>({assigned} fielded)</span>}
+                            </div>
+                          );
                         })}
                       </div>
                     </div>
