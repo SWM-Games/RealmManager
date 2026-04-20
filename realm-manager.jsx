@@ -404,11 +404,11 @@ function calcDemand(hero) {
   const phaseMult = {prospect:0.80, rising:0.95, peak:1.30, fading:0.75, veteran:0.55}[phase] ?? 1.0;
   base = Math.floor(base * phaseMult);
 
-  if(hero.traits?.includes("Greedy"))    base = Math.floor(base * 1.30);
-  if(hero.traits?.includes("Loyal"))     base = Math.floor(base * 0.80);
-  if(hero.traits?.includes("Inspiring")) base = Math.floor(base * 1.10);
-  if(hero.traits?.includes("Stubborn"))  base = Math.floor(base * 1.15);
-  if(hero.traits?.includes("Coward"))    base = Math.floor(base * 0.90);
+  if(hero.traits?.includes("Greedy"))    base = Math.floor(base * 1.20);
+  if(hero.traits?.includes("Loyal"))     base = Math.floor(base * 0.88);
+  // Inspiring has no contract premium — effect is purely morale-based
+  if(hero.traits?.includes("Stubborn"))  base = Math.floor(base * 1.10);
+  // Coward has no contract effect — effect is purely morale-based
 
   if(hero.morale < 40) base = Math.floor(base * (1 + (40 - hero.morale) / 100));
 
@@ -931,15 +931,6 @@ function generateRandomEvent(heroes, week) {
 // Endurance stat slows fatigue gain; Infirmary building speeds recovery.
 
 const GAME_SPEEDS = {
-  swift: {
-    id:           "swift",
-    label:        "Swift Campaign",
-    tagline:      "Rank up faster, shorter seasons",
-    seasonLength: 21,
-    rankStep:     2,
-    xpMult:       1.5,
-    ageMult:      2,
-  },
   standard: {
     id:           "standard",
     label:        "Grand Dynasty",
@@ -953,7 +944,8 @@ const GAME_SPEEDS = {
 
 // Active game speed — read from save, defaults to standard
 // All time-sensitive constants reference this rather than raw values
-let ACTIVE_SPEED = GAME_SPEEDS.standard; // overwritten after save load
+let ACTIVE_SPEED = GAME_SPEEDS.standard;
+function SEASON_LENGTH() { return ACTIVE_SPEED.seasonLength || 42; } // overwritten after save load
 // 3 objectives per season, randomly selected from this pool.
 // All check against formation/raid data — no level gates.
 
@@ -994,7 +986,7 @@ const ACHIEVEMENTS = [
   {
     id:       "full_house",
     name:     "Full House",
-    desc:     "Construct all 10 buildings in one run",
+    desc:     "Construct all 11 buildings in one run",
     icon:     "🏰",
     check:    (data)=>data.buildings.every(b=>b.built),
     boon: {
@@ -1144,7 +1136,7 @@ function generateStartingSquad() {
     starStats[s] = Math.min(starPot, rand(lo,hi)+rand(1,3));
   });
   starStats.Form = rand(4,7);
-  const starTraits = pickN(TRAITS, rand(2,3));
+  const starTraits = pickTraits(rand(2,3));
   const starAvg = Object.values(starStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
   const starContract = rand(1,3);
   squad.push({
@@ -1153,6 +1145,7 @@ function generateStartingSquad() {
     stageProgress: starProgress,
     stats: starStats,
     traits: starTraits,
+    level: 2, xp: xpForLevel(2),
     value: Math.max(80, Math.floor(starAvg * 7 * (1 + 0 * 0.32) + rand(-20,20))),
     salary: Math.floor(starAvg*rand(13,16)/10),
     contractYears: starContract,
@@ -1162,9 +1155,7 @@ function generateStartingSquad() {
   });
 
   // ── GUARANTEED ROLE COVERAGE (slots 1–3) ─────────────────────────────────
-  // One hero per key position so the player can always field a basic formation.
-  // ── GUARANTEED ROLE COVERAGE (slots 1–3) ─────────────────────────────────
-  // Rising to early Peak — capable but developing
+  // Rising stage — capable but developing, capped at level 1
   const guaranteedRoles = [
     pick(["Warrior","Paladin"]),
     pick(["Ranger","Rogue"]),
@@ -1183,7 +1174,7 @@ function generateStartingSquad() {
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
     stats.Form = rand(3,7);
-    squad.push({...h, stage, stageProgress, stats});
+    squad.push({...h, stage, stageProgress, stats, level:1, xp:0});
   });
 
   // ── RANDOM NORMAL HEROES (slots 4–7) ─────────────────────────────────────
@@ -1204,7 +1195,7 @@ function generateStartingSquad() {
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
     stats.Form = rand(3,7);
-    squad.push({...h, stage, stageProgress, stats});
+    squad.push({...h, stage, stageProgress, stats, level:1, xp:0});
   }
 
   // ── FODDER (slots 8–9) ────────────────────────────────────────────────────
@@ -1225,9 +1216,10 @@ function generateStartingSquad() {
       ...h,
       stage, stageProgress,
       stats: fodderStats,
-      traits: pickN(TRAITS, 1),
+      traits: pickTraits(1),
+      level: 0, xp: 0,
       salary: Math.floor(fodderAvg*rand(11,14)/10),
-      value: Math.max(30, Math.floor(fodderAvg*4 + rand(-10,10))),
+      value: 0,
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
@@ -1284,9 +1276,9 @@ function fatigueLabel(f) {
 }
 
 const POSITIONS = {
-  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin","Half-Orc","Dwarf"],        penalty:["Mage","Bard"],     primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins thrive. Mages & Bards suffer severe penalties." },
-  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue","Elf","Tiefling"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel. Heavy armour is sluggish here." },
-  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric","Gnome","Dragonborn"],   penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate. Brutes have no place here." },
+  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin","Half-Orc","Dwarf"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel. Mages & Clerics suffer here." },
+  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue","Elf","Tiefling"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel. Heavy classes are sluggish here." },
+  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric","Gnome","Dragonborn"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate. Warriors have no place here." },
 };
 const POS_KEYS = Object.keys(POSITIONS);
 
@@ -1434,8 +1426,8 @@ function calcHeroCombatScore(hero, pos) {
   let score = 0;
   Object.entries(weights).forEach(([stat, weight]) => {
     let w = weight;
-    if(stat === "Accuracy" && traits.includes("Eagle Eye")) w *= 2;
-    if(stat === "Composure" && traits.includes("Calm"))     w *= 2;
+    if(stat === "Accuracy" && traits.includes("Eagle Eye")) w *= 1.5;
+    if(stat === "Composure" && traits.includes("Calm"))     w *= 1.5;
     score += (hero.stats[stat] || 0) * w;
   });
 
@@ -1448,12 +1440,12 @@ function calcHeroCombatScore(hero, pos) {
   }
 
   // ── TRAIT COMBAT MODIFIERS ──────────────────────────────────────────────
-  if(traits.includes("Berserker"))  score *= pos === "Vanguard"    ? 1.20 : 0.95;
-  if(traits.includes("Glass Cannon")) score *= 1.25;
-  if(traits.includes("Tactician"))  score *= pos === "Arbiter"     ? 1.15 : 1.0;
-  if(traits.includes("Swift"))      score *= pos === "Skirmisher"  ? 1.15 : 1.0;
-  if(traits.includes("Blessed"))    score *= 1.05;
-  if(traits.includes("Cursed"))     score *= 0.90;
+  if(traits.includes("Berserker"))  score *= pos === "Vanguard"    ? 1.06 : 0.97;
+  if(traits.includes("Glass Cannon")) score *= 1.07;
+  if(traits.includes("Tactician"))  score *= pos === "Arbiter"     ? 1.05 : 1.0;
+  if(traits.includes("Swift"))      score *= pos === "Skirmisher"  ? 1.05 : 1.0;
+  if(traits.includes("Blessed"))    score *= 1.03;
+  if(traits.includes("Cursed"))     score *= 0.95;
 
   // Form 1–10 → 0.6–1.0 multiplier
   const formMult = 0.6 + ((hero.stats["Form"] || 5) / 10) * 0.4;
@@ -1488,7 +1480,7 @@ function analyseFormation(formation){
     const pd=POSITIONS[pos];
     (formation[pos]||[]).forEach(h=>{
       if(!h)return;
-      const isIdeal=pd.ideal.includes(h.role)||pd.ideal.includes(h.race);
+      const isIdeal=pd.ideal.includes(h.role);
       const isPenalty=pd.penalty.includes(h.role);
       heroMods[h.id]={
         fit: isIdeal?"ideal":isPenalty?"penalty":"neutral",
@@ -1709,7 +1701,7 @@ const RACE_SYNERGIES = [
   {
     id:"pact_dwarf_halforc", type:"duo",
     name:"Iron Warbond",     icon:"⚒️", color:"#fbbf24",
-    ratingMult:1.06, winBonus:0.03,
+    ratingMult:1.05, winBonus:0.03,
     desc:"3+ Dwarves & 3+ Half-Orcs — unstoppable Vanguard. The two toughest frontline races.",
     flavour:"Nothing breaches a wall of iron and fury.",
     check: h => h.filter(x=>x.race==="Dwarf").length>=3 && h.filter(x=>x.race==="Half-Orc").length>=3,
@@ -1733,7 +1725,7 @@ const RACE_SYNERGIES = [
   {
     id:"pact_dragonborn_halforc",type:"duo",
     name:"Warbeast Pact",    icon:"🐉", color:"#fb923c",
-    ratingMult:1.06, winBonus:0.03,
+    ratingMult:1.05, winBonus:0.03,
     desc:"3+ Dragonborn & 3+ Half-Orcs — terrifying physical dominance front-to-back.",
     flavour:"Scale and muscle — a wall of living violence.",
     check: h => h.filter(x=>x.race==="Dragonborn").length>=3 && h.filter(x=>x.race==="Half-Orc").length>=3,
@@ -1763,7 +1755,7 @@ function calcRaceSynergy(formation) {
 
 const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
-  { id:"barracks",  name:"Barracks",         icon:"🏰", cost:1200, tierRequired:"iron",     desc:"Heroes gain +20% XP from raids." },
+  { id:"barracks",  name:"Barracks",         icon:"🏰", cost:1200, tierRequired:"iron",     desc:"Heroes gain +20% XP from battles." },
   { id:"tavern",    name:"Tavern",            icon:"🍺", cost:1000, tierRequired:"iron",     desc:"All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
   { id:"infirmary", name:"Infirmary",         icon:"⚕️",  cost:1000, tierRequired:"bronze",   desc:"Injuries heal 1 week faster." },
@@ -1771,40 +1763,69 @@ const BUILDINGS = [
   // ── SILVER ───────────────────────────────────────────────────────────────────
   { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Bench heroes earn 20% of that week's battle XP." },
   { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Market refreshes every 3 weeks instead of every 6." },
+  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Listed heroes sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
   { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Unlocks premium heroes in the market." },
-  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"gold",     desc:"Listed heroes sell at 120% value and attract bids 50% more often." },
+  { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
   // ── PLATINUM ─────────────────────────────────────────────────────────────────
   { id:"sanctum",   name:"Elite Sanctum",     icon:"💎", cost:2200, tierRequired:"platinum", desc:"Unlocks elite heroes in the market." },
   { id:"legends",   name:"Hall of Legends",   icon:"🏛️", cost:2000, tierRequired:"platinum", desc:"Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
-const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Lucky","Unlucky","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
+const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
 
 const TRAIT_EFFECTS = {
-  "Berserker":    {color:"#ff7878", desc:"+20% power in Vanguard · +50% injury risk on defeat"},
-  "Tactician":    {color:"#78c8ff", desc:"+15% power in Arbiter"},
-  "Swift":        {color:"#a8ff78", desc:"+15% power in Skirmisher · −25% fatigue gain"},
+  "Berserker":    {color:"#ff7878", desc:"+6% power in Vanguard · +50% injury risk on defeat · bonus XP on wins"},
+  "Tactician":    {color:"#78c8ff", desc:"+5% power in Arbiter position"},
+  "Swift":        {color:"#a8ff78", desc:"+5% power in Skirmisher · −25% fatigue gain"},
   "Resilient":    {color:"#a8ff78", desc:"−30% fatigue gain · −50% injury risk"},
-  "Glass Cannon": {color:"#ff9f43", desc:"+25% power · 2× injury risk"},
-  "Blessed":      {color:"#ffd966", desc:"+5% power · extra form recovery"},
-  "Cursed":       {color:"#c084fc", desc:"−10% power · random form drain each week"},
-  "Brave":        {color:"#a8ff78", desc:"No morale loss on defeat · squad departure hit halved"},
-  "Iron Will":    {color:"#78c8ff", desc:"Morale floor at 50 in combat · never walks out"},
-  "Eagle Eye":    {color:"#ffd966", desc:"Accuracy counts double in combat score"},
-  "Calm":         {color:"#78c8ff", desc:"Composure counts double · −40% squad morale swings"},
-  "Night Vision": {color:"#c084fc", desc:"+8% win chance when your team is the underdog"},
-  "Lucky":        {color:"#a8ff78", desc:"15% chance to flip a defeat into a win"},
-  "Unlucky":      {color:"#ff7878", desc:"15% chance to flip a win into a defeat"},
-  "Loyal":        {color:"#a8ff78", desc:"−20% contract demands · less likely to walk out"},
-  "Greedy":       {color:"#ff9f43", desc:"+30% contract demands"},
-  "Hot-headed":   {color:"#ff7878", desc:"Walks out immediately if contract rejected"},
-  "Stubborn":     {color:"#ffd966", desc:"+15% contract demands · won't negotiate down"},
-  "Coward":       {color:"#888",    desc:"Reduced morale swings (good and bad)"},
-  "Inspiring":    {color:"#ffd966", desc:"Squad gets extra morale boost on this hero's retirement"},
+  "Glass Cannon": {color:"#ff9f43", desc:"+7% power in all positions · 2× injury risk"},
+  "Blessed":      {color:"#ffd966", desc:"+3% power"},
+  "Cursed":       {color:"#c084fc", desc:"−5% power · random form drain each week"},
+  "Brave":        {color:"#a8ff78", desc:"Immune to morale loss on defeat"},
+  "Iron Will":    {color:"#78c8ff", desc:"Morale floor at 50 during combat · never walks out"},
+  "Eagle Eye":    {color:"#ffd966", desc:"Accuracy weighted ×1.5 in combat score"},
+  "Calm":         {color:"#78c8ff", desc:"Composure weighted ×1.5 in combat score"},
+  "Night Vision": {color:"#c084fc", desc:"+4% win chance when your team is the underdog"},
+  "Loyal":        {color:"#a8ff78", desc:"−12% contract demands · very unlikely to walk out"},
+  "Greedy":       {color:"#ff9f43", desc:"+20% contract salary demand"},
+  "Hot-headed":   {color:"#ff7878", desc:"2.5× walkout risk at low morale · walks out immediately if contract rejected"},
+  "Stubborn":     {color:"#ffd966", desc:"+10% contract demand · won't accept counter-offers"},
+  "Coward":       {color:"#888",    desc:"Morale swings halved (good and bad)"},
+  "Inspiring":    {color:"#ffd966", desc:"+10% morale swings for squad · bigger morale boost on retirement"},
 };
 const FIRST_NAMES = ["Aldric","Sylas","Mira","Thorin","Zara","Fenix","Lyra","Brom","Elowen","Kazim","Vex","Nyla","Dorn","Seraphel","Grix","Isolde","Tavar","Rynn","Caelum","Vesper","Oryn","Sable","Cress","Baelin","Wren"];
 const LAST_NAMES  = ["Ironforge","Dawnwhisper","Ashveil","Stoneback","Emberthorn","Coldwater","Grimshaw","Silverwood","Blackthorn","Nighthollow","Voidmantle","Crestfall","Duskbane","Emberveil","Stormcrow"];
+
+// Pairs that should never appear on the same hero
+const TRAIT_CONFLICTS = [
+  ["Greedy","Loyal"],       // opposite contract disposition
+  ["Brave","Coward"],       // opposite morale response
+  ["Berserker","Calm"],     // aggression vs composure
+  ["Glass Cannon","Resilient"], // opposite injury profile
+  ["Hot-headed","Iron Will"],   // walkout behaviour contradicts
+  ["Blessed","Cursed"],     // direct opposites
+];
+
+function pickTraits(n) {
+  const pool = [...TRAITS];
+  const chosen = [];
+  let attempts = 0;
+  while(chosen.length < n && pool.length > 0 && attempts < 50) {
+    attempts++;
+    const idx = Math.floor(Math.random() * pool.length);
+    const candidate = pool[idx];
+    pool.splice(idx, 1);
+    // Check for conflicts with already-chosen traits
+    const hasConflict = chosen.some(t =>
+      TRAIT_CONFLICTS.some(pair =>
+        (pair[0]===t && pair[1]===candidate) || (pair[1]===t && pair[0]===candidate)
+      )
+    );
+    if(!hasConflict) chosen.push(candidate);
+  }
+  return chosen;
+}
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 
@@ -1844,6 +1865,7 @@ function rollPotential(premium=false, elite=false, tierId="iron"){
 
 // Contract weeks per year
 const DEFAULT_TOWN_COLOR = "#ffd966";
+const DEFAULT_TOWN_NAME  = "Your Realm";
 const TOWN_COLORS = [
   { label:"Gold",    value:"#ffd966" },
   { label:"Emerald", value:"#a8ff78" },
@@ -1958,7 +1980,7 @@ function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId)
   };
 }
 
-const WEEKS_PER_CONTRACT_YEAR = 12;
+const WEEKS_PER_CONTRACT_YEAR = 42; // 1 contract season = 1 game season
 const ROSTER_CAP = 12; // max heroes on squad at any time
 
 function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null,forcedRace=null,tierId="iron"){
@@ -1987,7 +2009,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
     stats[s]=Math.max(10,Math.min(potCap,base));
   });
   stats.Form=rand(3,10);
-  const traits=pickN(TRAITS,rand(1,3));
+  const traits=pickTraits(rand(1,3));
   const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
   const salary=Math.floor(avgStat*rand(13,16)/10);
   const potBonus=Math.max(0,stats.Potential-50)*5;
@@ -2562,11 +2584,6 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
     const flankers = heroes.length ? heroes : allHeroes;
     const best = flankers.reduce((b,h)=>calcHeroCombatScore(h,"Skirmisher")>(b?calcHeroCombatScore(b,"Skirmisher"):0)?h:b, null);
 
-    // Lucky trait surprise
-    const lucky = flankers.find(h=>h.traits?.includes("Lucky"));
-    if(lucky && Math.random()<0.3){
-      if(phaseWon) good(`${lucky.name}'s luck holds again — a fortunate bounce in the flanking movement.`);
-    }
 
     const lowAcc = flankers.find(h=>h.stats.Accuracy<35);
     if(lowAcc){
@@ -2798,7 +2815,7 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
 
   // Night Vision: underdog bonus applied to all phase chances
   const nightVisionHero = allHeroes.find(h=>h.traits?.includes("Night Vision"));
-  const nightBonus = nightVisionHero && effective < enemy.power ? 0.08 : 0;
+  const nightBonus = nightVisionHero && effective < enemy.power ? 0.04 : 0;
 
   // ── PER-PHASE WIN CHANCES ────────────────────────────────────────────────────
   // Each of the 3 position phases (Vanguard, Skirmisher, Arbiter) gets its own
@@ -2848,16 +2865,6 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   const pa = phaseWinChances["Vanguard"], pb = phaseWinChances["Skirmisher"], pc = phaseWinChances["Arbiter"];
   const overallWinChance = pa*pb*pc + pa*pb*(1-pc) + pa*(1-pb)*pc + (1-pa)*pb*pc;
 
-  // Lucky: 15% chance to flip a loss into a win (wins one extra phase)
-  const luckyHero = allHeroes.find(h=>h.traits?.includes("Lucky"));
-  if(!won && luckyHero && Math.random() < 0.15) {
-    won = true;
-  }
-  // Unlucky: 15% chance to flip a win into a loss
-  const unluckyHero = allHeroes.find(h=>h.traits?.includes("Unlucky"));
-  if(won && unluckyHero && Math.random() < 0.15) {
-    won = false;
-  }
 
   // Build phase results for simulation display
   const phaseResults = PHASE_DEFS.map(ph => {
@@ -3259,11 +3266,11 @@ function ContractBar({hero}){
   const left=hero.contractWeeksLeft||0;
   const pct=Math.max(0,(left/total)*100);
   const col=left<=WEEKS_PER_CONTRACT_YEAR?"#ff7878":left<=WEEKS_PER_CONTRACT_YEAR*2?"#ffd966":"#a8ff78";
-  const yearsLeft=(left/WEEKS_PER_CONTRACT_YEAR).toFixed(1);
+  const seasonsLeft=(left/WEEKS_PER_CONTRACT_YEAR).toFixed(1);
   return(
     <div style={{marginBottom:6}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
-        <span style={{color:col}}>📜 Contract: {yearsLeft}s left</span>
+        <span style={{color:col}}>📜 Contract: {seasonsLeft} season{parseFloat(seasonsLeft)!==1?"s":""} left</span>
         {hero.negotiationPending&&<span style={{fontSize:9,color:"#ff9f43",fontWeight:700,animation:"pulse 1s infinite"}}>⚠️ RENEWAL PENDING</span>}
       </div>
       <div style={{height:4,background:"#12122a",borderRadius:2,overflow:"hidden"}}>
@@ -3855,7 +3862,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
   );
 }
 
-function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats}){
+function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential}){
   // Use best-position combat score as the displayed power figure
   const power = Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
   const avgMental=Math.round(STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length);
@@ -3915,8 +3922,26 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         </div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#999"}}>
           <span>💰 {hero.salary}g/wk</span>
-          <span style={{color:"#ffd966"}}>⚖️ {hero.value.toLocaleString()}g</span>
+          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Free":hero.value.toLocaleString()+"g"}</span>
         </div>
+        {showHiddenStats&&(()=>{
+          const b = potentialBucket(hero.stats.Potential);
+          return(
+            <div style={{marginTop:5,padding:"3px 7px",borderRadius:5,background:"rgba(255,215,0,0.07)",border:"1px solid rgba(255,215,0,0.18)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:9,color:"#888"}}>Potential</span>
+              <span style={{fontSize:10,fontWeight:700,color:b.color}}>{b.icon} {b.label} <span style={{color:"#888",fontWeight:400}}>({hero.stats.Potential})</span></span>
+            </div>
+          );
+        })()}
+        {showScoutedPotential&&!showHiddenStats&&(()=>{
+          const b = potentialBucket(hero.stats.Potential);
+          return(
+            <div style={{marginTop:5,padding:"3px 7px",borderRadius:5,background:"rgba(120,200,255,0.06)",border:"1px solid rgba(120,200,255,0.2)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontSize:9,color:"#78c8ff"}}>🌠 Scouted</span>
+              <span style={{fontSize:10,fontWeight:700,color:b.color}}>{b.icon} {b.label}</span>
+            </div>
+          );
+        })()}
       </>)}
       {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"🆓 Sign Free":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
     </div>
@@ -4161,7 +4186,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             <div style={{marginBottom:8,padding:"8px 10px",borderRadius:7,background:"rgba(255,215,0,0.05)",border:"1px solid rgba(255,215,0,0.15)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
                 <span style={{fontSize:11,color:"#ffd966",fontWeight:700}}>Potential</span>
-                {hero.potentialRevealed ? (()=>{
+                {(hero.potentialRevealed || showHiddenStats) ? (()=>{
                   const b = potentialBucket(hero.stats.Potential);
                   return(
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
@@ -4172,7 +4197,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                 })() : (
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
                     <span style={{fontSize:10,color:"#888"}}>⏳ Unknown</span>
-                    <span style={{fontSize:9,color:"#555"}}>{Math.max(0,8-(hero.weeksInFormation||0))}+ raids to reveal</span>
+                    <span style={{fontSize:9,color:"#555"}}>{Math.max(0,8-(hero.weeksInFormation||0))}+ battles to reveal</span>
                   </div>
                 )}
               </div>
@@ -4311,7 +4336,7 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
           <div style={{fontSize:12,color:"#888",marginBottom:10}}>Their demand:</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {[["Current salary",`${hero.salary}g/wk`],["Demanded salary",`${demand.salary}g/wk`,demand.salary>hero.salary?"#ff9f43":"#a8ff78"],
-              ["Contract length",`${demand.years} year${demand.years>1?"s":""}`],["Season cost",`${demand.salary*WEEKS_PER_CONTRACT_YEAR*demand.years}g`]
+              ["Contract length",`${demand.years} season${demand.years>1?"s":""}`],["Total cost",`${(demand.salary*WEEKS_PER_CONTRACT_YEAR*demand.years).toLocaleString()}g`]
             ].map(([k,v,c="#f0e6d3"])=>(
               <div key={k} style={{background:"rgba(255,255,255,0.03)",borderRadius:7,padding:"8px 10px",border:"1px solid rgba(255,255,255,0.07)"}}>
                 <div style={{fontSize:9,color:"#999",marginBottom:2}}>{k}</div>
@@ -4508,7 +4533,7 @@ function TacticsTab({heroes,formation,setFormation}){
     const pd=POSITIONS[pickerOpen.pos];
     // Include all non-retired, non-injured heroes (injured shown but disabled)
     const list=heroes.filter(h=>!h.retired).map(h=>{
-      const isIdeal  =pd.ideal.includes(h.role)||pd.ideal.includes(h.race);
+      const isIdeal  =pd.ideal.includes(h.role);
       const isPenalty=pd.penalty.includes(h.role);
       const fit      =isIdeal?"ideal":isPenalty?"penalty":"neutral";
       const fitScore =isIdeal?0:isPenalty?2:1;
@@ -4663,15 +4688,23 @@ function TacticsTab({heroes,formation,setFormation}){
         ))}
 
         <div style={{fontSize:9,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:4,marginTop:8}}>DUO PACTS (3+ each)</div>
-        {RACE_SYNERGIES.filter(s=>s.type==="duo").map(s=>(
-          <div key={s.id} style={{padding:"5px 9px",borderRadius:7,marginBottom:3,background:"rgba(255,255,255,0.02)",border:`1px solid ${analysis.raceSynergy?.id===s.id?s.color+"66":"rgba(255,255,255,0.05)"}`,opacity:analysis.raceSynergy?.id===s.id?1:0.45,transition:"all 0.3s"}}>
-            <div style={{display:"flex",alignItems:"center",gap:5}}>
-              <span>{s.icon}</span>
-              <span style={{fontSize:10,fontWeight:700,color:analysis.raceSynergy?.id===s.id?s.color:"#888"}}>{s.name}</span>
-              <span style={{fontSize:9,color:"#999",marginLeft:"auto"}}>×{s.ratingMult}</span>
+        {RACE_SYNERGIES.filter(s=>s.type==="duo").map(s=>{
+          // Extract the two races from the check function desc
+          const racesMatch = s.desc.match(/3\+ ([A-Za-z-]+) & 3\+ ([A-Za-z-]+)/);
+          const r1 = racesMatch?.[1] || "";
+          const r2 = racesMatch?.[2] || "";
+          const active = analysis.raceSynergy?.id===s.id;
+          return(
+            <div key={s.id} style={{padding:"5px 9px",borderRadius:7,marginBottom:3,background:"rgba(255,255,255,0.02)",border:`1px solid ${active?s.color+"66":"rgba(255,255,255,0.05)"}`,opacity:active?1:0.55,transition:"all 0.3s"}}>
+              <div style={{display:"flex",alignItems:"center",gap:5}}>
+                <span>{s.icon}</span>
+                <span style={{fontSize:10,fontWeight:700,color:active?s.color:"#888"}}>{s.name}</span>
+                <span style={{fontSize:9,color:"#999",marginLeft:"auto"}}>×{s.ratingMult}</span>
+              </div>
+              {r1&&r2&&<div style={{fontSize:8,color:"#555",marginTop:2}}>{r1} + {r2} (3+ each)</div>}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── SLOT PICKER MODAL ── */}
@@ -5317,40 +5350,6 @@ function SetupScreen({ onComplete }) {
           </div>
         </div>
 
-        {/* Campaign length */}
-        <div style={{marginBottom:24}}>
-          <div style={{fontSize:11,color:"#888",marginBottom:10,letterSpacing:1}}>CAMPAIGN SPEED</div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {Object.values(GAME_SPEEDS).map(s=>{
-              const isSelected=speed===s.id;
-              const details = s.id==="swift"
-                ? ["26 weeks/season","±2 ranks/season","1.5× XP & Renown","Heroes age faster"]
-                : ["52 weeks/season","±1 rank/season","Standard XP & Renown","Authentic career length"];
-              return(
-                <button key={s.id} onClick={()=>setSpeed(s.id)}
-                  style={{
-                    padding:"12px 14px", borderRadius:10, border:`1px solid ${isSelected?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.08)"}`,
-                    background:isSelected?"rgba(255,215,0,0.07)":"rgba(255,255,255,0.03)",
-                    cursor:"pointer", textAlign:"left", transition:"all 0.15s",
-                  }}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                    <div style={{width:14,height:14,borderRadius:"50%",border:`2px solid ${isSelected?"#ffd966":"#444"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-                      {isSelected&&<div style={{width:6,height:6,borderRadius:"50%",background:"#ffd966"}}/>}
-                    </div>
-                    <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:isSelected?"#ffd966":"#888"}}>{s.label}</span>
-                    <span style={{fontSize:10,color:isSelected?"#ff9f43":"#555",marginLeft:4}}>{s.tagline}</span>
-                  </div>
-                  <div style={{display:"flex",gap:8,flexWrap:"wrap",paddingLeft:22}}>
-                    {details.map(d=>(
-                      <span key={d} style={{fontSize:9,color:isSelected?"#777":"#444",background:"rgba(255,255,255,0.04)",padding:"2px 7px",borderRadius:6}}>{d}</span>
-                    ))}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Preview */}
         <div style={{
           padding:"12px 14px", borderRadius:8, marginBottom:24,
@@ -5362,7 +5361,7 @@ function SetupScreen({ onComplete }) {
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:color}}>
                 {name.trim()||"Your Realm"}
               </div>
-              <div style={{fontSize:9,color:"#999",marginTop:1}}>Rank #9 of 9 · Season 1 · {GAME_SPEEDS[speed].label} · 10 heroes, 4,000g</div>
+              <div style={{fontSize:9,color:"#999",marginTop:1}}>Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold</div>
             </div>
           </div>
         </div>
@@ -5467,7 +5466,7 @@ function GuideTab(){
       <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:700,color:"#78c8ff",marginBottom:14}}>📖 How to Play</div>
 
       <Section id="loop" icon="⚔️" title="The Core Loop">
-        <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#f0e6d3"}}>set your formation</b>, <b style={{color:"#f0e6d3"}}>launch a battle</b>, and manage the aftermath. Win raids to earn gold. Use gold to sign heroes, build your town, and develop your squad.</p>
+        <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#f0e6d3"}}>set your formation</b>, <b style={{color:"#f0e6d3"}}>launch a battle</b>, and manage the aftermath. Win battles to earn gold. Use gold to sign heroes, build your town, and develop your squad.</p>
         <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#f0e6d3"}}>{SEASON_LENGTH()} weeks</b>. At the end of each season, the <b style={{color:"#ffd966"}}>top 2 teams promote</b> to the next league tier and the <b style={{color:"#ff7878"}}>bottom 2 relegate</b>.</p>
         <p style={{margin:0}}>You win by <b style={{color:"#ffd966"}}>finishing 1st in the Platinum League</b>. The path is Iron → Bronze → Silver → Gold → Platinum.</p>
       </Section>
@@ -5477,9 +5476,9 @@ function GuideTab(){
         {[
           ["⚙️ Iron",    "Entry level. Tavern & Barracks unlock here."],
           ["🥉 Bronze",  "Infirmary & Recovery Lodge unlock on arrival."],
-          ["🥈 Silver",  "Training Grounds & Talent Network unlock on arrival."],
-          ["🥇 Gold",    "Grand Bazaar unlocks — premium heroes available in market."],
-          ["💎 Platinum","Elite heroes available. Finish 1st to win the campaign."],
+          ["🥈 Silver",  "Training Grounds, Talent Network & Trading Post unlock on arrival."],
+          ["🥇 Gold",    "Grand Bazaar (premium heroes) & Observatory (pre-hire scouting) unlock."],
+          ["💎 Platinum","Elite Sanctum unlocks. Finish 1st to win the campaign."],
         ].map(([t,d])=>(
           <span key={t} style={{display:"block",marginBottom:4}}>
             <b style={{color:"#ffd966"}}>{t}</b> — <span style={{color:"#888"}}>{d}</span>
@@ -5491,14 +5490,13 @@ function GuideTab(){
       <Section id="formation" icon="🎯" title="Formation & Positions">
         <p style={{margin:"0 0 8px"}}>Your formation has three lanes — <b style={{color:"#ff7878"}}>Vanguard</b> (front, 2 slots), <b style={{color:"#ffd966"}}>Skirmisher</b> (flank, 2 slots), <b style={{color:"#78c8ff"}}>Arbiter</b> (command, 2 slots). You can field 1–6 heroes.</p>
         <p style={{margin:"0 0 8px"}}>Each position has <b style={{color:"#a8ff78"}}>ideal roles and races</b> that earn a bonus — and <b style={{color:"#ff7878"}}>penalty roles</b> that hurt. A Warrior or Half-Orc in Vanguard is ideal. An Elf or Tiefling in Skirmisher excels. A Mage in Vanguard is a liability.</p>
-        <p style={{margin:0}}>You win a battle by <b style={{color:"#ffd966"}}>winning 2 of 3 phases</b>. Each phase is won by your heroes' combined score in that lane vs the enemy's power share. Win chance is capped at 80% and floored at 20% — there's always risk.</p>
+        <p style={{margin:0}}>You win a battle by <b style={{color:"#ffd966"}}>winning 2 of 3 phases</b>. Each phase is won by your heroes' combined score in that lane vs the enemy's power share. Win chance is capped at 77% and floored at 27% — there's always some risk.</p>
       </Section>
 
       <Section id="heroes" icon="🧑" title="Hero Management">
         <p style={{margin:"0 0 6px"}}><b style={{color:"#ff9f43"}}>Fatigue</b> builds each battle and recovers on the bench. Above 88%, heroes underperform and risk injury. Rotate your squad to manage it.</p>
-        <p style={{margin:"0 0 6px"}}><b style={{color:"#ffd966"}}>Happiness</b> affects stats and contract demands. Win raids, renew contracts on time, and don't bench heroes for too long.</p>
-        <p style={{margin:"0 0 6px"}}><b style={{color:"#a78bfa"}}>Morale</b> is short-term combat readiness. Wins raise it, losses lower it. Iron Will heroes are immune to morale loss.</p>
-        <p style={{margin:0}}><b style={{color:"#78c8ff"}}>Contracts</b> expire after 1–4 seasons. Expired heroes demand renewal — accept, counter-offer, or risk them walking out.</p>
+        <p style={{margin:"0 0 6px"}}><b style={{color:"#a78bfa"}}>Morale</b> affects performance and contract demands. Wins raise it, losses lower it. It decays slightly each week — bench heroes too long and they grow unhappy. Below 20 morale with an expired contract they may walk out.</p>
+        <p style={{margin:0}}><b style={{color:"#78c8ff"}}>Contracts</b> expire after 1–4 seasons depending on career stage. Accept, counter-offer, or renew early. Releasing a hero at contract end has no morale penalty.</p>
       </Section>
 
       <Section id="economy" icon="💰" title="Hero Economy — Buy, Develop, Sell">
@@ -5509,7 +5507,7 @@ function GuideTab(){
       </Section>
 
       <Section id="synergies" icon="✨" title="Synergies & Penalties">
-        <p style={{margin:"0 0 8px"}}>Certain role combinations in the right positions trigger <b style={{color:"#a8ff78"}}>positive synergies</b> — formation rating boosts and win chance bonuses. Warrior + Paladin in Vanguard = Iron Wall. Mage + Bard in Arbiter = Arcane Chorus.</p>
+        <p style={{margin:"0 0 8px"}}>Certain role combinations in the right positions trigger <b style={{color:"#a8ff78"}}>positive synergies</b> — formation rating boosts and win chance bonuses. Warrior + Paladin in Vanguard = Iron Wall. Mage + Cleric in Arbiter = Arcane Chorus.</p>
         <p style={{margin:0}}>Wrong roles trigger <b style={{color:"#ff7878"}}>penalties</b> — a Mage in Vanguard (Chaos Front) dramatically reduces your rating. Check the Tactics tab — the ACTIVE NOW panel shows exactly what's firing before you battle.</p>
       </Section>
 
@@ -5520,15 +5518,16 @@ function GuideTab(){
 
       <Section id="tips" icon="💡" title="Tips & Tricks">
         {[
-          "Rest fatigued heroes before big raids — above 88% fatigue they lose 40% effectiveness and risk injury.",
+          "Rest fatigued heroes before big battles — above 88% fatigue they lose 40% effectiveness and risk injury.",
           "Counter your opponent's specialisation (shown in the Battle tab) to neutralise their power bonus.",
           "A Fading hero still has value as Squad Leader — their tenure scales morale and XP bonuses for the whole squad.",
-          "Sell heroes at Peak or Prime — once they hit Declining, offers drop to 60% of value and become rare.",
+          "Sell heroes at Peak — once they hit Fading, offers drop sharply and become rare.",
           "Form and Reputation both show as progress bars in the hero detail — watch them to time your sales.",
           "Accept the Legendary Challenge (Gold tier+) for exhibition gold — no league impact if you lose.",
           "Objectives are visible in the Battle tab before you fight — adjust your formation to hit them.",
           "The phase breakdown in the debrief shows exactly which lane lost you the battle. That's where to invest.",
-          "Events are underused by most players — ~9,000g per season in event gold if you accept 60% of them.",
+          "Events fire every 3–8 weeks — send heroes when available. Each event adds meaningful gold and XP on top of your weekly income.",
+          "Potential is hidden for the first 8–10 battles. Watch the progress bar in the Hidden stats tab before committing to long contracts.",
           "Promotion to a new tier unlocks buildings immediately — check the Town tab after every promotion.",
         ].map((tip,i)=>(
           <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(120,200,255,0.2)"}}>💡 {tip}</p>
@@ -5708,7 +5707,7 @@ export default function App(){
       morale:Math.min(100,h.morale+20),
     }));
     setNegotiationQueue(q=>q.slice(1));
-    addLog(`✅ Signed ${hero.name}: ${demand.salary}g/wk for ${demand.years}s.`,"success");
+    addLog(`✅ Signed ${hero.name}: ${demand.salary}g/wk for ${demand.years} season${demand.years>1?"s":""}.`,"success");
   };
 
   const handleCounter=(hero,counter)=>{
@@ -5723,7 +5722,7 @@ export default function App(){
         morale:Math.min(100,h.morale+10),
       }));
       setNegotiationQueue(q=>q.slice(1));
-      addLog(`🤝 ${hero.name} accepted the counter-offer: ${counter.salary}g/wk for ${counter.years}s.`,"success");
+      addLog(`🤝 ${hero.name} accepted the counter-offer: ${counter.salary}g/wk for ${counter.years} season${counter.years>1?"s":""}.`,"success");
     } else {
       setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
         ...h, morale:Math.max(10,h.morale-15),
@@ -5973,7 +5972,7 @@ export default function App(){
   // Called when a hero returns from an event. Rolls success/partial/fail,
   // applies rewards or consequences, returns a notification object.
 
-  const NEGATIVE_TRAITS = ["Cursed","Coward","Greedy","Hot-headed","Stubborn","Unlucky","Glass Cannon"];
+  const NEGATIVE_TRAITS = ["Cursed","Coward","Greedy","Hot-headed","Stubborn","Glass Cannon"];
   const XP_VALUES = { small:80, medium:150, large:250 };
   const STAT_BOOST_AMOUNTS = { small:[1,3], medium:[2,4], large:[2,4] };
 
@@ -7481,6 +7480,7 @@ export default function App(){
                 const opp=scheduledOpponent;
                 const spec=opp.specialisation;
                 const pen=calcSpecPenalty(spec,formation);
+                const penCol=pen?"#ff9f43":"#a8ff78";
                 const adjPower = pen
                   ? Math.round(opp.power*(1+pen.penalty))
                   : Math.round(opp.power);
@@ -7552,7 +7552,7 @@ export default function App(){
                         const penCol=pen?"#ff9f43":"#a8ff78";
                         return(
                           <div style={{padding:"8px 10px",background:"rgba(255,255,255,0.04)",borderRadius:7,border:`1px solid ${penCol}33`,marginBottom:8}}>
-                            <div style={{fontSize:10,fontWeight:700,color:diffCol,marginBottom:3}}>{spec.icon} {spec.label}</div>
+                            <div style={{fontSize:10,fontWeight:700,color:penCol,marginBottom:3}}>{spec.icon} {spec.label}</div>
                             <div style={{fontSize:10,color:"#888",lineHeight:1.5,marginBottom:5}}>{spec.desc}</div>
                             {pen?(
                               <div style={{padding:"5px 8px",borderRadius:6,background:"rgba(255,100,100,0.08)",border:"1px solid rgba(255,100,100,0.2)"}}>
@@ -7641,7 +7641,7 @@ export default function App(){
                         <div style={{padding:10,background:"rgba(167,139,250,0.05)",borderRadius:8,border:"1px solid rgba(167,139,250,0.1)",marginBottom:10}}>
                           <div style={{fontSize:11,color:"#a78bfa",marginBottom:4}}>📊 Match Preview</div>
                           <div style={{fontSize:11,color:"#999"}}>
-                            Rating <b style={{color:"#78c8ff"}}>{formRating}</b> vs {pen?<><b style={{color:"#ff9f43"}}>{adjPow}</b><span style={{fontSize:9,color:"#888"}}> (base {opp.power} +{Math.round(pen.penalty*100)}%)</span></>:<b style={{color:diffCol}}>{opp.power}</b>}
+                            Rating <b style={{color:"#78c8ff"}}>{formRating}</b> vs {pen?<><b style={{color:"#ff9f43"}}>{adjPow}</b><span style={{fontSize:9,color:"#888"}}> (base {opp.power} +{Math.round(pen.penalty*100)}%)</span></>:<b style={{color:penCol}}>{opp.power}</b>}
                           </div>
                           <div style={{fontSize:12,fontWeight:700,color:wcAdjCol,marginTop:3}}>{Math.round(wcAdj*100)}% win chance{pen?" (with spec penalty)":""}</div>
                           {formAnalysis.positive.length>0&&<div style={{fontSize:10,color:"#a8ff78",marginTop:2}}>✓ {formAnalysis.positive.map(s=>s.name).join(", ")}</div>}
@@ -7917,6 +7917,9 @@ export default function App(){
                 {buildings.find(b=>b.id==="bazaar"&&b.built)&&(
                   <span style={{fontSize:10,color:"#a8ff78",background:"rgba(168,255,120,0.08)",padding:"2px 8px",borderRadius:10,border:"1px solid rgba(168,255,120,0.18)"}}>🏪 Bazaar Active</span>
                 )}
+                {buildings.find(b=>b.id==="scouts"&&b.built)&&(
+                  <span style={{fontSize:10,color:"#78c8ff",background:"rgba(120,200,255,0.08)",padding:"2px 8px",borderRadius:10,border:"1px solid rgba(120,200,255,0.18)"}}>🌠 Observatory Active</span>
+                )}
                 <span style={{fontSize:10,color:"#555",marginLeft:"auto"}}>
                   {(()=>{
                     const hasNetwork=buildings.find(b=>b.id==="network"&&b.built);
@@ -7937,7 +7940,7 @@ export default function App(){
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
                 </select>
                 <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
-                  {["Value","Combat","Salary","Level","Stage"].map(s=><option key={s}>{s}</option>)}
+                  {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
 
@@ -7968,7 +7971,8 @@ export default function App(){
                 {(()=>{
                   const hasBazaar=buildings.find(b=>b.id==="bazaar"&&b.built);
                   const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
-                  const mSorts={Value:h=>-h.value,Combat:h=>-Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))),Salary:h=>h.salary,Level:h=>-h.level,Stage:h=>stageToCareerWeek(h.stage||"prospect",h.stageProgress||0)};
+                  const hasScouts=buildings.find(b=>b.id==="scouts"&&b.built);
+                  const mSorts={Value:h=>-h.value,Combat:h=>-Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))),Salary:h=>h.salary,Level:h=>-h.level,Stage:h=>stageToCareerWeek(h.stage||"prospect",h.stageProgress||0),Potential:h=>-h.stats.Potential};
                   const filtered = market
                     .filter(h=>{
                       if(h.marketTier==="elite") return !!hasSanctum;
@@ -7985,7 +7989,8 @@ export default function App(){
                         onClick={()=>setDetailHero(h)} showBuy
                         canAfford={gold>=(signDiscount>0?Math.round(h.value*(1-signDiscount)):h.value)}
                         rosterFull={heroes.filter(x=>!x.retired).length>=ROSTER_CAP}
-                        onBuy={buyHero}/>
+                        onBuy={buyHero}
+                        showScoutedPotential={!!hasScouts}/>
                     </div>
                   ));
                 })()}
