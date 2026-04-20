@@ -1992,10 +1992,11 @@ function simulateEnemyWeek(week, playerTownName, leagueTable, tierEnemyTowns) {
 // Picks the next AI opponent from the league table for the scheduled match
 function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
   if(!tierEnemyTowns || tierEnemyTowns.length === 0) return null;
-  // Pick a random town from the tier — weight toward towns with similar records
   const idx = Math.floor(Math.random() * tierEnemyTowns.length);
   const town = tierEnemyTowns[idx];
   const tier = TIERS[tierId] || TIERS.iron;
+  // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*120
+  const goldReward = rand(300,700) + tier.difficulty * 120;
   return {
     name:           town.name,
     power:          town.power || rand(tier.powerMin, tier.powerMax),
@@ -2004,6 +2005,7 @@ function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId)
     treasury:       rand(3000, 10000),
     specialisation: Math.random() < 0.35 ? pick(SPECIALISATIONS) : null,
     abilities:      town.abilities || [],
+    goldReward,
   };
 }
 
@@ -2467,7 +2469,7 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
     // Enemy specialisation callout
     if(enemy.specialisation){
       const spec = enemy.specialisation;
-      const pen = analysis.specPenalty;
+      const pen = calcSpecPenalty(spec, formation);
       if(pen) warn(`${enemy.name} fights with ${spec.label}. Your formation doesn't counter it — enemy effective power is higher.`);
       else info(`${enemy.name} uses ${spec.label}. Your formation counters it effectively.`);
     }
@@ -2736,6 +2738,13 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
   }
 
   if(phaseId === "resolution") {
+    const clutch = allHeroes.length > 0
+      ? allHeroes.reduce((best,h)=>{
+          const pos=POS_KEYS.find(p=>(formation[p]||[]).some(x=>x?.id===h.id))||"Vanguard";
+          const score=calcHeroCombatScore(h,pos);
+          return (!best||score>best.score)?{hero:h,score}:best;
+        }, null)?.hero
+      : null;
     const synStr = analysis.positive.map(s=>s.name).join(", ");
     const synWeak = analysis.negative.map(s=>s.name).join(", ");
     if(synStr) info(`Active synergies: ${synStr}.`);
@@ -6256,10 +6265,11 @@ export default function App(){
 ;
 
   const startBattle=()=>{
+    try {
     const opponent = legendaryChallenger || scheduledOpponent;
     if(!opponent){addLog("No opponent scheduled this week!","danger");return;}
     const placed=POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
-    if(placed.length<3){addLog("Assign at least 3 heroes in Tactics!","danger");return;}
+    if(placed.length<3){addLog("⚠️ Assign at least 3 heroes in Tactics first!","danger");return;}
 
     // Apply challenge modifier if active
     let battleOpponent = opponent;
@@ -6271,9 +6281,13 @@ export default function App(){
     }
 
     const sim=buildRaidSimulation(formation,battleOpponent,buildings,TIERS[playerTier]?.difficulty??1,ngPlus);
-    if(!sim)return;
+    if(!sim){addLog("Battle simulation failed — check formation.","danger");return;}
     setActiveSimulation(sim);
     setPendingRaidEnemy(battleOpponent);
+    } catch(err) {
+      console.error("startBattle error:", err);
+      addLog(`⚠️ Battle error: ${err?.message||"unknown"}. Try reassigning heroes in Tactics.`,"danger");
+    }
   };
 
   // ── SKIP WEEK — pay wages, no raid ────────────────────────────────────────
@@ -7780,14 +7794,10 @@ export default function App(){
                       <div style={{display:"flex",gap:8}}>
                         <div style={{flex:1,background:"rgba(255,215,0,0.06)",borderRadius:6,padding:"6px 8px",border:"1px solid rgba(255,215,0,0.12)"}}>
                           <div style={{fontSize:9,color:"#888"}}>Win reward</div>
-                          <div style={{fontSize:13,fontWeight:700,color:"#ffd966"}}>+{opp.goldReward}g</div>
-                        </div>
-                        <div style={{flex:1,background:"rgba(167,139,250,0.06)",borderRadius:6,padding:"6px 8px",border:"1px solid rgba(167,139,250,0.12)"}}>
-                          <div style={{fontSize:9,color:"#888"}}>Renown</div>
-                          <div style={{fontSize:13,fontWeight:700,color:"#a78bfa"}}>+{opp.renownReward}</div>
+                          <div style={{fontSize:13,fontWeight:700,color:"#ffd966"}}>~{opp.goldReward?.toLocaleString()||"?"}g</div>
                         </div>
                         <div style={{flex:1,background:"rgba(255,100,100,0.05)",borderRadius:6,padding:"6px 8px",border:"1px solid rgba(255,100,100,0.1)"}}>
-                          <div style={{fontSize:9,color:"#888"}}>Loss</div>
+                          <div style={{fontSize:9,color:"#888"}}>Loss reward</div>
                           <div style={{fontSize:13,fontWeight:700,color:"#888"}}>+0g</div>
                         </div>
                       </div>
@@ -7797,15 +7807,20 @@ export default function App(){
                     {(()=>{
                       const pen=calcSpecPenalty(spec,formation);
                       const adjPow=pen?Math.round(opp.power*(1+pen.penalty)):opp.power;
-                      const wcAdj=calcWinChance(placed>=3?formRating:0,opp.difficulty,adjPow);
-                      const wcAdjCol=wcAdj>=0.6?"#a8ff78":wcAdj>=0.45?"#ffd966":wcAdj>=0.25?"#ff9f43":"#ff7878";
+                      // Use the already-computed per-phase overall win chance — consistent with the phase display above
+                      const wcAdjCol=overallWC>=0.6?"#a8ff78":overallWC>=0.45?"#ffd966":overallWC>=0.25?"#ff9f43":"#ff7878";
                       return(
                         <div style={{padding:10,background:"rgba(167,139,250,0.05)",borderRadius:8,border:"1px solid rgba(167,139,250,0.1)",marginBottom:10}}>
                           <div style={{fontSize:11,color:"#a78bfa",marginBottom:4}}>📊 Match Preview</div>
-                          <div style={{fontSize:11,color:"#999"}}>
-                            Rating <b style={{color:"#78c8ff"}}>{formRating}</b> vs {pen?<><b style={{color:"#ff9f43"}}>{adjPow}</b><span style={{fontSize:9,color:"#888"}}> (base {opp.power} +{Math.round(pen.penalty*100)}%)</span></>:<b style={{color:penCol}}>{opp.power}</b>}
+                          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                            <div style={{fontSize:11,color:"#999"}}>
+                              {pen
+                                ? <span>Enemy power <b style={{color:"#ff9f43"}}>{adjPow}</b><span style={{fontSize:9,color:"#888"}}> (base {opp.power} +{Math.round(pen.penalty*100)}% spec)</span></span>
+                                : <span>Enemy power <b style={{color:penCol}}>{opp.power}</b></span>
+                              }
+                            </div>
+                            <div style={{fontSize:15,fontWeight:700,color:wcAdjCol}}>{Math.round(overallWC*100)}% win</div>
                           </div>
-                          <div style={{fontSize:12,fontWeight:700,color:wcAdjCol,marginTop:3}}>{Math.round(wcAdj*100)}% win chance{pen?" (with spec penalty)":""}</div>
                           {formAnalysis.positive.length>0&&<div style={{fontSize:10,color:"#a8ff78",marginTop:2}}>✓ {formAnalysis.positive.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.negative.length>0&&<div style={{fontSize:10,color:"#ff7878",marginTop:2}}>⚠️ {formAnalysis.negative.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.raceSynergy&&<div style={{fontSize:10,marginTop:2}}><span style={{color:formAnalysis.raceSynergy.color}}>{formAnalysis.raceSynergy.icon} {formAnalysis.raceSynergy.name}</span><span style={{color:"#999"}}> ×{formAnalysis.raceSynergy.ratingMult}</span></div>}
