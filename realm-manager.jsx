@@ -4971,7 +4971,7 @@ function TacticsTab({heroes,formation,setFormation}){
 
               {/* Picker header */}
               <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-                <PositionIcon position={pos} size={20}/>
+                <PositionIcon position={pickerOpen.pos} size={20}/>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:pd.color}}>{pd.label} — Slot {pickerOpen.slotIdx+1}</div>
                   <div style={{fontSize:10,color:"#999"}}>{pd.subtitle} · Ideal: {pd.ideal.filter(x=>ROLES.includes(x)).join(", ")}</div>
@@ -7827,7 +7827,8 @@ export default function App(){
                   const effectiveScore = ps.score * previewSynergyMult;
                   const ratio=effectiveScore>0?posShare/effectiveScore:999;
                   const raw=1/(1+Math.pow(ratio,k));
-                  posChances[pos]=Math.min(PCAP,Math.max(PFLOOR,placed>=3?raw:PFLOOR));
+                  const posHeroesHere=(formation[pos]||[]).filter(Boolean);
+                  posChances[pos]=Math.min(PCAP,Math.max(PFLOOR,posHeroesHere.length>0?raw:PFLOOR));
                 });
                 const pa=posChances.Vanguard,pb=posChances.Skirmisher,pc=posChances.Arbiter;
                 const overallWC=pa*pb*pc+pa*pb*(1-pc)+pa*(1-pb)*pc+(1-pa)*pb*pc;
