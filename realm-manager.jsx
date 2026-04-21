@@ -1393,6 +1393,7 @@ function calcLeaderBonuses(leader) {
   };
 }
 const FATIGUE_RECOVER_BASE = 25;    // base fatigue recovered per rest week
+const FATIGUE_GAIN_BASE    = 18;    // base fatigue gained per battle (modified by Endurance)
 const FATIGUE_WARN = 70;            // yellow warning threshold
 const FATIGUE_CRITICAL = 88;        // red — major penalty + injury risk spike
 
