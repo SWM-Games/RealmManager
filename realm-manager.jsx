@@ -253,6 +253,112 @@ function InjectCSS() {
 
 const ROLES = ["Warrior","Ranger","Mage","Rogue","Cleric","Paladin"];
 const ROLE_ICONS = { Warrior:"⚔️",Ranger:"🏹",Mage:"🔮",Rogue:"🗡️",Cleric:"✨",Paladin:"🛡️" };
+
+// ─── VISUAL CONFIG ────────────────────────────────────────────────────────────
+// Single source of truth for visual identifiers.
+// keys = file-safe names for your SVG/PNG assets.
+// Structure: /public/icons/{category}/{key}.svg
+//            /public/sprites/races/{key}.png  (hero portraits)
+// Swap each category's return in the wrapper components below when assets ready.
+const VISUAL_CONFIG = {
+  // Hero portraits — raster sprites (PNG), 1 per race
+  races: {
+    Human:      { key:"human",      emoji:"👤" },
+    Elf:        { key:"elf",        emoji:"🧝" },
+    Dwarf:      { key:"dwarf",      emoji:"⛏️"  },
+    "Half-Orc": { key:"half_orc",   emoji:"💪" },
+    Gnome:      { key:"gnome",      emoji:"🔧" },
+    Tiefling:   { key:"tiefling",   emoji:"😈" },
+    Dragonborn: { key:"dragonborn", emoji:"🐉" },
+  },
+  // Role symbols — SVG icons
+  roles: {
+    Warrior: { key:"warrior", emoji:"⚔️" },
+    Ranger:  { key:"ranger",  emoji:"🏹" },
+    Mage:    { key:"mage",    emoji:"🔮" },
+    Rogue:   { key:"rogue",   emoji:"🗡️" },
+    Cleric:  { key:"cleric",  emoji:"✨" },
+    Paladin: { key:"paladin", emoji:"🛡️" },
+  },
+  // Formation positions — SVG icons
+  positions: {
+    Vanguard:   { key:"vanguard",   emoji:"🗡️" },
+    Skirmisher: { key:"skirmisher", emoji:"🏹" },
+    Arbiter:    { key:"arbiter",    emoji:"✨" },
+  },
+  // League tier badges — SVG icons
+  tiers: {
+    iron:     { key:"tier_iron",     emoji:"⚙️"  },
+    bronze:   { key:"tier_bronze",   emoji:"🥉" },
+    silver:   { key:"tier_silver",   emoji:"🥈" },
+    gold:     { key:"tier_gold",     emoji:"🥇" },
+    platinum: { key:"tier_platinum", emoji:"💎" },
+  },
+  // Town buildings — SVG icons
+  buildings: {
+    barracks:  { key:"barracks",  emoji:"🏰" },
+    tavern:    { key:"tavern",    emoji:"🍺" },
+    infirmary: { key:"infirmary", emoji:"⚕️"  },
+    lodge:     { key:"lodge",     emoji:"🛖" },
+    trainyard: { key:"trainyard", emoji:"🎯" },
+    network:   { key:"network",   emoji:"🔭" },
+    trading:   { key:"trading",   emoji:"💰" },
+    bazaar:    { key:"bazaar",    emoji:"🏪" },
+    scouts:    { key:"scouts",    emoji:"🌠" },
+    sanctum:   { key:"sanctum",   emoji:"💎" },
+    legends:   { key:"legends",   emoji:"🏛️" },
+  },
+  // Hero traits — SVG icons
+  traits: {
+    Berserker:    { key:"berserker",    emoji:"🔴" },
+    Tactician:    { key:"tactician",    emoji:"🔵" },
+    Swift:        { key:"swift",        emoji:"🟢" },
+    Resilient:    { key:"resilient",    emoji:"🟢" },
+    "Glass Cannon":{ key:"glass_cannon",emoji:"🟠" },
+    Blessed:      { key:"blessed",      emoji:"🟡" },
+    Cursed:       { key:"cursed",       emoji:"🟣" },
+    Brave:        { key:"brave",        emoji:"🟢" },
+    "Iron Will":  { key:"iron_will",    emoji:"🔵" },
+    "Eagle Eye":  { key:"eagle_eye",    emoji:"🟡" },
+    Calm:         { key:"calm",         emoji:"🔵" },
+    "Night Vision":{ key:"night_vision",emoji:"🟣" },
+    Loyal:        { key:"loyal",        emoji:"🟢" },
+    Greedy:       { key:"greedy",       emoji:"🟠" },
+    "Hot-headed": { key:"hot_headed",   emoji:"🔴" },
+    Stubborn:     { key:"stubborn",     emoji:"🟡" },
+    Coward:       { key:"coward",       emoji:"⚫" },
+    Inspiring:    { key:"inspiring",    emoji:"🟡" },
+  },
+  // Race synergies — SVG icons (abstract concepts, not characters)
+  synergies: {
+    mono_elf:               { key:"syn_mono_elf",               emoji:"🌿" },
+    mono_dwarf:             { key:"syn_mono_dwarf",             emoji:"⛏️"  },
+    mono_human:             { key:"syn_mono_human",             emoji:"👑" },
+    mono_halforc:           { key:"syn_mono_halforc",           emoji:"💢" },
+    mono_tiefling:          { key:"syn_mono_tiefling",          emoji:"🔥" },
+    mono_gnome:             { key:"syn_mono_gnome",             emoji:"⚙️"  },
+    mono_dragonborn:        { key:"syn_mono_dragonborn",        emoji:"🐉" },
+    rainbow:                { key:"syn_rainbow",                emoji:"🌈" },
+    pact_elf_tiefling:      { key:"syn_pact_elf_tiefling",      emoji:"🌑" },
+    pact_dwarf_halforc:     { key:"syn_pact_dwarf_halforc",     emoji:"⚒️"  },
+    pact_gnome_tiefling:    { key:"syn_pact_gnome_tiefling",    emoji:"🔮" },
+    pact_human_elf:         { key:"syn_pact_human_elf",         emoji:"🤝" },
+    pact_dragonborn_halforc:{ key:"syn_pact_dragonborn_halforc",emoji:"🐉" },
+    pact_human_dwarf:       { key:"syn_pact_human_dwarf",       emoji:"⚖️"  },
+  },
+  // Navigation tabs — SVG icons
+  nav: {
+    Squad:    { key:"nav_squad",    emoji:"⚔️" },
+    Tactics:  { key:"nav_tactics",  emoji:"🎯" },
+    Battle:   { key:"nav_battle",   emoji:"⚔️" },
+    Dominion: { key:"nav_dominion", emoji:"⚜️" },
+    Town:     { key:"nav_town",     emoji:"🏰" },
+    Hire:     { key:"nav_hire",     emoji:"🤝" },
+    Ledger:   { key:"nav_ledger",   emoji:"📒" },
+    Guide:    { key:"nav_guide",    emoji:"📖" },
+  },
+};
+
 const RACE_ICONS = { Human:"👤",Elf:"🧝",Dwarf:"⛏️","Half-Orc":"💪",Gnome:"🔧",Tiefling:"😈",Dragonborn:"🐉" };
 
 // ── LIFE STAGE SYSTEM ─────────────────────────────────────────────────────
@@ -933,7 +1039,7 @@ function generateRandomEvent(heroes, week) {
 const GAME_SPEEDS = {
   standard: {
     id:           "standard",
-    label:        "Grand Dynasty",
+    label:        "",
     tagline:      "The full manager experience",
     seasonLength: 42,
     rankStep:     1,
@@ -1152,6 +1258,7 @@ function generateStartingSquad() {
     contractWeeks: starContract*WEEKS_PER_CONTRACT_YEAR,
     contractWeeksLeft: starContract*WEEKS_PER_CONTRACT_YEAR,
     foundling: true,
+    baseStats: {...starStats},
   });
 
   // ── GUARANTEED ROLE COVERAGE (slots 1–3) ─────────────────────────────────
@@ -1174,7 +1281,7 @@ function generateStartingSquad() {
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
     stats.Form = rand(3,7);
-    squad.push({...h, stage, stageProgress, stats, level:1, xp:0});
+    squad.push({...h, stage, stageProgress, stats, level:1, xp:0, baseStats:{...stats}});
   });
 
   // ── RANDOM NORMAL HEROES (slots 4–7) ─────────────────────────────────────
@@ -1212,6 +1319,7 @@ function generateStartingSquad() {
       weeksInFormation: 0, potentialRevealed: false,
       negotiationPending: false, negotiationIgnoredWeeks: 0,
       marketTier: "standard", mentorBonus: null,
+      baseStats: {...stats},
     });
   }
 
@@ -1249,6 +1357,7 @@ function generateStartingSquad() {
       negotiationPending: false, negotiationIgnoredWeeks: 0,
       marketTier: "standard", mentorBonus: null,
       fodder: true,
+      baseStats: {...fodderStats},
     });
   }
 
@@ -1518,17 +1627,18 @@ function analyseFormation(formation){
 
 function calcFormationRating(formation){
   const analysis=analyseFormation(formation);
-  let total=0, count=0;
+  // Sum position scores across all 3 lanes — this puts the rating on the same
+  // scale as enemy total power (e.g. Iron 67-105), making comparisons intuitive.
+  // calcPositionScore handles primary×1.25 + support×0.75 + role pairing bonuses.
+  let totalPositionPower=0;
   POS_KEYS.forEach(pos=>{
-    (formation[pos]||[]).forEach(h=>{
-      if(!h)return;
-      total+=calcHeroCombatScore(h,pos);
-      count++;
-    });
+    const posHeroes=(formation[pos]||[]).filter(Boolean);
+    if(posHeroes.length===0) return;
+    const {score}=calcPositionScore(posHeroes, pos);
+    totalPositionPower+=score;
   });
-  const base=count>0?total/count:0;
-  const effective=base*analysis.mult;
-  return {raw:Math.round(base), effective:Math.round(effective), analysis};
+  const effective=Math.round(totalPositionPower*analysis.mult);
+  return {raw:Math.round(totalPositionPower), effective, analysis};
 }
 
 // ─── WIN CHANCE ENGINE ────────────────────────────────────────────────────────
@@ -1818,8 +1928,24 @@ const TRAIT_EFFECTS = {
   "Coward":       {color:"#888",    desc:"Morale swings halved (good and bad)"},
   "Inspiring":    {color:"#ffd966", desc:"+10% morale swings for squad · bigger morale boost on retirement"},
 };
-const FIRST_NAMES = ["Aldric","Sylas","Mira","Thorin","Zara","Fenix","Lyra","Brom","Elowen","Kazim","Vex","Nyla","Dorn","Seraphel","Grix","Isolde","Tavar","Rynn","Caelum","Vesper","Oryn","Sable","Cress","Baelin","Wren"];
-const LAST_NAMES  = ["Ironforge","Dawnwhisper","Ashveil","Stoneback","Emberthorn","Coldwater","Grimshaw","Silverwood","Blackthorn","Nighthollow","Voidmantle","Crestfall","Duskbane","Emberveil","Stormcrow"];
+const FIRST_NAMES = [
+  "Aldric","Sylas","Mira","Thorin","Zara","Fenix","Lyra","Brom","Elowen","Kazim",
+  "Vex","Nyla","Dorn","Seraphel","Grix","Isolde","Tavar","Rynn","Caelum","Vesper",
+  "Oryn","Sable","Cress","Baelin","Wren","Ash","Cade","Dusk","Edda","Frey",
+  "Gareth","Hale","Iris","Joss","Kael","Lorn","Maren","Nox","Orin","Petra",
+  "Quinn","Rhett","Soren","Tess","Uvar","Vale","Wynn","Xan","Yael","Zell",
+  "Adra","Bael","Cira","Drax","Evyn","Fyra","Gael","Holt","Iren","Jace",
+  "Kira","Lund","Mael","Nell","Osric","Pryn","Raen","Skye","Tove","Ulric",
+];
+const LAST_NAMES = [
+  "Ironforge","Dawnwhisper","Ashveil","Stoneback","Emberthorn","Coldwater",
+  "Grimshaw","Silverwood","Blackthorn","Nighthollow","Voidmantle","Crestfall",
+  "Duskbane","Emberveil","Stormcrow","Ashmark","Boldfield","Crownhelm",
+  "Darkwater","Edgeborn","Farreach","Greymantle","Highwall","Ironveil",
+  "Jadewing","Kettleborn","Lightfall","Moorwatch","Northguard","Oldstone",
+  "Peakhollow","Quickblade","Ravenmark","Saltfire","Thornwall","Underhill",
+  "Vaulthall","Wildmoor","Yearwood","Zephyrcroft",
+];
 
 // Pairs that should never appear on the same hero
 const TRAIT_CONFLICTS = [
@@ -2073,6 +2199,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
     negotiationPending:false, negotiationIgnoredWeeks:0,
     marketTier: mktTier,
     mentorBonus: null,
+    baseStats: {...stats}, // snapshot at creation for growth tracking
   };
 }
 
@@ -2863,7 +2990,7 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   // This preserves the DnD Nat 1/20 feel while making each position matter.
 
   const PHASE_WIN_CAP   = 0.77;
-  const PHASE_WIN_FLOOR = 0.27;
+  const PHASE_WIN_FLOOR = 0.15;
   const k = 2.0;
 
   // Enemy power is split equally across 3 positions
@@ -3118,7 +3245,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                   <div style={{borderTop:`1px solid ${laneBorder}`,paddingTop:6,display:"flex",flexDirection:"column",gap:2}}>
                     {posHeroes.map((h,i)=>(
                       <div key={h.id} style={{fontSize:8,color:isRevealed?"#aaa":"#555",display:"flex",alignItems:"center",gap:3,justifyContent:"center"}}>
-                        <span style={{fontSize:9}}>{RACE_ICONS[h.race]}</span>
+                        <HeroAvatar race={h.race} size={9}/>
                         <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:60}}>{h.name.split(" ")[0]}</span>
                         {i===0&&ps?.pairingMult>1&&<span style={{color:"#ffd966",fontSize:8}}>✦</span>}
                       </div>
@@ -3176,7 +3303,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                 <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                   {injuredHeroes.map(h=>(
                     <div key={h.id} style={{fontSize:9,color:"#ff9f43",padding:"2px 6px",borderRadius:5,background:"rgba(255,100,100,0.1)",border:"1px solid rgba(255,100,100,0.2)"}}>
-                      {RACE_ICONS[h.race]} {h.name}
+                      <HeroAvatar race={h.race} size={14}/> {h.name}
                     </div>
                   ))}
                 </div>
@@ -3231,7 +3358,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                 <div style={{fontSize:10,color:"#ffd966",fontWeight:700,letterSpacing:1,marginBottom:6}}>⚠️ WEAK LINKS</div>
                 {simulation.weakLinks.slice(0,3).map((link,i)=>(
                   <div key={i} style={{fontSize:9,color:"#bbb",marginBottom:3}}>
-                    {RACE_ICONS[link.hero.race]} {link.hero.name} — {link.issues[0]?.reason}
+                    <HeroAvatar race={link.hero.race} size={13}/> {link.hero.name} — {link.issues[0]?.reason}
                   </div>
                 ))}
               </div>
@@ -3262,20 +3389,67 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
 // ─── COMPONENTS ───────────────────────────────────────────────────────────────
 
-function StatBar({label,value,prev,max=99,highlight,dimmed}){
+// ─── ICON / AVATAR COMPONENTS ────────────────────────────────────────────────
+// Each is a thin wrapper — swap the return line when assets are ready.
+// File convention: /public/icons/{category}/{key}.svg
+//                  /public/sprites/races/{key}.png
+
+function HeroAvatar({ race, size=20 }) {
+  const cfg = VISUAL_CONFIG.races[race];
+  // → <img src={`/sprites/races/${cfg.key}.png`} width={size} height={size} alt={race}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+}
+function RoleIcon({ role, size=14 }) {
+  const cfg = VISUAL_CONFIG.roles[role];
+  // → <img src={`/icons/roles/${cfg.key}.svg`} width={size} height={size} alt={role}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+}
+function PositionIcon({ position, size=16 }) {
+  const cfg = VISUAL_CONFIG.positions[position];
+  // → <img src={`/icons/positions/${cfg.key}.svg`} width={size} height={size} alt={position}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+}
+function TierIcon({ tier, size=16 }) {
+  const cfg = VISUAL_CONFIG.tiers[tier];
+  // → <img src={`/icons/tiers/${cfg.key}.svg`} width={size} height={size} alt={tier}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚙️"}</span>;
+}
+function BuildingIcon({ id, size=20 }) {
+  const cfg = VISUAL_CONFIG.buildings[id];
+  // → <img src={`/icons/buildings/${cfg.key}.svg`} width={size} height={size} alt={id}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"🏰"}</span>;
+}
+function NavIcon({ tab, size=18 }) {
+  const cfg = VISUAL_CONFIG.nav[tab];
+  // → <img src={`/icons/nav/${cfg.key}.svg`} width={size} height={size} alt={tab}/>
+  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+}
+
+function StatBar({label,value,prev,base,max=99,highlight,dimmed}){
   const pct=(value/max)*100, gain=prev!==undefined?value-prev:0;
   const col=dimmed?"#555":value>=80?"#a8ff78":value>=60?"#78c8ff":value>=40?"#ffd966":"#ff7878";
+  const hasGrowth = base!==undefined && value > base;
+  const basePct = base!==undefined ? (base/max)*100 : null;
+  const growthPct = hasGrowth ? ((value-base)/max)*100 : 0;
   return(
     <div style={{marginBottom:5,opacity:dimmed?0.45:1}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:2}}>
         <span style={{color:highlight?"#ffd966":"#bbb"}}>{label}</span>
         <span style={{display:"flex",gap:5,alignItems:"center"}}>
-          {gain!==0&&<span style={{fontSize:9,color:gain>0?"#a8ff78":"#ff7878",fontWeight:700}}>{gain>0?"+":""}{gain}</span>}
+          {gain!==0&&!hasGrowth&&<span style={{fontSize:9,color:gain>0?"#a8ff78":"#ff7878",fontWeight:700}}>{gain>0?"+":""}{gain}</span>}
+          {hasGrowth&&<span style={{fontSize:9,color:"#a8ff78",fontWeight:700}}>+{value-base}</span>}
           <span style={{fontWeight:700,color:col}}>{value}</span>
         </span>
       </div>
-      <div style={{height:4,background:"#12122a",borderRadius:2,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:col,borderRadius:2,transition:"width 0.5s"}}/>
+      <div style={{height:4,background:"#12122a",borderRadius:2,overflow:"hidden",position:"relative"}}>
+        {basePct!==null ? (
+          <>
+            <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${basePct}%`,background:"#3a3a5a",borderRadius:2}}/>
+            {hasGrowth&&<div style={{position:"absolute",left:`${basePct}%`,top:0,height:"100%",width:`${growthPct}%`,background:"#a8ff78",borderRadius:2,transition:"width 0.5s"}}/>}
+          </>
+        ) : (
+          <div style={{height:"100%",width:`${pct}%`,background:col,borderRadius:2,transition:"width 0.5s"}}/>
+        )}
       </div>
     </div>
   );
@@ -3435,7 +3609,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
               ))}
               {chronicle?.starPlayer&&(
                 <div style={{marginTop:8,paddingTop:8,borderTop:"1px solid rgba(255,215,0,0.1)",display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:16}}>{RACE_ICONS[chronicle.starPlayer.race]||"⚔️"}</span>
+                  <HeroAvatar race={chronicle.starPlayer.race} size={16}/>
                   <div>
                     <div style={{fontSize:11,fontWeight:700,color:"#f0e6d3"}}>{chronicle.starPlayer.name}</div>
                     <div style={{fontSize:9,color:"#999"}}>{chronicle.starPlayer.role} · {chronicle.starPlayer.pos} · PWR {chronicle.starPlayer.pwr} · Lv {chronicle.starPlayer.level} — your finest warrior</div>
@@ -3770,7 +3944,7 @@ function RandomEventModal({event, heroes, onAccept, onDecline}){
                 style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:9,marginBottom:5,cursor:"pointer",
                   background:isSelected?"rgba(168,255,120,0.08)":"rgba(255,255,255,0.03)",
                   border:`1px solid ${isSelected?"rgba(168,255,120,0.4)":"rgba(255,255,255,0.07)"}`,transition:"all 0.15s"}}>
-                <span style={{fontSize:20}}>{RACE_ICONS[h.race]}</span>
+                <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#f0e6d3"}}>{h.name}</div>
                   <div style={{display:"flex",gap:8,fontSize:10,color:"#888",flexWrap:"wrap",marginTop:2}}>
@@ -3843,7 +4017,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
                   marginBottom:5,cursor:"pointer",transition:"all 0.15s",
                   background:isSel?"rgba(167,139,250,0.1)":"rgba(255,255,255,0.03)",
                   border:`1px solid ${isSel?"rgba(167,139,250,0.4)":"rgba(255,255,255,0.07)"}`}}>
-                <span style={{fontSize:20}}>{RACE_ICONS[h.race]}</span>
+                <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#f0e6d3"}}>{h.name}</div>
                   <div style={{fontSize:10,color:"#888"}}>{h.role} · Lv {h.level}</div>
@@ -3911,7 +4085,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
               border:`1px solid ${selected?"#78c8ff":hasBid?"rgba(255,215,0,0.5)":hero.negotiationPending?"rgba(255,159,67,0.5)":contractUrgent?"rgba(255,100,100,0.3)":hero.injured?"rgba(255,100,100,0.3)":"rgba(255,255,255,0.07)"}`,
               borderRadius:10,padding:compact?"9px 12px":13,cursor:draggable?"grab":"pointer",transition:"border 0.2s",marginBottom:5}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:compact?0:7}}>
-        <span style={{fontSize:compact?17:21}}>{RACE_ICONS[hero.race]}</span>
+        <HeroAvatar race={hero.race} size={compact?17:21}/>
         <div style={{flex:1}}>
           <div style={{fontWeight:700,fontSize:compact?12:14,color:"#f0e6d3",fontFamily:"'Cinzel',serif"}}>
             {hero.name}
@@ -3924,7 +4098,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hasBid&&<span style={{fontSize:9,color:"#a8ff78",marginLeft:4}}>💰</span>}
             {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#78c8ff",marginLeft:4}}>✈️{hero.awayWeeks}w</span>}
           </div>
-          <div style={{fontSize:10,color:"#888"}}>{hero.race} {ROLE_ICONS[hero.role]} {hero.role} · Lv {hero.level}</div>
+          <div style={{fontSize:10,color:"#888"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level}</div>
         </div>
         <div style={{textAlign:"right"}}>
           <div style={{fontSize:10,color:agePhaseColor(phase),fontWeight:600}}>{agePhaseLabel(phase)}</div>
@@ -4249,6 +4423,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         ) :
         STAT_GROUPS[tab].map(s=>(
           <StatBar key={s} label={s} value={hero.stats[s]} prev={prevStats?.[s]}
+            base={hero.baseStats?.[s]}
             highlight={s==="Potential"}
             dimmed={declining&&PHYSICAL_STATS.includes(s)}/>
         ))
@@ -4357,10 +4532,10 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
         <div style={{fontSize:11,color:"#888",marginBottom:18}}>{hero.name} is seeking a new contract.</div>
 
         <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18,padding:"12px 14px",background:"rgba(255,255,255,0.03)",borderRadius:10,border:"1px solid rgba(255,255,255,0.07)"}}>
-          <span style={{fontSize:28}}>{RACE_ICONS[hero.race]}</span>
+          <HeroAvatar race={hero.race} size={28}/>
           <div style={{flex:1}}>
             <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#f0e6d3"}}>{hero.name}</div>
-            <div style={{fontSize:11,color:"#999"}}>{hero.race} {ROLE_ICONS[hero.role]} {hero.role} · Level {hero.level} · {agePhaseLabel(agePhase(hero))}</div>
+            <div style={{fontSize:11,color:"#999"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Level {hero.level} · {agePhaseLabel(agePhase(hero))}</div>
             <div style={{fontSize:10,color:hColor,marginTop:2}}>{moraleLabel(hero.morale).label}</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>
               {hero.traits.map(t=><span key={t} style={{fontSize:9,background:"rgba(167,139,250,0.1)",color:"#a78bfa",padding:"1px 6px",borderRadius:8}}>{t}</span>)}
@@ -4453,10 +4628,10 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
         <div style={{padding:"14px 20px 10px"}}>
           <div style={{background:"rgba(255,159,67,0.06)",borderRadius:10,padding:"12px 14px",border:"1px solid rgba(255,159,67,0.2)",marginBottom:14}}>
             <div style={{display:"flex",gap:10,alignItems:"center"}}>
-              <span style={{fontSize:28}}>{RACE_ICONS[retiree.race]}</span>
+              <HeroAvatar race={retiree.race} size={28}/>
               <div style={{flex:1}}>
                 <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#f0e6d3"}}>{retiree.name}</div>
-                <div style={{fontSize:11,color:"#999"}}>{retiree.race} {ROLE_ICONS[retiree.role]} {retiree.role} · {agePhaseLabel(agePhase(retiree))} · Level {retiree.level}</div>
+                <div style={{fontSize:11,color:"#999"}}>{retiree.race} <RoleIcon role={retiree.role}/> {retiree.role} · {agePhaseLabel(agePhase(retiree))} · Level {retiree.level}</div>
                 <div style={{fontSize:10,color:"#a78bfa",marginTop:2}}>{retiree.traits.join(", ")}</div>
               </div>
               <div style={{textAlign:"right"}}>
@@ -4501,7 +4676,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
                 <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${isSelected?"#ffd966":"#333"}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                   {isSelected&&<div style={{width:8,height:8,borderRadius:"50%",background:"#ffd966"}}/>}
                 </div>
-                <span style={{fontSize:18}}>{RACE_ICONS[h.race]}</span>
+                <HeroAvatar race={h.race} size={18}/>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#f0e6d3"}}>{h.name}</div>
                   <div style={{fontSize:9,color:"#999"}}>{h.role} · Lv {h.level} · {pos?pos:"bench"}{isSamePos&&<span style={{color:"#a8ff78",marginLeft:4}}>★ Same position</span>}</div>
@@ -4622,7 +4797,7 @@ function TacticsTab({heroes,formation,setFormation}){
           return(
             <div style={{marginBottom:12,padding:"9px 13px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.06)"}}>
               <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-                {[["BASE",raw,"#78c8ff"],["→",null,"#333"],["EFFECTIVE",effective,effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"]].map(([l,v,c],i)=>(
+                {[["BASE",raw,"#78c8ff"],["→",null,"#333"],["RATING",effective,effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"]].map(([l,v,c],i)=>(
                   v===null?<div key={i} style={{color:c,fontSize:18}}>→</div>:
                   <div key={l} style={{textAlign:"center"}}><div style={{fontSize:8,color:"#888"}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div></div>
                 ))}
@@ -4676,7 +4851,7 @@ function TacticsTab({heroes,formation,setFormation}){
           return(
             <div key={pos} style={{marginBottom:9,padding:"10px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
               <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
-                <span style={{fontSize:18}}>{pd.icon}</span>
+                <PositionIcon position={pos} size={18}/>
                 <div>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:pd.color}}>{pd.label}</div>
                   <div style={{fontSize:9,color:"#888"}}>{pd.subtitle}</div>
@@ -4694,10 +4869,10 @@ function TacticsTab({heroes,formation,setFormation}){
                       {h?(
                         <div onClick={()=>setPickerOpen({pos,slotIdx})}
                           style={{display:"flex",alignItems:"center",gap:6,background:isPickerTarget?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.04)",borderRadius:7,padding:"8px 10px",border:`1px solid ${isPickerTarget?"#78c8ff":fc}`,cursor:"pointer",position:"relative",transition:"border 0.15s"}}>
-                          <span style={{fontSize:16}}>{RACE_ICONS[h.race]}</span>
+                          <HeroAvatar race={h.race} size={16}/>
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
-                            <div style={{fontSize:9,color:"#999"}}>{ROLE_ICONS[h.role]} {h.role} · Lv {h.level}</div>
+                            <div style={{fontSize:9,color:"#999"}}><RoleIcon role={h.role}/> {h.role} · Lv {h.level}</div>
                           </div>
                           <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":"–"}</div>
                         </div>
@@ -4795,7 +4970,7 @@ function TacticsTab({heroes,formation,setFormation}){
 
               {/* Picker header */}
               <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-                <span style={{fontSize:20}}>{pd.icon}</span>
+                <PositionIcon position={pos} size={20}/>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:pd.color}}>{pd.label} — Slot {pickerOpen.slotIdx+1}</div>
                   <div style={{fontSize:10,color:"#999"}}>{pd.subtitle} · Ideal: {pd.ideal.filter(x=>ROLES.includes(x)).join(", ")}</div>
@@ -4838,7 +5013,7 @@ function TacticsTab({heroes,formation,setFormation}){
                         opacity:h.injured||(h.awayWeeks||0)>0?0.45:1,
                         transition:"background 0.15s,border 0.15s",
                       }}>
-                      <span style={{fontSize:20,flexShrink:0}}>{RACE_ICONS[h.race]}</span>
+                      <HeroAvatar race={h.race} size={20}/>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                           <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#f0e6d3"}}>{h.name}</span>
@@ -4849,7 +5024,7 @@ function TacticsTab({heroes,formation,setFormation}){
                           {(h.fatigue||0)>=FATIGUE_WARN&&<span style={{fontSize:9,color:fatigueLabel(h.fatigue).color,background:"rgba(255,100,100,0.08)",padding:"1px 5px",borderRadius:6}}>⚡ {fatigueLabel(h.fatigue).label}</span>}
                         </div>
                         <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
-                          <span style={{fontSize:10,color:"#888"}}>{ROLE_ICONS[h.role]} {h.role}</span>
+                          <span style={{fontSize:10,color:"#888"}}><RoleIcon role={h.role}/> {h.role}</span>
                           <span style={{fontSize:10,color:"#999"}}>{h.race}</span>
                           <span style={{fontSize:10,color:agePhaseColor(phase)}}>{agePhaseLabel(phase)}</span>
                           <span style={{fontSize:10,color:hColor}}>{hLabel}</span>
@@ -4914,7 +5089,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
             <div>
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:currentTier.color}}>
-                {currentTier.icon} {currentTier.name} League · Season {season}
+                <TierIcon tier={playerTier} size={14}/> {currentTier.name} League · Season {season}
               </div>
               <div style={{fontSize:10,color:"#999"}}>Week {seasonWeek} of {SEASON_LENGTH()} · {SEASON_LENGTH()-seasonWeek} remaining · {isPlatinum?"Finish 1st to win the campaign":"Top 2 promote · Bottom 2 relegate"}</div>
             </div>
@@ -5001,7 +5176,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Tribute */}
         <div style={{marginBottom:14,padding:"14px 16px",background:"rgba(255,255,255,0.03)",borderRadius:10,border:`1px solid ${currentTier.color}33`}}>
           <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:currentTier.color,marginBottom:10}}>
-            {currentTier.icon} Tribute Income
+            <TierIcon tier={playerTier} size={13}/> Tribute Income
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
             <div>
@@ -5018,28 +5193,6 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           </div>
         </div>
 
-        {/* Win chance */}
-        <div style={{marginBottom:14}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#999",marginBottom:8,fontWeight:700,letterSpacing:1}}>WIN CHANCE vs DIFFICULTY</div>
-          {[1,2,3,4,5].map(diff=>{
-            const wc=calcWinChance(formRating||30,diff);
-            const wcBoosted=calcWinChance((formRating||30)*1.4,diff);
-            const col=wc>=0.6?"#a8ff78":wc>=0.40?"#ffd966":wc>=0.25?"#ff9f43":"#ff7878";
-            const label=["Easy","Moderate","Hard","Very Hard","Elite"][diff-1];
-            const isTierDiff=diff===currentTier.difficulty;
-            return(
-              <div key={diff} style={{padding:"6px 10px",borderRadius:7,marginBottom:3,
-                background:isTierDiff?"rgba(255,255,255,0.04)":"rgba(255,255,255,0.02)",
-                border:isTierDiff?`1px solid ${currentTier.color}33`:"1px solid rgba(255,255,255,0.05)"}}>
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:10,color:isTierDiff?currentTier.color:"#888",flex:1,fontWeight:isTierDiff?700:400}}>{label} {"★".repeat(diff)}{isTierDiff?" ← current":""}</span>
-                  <span style={{fontSize:12,fontWeight:700,color:col}}>{Math.round(wc*100)}%</span>
-                  <span style={{fontSize:9,color:"#999"}}>+syn: {Math.round(wcBoosted*100)}%</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
 
         {/* Recent match results */}
         {matchLog&&matchLog.length>0&&(
@@ -5081,7 +5234,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
             {hallOfFame.starPlayer&&(
               <div style={{padding:"10px 12px",borderRadius:9,background:"rgba(167,139,250,0.06)",border:"1px solid rgba(167,139,250,0.2)",marginBottom:6}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:18}}>{RACE_ICONS[hallOfFame.starPlayer.race]||"⚔️"}</span>
+                  <HeroAvatar race={hallOfFame.starPlayer.race} size={18}/>
                   <div style={{flex:1}}>
                     <div style={{fontSize:11,fontWeight:700,color:"#a78bfa",fontFamily:"'Cinzel',serif"}}>🌟 Star Player</div>
                     <div style={{fontSize:12,fontWeight:700,color:"#f0e6d3"}}>{hallOfFame.starPlayer.name}</div>
@@ -5461,7 +5614,7 @@ function AbandonButton({onAbandon}){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:8,background:"rgba(255,159,67,0.06)",border:"1px solid rgba(255,159,67,0.2)"}}>
-      <div style={{fontSize:10,color:"#ff9f43",fontWeight:700}}>Abandon this campaign?</div>
+      <div style={{fontSize:10,color:"#ff9f43",fontWeight:700}}>Abandon this run?</div>
       <div style={{fontSize:9,color:"#aaa",lineHeight:1.5}}>
         Your run ends here. Achievements earned so far<br/>
         and all boons are preserved for your next run.
@@ -5469,7 +5622,7 @@ function AbandonButton({onAbandon}){
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{setConfirming(false);onAbandon();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"none",background:"#ff9f43",color:"#0d0d1a",cursor:"pointer",fontWeight:700,fontFamily:"'Cinzel',serif"}}>
-          Yes, abandon
+          Yes, abandon run
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"#888",cursor:"pointer"}}>
@@ -5481,7 +5634,7 @@ function AbandonButton({onAbandon}){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:6,border:"1px solid rgba(255,159,67,0.3)",background:"rgba(255,159,67,0.07)",color:"#ff9f43",cursor:"pointer",fontFamily:"'Cinzel',serif"}}>
-      Abandon
+      Abandon Run
     </button>
   );
 }
@@ -5500,7 +5653,7 @@ function NewGameButton(){
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{clearSave();clearNGPlus();window.location.reload();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"none",background:"#ff7878",color:"#0d0d1a",cursor:"pointer",fontWeight:700,fontFamily:"'Cinzel',serif"}}>
-          Yes, reset everything
+          Yes, start New Realm
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"#888",cursor:"pointer"}}>
@@ -5512,7 +5665,7 @@ function NewGameButton(){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:6,border:"1px solid rgba(255,100,100,0.3)",background:"rgba(255,100,100,0.07)",color:"#ff7878",cursor:"pointer",fontFamily:"'Cinzel',serif"}}>
-      New Game
+      New Realm
     </button>
   );
 }
@@ -5924,7 +6077,7 @@ export default function App(){
     const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
     const isElite   = !!(hasSanctum);
     const isPremium = hasBazaar || ["gold","platinum"].includes(playerTier);
-    let nh={...h,id:Date.now()};
+    let nh={...h, id:Date.now(), baseStats: h.baseStats || {...h.stats}};
     setGold(g=>g-discountedValue);
     setSeasonFinances(prev=>({...prev, signingCosts:prev.signingCosts+discountedValue}));
     if(signDiscount>0){
@@ -6290,7 +6443,7 @@ export default function App(){
     }
   };
 
-  // ── SKIP WEEK — pay wages, no raid ────────────────────────────────────────
+  // ── rest week — pay wages, no raid ────────────────────────────────────────
   // ── RAID: PHASE 2 — apply outcome after simulation completes ──────────────
   const applyRaidResult=()=>{
     try {
@@ -6306,7 +6459,6 @@ export default function App(){
       setLegendaryChallenger(null);
       if(result.won){
         const lc=raidEnemy;
-        setGold(g=>g+(lc.goldReward||3000));
         setGold(g=>g+(lc.goldReward||3000));
         addLog(`🏆 LEGENDARY VICTORY! You defeated ${lc.name}! +${(lc.goldReward||3000).toLocaleString()}g`,"success");
         setHallOfFame(prev=>({...prev, legendaryWins:(prev.legendaryWins||0)+1, lastLegendaryVictory:{name:lc.name,season,week:week+1}}));
@@ -6332,6 +6484,10 @@ export default function App(){
     const newLevelUps=[]; const snapshots={};
     const raidedIds=new Set(result.allHeroes.map(h=>h.id));
     const formationIds=new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
+
+    // Must be declared BEFORE heroes.map() — callbacks close over these
+    const leader=squadLeaderId?heroes.find(h=>h.id===squadLeaderId):null;
+    const leaderInFormation=leader&&raidedIds.has(leader.id);
 
     let updatedHeroes=heroes.map(h=>{
       const inRaid=raidedIds.has(h.id);
@@ -6535,8 +6691,6 @@ export default function App(){
     }
 
     // Squad Leader morale bonus — applies to all formation heroes if leader is in formation
-    const leader=squadLeaderId?updatedHeroes.find(h=>h.id===squadLeaderId):null;
-    const leaderInFormation=leader&&raidedIds.has(leader.id);
     if(leaderInFormation){
       const lb=calcLeaderBonuses(leader);
       updatedHeroes=updatedHeroes.map(h=>{
@@ -7060,10 +7214,9 @@ export default function App(){
   const IS={background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:6,color:"#f0e6d3",padding:"5px 9px",fontSize:11,outline:"none"};
   const STAT_ROWS = [
     ["Gold",          gold.toLocaleString()+"g",                                                         gold<0?"#ff7878":"#ffd966"],
-    ["Week",          `${week} · S${season} Wk${seasonWeek}`,                                           "#f0e6d3"],
+    ["Week",          `S${season} · Wk ${seasonWeek}`,                                           "#f0e6d3"],
     ["League",        `${currentTier.icon} ${currentTier.name} · ${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'} of 8`, currentTier.color],
     ["Tribute",       `+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g/wk`,     "#a8ff78"],
-    ["Mode",          GAME_SPEEDS[gameSpeed]?.label ?? "Grand Dynasty",                                  "#888"],
     ...(ngPlus?.wins ? [["Campaign",`⚔️ Run #${ngPlus.wins+1} · ${ngPlus.earnedBoons?.length||0} options unlocked`,"#ff9f43"]] : []),
     ...(squadLeaderId&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`👑 ${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]} · ${Math.round(calcLeaderScore(heroes.find(h=>h.id===squadLeaderId))*100)}%`,"#ffd966"]] : []),
     ["Formation",     `${placed}/6 · Rating ${formRating}`,                                             "#78c8ff"],
@@ -7151,7 +7304,7 @@ export default function App(){
               className={`rm-nav-item${tab===id?" active":""}`}
               onClick={()=>setTab(id)}
               style={tab===id?{background:`${townColor}18`,color:townColor}:{}}>
-              <span className="rm-nav-icon-wrap">{icon}</span>
+              <span className="rm-nav-icon-wrap"><NavIcon tab={id} size={15}/></span>
               <span>{label}</span>
               {badge&&<span className="rm-nav-badge"/>}
             </button>
@@ -7417,7 +7570,7 @@ export default function App(){
                       <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                         {ROLES.map(r=>{
                           const n=roleCounts[r]||0;
-                          return n>0?<span key={r} style={{fontSize:10,color:"#aaa"}}>{ROLE_ICONS[r]} {r.substring(0,3)} ×{n}</span>:null;
+                          return n>0?<span key={r} style={{fontSize:10,color:"#aaa"}}><RoleIcon role={r} size={11}/> {r.substring(0,3)} ×{n}</span>:null;
                         })}
                       </div>
                     </div>
@@ -7551,7 +7704,7 @@ export default function App(){
                           return(
                             <div key={h.id} style={{flex:1,minWidth:0,padding:"7px 9px",borderRadius:8,background:"rgba(0,0,0,0.3)",border:`1px solid ${fitCol}33`}}>
                               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
-                                <span style={{fontSize:15}}>{RACE_ICONS[h.race]}</span>
+                                <HeroAvatar race={h.race} size={15}/>
                                 <div style={{flex:1,minWidth:0}}>
                                   <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
                                   <div style={{fontSize:9,color:"#999"}}>{h.role} · Lv {h.level}</div>
@@ -7587,12 +7740,12 @@ export default function App(){
                 <div style={{padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
                   <div style={{fontSize:10,fontWeight:700,color:"#f0e6d3",marginBottom:4,fontFamily:"'Cinzel',serif"}}>Active Synergies</div>
                   {formAnalysis.active.map(s=><div key={s.id} style={{fontSize:10,color:s.negative?"#ff7878":"#a8ff78",marginBottom:2}}>{s.icon} {s.name} ×{s.ratingMult}</div>)}
-                  <div style={{marginTop:5,fontSize:12,fontWeight:700,color:"#78c8ff"}}>⚡ Effective Rating: {formRating}</div>
+                  <div style={{marginTop:5,fontSize:12,fontWeight:700,color:"#78c8ff"}}>⚡ Formation Rating: {formRating}</div>
                 </div>
               )}
               {formAnalysis.active.length===0&&placed>0&&(
                 <div style={{padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#78c8ff"}}>⚡ Effective Rating: {formRating}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#78c8ff"}}>⚡ Formation Rating: {formRating}</div>
                   <div style={{fontSize:10,color:"#888",marginTop:2}}>No synergies active</div>
                 </div>
               )}
@@ -7662,7 +7815,7 @@ export default function App(){
                   : Math.round(opp.power);
                 const posShare = adjPower/3;
                 const k=2.0;
-                const PCAP=0.77, PFLOOR=0.27;
+                const PCAP=0.77, PFLOOR=0.15;
                 const posChances={};
                 const posScoresPreview={};
                 const previewSynergyMult = Math.min(1.5, Math.max(0.3, formAnalysis.mult));
@@ -7796,10 +7949,7 @@ export default function App(){
                           <div style={{fontSize:9,color:"#888"}}>Win reward</div>
                           <div style={{fontSize:13,fontWeight:700,color:"#ffd966"}}>~{opp.goldReward?.toLocaleString()||"?"}g</div>
                         </div>
-                        <div style={{flex:1,background:"rgba(255,100,100,0.05)",borderRadius:6,padding:"6px 8px",border:"1px solid rgba(255,100,100,0.1)"}}>
-                          <div style={{fontSize:9,color:"#888"}}>Loss reward</div>
-                          <div style={{fontSize:13,fontWeight:700,color:"#888"}}>+0g</div>
-                        </div>
+
                       </div>
                     </div>
 
@@ -7911,12 +8061,12 @@ export default function App(){
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.55)",zIndex:2,borderRadius:9,gap:4}}>
                         <div style={{fontSize:20}}>🔒</div>
                         <div style={{fontSize:10,color:"#888",fontFamily:"'Cinzel',serif",textAlign:"center",padding:"0 16px"}}>
-                          Promote to {bTier?.icon} {bTier?.name||"higher tier"}
+                          Promote to {bTier?<TierIcon tier={b.tierRequired} size={12}/>:""} {bTier?.name||"higher tier"}
                         </div>
                       </div>
                     )}
                     <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:7}}>
-                      <span style={{fontSize:24}}>{b.icon}</span>
+                      <BuildingIcon id={b.id} size={24}/>
                       <div>
                         <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:b.built?"#a8ff78":"#f0e6d3"}}>{b.name}</div>
                         <div style={{fontSize:10,color:b.built?"#a8ff78":"#ffd966"}}>{b.built?"✅ Constructed":`${b.cost.toLocaleString()}g`}</div>
@@ -8009,10 +8159,10 @@ export default function App(){
                             {/* Hero info */}
                             <div style={{flex:1,minWidth:0}}>
                               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                                <span style={{fontSize:24}}>{RACE_ICONS[hero.race]}</span>
+                                <HeroAvatar race={hero.race} size={24}/>
                                 <div>
                                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#f0e6d3"}}>{hero.name}</div>
-                                  <div style={{fontSize:10,color:"#888"}}>{hero.race} {ROLE_ICONS[hero.role]} {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
+                                  <div style={{fontSize:10,color:"#888"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                                 </div>
                                 {bid.isListed&&<span style={{fontSize:9,color:"#ffd966",background:"rgba(255,215,0,0.12)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🏷️ Listed</span>}
                               </div>
@@ -8253,7 +8403,7 @@ export default function App(){
               <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:"#888",marginBottom:10,letterSpacing:0.5}}>
                 LAST WEEK {f?`(Week ${f.week})`:""}
               </div>
-              {!f&&<div style={{fontSize:11,color:"#888"}}>No activity recorded yet — complete a battle or skip a week.</div>}
+              {!f&&<div style={{fontSize:11,color:"#888"}}>No activity recorded yet — complete a battle or rest week.</div>}
               {f&&<>
                 {row("⚔️ Battle earnings",  f.raidGold>0?"+"+f.raidGold.toLocaleString()+"g":"—",  f.raidGold>0?"#a8ff78":"#888")}
                 {row("👑 Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#78c8ff", `${currentTier.icon} ${currentTier.name} · position ${currentTierPosition}`)}
@@ -8376,7 +8526,7 @@ export default function App(){
             <button key={id} className={`rm-bottom-nav-item${tab===id?" active":""}`}
               onClick={()=>{setTab(id);setShowMore(false);}}
               style={tab===id?{color:townColor}:{}}>
-              <span className="rm-bnav-icon">{icon}</span>
+              <span className="rm-bnav-icon"><NavIcon tab={id} size={20}/></span>
               <span className="rm-bnav-label">{label}</span>
               {badge&&<span className="rm-bottom-nav-badge"/>}
             </button>
@@ -8390,7 +8540,7 @@ export default function App(){
             <button key={id} className={`rm-bottom-nav-item${tab===id?" active":""}`}
               onClick={()=>{setTab(id);setShowMore(false);}}
               style={tab===id?{color:townColor}:{}}>
-              <span className="rm-bnav-icon">{icon}</span>
+              <span className="rm-bnav-icon"><NavIcon tab={id} size={20}/></span>
               <span className="rm-bnav-label">{label}</span>
               {badge&&<span className="rm-bottom-nav-badge"/>}
             </button>
@@ -8420,7 +8570,7 @@ export default function App(){
             <button key={id} className={`rm-bottom-nav-item${tab===id?" active":""}`}
               onClick={()=>{setTab(id);setShowMore(false);}}
               style={tab===id?{color:townColor}:{}}>
-              <span className="rm-bnav-icon">{icon}</span>
+              <span className="rm-bnav-icon"><NavIcon tab={id} size={20}/></span>
               <span className="rm-bnav-label">{label}</span>
               {badge&&<span className="rm-bottom-nav-badge"/>}
             </button>
