@@ -6487,6 +6487,7 @@ export default function App(){
     const formationIds=new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
 
     // Must be declared BEFORE heroes.map() — callbacks close over these
+    const fatiguePctBonus = 0; // placeholder for future recovery-rate buffs (e.g. items/boons)
     const leader=squadLeaderId?heroes.find(h=>h.id===squadLeaderId):null;
     const leaderInFormation=leader&&raidedIds.has(leader.id);
 
