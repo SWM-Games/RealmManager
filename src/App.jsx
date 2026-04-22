@@ -6045,7 +6045,7 @@ export default function App(){
   const [showMore,setShowMore] = useState(false);
   const [enemy,setEnemy]             = useState(null);
   const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
-  const [marketFilter,setMarketFilter] = useState({role:"All",stage:"All",sortBy:"Value"});
+  const [marketFilter,setMarketFilter] = useState({role:"All",race:"All",position:"All",stage:"All",sortBy:"Value"});
   const [retirees,setRetirees]       = useState([]);
   const [negotiationQueue,setNegotiationQueue] = useState(saved?.negotiationQueue ?? []);
   const [season,setSeason]               = useState(saved?.season ?? 1);
@@ -8493,6 +8493,12 @@ export default function App(){
                 <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
                   <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
+                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                  <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
+                </select>
+                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                  <option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}
+                </select>
                 <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
                   <option value="All">All Stages</option>
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
@@ -8538,6 +8544,9 @@ export default function App(){
                       return true;
                     })
                     .filter(h=>marketFilter.role==="All"||h.role===marketFilter.role)
+                    .filter(h=>marketFilter.race==="All"||h.race===marketFilter.race)
+                    // Position filter: show heroes whose role is the natural fit for that lane
+                    .filter(h=>marketFilter.position==="All"||(POSITIONS[marketFilter.position]?.ideal||[]).includes(h.role))
                     .filter(h=>marketFilter.stage==="All"||h.stage===marketFilter.stage)
                     .sort((a,b)=>(mSorts[marketFilter.sortBy]||mSorts.Value)(a)-(mSorts[marketFilter.sortBy]||mSorts.Value)(b));
                   if(filtered.length===0) return <div style={{color:"#888",fontSize:13,padding:8}}>No heroes match your filters.</div>;
