@@ -1411,7 +1411,7 @@ function fatigueLabel(f) {
 }
 
 const POSITIONS = {
-  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel. Mages & Clerics suffer here." },
+  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel." },
   Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
   Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
 };
@@ -6014,6 +6014,30 @@ export default function App(){
     }
   },[]);
 
+  // ── FORMATION SYNC — keep slot refs in sync with heroes state ─────────────
+  // Formation slots hold hero objects by reference; when per-week updates
+  // (fatigue, morale, injuries, level-ups) replace hero objects in `heroes`,
+  // the formation copy goes stale. Re-map slots to the current hero by id so
+  // displays (Tactics slots, Battle preview) and calculations (rating, battle)
+  // always see up-to-date stats.
+  useEffect(()=>{
+    setFormation(f=>{
+      const byId=new Map(heroes.map(h=>[h.id,h]));
+      let changed=false;
+      const nf={};
+      POS_KEYS.forEach(p=>{
+        nf[p]=(f[p]||[]).map(h=>{
+          if(!h) return h;
+          const fresh=byId.get(h.id);
+          if(fresh && fresh!==h){changed=true;return fresh;}
+          if(!fresh){changed=true;return null;} // hero was removed
+          return h;
+        });
+      });
+      return changed?nf:f;
+    });
+  },[heroes]);
+
   // ── AUTO-SAVE after any meaningful state change ───────────────────────────
   useEffect(()=>{
     // Debounce slightly so rapid state updates don't thrash localStorage
@@ -7047,11 +7071,19 @@ export default function App(){
       setRaceSynergyUsage(prev=>({...prev, [result.analysis.raceSynergy.id]:(prev[result.analysis.raceSynergy.id]||0)+1}));
     }
 
-    // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule)
+    // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule).
+    // Also record the player's match in the opponent's league row so their W/L tracks the actual outcome.
     if(!isLegendary){
       setLeagueTable(prev=>{
         const {updated,results}=simulateEnemyWeek(week+1,raidEnemy.name,prev,tierEnemyTowns);
-        if(results.length) setMatchLog(ml=>[...results.map(r=>({...r,week:week+1})),...ml.slice(0,19)]);
+        const oppRow=updated[raidEnemy.name]||{wins:0,losses:0,power:raidEnemy.power};
+        updated[raidEnemy.name]={
+          ...oppRow,
+          wins:   oppRow.wins  +(result.won?0:1),
+          losses: oppRow.losses+(result.won?1:0),
+        };
+        const playerMatch={home:townName,away:raidEnemy.name,homeWon:result.won,week:week+1,isPlayer:true};
+        setMatchLog(ml=>[playerMatch,...results.map(r=>({...r,week:week+1})),...ml.slice(0,19)]);
         return updated;
       });
     }
@@ -7671,11 +7703,11 @@ export default function App(){
             })()}
             <div className="rm-filter-bar" style={{marginBottom:12}}>
               <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:155,minWidth:0,maxWidth:"100%"}}/>
-              <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option>All</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
-              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option>All</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r}>{r}</option>)}</select>
+              <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
+              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}</select>
               <select value={filter.position} onChange={e=>setFilter(f=>({...f,position:e.target.value}))} style={IS}><option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
-              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}>{["All","Fit","Injured","Unhappy","Contract"].map(v=><option key={v}>{v}</option>)}</select>
+              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Unhappy","Contract"].map(v=><option key={v} value={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
                 {["Value","Level","XP","Stage","Morale","Contract","Combat","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
               </select>
@@ -8343,7 +8375,7 @@ export default function App(){
               {/* Market filter bar */}
               <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
                 <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
-                  <option>All</option>{ROLES.map(r=><option key={r}>{r}</option>)}
+                  <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
                 <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
                   <option value="All">All Stages</option>
@@ -8406,22 +8438,83 @@ export default function App(){
                 })()}
               </div>
 
-              {/* Listed heroes — below the fold, low visual weight */}
-              {listedHeroIds.size>0&&(
-                <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
-                  <div style={{fontSize:11,color:"#999",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-                    <span>🏷️ Your Listed Heroes</span>
-                    <span style={{fontSize:10,color:"#888"}}>— awaiting bids (next cycle in ~{4-(week%4)} weeks)</span>
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:7}}>
-                    {heroes.filter(h=>listedHeroIds.has(h.id)).map(h=>(
-                      <HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id}
-                        isListed hasBid={transferBids.some(b=>b.heroId===h.id)}
-                        onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>
-                    ))}
-                  </div>
+              {/* ══ YOUR SQUAD — list / renew / release without opening detail ══ */}
+              <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#78c8ff"}}>👥 Your Squad</div>
+                  <span style={{fontSize:10,color:"#888"}}>
+                    Quick actions — list for sale, renew contract, or release. Next bid cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
+                  </span>
                 </div>
-              )}
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:7}}>
+                  {heroes.filter(h=>!h.retired).map(h=>{
+                    const listed = listedHeroIds.has(h.id);
+                    const hasBid = transferBids.some(b=>b.heroId===h.id);
+                    const weeksLeft = h.contractWeeksLeft||0;
+                    const contractExpired = weeksLeft === 0;
+                    const canRenew = !h.negotiationPending && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
+                    return(
+                      <div key={h.id} style={{padding:"8px 10px",borderRadius:8,
+                        background:listed?"rgba(255,215,0,0.04)":hasBid?"rgba(168,255,120,0.04)":"rgba(255,255,255,0.025)",
+                        border:`1px solid ${listed?"rgba(255,215,0,0.25)":hasBid?"rgba(168,255,120,0.25)":"rgba(255,255,255,0.06)"}`}}>
+                        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
+                          <HeroAvatar race={h.race} size={16}/>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                              {h.name}
+                              {listed&&<span style={{fontSize:8,color:"#ffd966",marginLeft:5,fontWeight:400}}>🏷️ Listed</span>}
+                              {hasBid&&<span style={{fontSize:8,color:"#a8ff78",marginLeft:5,fontWeight:400}}>💰 Offer</span>}
+                            </div>
+                            <div style={{fontSize:9,color:"#888"}}>
+                              <RoleIcon role={h.role}/> {h.role} · Lv {h.level} · {h.value.toLocaleString()}g
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{fontSize:9,color:"#888",marginBottom:6}}>
+                          {contractExpired
+                            ? <span style={{color:"#ff9f43",fontWeight:700}}>Contract expired — renewal pending</span>
+                            : h.negotiationPending
+                              ? <span style={{color:"#78c8ff"}}>In negotiation · {weeksLeft}w on current deal</span>
+                              : <>Contract {weeksLeft}w left · {h.salary}g/wk</>
+                          }
+                        </div>
+                        <div style={{display:"flex",gap:4}}>
+                          <button onClick={()=>toggleListed(h)}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,
+                              border:`1px solid ${listed?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.1)"}`,
+                              cursor:"pointer",
+                              background:listed?"rgba(255,215,0,0.12)":"rgba(255,255,255,0.04)",
+                              color:listed?"#ffd966":"#888",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                            {listed?"✓ Listed":"🏷️ List"}
+                          </button>
+                          <button onClick={()=>canRenew&&initiateEarlyRenewal(h)}
+                            disabled={!canRenew}
+                            title={h.negotiationPending?"Already in negotiation":canRenew?"Start contract talks":contractExpired?"Already expired":"Renew available within 2 seasons of expiry"}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(120,200,255,0.2)",
+                              cursor:canRenew?"pointer":"not-allowed",
+                              background:"rgba(120,200,255,0.06)",
+                              color:canRenew?"#78c8ff":"#555",
+                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif",
+                              opacity:canRenew?1:0.5}}>
+                            📋 Renew
+                          </button>
+                          <button onClick={()=>{
+                            const msg=contractExpired
+                              ? `Release ${h.name}? Contract expired — mutual parting, no morale hit.`
+                              : `Release ${h.name}? Morale penalty will apply to the remaining squad.`;
+                            if(window.confirm(msg)) releaseHero(h);
+                          }}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(255,100,100,0.2)",
+                              cursor:"pointer",background:"rgba(255,100,100,0.05)",color:"#ff7878",
+                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                            🚪 Release
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
           </div>
