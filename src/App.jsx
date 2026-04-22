@@ -1243,7 +1243,7 @@ function generateStartingSquad() {
     const hi = Math.max(lo, Math.floor(starPot*0.50));
     starStats[s] = Math.min(starPot, rand(lo,hi)+rand(1,3));
   });
-  starStats.Form = rand(4,7);
+  starStats.Form = rand(5,8);
   const starTraits = pickTraits(rand(2,3));
   const starAvg = Object.values(starStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
   const starContract = rand(1,3);
@@ -1282,7 +1282,7 @@ function generateStartingSquad() {
       const hi = Math.max(lo, Math.floor(pot*0.50));
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
-    stats.Form = rand(3,7);
+    stats.Form = rand(4,7);
     squad.push({...h, stage, stageProgress, stats, level:1, xp:0, baseStats:{...stats}});
   });
 
@@ -1301,7 +1301,7 @@ function generateStartingSquad() {
       const hi = Math.max(lo, Math.floor(pot*0.45));
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
-    stats.Form = rand(2,6);
+    stats.Form = rand(4,7);
     const avgStat = Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
     squad.push({
       id: Date.now()+i+rand(0,9999),
@@ -1312,7 +1312,7 @@ function generateStartingSquad() {
       level: 0, xp: 0,
       salary: Math.floor(avgStat*rand(11,14)/10),
       value: 0,
-      morale: rand(55,85),
+      morale: rand(65,85),
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
@@ -1337,7 +1337,7 @@ function generateStartingSquad() {
       if(s==="Form"){ return; }
       fodderStats[s] = Math.max(10, Math.min(fodderPot, Math.floor(fodderPot*rand(25,50)/100)));
     });
-    fodderStats.Form = rand(2,5);
+    fodderStats.Form = rand(3,6);
     const fodderAvg = Object.values(fodderStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
     squad.push({
       id: Date.now()+i+100+rand(0,9999),
@@ -1349,7 +1349,7 @@ function generateStartingSquad() {
       level: 0, xp: 0,
       salary: Math.floor(fodderAvg*rand(11,14)/10),
       value: 0,
-      morale: rand(50,75),
+      morale: rand(60,80),
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
@@ -2200,7 +2200,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
     if(stage==="veteran")base=base-rand(5,12);
     stats[s]=Math.max(10,Math.min(potCap,base));
   });
-  stats.Form=rand(3,10);
+  stats.Form=rand(5,9);
   const traits=pickTraits(rand(1,3));
   const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
   // Salary: base wage plus experience premium — a level 10 hero costs noticeably more than a level 0
@@ -2222,7 +2222,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   return {
     id, name:`${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`, race, role,
     stage, stageProgress,
-    stats, traits, salary, value, morale:rand(55,100),
+    stats, traits, salary, value, morale:rand(70,95),
         contractYears, contractWeeks, contractWeeksLeft:contractWeeks,
     xp:heroXP, level:heroLevel, injured:false, injuryWeeks:0, retired:false,
     fatigue:0, weeksUnplayed:0, weeksInSquad:0, weeksInFormation:0,
