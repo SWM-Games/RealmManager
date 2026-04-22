@@ -4255,7 +4255,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           {heroBids.map(bid=>(
             <div key={bid.id} style={{padding:"10px 12px",borderRadius:8,background:"rgba(255,215,0,0.06)",border:"1px solid rgba(255,215,0,0.25)",marginBottom:6}}>
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#ffd966",marginBottom:3}}>💰 Bid from {bid.town}</div>
-              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.pctOfValue}% of market value)</span></div>
+              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.freeTransfer?"free-transfer nominal fee":`${bid.pctOfValue}% of market value`})</span></div>
               <div style={{fontSize:10,color:"#888",marginBottom:8}}>Interested in: {bid.reason}</div>
               <div style={{display:"flex",gap:6}}>
                 <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
@@ -4605,6 +4605,85 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
           )}
           <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"1px solid rgba(255,100,100,0.3)",cursor:"pointer",background:"rgba(255,100,100,0.08)",color:"#ff7878",fontWeight:700,fontSize:12,fontFamily:"'Cinzel',serif"}}>
             ✗ Reject<br/><span style={{fontSize:9,fontWeight:400}}>–10 morale</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── NEW OFFERS MODAL ────────────────────────────────────────────────────────
+// Fires right after new transfer bids arrive so the player can't miss them.
+// Offers stay in `transferBids` even after the modal is dismissed, so the
+// Hire tab remains the canonical place to review bids over their full window.
+
+function NewOffersModal({ bids, heroes, onAccept, onDecline, onDismiss }) {
+  if (!bids || bids.length === 0) return null;
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:160,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:20}}
+      onClick={onDismiss}>
+      <div onClick={e=>e.stopPropagation()}
+        style={{background:"linear-gradient(160deg,#0c0c1e,#12102a)",border:"1px solid rgba(168,255,120,0.35)",borderRadius:14,width:"min(620px,96vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 0 40px rgba(168,255,120,0.1)"}}>
+        <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          <span style={{fontSize:22}}>📨</span>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#a8ff78"}}>
+              {bids.length===1?"Transfer Offer Received":`${bids.length} Transfer Offers Received`}
+            </div>
+            <div style={{fontSize:10,color:"#888"}}>Rival realms are scouting your squad. Act now or review them later in the Hire tab.</div>
+          </div>
+        </div>
+        <div style={{overflowY:"auto",padding:"12px 16px",flex:1,display:"flex",flexDirection:"column",gap:10}}>
+          {bids.map(bid => {
+            const hero = heroes.find(h=>h.id===bid.heroId);
+            if (!hero) return null;
+            const phase = agePhase(hero);
+            const aboveValue = !bid.freeTransfer && bid.offer > bid.marketValue;
+            return (
+              <div key={bid.id}
+                style={{borderRadius:10,overflow:"hidden",
+                  border:`1px solid ${bid.freeTransfer?"rgba(167,139,250,0.3)":aboveValue?"rgba(168,255,120,0.4)":"rgba(168,255,120,0.2)"}`,
+                  background:bid.freeTransfer?"rgba(167,139,250,0.05)":aboveValue?"rgba(168,255,120,0.05)":"rgba(255,255,255,0.025)"}}>
+                {aboveValue&&(
+                  <div style={{padding:"4px 12px",fontSize:10,color:"#a8ff78",fontWeight:700,background:"rgba(168,255,120,0.1)",borderBottom:"1px solid rgba(168,255,120,0.2)"}}>
+                    🔥 Above Market Value
+                  </div>
+                )}
+                {bid.freeTransfer&&(
+                  <div style={{padding:"4px 12px",fontSize:10,color:"#a78bfa",fontWeight:700,background:"rgba(167,139,250,0.1)",borderBottom:"1px solid rgba(167,139,250,0.2)"}}>
+                    🕊️ Free-Transfer — take the nominal fee, skip the release morale hit
+                  </div>
+                )}
+                <div style={{padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
+                  <HeroAvatar race={hero.race} size={20}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#f0e6d3"}}>{hero.name}</div>
+                    <div style={{fontSize:9,color:"#888"}}>{hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
+                    <div style={{fontSize:9,color:"#888",fontStyle:"italic",marginTop:2}}>"{bid.town} — {bid.reason}"</div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontSize:18,fontWeight:900,color:"#a8ff78",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
+                    {!bid.freeTransfer && bid.pctOfValue!=null && <div style={{fontSize:9,color:"#888"}}>{bid.pctOfValue}% of value</div>}
+                  </div>
+                </div>
+                <div style={{padding:"0 12px 10px",display:"flex",gap:6}}>
+                  <button onClick={()=>onAccept(bid)}
+                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:900,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    ✓ Accept {bid.offer.toLocaleString()}g
+                  </button>
+                  <button onClick={()=>onDecline(bid)}
+                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(255,100,100,0.25)",cursor:"pointer",background:"rgba(255,100,100,0.07)",color:"#ff7878",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    ✗ Decline
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{padding:"10px 16px",borderTop:"1px solid rgba(255,255,255,0.05)",flexShrink:0}}>
+          <button onClick={onDismiss}
+            style={{width:"100%",padding:"9px 0",borderRadius:7,border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer",background:"rgba(255,255,255,0.04)",color:"#aaa",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+            Decide later (offers stay in the Hire tab for 2 weeks)
           </button>
         </div>
       </div>
@@ -6007,6 +6086,7 @@ export default function App(){
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
   const [transferBids,setTransferBids]         = useState(saved?.transferBids ?? []);
+  const [newOfferBids,setNewOfferBids]         = useState([]); // freshly-arrived bids for the pop-up modal
 
   const addLog=(text,type="info")=>setLog(l=>[{week,text,type},...l.slice(0,79)]);
 
@@ -6270,9 +6350,15 @@ export default function App(){
       const minPct = (isListed ? 0.80 : 0.65) * phaseValueMult * formBidMult * tradingValueMult;
       const maxPct = (isListed ? (1.15 + repBidBonus) : (0.95 + repBidBonus)) * phaseValueMult * formBidMult * tradingValueMult;
       const pct = Math.max(0.15, minPct + Math.random() * Math.max(0, maxPct - minPct));
-      const offer = Math.round(h.value * pct);
+      // Free-transfer fodder (value 0) still attracts nominal offers so the
+      // player can move them for a small windfall instead of taking a
+      // release morale hit.
+      const freeTransfer = (h.value || 0) === 0;
+      const offer = freeTransfer ? rand(80, 180) : Math.round(h.value * pct);
 
-      const town=pick(ENEMY_TOWNS);
+      // Bidders come from rival realms — the league towns are the natural pool
+      const townPool = (tierEnemyTowns && tierEnemyTowns.length) ? tierEnemyTowns : [{name:"A Rival Realm"}];
+      const town=pick(townPool);
 
       const combatScore=calcHeroCombatScore(h,"Vanguard");
       const reasons=[];
@@ -6293,7 +6379,9 @@ export default function App(){
         town:town.name,
         offer,
         marketValue:h.value,
-        pctOfValue:Math.round(pct*100),
+        // null for free-transfer heroes (value 0) — UI shows a different label instead of "X% of 0g"
+        pctOfValue: freeTransfer ? null : Math.round(pct*100),
+        freeTransfer,
         reason,
         week:currentWeek,
         isListed,
@@ -7095,13 +7183,18 @@ export default function App(){
     if((week+1)%4===0){
       const newBids=generateBids(heroes,week+1,listedHeroIds);
       if(newBids.length){
+        // Dedupe against already-active bids so one hero can't have two concurrent offers
+        const existingHeroIds=new Set(transferBids.filter(b=>b.week>=week-1).map(b=>b.heroId));
+        const dedupedNew=newBids.filter(b=>!existingHeroIds.has(b.heroId));
         setTransferBids(prev=>{
           const fresh=prev.filter(b=>b.week>=week-1);
-          const existingHeroIds=new Set(fresh.map(b=>b.heroId));
-          const dedupedNew=newBids.filter(b=>!existingHeroIds.has(b.heroId));
           return [...fresh,...dedupedNew];
         });
-        addLog(`📨 ${newBids.length} offer${newBids.length>1?"s":""} received! Check the Hire tab.`,"success");
+        if(dedupedNew.length){
+          // Pop the modal with the freshly-arrived bids
+          setNewOfferBids(dedupedNew);
+          addLog(`📨 ${dedupedNew.length} offer${dedupedNew.length>1?"s":""} received!`,"success");
+        }
       }
     }
 
@@ -7396,6 +7489,15 @@ export default function App(){
       )}
       {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent}/>}
       {activeWanderingMaster&&<WanderingMasterModal event={activeWanderingMaster} heroes={heroes} gold={gold} onAccept={acceptWanderingMaster} onDecline={declineWanderingMaster}/>}
+      {newOfferBids.length>0&&(
+        <NewOffersModal
+          bids={newOfferBids}
+          heroes={heroes}
+          onAccept={(bid)=>{ acceptBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
+          onDecline={(bid)=>{ declineBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
+          onDismiss={()=>setNewOfferBids([])}
+        />
+      )}
 
       {/* ── DESKTOP SIDEBAR ── */}
       <div className="rm-sidebar">
@@ -8250,7 +8352,7 @@ export default function App(){
                   {transferBids.map(bid=>{
                     const hero=heroes.find(h=>h.id===bid.heroId);
                     if(!hero) return null;
-                    const aboveValue=bid.offer>bid.marketValue;
+                    const aboveValue=!bid.freeTransfer && bid.offer>bid.marketValue;
                     const weeksAgo=Math.max(0,(week||0)-bid.week);
                     const weeksLeft=Math.max(0,2-weeksAgo);
                     const urgentExpiry=weeksLeft<=1;
@@ -8268,6 +8370,12 @@ export default function App(){
                           <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(168,255,120,0.15),rgba(168,255,120,0.05))",borderBottom:"1px solid rgba(168,255,120,0.2)",display:"flex",alignItems:"center",gap:8}}>
                             <span style={{fontSize:12}}>🔥</span>
                             <span style={{fontSize:11,fontWeight:700,color:"#a8ff78"}}>Above Market Value — {bid.pctOfValue}% of {bid.marketValue.toLocaleString()}g</span>
+                          </div>
+                        )}
+                        {bid.freeTransfer&&(
+                          <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(167,139,250,0.15),rgba(167,139,250,0.05))",borderBottom:"1px solid rgba(167,139,250,0.2)",display:"flex",alignItems:"center",gap:8}}>
+                            <span style={{fontSize:12}}>🕊️</span>
+                            <span style={{fontSize:11,fontWeight:700,color:"#a78bfa"}}>Free-Transfer Offer — a rival will take them off your hands</span>
                           </div>
                         )}
 
@@ -8305,7 +8413,9 @@ export default function App(){
                             {/* Offer + actions */}
                             <div style={{flexShrink:0,textAlign:"right",minWidth:140}}>
                               <div style={{fontSize:28,fontWeight:900,color:"#a8ff78",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
-                              {!aboveValue&&<div style={{fontSize:10,color:"#999",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
+                              {bid.freeTransfer
+                                ? <div style={{fontSize:10,color:"#a78bfa",marginBottom:4}}>Nominal fee</div>
+                                : !aboveValue && <div style={{fontSize:10,color:"#999",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
                               <div style={{fontSize:10,color:urgentExpiry?"#ff7878":"#555",marginBottom:10}}>
                                 {urgentExpiry?"⚠️ Expires this week":"Expires in "+weeksLeft+" week"+(weeksLeft!==1?"s":"")}
                               </div>
