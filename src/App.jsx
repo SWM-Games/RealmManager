@@ -192,9 +192,11 @@ const RESPONSIVE_CSS = `
   }
 
   /* ── DETAIL PANEL ── */
+  /* z-index sits above every modal (max 250) so "View Hero" buttons inside
+     modals can open the detail panel on top without closing the modal first. */
   .rm-detail-panel {
     position: fixed; top: 0; right: 0; width: 340px; height: 100vh;
-    overflow-y: auto; z-index: 100;
+    overflow-y: auto; z-index: 300;
   }
   @media (max-width: 640px) {
     .rm-detail-panel { width: 100vw !important; left: 0 !important; overflow-y: hidden !important; }
@@ -1440,35 +1442,21 @@ const POSITION_PAIRINGS = [
   { pos:"Arbiter",    roles:["Cleric","Cleric"],   mult:1.05 },
 ];
 
-// Race pairing bonuses — applied within a position, stacks with role pairing.
-// Position-agnostic: race chemistry is about the heroes, not the lane.
-// Calibrated to contribute ~×1.04 max toward the ×1.5 total tactical ceiling.
-const RACE_PAIRINGS = [
-  // Compatible pairs
-  { races:["Dwarf","Half-Orc"],   mult:1.03 },
-  { races:["Human","Elf"],        mult:1.03 },
-  { races:["Gnome","Tiefling"],   mult:1.04 },
-  { races:["Human","Dragonborn"], mult:1.02 },
-  { races:["Dwarf","Gnome"],      mult:1.03 },
-  { races:["Elf","Tiefling"],     mult:1.02 },
-  // Friction pairs
-  { races:["Elf","Half-Orc"],     mult:0.97 },
-  { races:["Elf","Dragonborn"],   mult:0.98 },
-  { races:["Gnome","Half-Orc"],   mult:0.98 },
-];
-const SAME_RACE_BONUS = 1.04; // same race unity — slightly less than best compatible
+// Race chemistry lives in the formation-wide RACE_SYNERGIES (mono / rainbow / duo
+// pacts). Per-lane race pairings were dropped — they double-counted against the
+// formation-wide bonus and made the maths harder for players to predict.
 
 // Calculate position score for 1 or 2 heroes.
-// With 2 heroes: primary (higher score) ×1.25, support ×0.75, then role pairing bonus, then race pairing bonus.
-// Returns { score, primaryHero, supportHero, pairingMult, raceMult }
+// With 2 heroes: primary (higher score) ×1.25, support ×0.75, then role pairing bonus.
+// Returns { score, primaryHero, supportHero, pairingMult }
 function calcPositionScore(heroes, pos) {
   const valid = (heroes||[]).filter(Boolean);
-  if(valid.length === 0) return { score:0, primaryHero:null, supportHero:null, pairingMult:1.0, raceMult:1.0 };
+  if(valid.length === 0) return { score:0, primaryHero:null, supportHero:null, pairingMult:1.0 };
 
   const scored = valid.map(h => ({ h, s:calcHeroCombatScore(h, pos) }))
                        .sort((a,b) => b.s - a.s);
 
-  let score, primaryHero, supportHero, pairingMult = 1.0, raceMult = 1.0;
+  let score, primaryHero, supportHero, pairingMult = 1.0;
 
   if(scored.length === 1) {
     score = scored[0].s;
@@ -1489,21 +1477,9 @@ function calcPositionScore(heroes, pos) {
       pairingMult = rolePairing.mult;
       score *= pairingMult;
     }
-
-    // Race pairing bonus
-    if(primaryHero.race === supportHero.race) {
-      raceMult = SAME_RACE_BONUS;
-    } else {
-      const races = [primaryHero.race, supportHero.race].sort();
-      const racePairing = RACE_PAIRINGS.find(p =>
-        [...p.races].sort().join() === races.join()
-      );
-      if(racePairing) raceMult = racePairing.mult;
-    }
-    score *= raceMult;
   }
 
-  return { score, primaryHero, supportHero, pairingMult, raceMult };
+  return { score, primaryHero, supportHero, pairingMult };
 }
 
 // ─── COMBAT SCORE ENGINE ─────────────────────────────────────────────────────
@@ -3042,10 +3018,10 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   const positionScores = {};
   POS_KEYS.forEach(pos => {
     const posHeroes = (formation[pos]||[]).filter(Boolean);
-    const { score, primaryHero, supportHero, pairingMult, raceMult } = calcPositionScore(posHeroes, pos);
+    const { score, primaryHero, supportHero, pairingMult } = calcPositionScore(posHeroes, pos);
     // Apply formation-wide synergy multiplier to position score
     const effectiveScore = score * synergyMult;
-    positionScores[pos] = { score, effectiveScore, primaryHero, supportHero, pairingMult, raceMult };
+    positionScores[pos] = { score, effectiveScore, primaryHero, supportHero, pairingMult };
     const ratio     = effectiveScore > 0 ? posEnemyShare / effectiveScore : 999;
     const rawChance = 1 / (1 + Math.pow(ratio, k));
     phaseWinChances[pos] = Math.min(PHASE_WIN_CAP, Math.max(PHASE_WIN_FLOOR, rawChance + nightBonus));
@@ -3848,7 +3824,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
 // ─── RANDOM EVENT MODAL ──────────────────────────────────────────────────────
 
-function RandomEventModal({event, heroes, onAccept, onDecline}){
+function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
   const [selected,setSelected]=useState([]);
   if(!event)return null;
 
@@ -3990,6 +3966,13 @@ function RandomEventModal({event, heroes, onAccept, onDecline}){
                     <span style={{color:confidence.color,fontWeight:700}}>{confidence.icon} {confidence.label}</span>
                   </div>
                 </div>
+                {onViewHero&&(
+                  <button onClick={(e)=>{e.stopPropagation();onViewHero(h);}}
+                    title="Open full hero sheet"
+                    style={{padding:"4px 8px",borderRadius:6,border:"1px solid rgba(120,200,255,0.3)",background:"rgba(120,200,255,0.08)",color:"#78c8ff",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                    👁️ View
+                  </button>
+                )}
                 {isSelected&&<div style={{fontSize:14,color:"#a8ff78",fontWeight:700}}>✓</div>}
               </div>
             );
@@ -4704,6 +4687,143 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
 
 // ─── RETIREMENT MODAL ────────────────────────────────────────────────────────
 
+// ─── SEASON SUMMARY MODAL ────────────────────────────────────────────────────
+// Fires at the end of every regular season (not Platinum championship or
+// bankruptcy — those pipe into the Legacy Ceremony instead). Gives the player
+// a retrospective: W/L, tier movement, hero progression, buildings, ledger.
+
+function SeasonSummaryModal({ summary, onDismiss, townColor }) {
+  if (!summary) return null;
+  const { season, wins, losses, tier, finalPosition, movement, newTier, levelUps, newSignings, departures, buildingsBuilt, finances } = summary;
+  const tierMeta = TIERS[tier] || TIERS.iron;
+  const newTierMeta = TIERS[newTier] || tierMeta;
+  const totalIncome = (finances.tribute||0) + (finances.raidGold||0) + (finances.eventGold||0);
+  const totalSpend  = (finances.wages||0) + (finances.signingCosts||0);
+  const netGold     = totalIncome - totalSpend;
+  const posLabel    = `${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'}`;
+  const movementConfig = {
+    promoted:         {icon:"🎉", label:`Promoted to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#a8ff78"},
+    relegated:        {icon:"📉", label:`Relegated to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#ff9f43"},
+    relegated_floor:  {icon:"⚠️",  label:"Held at the Iron floor", color:"#ff9f43"},
+    safe:             {icon:"🛡️",  label:`Held position in ${tierMeta.icon} ${tierMeta.name}`, color:"#78c8ff"},
+  }[movement] || {icon:"🏁", label:"Season complete", color:"#888"};
+
+  const ledgerRows = [
+    ["👑 Tribute",          finances.tribute||0,       "#78c8ff"],
+    ["⚔️ Battle winnings",   finances.raidGold||0,      (finances.raidGold||0)>=0?"#a8ff78":"#ff7878"],
+    (finances.eventGold||0) ? ["✨ Events",            finances.eventGold,        "#a78bfa"] : null,
+    ["💸 Wages",            -(finances.wages||0),      "#ff9f43"],
+    (finances.signingCosts||0) ? ["🤝 Signings",       -(finances.signingCosts||0),"#ff7878"] : null,
+  ].filter(Boolean);
+
+  const col = townColor || "#ffd966";
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",padding:20}}>
+      <div style={{width:"min(640px,96vw)",maxHeight:"90vh",background:"linear-gradient(160deg,#09091a,#0f0f22)",border:`1px solid ${col}44`,borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 0 60px ${col}14`}}>
+        {/* Header */}
+        <div style={{padding:"18px 22px",textAlign:"center",background:"linear-gradient(180deg,rgba(255,255,255,0.03),transparent)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#888",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:col,lineHeight:1,marginBottom:6}}>
+            {wins}W · {losses}L · Finished {posLabel}
+          </div>
+          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'Cinzel',serif"}}>
+            {movementConfig.icon} {movementConfig.label}
+          </div>
+        </div>
+
+        <div style={{overflowY:"auto",padding:"16px 20px",flex:1}}>
+          {/* Hero progression */}
+          {(levelUps.length > 0 || newSignings.length > 0 || departures.length > 0) && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
+              {levelUps.length > 0 && (
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:"#a8ff78",fontWeight:700,marginBottom:4}}>⭐ Level-ups · {levelUps.length}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
+                    {levelUps.map((h,i) => (
+                      <div key={i} style={{padding:"4px 8px",borderRadius:5,background:"rgba(168,255,120,0.05)",border:"1px solid rgba(168,255,120,0.15)",fontSize:11,color:"#f0e6d3"}}>
+                        {h.name} <span style={{color:"#888"}}>L{h.oldLevel}→L{h.newLevel}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {newSignings.length > 0 && (
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:"#78c8ff",fontWeight:700,marginBottom:4}}>🤝 Signed this season · {newSignings.length}</div>
+                  <div style={{fontSize:11,color:"#aaa",lineHeight:1.5}}>{newSignings.map(h=>h.name).join(" · ")}</div>
+                </div>
+              )}
+              {departures.length > 0 && (
+                <div>
+                  <div style={{fontSize:10,color:"#ff9f43",fontWeight:700,marginBottom:4}}>👋 Departed · {departures.length}</div>
+                  <div style={{fontSize:11,color:"#aaa",lineHeight:1.5}}>{departures.map(h=>h.name).join(" · ")}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Buildings */}
+          {buildingsBuilt.length > 0 && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
+                {buildingsBuilt.map(id => {
+                  const b = BUILDINGS.find(x => x.id === id);
+                  if (!b) return null;
+                  return (
+                    <div key={id} style={{padding:"6px 10px",borderRadius:6,background:"rgba(168,255,120,0.04)",border:"1px solid rgba(168,255,120,0.15)",display:"flex",alignItems:"center",gap:6}}>
+                      <BuildingIcon id={b.id} size={14}/>
+                      <span style={{fontSize:11,color:"#f0e6d3",fontWeight:700}}>{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Ledger */}
+          <div style={{marginBottom:10}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
+            <div style={{padding:"10px 12px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8}}>
+              {ledgerRows.map(([label,val,c],i) => (
+                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                  <span style={{color:"#f0e6d3"}}>{label}</span>
+                  <span style={{color:c,fontWeight:700}}>{val>=0?"+":""}{val.toLocaleString()}g</span>
+                </div>
+              ))}
+              <div style={{display:"flex",justifyContent:"space-between",paddingTop:6,marginTop:2}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#f0e6d3",fontFamily:"'Cinzel',serif"}}>Season net</span>
+                <span style={{fontSize:14,fontWeight:900,color:netGold>=0?"#a8ff78":"#ff7878",fontFamily:"'Cinzel',serif"}}>
+                  {netGold>=0?"+":""}{netGold.toLocaleString()}g
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:"12px 20px",borderTop:"1px solid rgba(255,255,255,0.06)",background:"rgba(0,0,0,0.25)"}}>
+          <button onClick={onDismiss}
+            style={{width:"100%",padding:"11px 0",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${col},#ff9f43)`,color:"#0d0d1a",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14}}>
+            Begin Season {season + 1} →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Capture a lightweight snapshot at the start of a season — used to diff
+// level-ups, signings, departures, and buildings built for the summary modal.
+function captureSeasonSnapshot(heroes, buildings) {
+  return {
+    heroes: (heroes||[]).filter(h => !h.retired).map(h => ({ id: h.id, name: h.name, level: h.level })),
+    built:  (buildings||[]).filter(b => b.built).map(b => b.id),
+  };
+}
+
 function RetirementModal({retirees, heroes, formation, onDismiss}){
   const [step, setStep]       = useState(0);      // index into retirees array
   const [mentees, setMentees] = useState({});      // retiredId → menteeId
@@ -5065,7 +5185,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <div style={{marginTop:6,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",fontSize:10}}>
                     <span style={{color:"#78c8ff",fontWeight:700}}>⚡ Lane PWR {Math.round(ps.score)}</span>
                     {rolePairing && <span style={{color:"#a8ff78"}}>🤝 {[...rolePairing.roles].sort().join(" + ")} ×{rolePairing.mult}</span>}
-                    {ps.raceMult!==1.0 && <span style={{color:ps.raceMult>1?"#a8ff78":"#ff9f43"}}>🧬 Race ×{ps.raceMult.toFixed(2)}</span>}
+                    {/* Race chemistry is now formation-wide only — see the Race Composition panel */}
                   </div>
                 );
               })()}
@@ -5583,6 +5703,7 @@ function saveGame(state) {
       listedHeroIds: [...(state.listedHeroIds||[])],
       transferBids: state.transferBids,
       formationPresets: state.formationPresets,
+      seasonStartSnapshot: state.seasonStartSnapshot,
       leagueTable: state.leagueTable,
       playerRecord: state.playerRecord,
       matchLog: state.matchLog,
@@ -6156,6 +6277,8 @@ export default function App(){
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
   const [transferBids,setTransferBids]         = useState(saved?.transferBids ?? []);
   const [formationPresets,setFormationPresets] = useState(saved?.formationPresets ?? [null,null]); // 2 slots for quick-swap formations
+  const [seasonStartSnapshot,setSeasonStartSnapshot] = useState(saved?.seasonStartSnapshot ?? null); // diff target for the end-of-season summary
+  const [seasonSummary,setSeasonSummary]         = useState(null); // set by endSeason; modal renders while set
   const [newOfferBids,setNewOfferBids]         = useState([]); // freshly-arrived bids for the pop-up modal
 
   const addLog=(text,type="info")=>setLog(l=>[{week,text,type},...l.slice(0,79)]);
@@ -6166,6 +6289,14 @@ export default function App(){
       setScheduledOpponent(generateScheduledOpponent(1, {}, tierEnemyTowns, playerTier));
     }
   },[]);
+
+  // Seed the season snapshot once heroes are available (fresh new game OR
+  // restored save that predates this feature). Fires at most once per run.
+  useEffect(()=>{
+    if(setupDone && !seasonStartSnapshot && heroes.length>0){
+      setSeasonStartSnapshot(captureSeasonSnapshot(heroes, buildings));
+    }
+  },[setupDone, heroes.length]);
 
   // ── FORMATION SYNC — keep slot refs in sync with heroes state ─────────────
   // Formation slots hold hero objects by reference; when per-week updates
@@ -6202,14 +6333,14 @@ export default function App(){
                 playerTier,tierPosition,tierEnemyTowns,
                 scheduledOpponent,negotiationQueue,
                 townName,townColor,
-                listedHeroIds:[...listedHeroIds],transferBids,formationPresets,
+                listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,
                 signDiscount,gameSpeed,squadLeaderId,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -7437,6 +7568,34 @@ export default function App(){
                         `✅ Held position in ${TIERS[playerTier].name} (${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'})`;
     addLog(`🏆 Season ${season} ended! ${movementMsg} — ${playerWins}W/${playerLosses}L`,"success");
 
+    // ── END-OF-SEASON SUMMARY ────────────────────────────────────────────
+    // Skip when the legacy ceremony is taking over (Platinum champion).
+    // Bankruptcy also routes to the legacy ceremony and never reaches endSeason.
+    if(!(isPlatinum && finalPosition === 1)){
+      const snapshot = seasonStartSnapshot || captureSeasonSnapshot(heroes, buildings);
+      const currentBuilt = new Set(buildings.filter(b=>b.built).map(b=>b.id));
+      const snapBuilt    = new Set(snapshot.built || []);
+      const buildingsBuilt = [...currentBuilt].filter(id => !snapBuilt.has(id));
+      const snapById = new Map((snapshot.heroes||[]).map(sh=>[sh.id,sh]));
+      const currentIds = new Set(heroes.map(h=>h.id));
+      const levelUps = heroes.reduce((acc,h)=>{
+        const sh = snapById.get(h.id);
+        if(sh && h.level > sh.level) acc.push({name:h.name, oldLevel:sh.level, newLevel:h.level});
+        return acc;
+      },[]);
+      const newSignings = heroes.filter(h=>!snapById.has(h.id)).map(h=>({name:h.name, level:h.level}));
+      const departures  = (snapshot.heroes||[]).filter(sh=>!currentIds.has(sh.id)).map(sh=>({name:sh.name}));
+      setSeasonSummary({
+        season, wins: playerWins, losses: playerLosses,
+        tier: playerTier, finalPosition, movement, newTier: newTierId,
+        levelUps, newSignings, departures, buildingsBuilt,
+        finances: {...seasonFinances},
+      });
+    }
+
+    // Capture a fresh snapshot for next season's diff
+    setSeasonStartSnapshot(captureSeasonSnapshot(heroes, buildings));
+
     // ── PROMOTION BONUS ───────────────────────────────────────────────────
     if(movement==="promoted"){
       setGold(g=>g+500);
@@ -7560,6 +7719,7 @@ export default function App(){
       <NegotiationModal pending={negotiationQueue} gold={gold} onAccept={handleAccept} onCounter={handleCounter} onReject={handleReject}/>
       {activeSimulation&&<RaidSimulationModal simulation={activeSimulation} enemy={pendingRaidEnemy} onComplete={applyRaidResult}/>}
       {weekSummary&&!activeSimulation&&<WeeklySummary summary={weekSummary} onDismiss={()=>setWeekSummary(null)} townColor={townColor}/>}
+      {seasonSummary&&!activeSimulation&&!legacyCeremony&&<SeasonSummaryModal summary={seasonSummary} onDismiss={()=>setSeasonSummary(null)} townColor={townColor}/>}
 
       {/* Legacy Ceremony — fires when player reaches Rank 1 */}
       {legacyCeremony&&(
@@ -7582,7 +7742,7 @@ export default function App(){
           }}
         />
       )}
-      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent}/>}
+      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent} onViewHero={(h)=>{setDetailHero(h);setPrevStats(null);}}/>}
       {activeWanderingMaster&&<WanderingMasterModal event={activeWanderingMaster} heroes={heroes} gold={gold} onAccept={acceptWanderingMaster} onDecline={declineWanderingMaster}/>}
       {newOfferBids.length>0&&(
         <NewOffersModal
@@ -7990,8 +8150,8 @@ export default function App(){
                       {/* Position header */}
                       {(()=>{
                         const ps = calcPositionScore(assigned, pos);
-                        const hasPairing = ps.pairingMult > 1.0 || ps.raceMult !== 1.0;
-                        const hasBonus = ps.pairingMult > 1.0 || ps.raceMult > 1.0;
+                        const hasPairing = ps.pairingMult > 1.0;
+                        const hasBonus = ps.pairingMult > 1.0;
                         const pwrCol = ps.score>=60?"#a8ff78":ps.score>=35?"#78c8ff":ps.score>0?"#ffd966":"#555";
                         return(
                           <div style={{padding:"6px 10px",background:`${pd.color}14`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -8177,8 +8337,8 @@ export default function App(){
                           const p=posChances[pos];
                           const ps=posScoresPreview[pos];
                           const col=p>=0.65?"#a8ff78":p>=0.45?"#ffd966":p>=0.30?"#ff9f43":"#ff7878";
-                          const hasPairing = ps.pairingMult > 1.0 || ps.raceMult !== 1.0;
-                          const hasBonus = ps.pairingMult > 1.0 || ps.raceMult > 1.0;
+                          const hasPairing = ps.pairingMult > 1.0;
+                          const hasBonus = ps.pairingMult > 1.0;
                           return(
                             <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:7,background:"rgba(255,255,255,0.03)",border:`1px solid ${col}33`,textAlign:"center"}}>
                               <div style={{fontSize:10}}>{icon}{hasBonus?" ✦":hasPairing?" ✗":""}</div>
