@@ -1189,8 +1189,8 @@ const ACHIEVEMENTS = [
   },
   {
     id:       "transfer_king",
-    name:     "Transfer King",
-    desc:     "Sell 15 heroes in a single run",
+    name:     "Banner Broker",
+    desc:     "Send 15 heroes to serve rival banners in a single run",
     icon:     "🔄",
     check:    (data)=>(data.heroesSold||0)>=15,
     boon: {
@@ -1907,7 +1907,7 @@ const BUILDINGS = [
   // ── SILVER ───────────────────────────────────────────────────────────────────
   { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Bench heroes earn 20% of that week's battle XP." },
   { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Listed heroes sell at 120% value and attract bids 50% more often." },
+  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
   { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Unlocks premium heroes in the market." },
   { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
@@ -4131,7 +4131,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {isLeader&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}}>👑</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#a78bfa",marginLeft:4}}>✨</span>}
             {hero.fodder&&<span style={{fontSize:9,color:"#888",marginLeft:4}}>⚙️</span>}
-            {isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}}>🏷️</span>}
+            {isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}} title="Open to offers">🕊️</span>}
             {hasBid&&<span style={{fontSize:9,color:"#a8ff78",marginLeft:4}}>💰</span>}
             {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#78c8ff",marginLeft:4}}>✈️{hero.awayWeeks}w</span>}
           </div>
@@ -4169,7 +4169,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         </div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#999"}}>
           <span>💰 {hero.salary}g/wk</span>
-          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Free":hero.value.toLocaleString()+"g"}</span>
+          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Unattached":hero.value.toLocaleString()+"g"}</span>
         </div>
         {showHiddenStats&&(()=>{
           const b = potentialBucket(hero.stats.Potential);
@@ -4190,7 +4190,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           );
         })()}
       </>)}
-      {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"🆓 Sign Free":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
+      {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"📜 Sign · No fee":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
     </div>
   );
 }
@@ -4207,7 +4207,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {/* Sticky header — always visible even when scrolled */}
       <div className="rm-detail-header" style={{position:"sticky",top:0,zIndex:10,background:"rgba(9,9,26,0.97)",borderBottom:"1px solid rgba(255,255,255,0.07)",padding:"12px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",backdropFilter:"blur(10px)"}}>
         <span style={{fontFamily:"'Cinzel',serif",color:"#f0e6d3",fontSize:14,fontWeight:700}}>
-          {hero.name}{isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:7,background:"rgba(255,215,0,0.12)",padding:"1px 6px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🏷️ Listed</span>}
+          {hero.name}{isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:7,background:"rgba(255,215,0,0.12)",padding:"1px 6px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🕊️ Open to Offers</span>}
         </span>
         <button onClick={onClose} className="rm-detail-close" style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",color:"#ccc",fontSize:12,cursor:"pointer",borderRadius:7,padding:"6px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,lineHeight:1}}>✕ Close</button>
       </div>
@@ -4262,7 +4262,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           {heroBids.map(bid=>(
             <div key={bid.id} style={{padding:"10px 12px",borderRadius:8,background:"rgba(255,215,0,0.06)",border:"1px solid rgba(255,215,0,0.25)",marginBottom:6}}>
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#ffd966",marginBottom:3}}>💰 Bid from {bid.town}</div>
-              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.freeTransfer?"free-transfer nominal fee":`${bid.pctOfValue}% of market value`})</span></div>
+              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.freeTransfer?"parting fee":`${bid.pctOfValue}% of market value`})</span></div>
               <div style={{fontSize:10,color:"#888",marginBottom:8}}>Interested in: {bid.reason}</div>
               <div style={{display:"flex",gap:6}}>
                 <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
@@ -4520,7 +4520,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
         {onToggleListed&&(
           <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:6,border:`1px solid ${isListed?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.15)"}`,background:isListed?"rgba(255,215,0,0.1)":"rgba(255,255,255,0.04)",color:isListed?"#ffd966":"#888",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
-            {isListed?"🏷️ Unlist":"🏷️ List for Sale"}
+            {isListed?"🕊️ Close to Offers":"🕊️ Open to Offers"}
           </button>
         )}
         {/* Early renewal — available within 2 seasons of expiry, not already pending */}
@@ -4635,9 +4635,9 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
           <span style={{fontSize:22}}>📨</span>
           <div style={{flex:1}}>
             <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#a8ff78"}}>
-              {bids.length===1?"Transfer Offer Received":`${bids.length} Transfer Offers Received`}
+              {bids.length===1?"A Rival Offer Arrives":`${bids.length} Offers from Rival Realms`}
             </div>
-            <div style={{fontSize:10,color:"#888"}}>Rival realms are scouting your squad. Act now or review them later in the Hire tab.</div>
+            <div style={{fontSize:10,color:"#888"}}>Envoys ride in with pledges of gold for your heroes. Act now or review them later in the Hire tab.</div>
           </div>
         </div>
         <div style={{overflowY:"auto",padding:"12px 16px",flex:1,display:"flex",flexDirection:"column",gap:10}}>
@@ -4658,7 +4658,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
                 )}
                 {bid.freeTransfer&&(
                   <div style={{padding:"4px 12px",fontSize:10,color:"#a78bfa",fontWeight:700,background:"rgba(167,139,250,0.1)",borderBottom:"1px solid rgba(167,139,250,0.2)"}}>
-                    🕊️ Free-Transfer — take the nominal fee, skip the release morale hit
+                    🕊️ Honourable Release — take the parting fee and skip the morale hit of a release
                   </div>
                 )}
                 <div style={{padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
@@ -5899,7 +5899,7 @@ function GuideTab(){
       <Section id="economy" icon="💰" title="Hero Economy — Sign, Develop, Sell">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Level 0 Prospects</b> are free to sign. Develop them through battles to raise their level, Form, and Reputation — then sell at Peak for a significant profit. This is your primary income cycle.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#ffd966"}}>Potential</b> is hidden until a hero has played 8–10 battles. The Hidden stats tab shows a progress bar. Build the <b style={{color:"#78c8ff"}}>Observatory</b> (Gold tier) to see the potential bucket (Low/Med/High/Elite) before you even sign a market hero.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to transfer bids. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much scouts bid.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to rival offers. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much rival scouts bid.</p>
         <p style={{margin:0}}>The <b style={{color:"#ffd966"}}>Career Arc</b> panel in each hero's detail shows exactly where they are: Prospect → Rising → Peak → Fading → Veteran. Sell at Peak. Once Fading, bids drop to 60% of value.</p>
       </Section>
 
@@ -5907,7 +5907,7 @@ function GuideTab(){
         {[
           ["⚙️ Iron",    [["🏰 Barracks","Heroes earn +20% XP per battle."],["🍺 Tavern","All heroes +3 morale each week."]]],
           ["🥉 Bronze",  [["⚕️ Infirmary","Injuries heal 1 week faster."],["🛖 Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
-          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Listed heroes sell at 120% value, bids 50% more frequent."]]],
+          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["🥇 Gold",    [["🏪 Grand Bazaar","Unlocks premium heroes in the market."],["🌠 Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["💎 Platinum",[["💎 Elite Sanctum","Unlocks elite heroes in the market."],["🏛️ Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
         ].map(([tier,buildings])=>(
@@ -6383,7 +6383,7 @@ export default function App(){
       if(agePhase(h)==="peak"||agePhase(h)==="rising") reasons.push("strong career stage");
       if(h.level>=6) reasons.push(`Lv ${h.level} experience`);
       if(repStat>=60) reasons.push("renowned across the realm");
-      if(isListed) reasons.push("listed for transfer");
+      if(isListed) reasons.push("open to offers");
       const reason=reasons.length?reasons.slice(0,2).join(" & "):"scouted your roster";
 
       bidding.push({
@@ -6423,7 +6423,7 @@ export default function App(){
     setTransferBids(prev=>prev.filter(b=>b.heroId!==h.id));
     setDetailHero(null);
     setHallOfFame(prev=>({...prev, heroesSold:(prev.heroesSold||0)+1}));
-    addLog(`💰 ${h.name} transferred to ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
+    addLog(`💰 ${h.name} took service with ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
     addLog(`The squad wishes them well. Minor morale dip — better than a walkout.`,"info");
     // Complete sell_hero objective
   };
@@ -8390,7 +8390,7 @@ export default function App(){
                         {bid.freeTransfer&&(
                           <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(167,139,250,0.15),rgba(167,139,250,0.05))",borderBottom:"1px solid rgba(167,139,250,0.2)",display:"flex",alignItems:"center",gap:8}}>
                             <span style={{fontSize:12}}>🕊️</span>
-                            <span style={{fontSize:11,fontWeight:700,color:"#a78bfa"}}>Free-Transfer Offer — a rival will take them off your hands</span>
+                            <span style={{fontSize:11,fontWeight:700,color:"#a78bfa"}}>Honourable Release — a rival will take them for a parting fee</span>
                           </div>
                         )}
 
@@ -8405,7 +8405,7 @@ export default function App(){
                                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#f0e6d3"}}>{hero.name}</div>
                                   <div style={{fontSize:10,color:"#888"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                                 </div>
-                                {bid.isListed&&<span style={{fontSize:9,color:"#ffd966",background:"rgba(255,215,0,0.12)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🏷️ Listed</span>}
+                                {bid.isListed&&<span style={{fontSize:9,color:"#ffd966",background:"rgba(255,215,0,0.12)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🕊️ Open to Offers</span>}
                               </div>
 
                               {/* Mini stats */}
@@ -8429,7 +8429,7 @@ export default function App(){
                             <div style={{flexShrink:0,textAlign:"right",minWidth:140}}>
                               <div style={{fontSize:28,fontWeight:900,color:"#a8ff78",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
                               {bid.freeTransfer
-                                ? <div style={{fontSize:10,color:"#a78bfa",marginBottom:4}}>Nominal fee</div>
+                                ? <div style={{fontSize:10,color:"#a78bfa",marginBottom:4}}>Parting fee</div>
                                 : !aboveValue && <div style={{fontSize:10,color:"#999",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
                               <div style={{fontSize:10,color:urgentExpiry?"#ff7878":"#555",marginBottom:10}}>
                                 {urgentExpiry?"⚠️ Expires this week":"Expires in "+weeksLeft+" week"+(weeksLeft!==1?"s":"")}
@@ -8580,7 +8580,7 @@ export default function App(){
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
                   <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#78c8ff"}}>👥 Your Squad</div>
                   <span style={{fontSize:10,color:"#888"}}>
-                    Quick actions — list for sale, renew contract, or release. Next bid cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
+                    Quick actions — open to offers, renew contract, or release. Next rival-offer cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
                   </span>
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:7}}>
@@ -8599,7 +8599,7 @@ export default function App(){
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                               {h.name}
-                              {listed&&<span style={{fontSize:8,color:"#ffd966",marginLeft:5,fontWeight:400}}>🏷️ Listed</span>}
+                              {listed&&<span style={{fontSize:8,color:"#ffd966",marginLeft:5,fontWeight:400}}>🕊️ Open</span>}
                               {hasBid&&<span style={{fontSize:8,color:"#a8ff78",marginLeft:5,fontWeight:400}}>💰 Offer</span>}
                             </div>
                             <div style={{fontSize:9,color:"#888"}}>
@@ -8622,7 +8622,7 @@ export default function App(){
                               cursor:"pointer",
                               background:listed?"rgba(255,215,0,0.12)":"rgba(255,255,255,0.04)",
                               color:listed?"#ffd966":"#888",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
-                            {listed?"✓ Listed":"🏷️ List"}
+                            {listed?"✓ Open":"🕊️ Open"}
                           </button>
                           <button onClick={()=>canRenew&&initiateEarlyRenewal(h)}
                             disabled={!canRenew}
