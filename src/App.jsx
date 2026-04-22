@@ -1756,7 +1756,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_elf",    type:"mono",   race:"Elf",
     name:"Elven Unity",      icon:"🌿", color:"#86efac",
-    ratingMult:1.10, winBonus:0.05,
+    ratingMult:1.11, winBonus:0.05,
     desc:"6 Elves — precision and speed at their peak. Dominant Skirmishers but fragile Vanguard.",
     flavour:"The elves moved as one, silent and devastating.",
     check: h => h.filter(x=>x.race==="Elf").length>=6,
@@ -1772,7 +1772,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_human",  type:"mono",   race:"Human",
     name:"Human Resolve",    icon:"🛡️", color:"#93c5fd",
-    ratingMult:1.09, winBonus:0.04,
+    ratingMult:1.11, winBonus:0.04,
     desc:"6 Humans — adaptable and resilient. No soft spots, steady across all positions.",
     flavour:"Human tenacity — they just wouldn't quit.",
     check: h => h.filter(x=>x.race==="Human").length>=6,
@@ -1780,7 +1780,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_halforc",type:"mono",   race:"Half-Orc",
     name:"Orcish Rampage",   icon:"💢", color:"#f87171",
-    ratingMult:1.12, winBonus:0.06,
+    ratingMult:1.11, winBonus:0.06,
     desc:"6 Half-Orcs — terrifying raw aggression. Shatters frontlines but has no subtlety.",
     flavour:"The Half-Orc charge shook the earth.",
     check: h => h.filter(x=>x.race==="Half-Orc").length>=6,
@@ -1788,7 +1788,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_tiefling",type:"mono",  race:"Tiefling",
     name:"Infernal Pact",    icon:"😈", color:"#c084fc",
-    ratingMult:1.10, winBonus:0.05,
+    ratingMult:1.11, winBonus:0.05,
     desc:"6 Tieflings — dark power and guile. Arbiters are supercharged, physical roles thin.",
     flavour:"Infernal energy surged through the Tiefling ranks.",
     check: h => h.filter(x=>x.race==="Tiefling").length>=6,
@@ -1796,7 +1796,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_gnome",  type:"mono",   race:"Gnome",
     name:"Gnomish Ingenuity", icon:"⚙️", color:"#67e8f9",
-    ratingMult:1.09, winBonus:0.04,
+    ratingMult:1.11, winBonus:0.04,
     desc:"6 Gnomes — brilliant command and magic. Vanguard is paper-thin.",
     flavour:"Gnomish tactics outsmarted every counter.",
     check: h => h.filter(x=>x.race==="Gnome").length>=6,
@@ -1804,7 +1804,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_dragonborn",type:"mono",race:"Dragonborn",
     name:"Draconic Might",   icon:"🐉", color:"#fb923c",
-    ratingMult:1.12, winBonus:0.06,
+    ratingMult:1.11, winBonus:0.06,
     desc:"6 Dragonborn — overwhelming presence and raw power across the board.",
     flavour:"Draconic fire swept the field.",
     check: h => h.filter(x=>x.race==="Dragonborn").length>=6,
@@ -2096,22 +2096,44 @@ function growHeroStats(hero, newLevel, buildings) {
 }
 
 // ─── LEAGUE SIMULATION ───────────────────────────────────────────────────────
-// Simulates AI town results for the week — updates their win/loss records
-function simulateEnemyWeek(week, playerTownName, leagueTable, tierEnemyTowns) {
+// Simulates AI-vs-AI results for the week. The town that played the player this
+// week is excluded (their outcome came from the player's battle). Remaining towns
+// are paired up into head-to-head matches so total wins always equals total losses.
+// Win probability is weighted by power (stronger usually wins, upsets still happen).
+function simulateEnemyWeek(week, playerOpponentName, leagueTable, tierEnemyTowns) {
   if(!tierEnemyTowns || !leagueTable) return { updated: leagueTable || {}, results: [] };
   const updated = {...leagueTable};
   const results = [];
-  // Each AI town plays one match — 50% base win rate with small variance
-  tierEnemyTowns.forEach(town => {
-    if(!updated[town.name]) updated[town.name] = {wins:0, losses:0, power:town.power};
-    const won = Math.random() < 0.5;
-    updated[town.name] = {
-      ...updated[town.name],
-      wins:   updated[town.name].wins   + (won ? 1 : 0),
-      losses: updated[town.name].losses + (won ? 0 : 1),
+
+  const available = tierEnemyTowns.filter(t => t.name !== playerOpponentName);
+  const shuffled = [...available].sort(() => Math.random() - 0.5);
+  const pairCount = Math.floor(shuffled.length / 2);
+
+  for(let i = 0; i < pairCount; i++) {
+    const home = shuffled[i * 2];
+    const away = shuffled[i * 2 + 1];
+    if(!updated[home.name]) updated[home.name] = {wins:0, losses:0, power:home.power};
+    if(!updated[away.name]) updated[away.name] = {wins:0, losses:0, power:away.power};
+
+    // Power-weighted win chance, compressed into 30-70% so upsets stay possible
+    const ph = home.power || 100, pa = away.power || 100;
+    const homeShare = ph / (ph + pa);
+    const homeWinChance = 0.30 + homeShare * 0.40;
+    const homeWon = Math.random() < homeWinChance;
+
+    updated[home.name] = {
+      ...updated[home.name],
+      wins:   updated[home.name].wins   + (homeWon ? 1 : 0),
+      losses: updated[home.name].losses + (homeWon ? 0 : 1),
     };
-    results.push({ name: town.name, won });
-  });
+    updated[away.name] = {
+      ...updated[away.name],
+      wins:   updated[away.name].wins   + (homeWon ? 0 : 1),
+      losses: updated[away.name].losses + (homeWon ? 1 : 0),
+    };
+    results.push({ home: home.name, away: away.name, homeWon });
+  }
+
   return { updated, results };
 }
 
@@ -2150,34 +2172,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const careerWk = randomCareerWeekInWindow(win.stage, win.minPct, win.maxStage, win.maxPct);
   const { stage, stageProgress } = careerWeekToStage(careerWk);
 
-  const stats={};
-  ALL_STATS.forEach(s=>{
-    if(s==="Potential"){stats[s]=potential;return;}
-    if(["Form"].includes(s))return;
-    const potCap=Math.max(10,potential);
-    const lo=Math.max(10,Math.floor(potential*0.25));
-    const hi=Math.max(lo,Math.floor(potential*0.50));
-    let base=rand(lo,hi);
-    // Peak heroes arrive more developed — they've had seasons of experience
-    if(stage==="peak")   base=Math.min(potCap,base+rand(5,12));
-    if(stage==="fading") base=Math.max(10,base-rand(2,6));
-    if(stage==="veteran")base=Math.max(10,base-rand(5,12));
-    stats[s]=Math.max(10,Math.min(potCap,base));
-  });
-  stats.Form=rand(3,10);
-  const traits=pickTraits(rand(1,3));
-  const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
-  const salary=Math.floor(avgStat*rand(13,16)/10);
-  const potBonus=Math.max(0,stats.Potential-50)*5;
-  const baseValue=Math.floor(avgStat * 7 * (1 + 0 * 0.32) + potBonus*0.3 + rand(-30,30));
-  const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
-  // Contract length appropriate to career stage — veterans don't sign 4-year deals
-  const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
-  const maxYears = STAGE_CONTRACT_MAX[stage] || 3;
-  const contractYears = rand(1, maxYears);
-  const contractWeeks = contractYears * WEEKS_PER_CONTRACT_YEAR;
-
-  // Level based on career stage — heroes arrive with appropriate experience
+  // Level first — stage sets the range, market tier boosts it
   const STAGE_LEVEL_RANGES = {
     prospect:[0,2], rising:[2,6], peak:[6,10], fading:[8,12], veteran:[10,14],
   };
@@ -2185,6 +2180,39 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const tierLvBonus = elite?rand(2,3):premium?rand(1,2):0;
   const heroLevel = Math.min(MAX_LEVEL, rand(lvMin,lvMax)+tierLvBonus);
   const heroXP = xpForLevel(heroLevel);
+
+  // Stats scale with both stage AND level — mirrors growHeroStats (2-3 per level toward potential)
+  const stats={};
+  ALL_STATS.forEach(s=>{
+    if(s==="Potential"){stats[s]=potential;return;}
+    if(["Form"].includes(s))return;
+    const potCap=Math.max(10,potential);
+    // Level-0 baseline: 25-40% of potential (a raw prospect)
+    const lo=Math.max(10,Math.floor(potential*0.25));
+    const hi=Math.max(lo,Math.floor(potential*0.40));
+    let base=rand(lo,hi);
+    // Per-level growth — same curve the hero would follow on organic level-ups
+    base += heroLevel * rand(2, 3);
+    // Late-career decay on top of earned stats
+    if(stage==="fading") base=base-rand(2,6);
+    if(stage==="veteran")base=base-rand(5,12);
+    stats[s]=Math.max(10,Math.min(potCap,base));
+  });
+  stats.Form=rand(3,10);
+  const traits=pickTraits(rand(1,3));
+  const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
+  // Salary: base wage plus experience premium — a level 10 hero costs noticeably more than a level 0
+  const salary=Math.floor(avgStat*rand(13,16)/10 + heroLevel*rand(6,10));
+  const potBonus=Math.max(0,stats.Potential-50)*5;
+  // Value: matches calcHeroValue's level multiplier so recomputed value after level-up doesn't jump
+  const baseValue=Math.floor(avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3 + rand(-30,30));
+  const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
+  // Contract length appropriate to career stage — veterans don't sign 4-year deals
+  const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
+  const maxYears = STAGE_CONTRACT_MAX[stage] || 3;
+  const contractYears = rand(1, maxYears);
+  const contractWeeks = contractYears * WEEKS_PER_CONTRACT_YEAR;
+
   // Standard Prospect level 0s are free — unproven and pre-career
   const isFreeProsepct = !elite && !premium && stage === "prospect" && heroLevel === 0;
   const value = isFreeProsepct ? 0 : Math.max(100,Math.floor(baseValue*valueMult));
@@ -4867,17 +4895,24 @@ function TacticsTab({heroes,formation,setFormation}){
                   const isPickerTarget=pickerOpen?.pos===pos&&pickerOpen?.slotIdx===slotIdx;
                   return(
                     <div key={slotIdx}>
-                      {h?(
+                      {h?(()=>{
+                        const fat=h.fatigue||0;
+                        const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
+                        return(
                         <div onClick={()=>setPickerOpen({pos,slotIdx})}
                           style={{display:"flex",alignItems:"center",gap:6,background:isPickerTarget?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.04)",borderRadius:7,padding:"8px 10px",border:`1px solid ${isPickerTarget?"#78c8ff":fc}`,cursor:"pointer",position:"relative",transition:"border 0.15s"}}>
                           <HeroAvatar race={h.race} size={16}/>
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
-                            <div style={{fontSize:9,color:"#999"}}><RoleIcon role={h.role}/> {h.role} · Lv {h.level}</div>
+                            <div style={{fontSize:9,color:"#999"}}>
+                              <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
+                              <span style={{marginLeft:6,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
+                            </div>
                           </div>
                           <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":"–"}</div>
                         </div>
-                      ):(
+                        );
+                      })():(
                         <button onClick={()=>setPickerOpen({pos,slotIdx})}
                           style={{width:"100%",height:52,borderRadius:7,border:`2px dashed ${isPickerTarget?pd.color:pd.color+"44"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontSize:11,color:isPickerTarget?pd.color:"#888",background:isPickerTarget?`${pd.color}0a`:"transparent",cursor:"pointer",transition:"all 0.15s",fontFamily:"'Lato',sans-serif"}}>
                           <span style={{fontSize:16}}>+</span> Assign hero
@@ -4893,6 +4928,51 @@ function TacticsTab({heroes,formation,setFormation}){
             </div>
           );
         })}
+
+        {/* Bench — heroes not currently in formation */}
+        {(()=>{
+          const bench=heroes.filter(h=>!h.retired&&!assignedIds.has(h.id));
+          if(bench.length===0) return null;
+          return(
+            <div style={{marginTop:14,padding:"10px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+                <span style={{fontSize:15}}>🪑</span>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#888"}}>Bench</div>
+                  <div style={{fontSize:9,color:"#888"}}>{bench.length} hero{bench.length===1?"":"es"} not in formation</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:5}}>
+                {bench.map(h=>{
+                  const fat=h.fatigue||0;
+                  const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
+                  const {color:mCol}=moraleLabel(h.morale);
+                  const dimmed=h.injured||(h.awayWeeks||0)>0;
+                  return(
+                    <div key={h.id}
+                      style={{display:"flex",alignItems:"center",gap:6,padding:"6px 9px",borderRadius:7,
+                        background:"rgba(0,0,0,0.25)",border:"1px solid rgba(255,255,255,0.05)",
+                        opacity:dimmed?0.55:1}}>
+                      <HeroAvatar race={h.race} size={15}/>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
+                        <div style={{fontSize:9,color:"#888"}}>
+                          <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
+                          {h.injured&&<span style={{color:"#ff7878",marginLeft:4}}>🩸{h.injuryWeeks}w</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{color:"#78c8ff",marginLeft:4}}>✈️{h.awayWeeks}w</span>}
+                        </div>
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:1,flexShrink:0}}>
+                        <span style={{fontSize:9,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
+                        <span style={{fontSize:9,color:mCol}}>💛 {h.morale}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Right: race composition panel */}
@@ -5038,6 +5118,7 @@ function TacticsTab({heroes,formation,setFormation}){
                             </span>
                           ))}
                           <span style={{fontSize:9,color:"#999"}}>Morale {h.morale}%</span>
+                          <span style={{fontSize:9,color:fatigueLabel(h.fatigue||0).color}}>⚡ Fatigue {h.fatigue||0}</span>
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
@@ -6097,7 +6178,6 @@ export default function App(){
 
   const buildBuilding=b=>{
     if(gold<b.cost)return;
-    if(playerRenown<(b.renownRequired||0))return;
     setGold(g=>g-b.cost);
     setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:true}:x));
     addLog(`🏗️ ${b.name} constructed!`,"success");
