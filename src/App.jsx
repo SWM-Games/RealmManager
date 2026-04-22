@@ -4624,7 +4624,7 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
 // Offers stay in `transferBids` even after the modal is dismissed, so the
 // Hire tab remains the canonical place to review bids over their full window.
 
-function NewOffersModal({ bids, heroes, onAccept, onDecline, onDismiss }) {
+function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismiss }) {
   if (!bids || bids.length === 0) return null;
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:160,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:20}}
@@ -4675,8 +4675,12 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onDismiss }) {
                 </div>
                 <div style={{padding:"0 12px 10px",display:"flex",gap:6}}>
                   <button onClick={()=>onAccept(bid)}
-                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:900,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    style={{flex:2,padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:900,fontSize:11,fontFamily:"'Cinzel',serif"}}>
                     ✓ Accept {bid.offer.toLocaleString()}g
+                  </button>
+                  <button onClick={()=>onViewHero&&onViewHero(hero)}
+                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(120,200,255,0.25)",cursor:"pointer",background:"rgba(120,200,255,0.06)",color:"#78c8ff",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    👁️ View
                   </button>
                   <button onClick={()=>onDecline(bid)}
                     style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(255,100,100,0.25)",cursor:"pointer",background:"rgba(255,100,100,0.07)",color:"#ff7878",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
@@ -7505,6 +7509,7 @@ export default function App(){
           heroes={heroes}
           onAccept={(bid)=>{ acceptBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
           onDecline={(bid)=>{ declineBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
+          onViewHero={(hero)=>{ setDetailHero(hero); setPrevStats(null); setNewOfferBids([]); }}
           onDismiss={()=>setNewOfferBids([])}
         />
       )}
