@@ -17,6 +17,13 @@ const RESPONSIVE_CSS = `
   html { font-size: 16px; }
   button, select, input { touch-action: manipulation; }
 
+  /* Dropdown option contrast — native <option> elements inherit OS colours by
+     default, which renders cream-on-white on light-theme systems. Force a
+     dark background + light text so the option list stays readable when the
+     select is open (supported on Chromium 119+, Firefox, modern Safari). */
+  select option { background: #0c0c1e; color: #f0e6d3; }
+  select option:checked, select option:hover { background: #1a1a2a; color: #ffd966; }
+
   /* ── LAYOUT SHELL ── */
   .rm-shell { display: flex; min-height: 100vh; }
 
@@ -8490,20 +8497,20 @@ export default function App(){
 
               {/* Market filter bar */}
               <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   <option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}
                 </select>
-                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   <option value="All">All Stages</option>
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
                 </select>
-                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
