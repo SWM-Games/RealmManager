@@ -989,7 +989,9 @@ function calcRelativeStars(opponentPower, tierId) {
 }
 
 function renderStars(stars) {
-  return "★".repeat(stars) + "☆".repeat(5 - stars);
+  // Filled-only: contrast between filled and outline glyphs was too low to read
+  // at display sizes. Difficulty now communicated purely by how many stars show.
+  return "★".repeat(Math.max(0, Math.min(5, stars)));
 }
 
 function starsColor(stars) {
@@ -2942,35 +2944,34 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
   return events;
 }
 
-// Weak link analysis: surfaces specific heroes who dragged down the team
-function analyseWeakLinks(formation, analysis) {
+// Weak link analysis: surfaces specific heroes who dragged down the team.
+// tierId scales the "low primary stats" threshold — 25 avg is fine in Iron,
+// not fine in Platinum — so the flag only fires when stats are weak for the
+// tier the player is actually fighting in.
+function analyseWeakLinks(formation, analysis, tierId) {
+  const tier = TIERS[tierId] || TIERS.iron;
+  // Iron=25, Bronze=35, Silver=45, Gold=55, Platinum=65 (difficulty-scaled)
+  const weakStatThreshold = 15 + tier.difficulty * 10;
   const links = [];
   POS_KEYS.forEach(pos => {
     const pd = POSITIONS[pos];
     (formation[pos]||[]).forEach(h => {
       if(!h) return;
-      const mod = analysis.heroMods[h.id];
       const issues = [];
 
-      if(false) { // penalty fit removed — wrong role is neutral not penalised
-        issues.push({ severity:"warning", reason:`Off-position — ${h.role} in ${pos} (better fit: ${pd.ideal.filter(x=>ROLES.includes(x)).join(", ")})`, stat:"Position", impact:-15 });
-      }
       if(h.stats.Form < 4) {
         issues.push({ severity:"warning", reason:`Very low Form (${h.stats.Form}/10) — underperforming`, stat:"Form", impact:-15 });
       }
       if(h.morale < 40) {
         issues.push({ severity:"warning", reason:`Low morale (${h.morale}%) — not fighting at full effort`, stat:"Morale", impact:-12 });
       }
-      if(h.morale < 40) {
-        issues.push({ severity:"warning", reason:`Low morale (${h.morale}) — performance suffering`, stat:"Morale", impact:-10 });
-      }
       if(h.injured) {
         issues.push({ severity:"critical", reason:`Carrying an injury — effectiveness heavily compromised`, stat:"Injury", impact:-25 });
       }
-      // Check primary stat fit
+      // Check primary stat fit — threshold scales with tier difficulty
       const primaryAvg = pd.primaryStats.reduce((a,s)=>a+(h.stats[s]||0),0)/pd.primaryStats.length;
-      if(primaryAvg < 35) {
-        issues.push({ severity:"warning", reason:`Low primary stats for this position (avg ${Math.round(primaryAvg)})`, stat:"Stats", impact:-10 });
+      if(primaryAvg < weakStatThreshold) {
+        issues.push({ severity:"warning", reason:`Low primary stats for ${tier.name} tier (avg ${Math.round(primaryAvg)} · ${weakStatThreshold}+ recommended)`, stat:"Stats", impact:-10 });
       }
       // Declining hero in physical position
       const phase = agePhase(h);
@@ -3148,7 +3149,7 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
 
   // Win swing computed once; loss swing is per-hero (scales with individual morale)
   const moraleSwing = won ? rand(6,10) : 0;
-  const weakLinks = analyseWeakLinks(formation, analysis);
+  const weakLinks = analyseWeakLinks(formation, analysis, enemy.tierId);
 
   // MVP: highest combat score hero in their position
   const starPerformer = allHeroes.reduce((best,h) => {
@@ -4187,7 +4188,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   );
 }
 
-function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader}){
+function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true}){
   const [tab,setTab]=useState("Combat");
   if(!hero)return null;
   const phase=agePhase(hero);
@@ -4458,8 +4459,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         ))
       }
 
-      {/* Squad Leader */}
-      {(()=>{
+      {/* Squad Leader — only for heroes you actually own */}
+      {isOwned&&(()=>{
         const score=calcLeaderScore(hero);
         const mult=calcLeaderMult(hero);
         const lb=calcLeaderBonuses(hero);
@@ -4507,7 +4508,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         );
       })()}
 
-      {/* Transfer / release buttons */}
+      {/* Transfer / release buttons — only for heroes you actually own */}
+      {isOwned&&(
       <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
         {onToggleListed&&(
           <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:6,border:`1px solid ${isListed?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.15)"}`,background:isListed?"rgba(255,215,0,0.1)":"rgba(255,255,255,0.04)",color:isListed?"#ffd966":"#888",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
@@ -4538,6 +4540,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           if(window.confirm(msg)) onRelease(hero);
         }} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid rgba(255,100,100,0.25)",background:"rgba(255,100,100,0.08)",color:"#ff7878",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>🚪 Release</button>
       </div>
+      )}
       </div>{/* end scroll wrapper */}
     </div>
   );
@@ -8340,7 +8343,7 @@ export default function App(){
             <div style={{borderTop:transferBids.length>0?"1px solid rgba(255,255,255,0.06)":"none",paddingTop:transferBids.length>0?20:0}}>
               {/* Header with roster count */}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#ffd966"}}>🏪 Free Agent Market</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#ffd966"}}>🏪 Heroes For Hire</div>
                 <span style={{fontSize:11,color:"#888"}}>Treasury: <b style={{color:"#ffd966"}}>{gold.toLocaleString()}g</b></span>
                 {/* Roster count — prominent when near cap */}
                 {(()=>{
@@ -8771,6 +8774,7 @@ export default function App(){
       {detailHero&&(
         <HeroDetail
           hero={heroes.find(h=>h.id===detailHero.id)||market.find(h=>h.id===detailHero.id)||detailHero}
+          isOwned={!!heroes.find(h=>h.id===detailHero.id)}
           prevStats={prevStats?.[detailHero.id]}
           onClose={()=>setDetailHero(null)}
           onRelease={releaseHero}
