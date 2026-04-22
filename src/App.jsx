@@ -4833,7 +4833,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
 // ─── TACTICS TAB ─────────────────────────────────────────────────────────────
 
-function TacticsTab({heroes,formation,setFormation}){
+function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset}){
   // pickerOpen = { pos, slotIdx } | null
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
@@ -4901,18 +4901,55 @@ function TacticsTab({heroes,formation,setFormation}){
           </div>
         </div>
 
+        {/* Formation presets — save up to 2 formations and rotate them back in */}
+        {formationPresets&&(
+          <div style={{marginBottom:10,padding:"8px 10px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.05)"}}>
+            <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:6}}>FORMATION PRESETS</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {[0,1].map(idx=>{
+                const p=formationPresets[idx]||null;
+                const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
+                const total=counts.reduce((a,n)=>a+n,0);
+                return(
+                  <div key={idx} style={{flex:1,minWidth:180,display:"flex",alignItems:"center",gap:5,padding:"6px 8px",borderRadius:7,background:"rgba(0,0,0,0.25)",border:`1px solid ${p?"rgba(120,200,255,0.2)":"rgba(255,255,255,0.05)"}`}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:10,fontFamily:"'Cinzel',serif",fontWeight:700,color:p?"#78c8ff":"#666"}}>Preset {idx+1}</div>
+                      <div style={{fontSize:9,color:"#888"}}>
+                        {p?`${total}/6 · V${counts[0]} S${counts[1]} A${counts[2]}`:"Empty slot"}
+                      </div>
+                    </div>
+                    {p&&(
+                      <button onClick={()=>onLoadPreset(idx)} title="Load this preset into the formation"
+                        style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(120,200,255,0.3)",background:"rgba(120,200,255,0.08)",color:"#78c8ff",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>↻ Load</button>
+                    )}
+                    <button onClick={()=>onSavePreset(idx)} title="Save current formation to this slot"
+                      style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(168,255,120,0.3)",background:"rgba(168,255,120,0.08)",color:"#a8ff78",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>💾 Save</button>
+                    {p&&(
+                      <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
+                        style={{padding:"3px 6px",borderRadius:5,border:"1px solid rgba(255,100,100,0.2)",background:"rgba(255,100,100,0.05)",color:"#ff7878",cursor:"pointer",fontSize:9,fontWeight:700}}>✕</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Rating summary with expandable multiplier breakdown */}
         {(()=>{
           // Build multiplier list
           const mults=[];
           analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
           if(analysis.raceSynergy) mults.push({label:analysis.raceSynergy.name,icon:analysis.raceSynergy.icon,mult:analysis.raceSynergy.ratingMult,col:analysis.raceSynergy.color});
-          // Count role pairings active
+          // Count role pairings active — match calcPositionScore's exact logic so
+          // display and actual math agree (previous `every(h=>roles.includes)` matched
+          // two Warriors against the Warrior+Paladin entry and reported the wrong mult).
           POS_KEYS.forEach(pos=>{
             const heroes2=(formation[pos]||[]).filter(Boolean);
             if(heroes2.length===2){
-              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&heroes2.every(h=>p.roles.includes(h.role)));
-              if(pp) mults.push({label:`${heroes2.map(h=>h.role).join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
+              const sortedRoles=heroes2.map(h=>h.role).sort().join();
+              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
+              if(pp) mults.push({label:`${[...pp.roles].sort().join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
             }
           });
           const netMult=mults.reduce((a,m)=>a*m.mult,1.0);
@@ -5015,6 +5052,23 @@ function TacticsTab({heroes,formation,setFormation}){
                   );
                 })}
               </div>
+              {/* Lane power + pairing readout — so the player can see the effect of hero choices at a glance */}
+              {(()=>{
+                const posHeroes=slots.filter(Boolean);
+                if(posHeroes.length===0) return null;
+                const ps=calcPositionScore(posHeroes,pos);
+                const sortedRoles=posHeroes.map(h=>h.role).sort().join();
+                const rolePairing=posHeroes.length===2
+                  ? POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles)
+                  : null;
+                return (
+                  <div style={{marginTop:6,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",fontSize:10}}>
+                    <span style={{color:"#78c8ff",fontWeight:700}}>⚡ Lane PWR {Math.round(ps.score)}</span>
+                    {rolePairing && <span style={{color:"#a8ff78"}}>🤝 {[...rolePairing.roles].sort().join(" + ")} ×{rolePairing.mult}</span>}
+                    {ps.raceMult!==1.0 && <span style={{color:ps.raceMult>1?"#a8ff78":"#ff9f43"}}>🧬 Race ×{ps.raceMult.toFixed(2)}</span>}
+                  </div>
+                );
+              })()}
               <div style={{marginTop:6,fontSize:9,color:"#888"}}>
                 <span style={{color:"#a8ff7866"}}>✓ Ideal: {pd.ideal.join(", ")}</span>
               </div>
@@ -5528,6 +5582,7 @@ function saveGame(state) {
       townColor: state.townColor,
       listedHeroIds: [...(state.listedHeroIds||[])],
       transferBids: state.transferBids,
+      formationPresets: state.formationPresets,
       leagueTable: state.leagueTable,
       playerRecord: state.playerRecord,
       matchLog: state.matchLog,
@@ -6100,6 +6155,7 @@ export default function App(){
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
   const [transferBids,setTransferBids]         = useState(saved?.transferBids ?? []);
+  const [formationPresets,setFormationPresets] = useState(saved?.formationPresets ?? [null,null]); // 2 slots for quick-swap formations
   const [newOfferBids,setNewOfferBids]         = useState([]); // freshly-arrived bids for the pop-up modal
 
   const addLog=(text,type="info")=>setLog(l=>[{week,text,type},...l.slice(0,79)]);
@@ -6146,14 +6202,14 @@ export default function App(){
                 playerTier,tierPosition,tierEnemyTowns,
                 scheduledOpponent,negotiationQueue,
                 townName,townColor,
-                listedHeroIds:[...listedHeroIds],transferBids,
+                listedHeroIds:[...listedHeroIds],transferBids,formationPresets,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,
                 signDiscount,gameSpeed,squadLeaderId,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -6325,6 +6381,31 @@ export default function App(){
       else next.add(h.id);
       return next;
     });
+  };
+
+  // Formation presets — store id maps; resolve to hero refs on load
+  const savePreset=(idx)=>{
+    const snap=serializeFormation(formation);
+    setFormationPresets(prev=>{
+      const next=[...prev];
+      next[idx]=snap;
+      return next;
+    });
+    addLog(`💾 Saved current formation to Preset ${idx+1}.`,"info");
+  };
+  const loadPreset=(idx)=>{
+    const p=formationPresets[idx];
+    if(!p){addLog(`Preset ${idx+1} is empty.`,"warning");return;}
+    setFormation(deserializeFormation(p,heroes));
+    addLog(`↻ Loaded Preset ${idx+1}.`,"success");
+  };
+  const clearPreset=(idx)=>{
+    setFormationPresets(prev=>{
+      const next=[...prev];
+      next[idx]=null;
+      return next;
+    });
+    addLog(`Preset ${idx+1} cleared.`,"info");
   };
 
   const generateBids=(currentHeroes,currentWeek,listed)=>{
@@ -7840,7 +7921,7 @@ export default function App(){
         )}
 
         {/* TACTICS */}
-        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation}/>}
+        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
 
         {/* DOMINION */}
         {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier,currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
@@ -8285,21 +8366,40 @@ export default function App(){
                 const unlocked = bTierIdx <= tierIdx;
                 const canAfford = gold >= b.cost;
                 const bTier = TIERS[b.tierRequired||"iron"];
-                return(
-                  <div key={b.id} style={{
-                    background:b.built?"rgba(168,255,120,0.05)":unlocked?"rgba(255,255,255,0.025)":"rgba(255,255,255,0.01)",
-                    border:`1px solid ${b.built?"rgba(168,255,120,0.18)":unlocked?"rgba(255,255,255,0.07)":"rgba(255,255,255,0.03)"}`,
-                    borderRadius:9,padding:13,opacity:unlocked?1:0.55,
-                    position:"relative",overflow:"hidden",
-                  }}>
-                    {!unlocked&&(
-                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.55)",zIndex:2,borderRadius:9,gap:4}}>
-                        <div style={{fontSize:20}}>🔒</div>
-                        <div style={{fontSize:10,color:"#888",fontFamily:"'Cinzel',serif",textAlign:"center",padding:"0 16px"}}>
-                          Promote to {bTier?<TierIcon tier={b.tierRequired} size={12}/>:""} {bTier?.name||"higher tier"}
+                if(!unlocked){
+                  // Clean locked layout — no overlay, no bleed-through text
+                  return(
+                    <div key={b.id} style={{
+                      background:"rgba(255,255,255,0.015)",
+                      border:"1px dashed rgba(255,255,255,0.07)",
+                      borderRadius:9,padding:13,
+                    }}>
+                      <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8,opacity:0.55}}>
+                        <BuildingIcon id={b.id} size={22}/>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#888"}}>{b.name}</div>
+                          <div style={{fontSize:10,color:"#666"}}>{b.cost.toLocaleString()}g · locked</div>
                         </div>
                       </div>
-                    )}
+                      <div style={{
+                        padding:"10px 12px",borderRadius:7,
+                        background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+                        display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+                      }}>
+                        <span style={{fontSize:16}}>🔒</span>
+                        <span style={{fontSize:10,color:"#999",fontFamily:"'Cinzel',serif",textAlign:"center"}}>
+                          Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#aaa"}}>{bTier?.name||"higher tier"}</b>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                return(
+                  <div key={b.id} style={{
+                    background:b.built?"rgba(168,255,120,0.05)":"rgba(255,255,255,0.025)",
+                    border:`1px solid ${b.built?"rgba(168,255,120,0.18)":"rgba(255,255,255,0.07)"}`,
+                    borderRadius:9,padding:13,
+                  }}>
                     <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:7}}>
                       <BuildingIcon id={b.id} size={24}/>
                       <div>
@@ -8308,7 +8408,7 @@ export default function App(){
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#999",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
-                    {!b.built&&unlocked&&(
+                    {!b.built&&(
                       <button onClick={()=>buildBuilding(b)} disabled={!canAfford}
                         style={{width:"100%",padding:"6px 0",borderRadius:5,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
