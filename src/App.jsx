@@ -6069,7 +6069,10 @@ export default function App(){
   const [pendingRaidEnemy,setPendingRaidEnemy] = useState(null);
   const [scheduledOpponent,setScheduledOpponent] = useState(saved?.scheduledOpponent ?? null);
   const [playerRecord,setPlayerRecord]         = useState(saved?.playerRecord ?? {wins:0,losses:0});
-  const [matchLog,setMatchLog]                 = useState(saved?.matchLog ?? []);
+  // Filter out legacy match entries saved before the {home, away, homeWon} shape —
+  // older saves stored {name, won} records which render as blank rows in the
+  // Recent Results list. Drop them once on load; new entries use the new shape.
+  const [matchLog,setMatchLog]                 = useState(()=>(saved?.matchLog??[]).filter(r=>r&&r.home&&r.away));
   const [activeEvent,setActiveEvent]           = useState(saved?.activeEvent ?? null);
   const [showHiddenStats,setShowHiddenStats]   = useState(saved?.showHiddenStats ?? false);
   const [squadLeaderId,setSquadLeaderId]       = useState(saved?.squadLeaderId ?? null);
