@@ -17,6 +17,13 @@ const RESPONSIVE_CSS = `
   html { font-size: 16px; }
   button, select, input { touch-action: manipulation; }
 
+  /* Dropdown option contrast — native <option> elements inherit OS colours by
+     default, which renders cream-on-white on light-theme systems. Force a
+     dark background + light text so the option list stays readable when the
+     select is open (supported on Chromium 119+, Firefox, modern Safari). */
+  select option { background: #0c0c1e; color: #f0e6d3; }
+  select option:checked, select option:hover { background: #1a1a2a; color: #ffd966; }
+
   /* ── LAYOUT SHELL ── */
   .rm-shell { display: flex; min-height: 100vh; }
 
@@ -185,9 +192,11 @@ const RESPONSIVE_CSS = `
   }
 
   /* ── DETAIL PANEL ── */
+  /* z-index sits above every modal (max 250) so "View Hero" buttons inside
+     modals can open the detail panel on top without closing the modal first. */
   .rm-detail-panel {
     position: fixed; top: 0; right: 0; width: 340px; height: 100vh;
-    overflow-y: auto; z-index: 100;
+    overflow-y: auto; z-index: 300;
   }
   @media (max-width: 640px) {
     .rm-detail-panel { width: 100vw !important; left: 0 !important; overflow-y: hidden !important; }
@@ -989,7 +998,9 @@ function calcRelativeStars(opponentPower, tierId) {
 }
 
 function renderStars(stars) {
-  return "★".repeat(stars) + "☆".repeat(5 - stars);
+  // Filled-only: contrast between filled and outline glyphs was too low to read
+  // at display sizes. Difficulty now communicated purely by how many stars show.
+  return "★".repeat(Math.max(0, Math.min(5, stars)));
 }
 
 function starsColor(stars) {
@@ -1180,8 +1191,8 @@ const ACHIEVEMENTS = [
   },
   {
     id:       "transfer_king",
-    name:     "Transfer King",
-    desc:     "Sell 15 heroes in a single run",
+    name:     "Banner Broker",
+    desc:     "Send 15 heroes to serve rival banners in a single run",
     icon:     "🔄",
     check:    (data)=>(data.heroesSold||0)>=15,
     boon: {
@@ -1241,7 +1252,7 @@ function generateStartingSquad() {
     const hi = Math.max(lo, Math.floor(starPot*0.50));
     starStats[s] = Math.min(starPot, rand(lo,hi)+rand(1,3));
   });
-  starStats.Form = rand(4,7);
+  starStats.Form = rand(5,8);
   const starTraits = pickTraits(rand(2,3));
   const starAvg = Object.values(starStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
   const starContract = rand(1,3);
@@ -1280,7 +1291,7 @@ function generateStartingSquad() {
       const hi = Math.max(lo, Math.floor(pot*0.50));
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
-    stats.Form = rand(3,7);
+    stats.Form = rand(4,7);
     squad.push({...h, stage, stageProgress, stats, level:1, xp:0, baseStats:{...stats}});
   });
 
@@ -1299,7 +1310,7 @@ function generateStartingSquad() {
       const hi = Math.max(lo, Math.floor(pot*0.45));
       stats[s] = Math.max(10, Math.min(pot, rand(lo,hi)));
     });
-    stats.Form = rand(2,6);
+    stats.Form = rand(4,7);
     const avgStat = Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
     squad.push({
       id: Date.now()+i+rand(0,9999),
@@ -1310,7 +1321,7 @@ function generateStartingSquad() {
       level: 0, xp: 0,
       salary: Math.floor(avgStat*rand(11,14)/10),
       value: 0,
-      morale: rand(55,85),
+      morale: rand(65,85),
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
@@ -1335,7 +1346,7 @@ function generateStartingSquad() {
       if(s==="Form"){ return; }
       fodderStats[s] = Math.max(10, Math.min(fodderPot, Math.floor(fodderPot*rand(25,50)/100)));
     });
-    fodderStats.Form = rand(2,5);
+    fodderStats.Form = rand(3,6);
     const fodderAvg = Object.values(fodderStats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
     squad.push({
       id: Date.now()+i+100+rand(0,9999),
@@ -1347,7 +1358,7 @@ function generateStartingSquad() {
       level: 0, xp: 0,
       salary: Math.floor(fodderAvg*rand(11,14)/10),
       value: 0,
-      morale: rand(50,75),
+      morale: rand(60,80),
       contractYears: 1,
       contractWeeks: WEEKS_PER_CONTRACT_YEAR,
       contractWeeksLeft: WEEKS_PER_CONTRACT_YEAR,
@@ -1411,7 +1422,7 @@ function fatigueLabel(f) {
 }
 
 const POSITIONS = {
-  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel. Mages & Clerics suffer here." },
+  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel." },
   Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
   Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
 };
@@ -1431,35 +1442,21 @@ const POSITION_PAIRINGS = [
   { pos:"Arbiter",    roles:["Cleric","Cleric"],   mult:1.05 },
 ];
 
-// Race pairing bonuses — applied within a position, stacks with role pairing.
-// Position-agnostic: race chemistry is about the heroes, not the lane.
-// Calibrated to contribute ~×1.04 max toward the ×1.5 total tactical ceiling.
-const RACE_PAIRINGS = [
-  // Compatible pairs
-  { races:["Dwarf","Half-Orc"],   mult:1.03 },
-  { races:["Human","Elf"],        mult:1.03 },
-  { races:["Gnome","Tiefling"],   mult:1.04 },
-  { races:["Human","Dragonborn"], mult:1.02 },
-  { races:["Dwarf","Gnome"],      mult:1.03 },
-  { races:["Elf","Tiefling"],     mult:1.02 },
-  // Friction pairs
-  { races:["Elf","Half-Orc"],     mult:0.97 },
-  { races:["Elf","Dragonborn"],   mult:0.98 },
-  { races:["Gnome","Half-Orc"],   mult:0.98 },
-];
-const SAME_RACE_BONUS = 1.04; // same race unity — slightly less than best compatible
+// Race chemistry lives in the formation-wide RACE_SYNERGIES (mono / rainbow / duo
+// pacts). Per-lane race pairings were dropped — they double-counted against the
+// formation-wide bonus and made the maths harder for players to predict.
 
 // Calculate position score for 1 or 2 heroes.
-// With 2 heroes: primary (higher score) ×1.25, support ×0.75, then role pairing bonus, then race pairing bonus.
-// Returns { score, primaryHero, supportHero, pairingMult, raceMult }
+// With 2 heroes: primary (higher score) ×1.25, support ×0.75, then role pairing bonus.
+// Returns { score, primaryHero, supportHero, pairingMult }
 function calcPositionScore(heroes, pos) {
   const valid = (heroes||[]).filter(Boolean);
-  if(valid.length === 0) return { score:0, primaryHero:null, supportHero:null, pairingMult:1.0, raceMult:1.0 };
+  if(valid.length === 0) return { score:0, primaryHero:null, supportHero:null, pairingMult:1.0 };
 
   const scored = valid.map(h => ({ h, s:calcHeroCombatScore(h, pos) }))
                        .sort((a,b) => b.s - a.s);
 
-  let score, primaryHero, supportHero, pairingMult = 1.0, raceMult = 1.0;
+  let score, primaryHero, supportHero, pairingMult = 1.0;
 
   if(scored.length === 1) {
     score = scored[0].s;
@@ -1480,21 +1477,9 @@ function calcPositionScore(heroes, pos) {
       pairingMult = rolePairing.mult;
       score *= pairingMult;
     }
-
-    // Race pairing bonus
-    if(primaryHero.race === supportHero.race) {
-      raceMult = SAME_RACE_BONUS;
-    } else {
-      const races = [primaryHero.race, supportHero.race].sort();
-      const racePairing = RACE_PAIRINGS.find(p =>
-        [...p.races].sort().join() === races.join()
-      );
-      if(racePairing) raceMult = racePairing.mult;
-    }
-    score *= raceMult;
   }
 
-  return { score, primaryHero, supportHero, pairingMult, raceMult };
+  return { score, primaryHero, supportHero, pairingMult };
 }
 
 // ─── COMBAT SCORE ENGINE ─────────────────────────────────────────────────────
@@ -1756,7 +1741,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_elf",    type:"mono",   race:"Elf",
     name:"Elven Unity",      icon:"🌿", color:"#86efac",
-    ratingMult:1.10, winBonus:0.05,
+    ratingMult:1.11, winBonus:0.05,
     desc:"6 Elves — precision and speed at their peak. Dominant Skirmishers but fragile Vanguard.",
     flavour:"The elves moved as one, silent and devastating.",
     check: h => h.filter(x=>x.race==="Elf").length>=6,
@@ -1772,7 +1757,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_human",  type:"mono",   race:"Human",
     name:"Human Resolve",    icon:"🛡️", color:"#93c5fd",
-    ratingMult:1.09, winBonus:0.04,
+    ratingMult:1.11, winBonus:0.04,
     desc:"6 Humans — adaptable and resilient. No soft spots, steady across all positions.",
     flavour:"Human tenacity — they just wouldn't quit.",
     check: h => h.filter(x=>x.race==="Human").length>=6,
@@ -1780,7 +1765,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_halforc",type:"mono",   race:"Half-Orc",
     name:"Orcish Rampage",   icon:"💢", color:"#f87171",
-    ratingMult:1.12, winBonus:0.06,
+    ratingMult:1.11, winBonus:0.06,
     desc:"6 Half-Orcs — terrifying raw aggression. Shatters frontlines but has no subtlety.",
     flavour:"The Half-Orc charge shook the earth.",
     check: h => h.filter(x=>x.race==="Half-Orc").length>=6,
@@ -1788,7 +1773,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_tiefling",type:"mono",  race:"Tiefling",
     name:"Infernal Pact",    icon:"😈", color:"#c084fc",
-    ratingMult:1.10, winBonus:0.05,
+    ratingMult:1.11, winBonus:0.05,
     desc:"6 Tieflings — dark power and guile. Arbiters are supercharged, physical roles thin.",
     flavour:"Infernal energy surged through the Tiefling ranks.",
     check: h => h.filter(x=>x.race==="Tiefling").length>=6,
@@ -1796,7 +1781,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_gnome",  type:"mono",   race:"Gnome",
     name:"Gnomish Ingenuity", icon:"⚙️", color:"#67e8f9",
-    ratingMult:1.09, winBonus:0.04,
+    ratingMult:1.11, winBonus:0.04,
     desc:"6 Gnomes — brilliant command and magic. Vanguard is paper-thin.",
     flavour:"Gnomish tactics outsmarted every counter.",
     check: h => h.filter(x=>x.race==="Gnome").length>=6,
@@ -1804,7 +1789,7 @@ const RACE_SYNERGIES = [
   {
     id:"mono_dragonborn",type:"mono",race:"Dragonborn",
     name:"Draconic Might",   icon:"🐉", color:"#fb923c",
-    ratingMult:1.12, winBonus:0.06,
+    ratingMult:1.11, winBonus:0.06,
     desc:"6 Dragonborn — overwhelming presence and raw power across the board.",
     flavour:"Draconic fire swept the field.",
     check: h => h.filter(x=>x.race==="Dragonborn").length>=6,
@@ -1898,7 +1883,7 @@ const BUILDINGS = [
   // ── SILVER ───────────────────────────────────────────────────────────────────
   { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Bench heroes earn 20% of that week's battle XP." },
   { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Listed heroes sell at 120% value and attract bids 50% more often." },
+  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
   { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Unlocks premium heroes in the market." },
   { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
@@ -2096,22 +2081,44 @@ function growHeroStats(hero, newLevel, buildings) {
 }
 
 // ─── LEAGUE SIMULATION ───────────────────────────────────────────────────────
-// Simulates AI town results for the week — updates their win/loss records
-function simulateEnemyWeek(week, playerTownName, leagueTable, tierEnemyTowns) {
+// Simulates AI-vs-AI results for the week. The town that played the player this
+// week is excluded (their outcome came from the player's battle). Remaining towns
+// are paired up into head-to-head matches so total wins always equals total losses.
+// Win probability is weighted by power (stronger usually wins, upsets still happen).
+function simulateEnemyWeek(week, playerOpponentName, leagueTable, tierEnemyTowns) {
   if(!tierEnemyTowns || !leagueTable) return { updated: leagueTable || {}, results: [] };
   const updated = {...leagueTable};
   const results = [];
-  // Each AI town plays one match — 50% base win rate with small variance
-  tierEnemyTowns.forEach(town => {
-    if(!updated[town.name]) updated[town.name] = {wins:0, losses:0, power:town.power};
-    const won = Math.random() < 0.5;
-    updated[town.name] = {
-      ...updated[town.name],
-      wins:   updated[town.name].wins   + (won ? 1 : 0),
-      losses: updated[town.name].losses + (won ? 0 : 1),
+
+  const available = tierEnemyTowns.filter(t => t.name !== playerOpponentName);
+  const shuffled = [...available].sort(() => Math.random() - 0.5);
+  const pairCount = Math.floor(shuffled.length / 2);
+
+  for(let i = 0; i < pairCount; i++) {
+    const home = shuffled[i * 2];
+    const away = shuffled[i * 2 + 1];
+    if(!updated[home.name]) updated[home.name] = {wins:0, losses:0, power:home.power};
+    if(!updated[away.name]) updated[away.name] = {wins:0, losses:0, power:away.power};
+
+    // Power-weighted win chance, compressed into 30-70% so upsets stay possible
+    const ph = home.power || 100, pa = away.power || 100;
+    const homeShare = ph / (ph + pa);
+    const homeWinChance = 0.30 + homeShare * 0.40;
+    const homeWon = Math.random() < homeWinChance;
+
+    updated[home.name] = {
+      ...updated[home.name],
+      wins:   updated[home.name].wins   + (homeWon ? 1 : 0),
+      losses: updated[home.name].losses + (homeWon ? 0 : 1),
     };
-    results.push({ name: town.name, won });
-  });
+    updated[away.name] = {
+      ...updated[away.name],
+      wins:   updated[away.name].wins   + (homeWon ? 0 : 1),
+      losses: updated[away.name].losses + (homeWon ? 1 : 0),
+    };
+    results.push({ home: home.name, away: away.name, homeWon });
+  }
+
   return { updated, results };
 }
 
@@ -2150,34 +2157,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const careerWk = randomCareerWeekInWindow(win.stage, win.minPct, win.maxStage, win.maxPct);
   const { stage, stageProgress } = careerWeekToStage(careerWk);
 
-  const stats={};
-  ALL_STATS.forEach(s=>{
-    if(s==="Potential"){stats[s]=potential;return;}
-    if(["Form"].includes(s))return;
-    const potCap=Math.max(10,potential);
-    const lo=Math.max(10,Math.floor(potential*0.25));
-    const hi=Math.max(lo,Math.floor(potential*0.50));
-    let base=rand(lo,hi);
-    // Peak heroes arrive more developed — they've had seasons of experience
-    if(stage==="peak")   base=Math.min(potCap,base+rand(5,12));
-    if(stage==="fading") base=Math.max(10,base-rand(2,6));
-    if(stage==="veteran")base=Math.max(10,base-rand(5,12));
-    stats[s]=Math.max(10,Math.min(potCap,base));
-  });
-  stats.Form=rand(3,10);
-  const traits=pickTraits(rand(1,3));
-  const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
-  const salary=Math.floor(avgStat*rand(13,16)/10);
-  const potBonus=Math.max(0,stats.Potential-50)*5;
-  const baseValue=Math.floor(avgStat * 7 * (1 + 0 * 0.32) + potBonus*0.3 + rand(-30,30));
-  const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
-  // Contract length appropriate to career stage — veterans don't sign 4-year deals
-  const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
-  const maxYears = STAGE_CONTRACT_MAX[stage] || 3;
-  const contractYears = rand(1, maxYears);
-  const contractWeeks = contractYears * WEEKS_PER_CONTRACT_YEAR;
-
-  // Level based on career stage — heroes arrive with appropriate experience
+  // Level first — stage sets the range, market tier boosts it
   const STAGE_LEVEL_RANGES = {
     prospect:[0,2], rising:[2,6], peak:[6,10], fading:[8,12], veteran:[10,14],
   };
@@ -2185,6 +2165,39 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const tierLvBonus = elite?rand(2,3):premium?rand(1,2):0;
   const heroLevel = Math.min(MAX_LEVEL, rand(lvMin,lvMax)+tierLvBonus);
   const heroXP = xpForLevel(heroLevel);
+
+  // Stats scale with both stage AND level — mirrors growHeroStats (2-3 per level toward potential)
+  const stats={};
+  ALL_STATS.forEach(s=>{
+    if(s==="Potential"){stats[s]=potential;return;}
+    if(["Form"].includes(s))return;
+    const potCap=Math.max(10,potential);
+    // Level-0 baseline: 25-40% of potential (a raw prospect)
+    const lo=Math.max(10,Math.floor(potential*0.25));
+    const hi=Math.max(lo,Math.floor(potential*0.40));
+    let base=rand(lo,hi);
+    // Per-level growth — same curve the hero would follow on organic level-ups
+    base += heroLevel * rand(2, 3);
+    // Late-career decay on top of earned stats
+    if(stage==="fading") base=base-rand(2,6);
+    if(stage==="veteran")base=base-rand(5,12);
+    stats[s]=Math.max(10,Math.min(potCap,base));
+  });
+  stats.Form=rand(5,9);
+  const traits=pickTraits(rand(1,3));
+  const avgStat=Object.values(stats).reduce((a,b)=>a+b,0)/ALL_STATS.length;
+  // Salary: base wage plus experience premium — a level 10 hero costs noticeably more than a level 0
+  const salary=Math.floor(avgStat*rand(13,16)/10 + heroLevel*rand(6,10));
+  const potBonus=Math.max(0,stats.Potential-50)*5;
+  // Value: matches calcHeroValue's level multiplier so recomputed value after level-up doesn't jump
+  const baseValue=Math.floor(avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3 + rand(-30,30));
+  const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
+  // Contract length appropriate to career stage — veterans don't sign 4-year deals
+  const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
+  const maxYears = STAGE_CONTRACT_MAX[stage] || 3;
+  const contractYears = rand(1, maxYears);
+  const contractWeeks = contractYears * WEEKS_PER_CONTRACT_YEAR;
+
   // Standard Prospect level 0s are free — unproven and pre-career
   const isFreeProsepct = !elite && !premium && stage === "prospect" && heroLevel === 0;
   const value = isFreeProsepct ? 0 : Math.max(100,Math.floor(baseValue*valueMult));
@@ -2192,7 +2205,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   return {
     id, name:`${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`, race, role,
     stage, stageProgress,
-    stats, traits, salary, value, morale:rand(55,100),
+    stats, traits, salary, value, morale:rand(70,95),
         contractYears, contractWeeks, contractWeeksLeft:contractWeeks,
     xp:heroXP, level:heroLevel, injured:false, injuryWeeks:0, retired:false,
     fatigue:0, weeksUnplayed:0, weeksInSquad:0, weeksInFormation:0,
@@ -2914,35 +2927,34 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
   return events;
 }
 
-// Weak link analysis: surfaces specific heroes who dragged down the team
-function analyseWeakLinks(formation, analysis) {
+// Weak link analysis: surfaces specific heroes who dragged down the team.
+// tierId scales the "low primary stats" threshold — 25 avg is fine in Iron,
+// not fine in Platinum — so the flag only fires when stats are weak for the
+// tier the player is actually fighting in.
+function analyseWeakLinks(formation, analysis, tierId) {
+  const tier = TIERS[tierId] || TIERS.iron;
+  // Iron=25, Bronze=35, Silver=45, Gold=55, Platinum=65 (difficulty-scaled)
+  const weakStatThreshold = 15 + tier.difficulty * 10;
   const links = [];
   POS_KEYS.forEach(pos => {
     const pd = POSITIONS[pos];
     (formation[pos]||[]).forEach(h => {
       if(!h) return;
-      const mod = analysis.heroMods[h.id];
       const issues = [];
 
-      if(false) { // penalty fit removed — wrong role is neutral not penalised
-        issues.push({ severity:"warning", reason:`Off-position — ${h.role} in ${pos} (better fit: ${pd.ideal.filter(x=>ROLES.includes(x)).join(", ")})`, stat:"Position", impact:-15 });
-      }
       if(h.stats.Form < 4) {
         issues.push({ severity:"warning", reason:`Very low Form (${h.stats.Form}/10) — underperforming`, stat:"Form", impact:-15 });
       }
       if(h.morale < 40) {
         issues.push({ severity:"warning", reason:`Low morale (${h.morale}%) — not fighting at full effort`, stat:"Morale", impact:-12 });
       }
-      if(h.morale < 40) {
-        issues.push({ severity:"warning", reason:`Low morale (${h.morale}) — performance suffering`, stat:"Morale", impact:-10 });
-      }
       if(h.injured) {
         issues.push({ severity:"critical", reason:`Carrying an injury — effectiveness heavily compromised`, stat:"Injury", impact:-25 });
       }
-      // Check primary stat fit
+      // Check primary stat fit — threshold scales with tier difficulty
       const primaryAvg = pd.primaryStats.reduce((a,s)=>a+(h.stats[s]||0),0)/pd.primaryStats.length;
-      if(primaryAvg < 35) {
-        issues.push({ severity:"warning", reason:`Low primary stats for this position (avg ${Math.round(primaryAvg)})`, stat:"Stats", impact:-10 });
+      if(primaryAvg < weakStatThreshold) {
+        issues.push({ severity:"warning", reason:`Low primary stats for ${tier.name} tier (avg ${Math.round(primaryAvg)} · ${weakStatThreshold}+ recommended)`, stat:"Stats", impact:-10 });
       }
       // Declining hero in physical position
       const phase = agePhase(h);
@@ -3006,10 +3018,10 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   const positionScores = {};
   POS_KEYS.forEach(pos => {
     const posHeroes = (formation[pos]||[]).filter(Boolean);
-    const { score, primaryHero, supportHero, pairingMult, raceMult } = calcPositionScore(posHeroes, pos);
+    const { score, primaryHero, supportHero, pairingMult } = calcPositionScore(posHeroes, pos);
     // Apply formation-wide synergy multiplier to position score
     const effectiveScore = score * synergyMult;
-    positionScores[pos] = { score, effectiveScore, primaryHero, supportHero, pairingMult, raceMult };
+    positionScores[pos] = { score, effectiveScore, primaryHero, supportHero, pairingMult };
     const ratio     = effectiveScore > 0 ? posEnemyShare / effectiveScore : 999;
     const rawChance = 1 / (1 + Math.pow(ratio, k));
     phaseWinChances[pos] = Math.min(PHASE_WIN_CAP, Math.max(PHASE_WIN_FLOOR, rawChance + nightBonus));
@@ -3120,7 +3132,7 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
 
   // Win swing computed once; loss swing is per-hero (scales with individual morale)
   const moraleSwing = won ? rand(6,10) : 0;
-  const weakLinks = analyseWeakLinks(formation, analysis);
+  const weakLinks = analyseWeakLinks(formation, analysis, enemy.tierId);
 
   // MVP: highest combat score hero in their position
   const starPerformer = allHeroes.reduce((best,h) => {
@@ -3812,7 +3824,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
 // ─── RANDOM EVENT MODAL ──────────────────────────────────────────────────────
 
-function RandomEventModal({event, heroes, onAccept, onDecline}){
+function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
   const [selected,setSelected]=useState([]);
   if(!event)return null;
 
@@ -3954,6 +3966,13 @@ function RandomEventModal({event, heroes, onAccept, onDecline}){
                     <span style={{color:confidence.color,fontWeight:700}}>{confidence.icon} {confidence.label}</span>
                   </div>
                 </div>
+                {onViewHero&&(
+                  <button onClick={(e)=>{e.stopPropagation();onViewHero(h);}}
+                    title="Open full hero sheet"
+                    style={{padding:"4px 8px",borderRadius:6,border:"1px solid rgba(120,200,255,0.3)",background:"rgba(120,200,255,0.08)",color:"#78c8ff",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                    👁️ View
+                  </button>
+                )}
                 {isSelected&&<div style={{fontSize:14,color:"#a8ff78",fontWeight:700}}>✓</div>}
               </div>
             );
@@ -4095,7 +4114,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {isLeader&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}}>👑</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#a78bfa",marginLeft:4}}>✨</span>}
             {hero.fodder&&<span style={{fontSize:9,color:"#888",marginLeft:4}}>⚙️</span>}
-            {isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}}>🏷️</span>}
+            {isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}} title="Open to offers">🕊️</span>}
             {hasBid&&<span style={{fontSize:9,color:"#a8ff78",marginLeft:4}}>💰</span>}
             {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#78c8ff",marginLeft:4}}>✈️{hero.awayWeeks}w</span>}
           </div>
@@ -4133,7 +4152,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         </div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#999"}}>
           <span>💰 {hero.salary}g/wk</span>
-          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Free":hero.value.toLocaleString()+"g"}</span>
+          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Unattached":hero.value.toLocaleString()+"g"}</span>
         </div>
         {showHiddenStats&&(()=>{
           const b = potentialBucket(hero.stats.Potential);
@@ -4154,12 +4173,12 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           );
         })()}
       </>)}
-      {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"🆓 Sign Free":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
+      {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"📜 Sign · No fee":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
     </div>
   );
 }
 
-function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader}){
+function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true}){
   const [tab,setTab]=useState("Combat");
   if(!hero)return null;
   const phase=agePhase(hero);
@@ -4171,7 +4190,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {/* Sticky header — always visible even when scrolled */}
       <div className="rm-detail-header" style={{position:"sticky",top:0,zIndex:10,background:"rgba(9,9,26,0.97)",borderBottom:"1px solid rgba(255,255,255,0.07)",padding:"12px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",backdropFilter:"blur(10px)"}}>
         <span style={{fontFamily:"'Cinzel',serif",color:"#f0e6d3",fontSize:14,fontWeight:700}}>
-          {hero.name}{isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:7,background:"rgba(255,215,0,0.12)",padding:"1px 6px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🏷️ Listed</span>}
+          {hero.name}{isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:7,background:"rgba(255,215,0,0.12)",padding:"1px 6px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🕊️ Open to Offers</span>}
         </span>
         <button onClick={onClose} className="rm-detail-close" style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",color:"#ccc",fontSize:12,cursor:"pointer",borderRadius:7,padding:"6px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,lineHeight:1}}>✕ Close</button>
       </div>
@@ -4226,7 +4245,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           {heroBids.map(bid=>(
             <div key={bid.id} style={{padding:"10px 12px",borderRadius:8,background:"rgba(255,215,0,0.06)",border:"1px solid rgba(255,215,0,0.25)",marginBottom:6}}>
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#ffd966",marginBottom:3}}>💰 Bid from {bid.town}</div>
-              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.pctOfValue}% of market value)</span></div>
+              <div style={{fontSize:13,fontWeight:900,color:"#a8ff78",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#999",fontWeight:400}}>({bid.freeTransfer?"parting fee":`${bid.pctOfValue}% of market value`})</span></div>
               <div style={{fontSize:10,color:"#888",marginBottom:8}}>Interested in: {bid.reason}</div>
               <div style={{display:"flex",gap:6}}>
                 <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
@@ -4430,8 +4449,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         ))
       }
 
-      {/* Squad Leader */}
-      {(()=>{
+      {/* Squad Leader — only for heroes you actually own */}
+      {isOwned&&(()=>{
         const score=calcLeaderScore(hero);
         const mult=calcLeaderMult(hero);
         const lb=calcLeaderBonuses(hero);
@@ -4479,11 +4498,12 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         );
       })()}
 
-      {/* Transfer / release buttons */}
+      {/* Transfer / release buttons — only for heroes you actually own */}
+      {isOwned&&(
       <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
         {onToggleListed&&(
           <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:6,border:`1px solid ${isListed?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.15)"}`,background:isListed?"rgba(255,215,0,0.1)":"rgba(255,255,255,0.04)",color:isListed?"#ffd966":"#888",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
-            {isListed?"🏷️ Unlist":"🏷️ List for Sale"}
+            {isListed?"🕊️ Close to Offers":"🕊️ Open to Offers"}
           </button>
         )}
         {/* Early renewal — available within 2 seasons of expiry, not already pending */}
@@ -4510,6 +4530,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           if(window.confirm(msg)) onRelease(hero);
         }} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid rgba(255,100,100,0.25)",background:"rgba(255,100,100,0.08)",color:"#ff7878",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>🚪 Release</button>
       </div>
+      )}
       </div>{/* end scroll wrapper */}
     </div>
   );
@@ -4581,7 +4602,227 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
   );
 }
 
+// ─── NEW OFFERS MODAL ────────────────────────────────────────────────────────
+// Fires right after new transfer bids arrive so the player can't miss them.
+// Offers stay in `transferBids` even after the modal is dismissed, so the
+// Hire tab remains the canonical place to review bids over their full window.
+
+function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismiss }) {
+  if (!bids || bids.length === 0) return null;
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:160,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:20}}
+      onClick={onDismiss}>
+      <div onClick={e=>e.stopPropagation()}
+        style={{background:"linear-gradient(160deg,#0c0c1e,#12102a)",border:"1px solid rgba(168,255,120,0.35)",borderRadius:14,width:"min(620px,96vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 0 40px rgba(168,255,120,0.1)"}}>
+        <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(255,255,255,0.06)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+          <span style={{fontSize:22}}>📨</span>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#a8ff78"}}>
+              {bids.length===1?"A Rival Offer Arrives":`${bids.length} Offers from Rival Realms`}
+            </div>
+            <div style={{fontSize:10,color:"#888"}}>Envoys ride in with pledges of gold for your heroes. Act now or review them later in the Hire tab.</div>
+          </div>
+        </div>
+        <div style={{overflowY:"auto",padding:"12px 16px",flex:1,display:"flex",flexDirection:"column",gap:10}}>
+          {bids.map(bid => {
+            const hero = heroes.find(h=>h.id===bid.heroId);
+            if (!hero) return null;
+            const phase = agePhase(hero);
+            const aboveValue = !bid.freeTransfer && bid.offer > bid.marketValue;
+            return (
+              <div key={bid.id}
+                style={{borderRadius:10,overflow:"hidden",
+                  border:`1px solid ${bid.freeTransfer?"rgba(167,139,250,0.3)":aboveValue?"rgba(168,255,120,0.4)":"rgba(168,255,120,0.2)"}`,
+                  background:bid.freeTransfer?"rgba(167,139,250,0.05)":aboveValue?"rgba(168,255,120,0.05)":"rgba(255,255,255,0.025)"}}>
+                {aboveValue&&(
+                  <div style={{padding:"4px 12px",fontSize:10,color:"#a8ff78",fontWeight:700,background:"rgba(168,255,120,0.1)",borderBottom:"1px solid rgba(168,255,120,0.2)"}}>
+                    🔥 Above Market Value
+                  </div>
+                )}
+                {bid.freeTransfer&&(
+                  <div style={{padding:"4px 12px",fontSize:10,color:"#a78bfa",fontWeight:700,background:"rgba(167,139,250,0.1)",borderBottom:"1px solid rgba(167,139,250,0.2)"}}>
+                    🕊️ Honourable Release — take the parting fee and skip the morale hit of a release
+                  </div>
+                )}
+                <div style={{padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
+                  <HeroAvatar race={hero.race} size={20}/>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#f0e6d3"}}>{hero.name}</div>
+                    <div style={{fontSize:9,color:"#888"}}>{hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
+                    <div style={{fontSize:9,color:"#888",fontStyle:"italic",marginTop:2}}>"{bid.town} — {bid.reason}"</div>
+                  </div>
+                  <div style={{textAlign:"right",flexShrink:0}}>
+                    <div style={{fontSize:18,fontWeight:900,color:"#a8ff78",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
+                    {!bid.freeTransfer && bid.pctOfValue!=null && <div style={{fontSize:9,color:"#888"}}>{bid.pctOfValue}% of value</div>}
+                  </div>
+                </div>
+                <div style={{padding:"0 12px 10px",display:"flex",gap:6}}>
+                  <button onClick={()=>onAccept(bid)}
+                    style={{flex:2,padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#a8ff78,#48c774)",color:"#0d0d1a",fontWeight:900,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    ✓ Accept {bid.offer.toLocaleString()}g
+                  </button>
+                  <button onClick={()=>onViewHero&&onViewHero(hero)}
+                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(120,200,255,0.25)",cursor:"pointer",background:"rgba(120,200,255,0.06)",color:"#78c8ff",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    👁️ View
+                  </button>
+                  <button onClick={()=>onDecline(bid)}
+                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(255,100,100,0.25)",cursor:"pointer",background:"rgba(255,100,100,0.07)",color:"#ff7878",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    ✗ Decline
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{padding:"10px 16px",borderTop:"1px solid rgba(255,255,255,0.05)",flexShrink:0}}>
+          <button onClick={onDismiss}
+            style={{width:"100%",padding:"9px 0",borderRadius:7,border:"1px solid rgba(255,255,255,0.12)",cursor:"pointer",background:"rgba(255,255,255,0.04)",color:"#aaa",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+            Decide later (offers stay in the Hire tab for 2 weeks)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── RETIREMENT MODAL ────────────────────────────────────────────────────────
+
+// ─── SEASON SUMMARY MODAL ────────────────────────────────────────────────────
+// Fires at the end of every regular season (not Platinum championship or
+// bankruptcy — those pipe into the Legacy Ceremony instead). Gives the player
+// a retrospective: W/L, tier movement, hero progression, buildings, ledger.
+
+function SeasonSummaryModal({ summary, onDismiss, townColor }) {
+  if (!summary) return null;
+  const { season, wins, losses, tier, finalPosition, movement, newTier, levelUps, newSignings, departures, buildingsBuilt, finances } = summary;
+  const tierMeta = TIERS[tier] || TIERS.iron;
+  const newTierMeta = TIERS[newTier] || tierMeta;
+  const totalIncome = (finances.tribute||0) + (finances.raidGold||0) + (finances.eventGold||0);
+  const totalSpend  = (finances.wages||0) + (finances.signingCosts||0);
+  const netGold     = totalIncome - totalSpend;
+  const posLabel    = `${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'}`;
+  const movementConfig = {
+    promoted:         {icon:"🎉", label:`Promoted to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#a8ff78"},
+    relegated:        {icon:"📉", label:`Relegated to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#ff9f43"},
+    relegated_floor:  {icon:"⚠️",  label:"Held at the Iron floor", color:"#ff9f43"},
+    safe:             {icon:"🛡️",  label:`Held position in ${tierMeta.icon} ${tierMeta.name}`, color:"#78c8ff"},
+  }[movement] || {icon:"🏁", label:"Season complete", color:"#888"};
+
+  const ledgerRows = [
+    ["👑 Tribute",          finances.tribute||0,       "#78c8ff"],
+    ["⚔️ Battle winnings",   finances.raidGold||0,      (finances.raidGold||0)>=0?"#a8ff78":"#ff7878"],
+    (finances.eventGold||0) ? ["✨ Events",            finances.eventGold,        "#a78bfa"] : null,
+    ["💸 Wages",            -(finances.wages||0),      "#ff9f43"],
+    (finances.signingCosts||0) ? ["🤝 Signings",       -(finances.signingCosts||0),"#ff7878"] : null,
+  ].filter(Boolean);
+
+  const col = townColor || "#ffd966";
+
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",padding:20}}>
+      <div style={{width:"min(640px,96vw)",maxHeight:"90vh",background:"linear-gradient(160deg,#09091a,#0f0f22)",border:`1px solid ${col}44`,borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 0 60px ${col}14`}}>
+        {/* Header */}
+        <div style={{padding:"18px 22px",textAlign:"center",background:"linear-gradient(180deg,rgba(255,255,255,0.03),transparent)",borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#888",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:col,lineHeight:1,marginBottom:6}}>
+            {wins}W · {losses}L · Finished {posLabel}
+          </div>
+          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'Cinzel',serif"}}>
+            {movementConfig.icon} {movementConfig.label}
+          </div>
+        </div>
+
+        <div style={{overflowY:"auto",padding:"16px 20px",flex:1}}>
+          {/* Hero progression */}
+          {(levelUps.length > 0 || newSignings.length > 0 || departures.length > 0) && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
+              {levelUps.length > 0 && (
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:"#a8ff78",fontWeight:700,marginBottom:4}}>⭐ Level-ups · {levelUps.length}</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
+                    {levelUps.map((h,i) => (
+                      <div key={i} style={{padding:"4px 8px",borderRadius:5,background:"rgba(168,255,120,0.05)",border:"1px solid rgba(168,255,120,0.15)",fontSize:11,color:"#f0e6d3"}}>
+                        {h.name} <span style={{color:"#888"}}>L{h.oldLevel}→L{h.newLevel}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {newSignings.length > 0 && (
+                <div style={{marginBottom:8}}>
+                  <div style={{fontSize:10,color:"#78c8ff",fontWeight:700,marginBottom:4}}>🤝 Signed this season · {newSignings.length}</div>
+                  <div style={{fontSize:11,color:"#aaa",lineHeight:1.5}}>{newSignings.map(h=>h.name).join(" · ")}</div>
+                </div>
+              )}
+              {departures.length > 0 && (
+                <div>
+                  <div style={{fontSize:10,color:"#ff9f43",fontWeight:700,marginBottom:4}}>👋 Departed · {departures.length}</div>
+                  <div style={{fontSize:11,color:"#aaa",lineHeight:1.5}}>{departures.map(h=>h.name).join(" · ")}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Buildings */}
+          {buildingsBuilt.length > 0 && (
+            <div style={{marginBottom:16}}>
+              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
+                {buildingsBuilt.map(id => {
+                  const b = BUILDINGS.find(x => x.id === id);
+                  if (!b) return null;
+                  return (
+                    <div key={id} style={{padding:"6px 10px",borderRadius:6,background:"rgba(168,255,120,0.04)",border:"1px solid rgba(168,255,120,0.15)",display:"flex",alignItems:"center",gap:6}}>
+                      <BuildingIcon id={b.id} size={14}/>
+                      <span style={{fontSize:11,color:"#f0e6d3",fontWeight:700}}>{b.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Ledger */}
+          <div style={{marginBottom:10}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
+            <div style={{padding:"10px 12px",background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8}}>
+              {ledgerRows.map(([label,val,c],i) => (
+                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11,borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+                  <span style={{color:"#f0e6d3"}}>{label}</span>
+                  <span style={{color:c,fontWeight:700}}>{val>=0?"+":""}{val.toLocaleString()}g</span>
+                </div>
+              ))}
+              <div style={{display:"flex",justifyContent:"space-between",paddingTop:6,marginTop:2}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#f0e6d3",fontFamily:"'Cinzel',serif"}}>Season net</span>
+                <span style={{fontSize:14,fontWeight:900,color:netGold>=0?"#a8ff78":"#ff7878",fontFamily:"'Cinzel',serif"}}>
+                  {netGold>=0?"+":""}{netGold.toLocaleString()}g
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{padding:"12px 20px",borderTop:"1px solid rgba(255,255,255,0.06)",background:"rgba(0,0,0,0.25)"}}>
+          <button onClick={onDismiss}
+            style={{width:"100%",padding:"11px 0",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${col},#ff9f43)`,color:"#0d0d1a",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14}}>
+            Begin Season {season + 1} →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Capture a lightweight snapshot at the start of a season — used to diff
+// level-ups, signings, departures, and buildings built for the summary modal.
+function captureSeasonSnapshot(heroes, buildings) {
+  return {
+    heroes: (heroes||[]).filter(h => !h.retired).map(h => ({ id: h.id, name: h.name, level: h.level })),
+    built:  (buildings||[]).filter(b => b.built).map(b => b.id),
+  };
+}
 
 function RetirementModal({retirees, heroes, formation, onDismiss}){
   const [step, setStep]       = useState(0);      // index into retirees array
@@ -4712,7 +4953,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
 // ─── TACTICS TAB ─────────────────────────────────────────────────────────────
 
-function TacticsTab({heroes,formation,setFormation}){
+function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset}){
   // pickerOpen = { pos, slotIdx } | null
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
@@ -4780,18 +5021,55 @@ function TacticsTab({heroes,formation,setFormation}){
           </div>
         </div>
 
+        {/* Formation presets — save up to 2 formations and rotate them back in */}
+        {formationPresets&&(
+          <div style={{marginBottom:10,padding:"8px 10px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.05)"}}>
+            <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:6}}>FORMATION PRESETS</div>
+            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+              {[0,1].map(idx=>{
+                const p=formationPresets[idx]||null;
+                const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
+                const total=counts.reduce((a,n)=>a+n,0);
+                return(
+                  <div key={idx} style={{flex:1,minWidth:180,display:"flex",alignItems:"center",gap:5,padding:"6px 8px",borderRadius:7,background:"rgba(0,0,0,0.25)",border:`1px solid ${p?"rgba(120,200,255,0.2)":"rgba(255,255,255,0.05)"}`}}>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:10,fontFamily:"'Cinzel',serif",fontWeight:700,color:p?"#78c8ff":"#666"}}>Preset {idx+1}</div>
+                      <div style={{fontSize:9,color:"#888"}}>
+                        {p?`${total}/6 · V${counts[0]} S${counts[1]} A${counts[2]}`:"Empty slot"}
+                      </div>
+                    </div>
+                    {p&&(
+                      <button onClick={()=>onLoadPreset(idx)} title="Load this preset into the formation"
+                        style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(120,200,255,0.3)",background:"rgba(120,200,255,0.08)",color:"#78c8ff",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>↻ Load</button>
+                    )}
+                    <button onClick={()=>onSavePreset(idx)} title="Save current formation to this slot"
+                      style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(168,255,120,0.3)",background:"rgba(168,255,120,0.08)",color:"#a8ff78",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>💾 Save</button>
+                    {p&&(
+                      <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
+                        style={{padding:"3px 6px",borderRadius:5,border:"1px solid rgba(255,100,100,0.2)",background:"rgba(255,100,100,0.05)",color:"#ff7878",cursor:"pointer",fontSize:9,fontWeight:700}}>✕</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Rating summary with expandable multiplier breakdown */}
         {(()=>{
           // Build multiplier list
           const mults=[];
           analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
           if(analysis.raceSynergy) mults.push({label:analysis.raceSynergy.name,icon:analysis.raceSynergy.icon,mult:analysis.raceSynergy.ratingMult,col:analysis.raceSynergy.color});
-          // Count role pairings active
+          // Count role pairings active — match calcPositionScore's exact logic so
+          // display and actual math agree (previous `every(h=>roles.includes)` matched
+          // two Warriors against the Warrior+Paladin entry and reported the wrong mult).
           POS_KEYS.forEach(pos=>{
             const heroes2=(formation[pos]||[]).filter(Boolean);
             if(heroes2.length===2){
-              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&heroes2.every(h=>p.roles.includes(h.role)));
-              if(pp) mults.push({label:`${heroes2.map(h=>h.role).join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
+              const sortedRoles=heroes2.map(h=>h.role).sort().join();
+              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
+              if(pp) mults.push({label:`${[...pp.roles].sort().join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
             }
           });
           const netMult=mults.reduce((a,m)=>a*m.mult,1.0);
@@ -4867,17 +5145,24 @@ function TacticsTab({heroes,formation,setFormation}){
                   const isPickerTarget=pickerOpen?.pos===pos&&pickerOpen?.slotIdx===slotIdx;
                   return(
                     <div key={slotIdx}>
-                      {h?(
+                      {h?(()=>{
+                        const fat=h.fatigue||0;
+                        const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
+                        return(
                         <div onClick={()=>setPickerOpen({pos,slotIdx})}
                           style={{display:"flex",alignItems:"center",gap:6,background:isPickerTarget?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.04)",borderRadius:7,padding:"8px 10px",border:`1px solid ${isPickerTarget?"#78c8ff":fc}`,cursor:"pointer",position:"relative",transition:"border 0.15s"}}>
                           <HeroAvatar race={h.race} size={16}/>
                           <div style={{flex:1,minWidth:0}}>
                             <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
-                            <div style={{fontSize:9,color:"#999"}}><RoleIcon role={h.role}/> {h.role} · Lv {h.level}</div>
+                            <div style={{fontSize:9,color:"#999"}}>
+                              <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
+                              <span style={{marginLeft:6,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
+                            </div>
                           </div>
                           <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":"–"}</div>
                         </div>
-                      ):(
+                        );
+                      })():(
                         <button onClick={()=>setPickerOpen({pos,slotIdx})}
                           style={{width:"100%",height:52,borderRadius:7,border:`2px dashed ${isPickerTarget?pd.color:pd.color+"44"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontSize:11,color:isPickerTarget?pd.color:"#888",background:isPickerTarget?`${pd.color}0a`:"transparent",cursor:"pointer",transition:"all 0.15s",fontFamily:"'Lato',sans-serif"}}>
                           <span style={{fontSize:16}}>+</span> Assign hero
@@ -4887,12 +5172,74 @@ function TacticsTab({heroes,formation,setFormation}){
                   );
                 })}
               </div>
+              {/* Lane power + pairing readout — so the player can see the effect of hero choices at a glance */}
+              {(()=>{
+                const posHeroes=slots.filter(Boolean);
+                if(posHeroes.length===0) return null;
+                const ps=calcPositionScore(posHeroes,pos);
+                const sortedRoles=posHeroes.map(h=>h.role).sort().join();
+                const rolePairing=posHeroes.length===2
+                  ? POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles)
+                  : null;
+                return (
+                  <div style={{marginTop:6,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",fontSize:10}}>
+                    <span style={{color:"#78c8ff",fontWeight:700}}>⚡ Lane PWR {Math.round(ps.score)}</span>
+                    {rolePairing && <span style={{color:"#a8ff78"}}>🤝 {[...rolePairing.roles].sort().join(" + ")} ×{rolePairing.mult}</span>}
+                    {/* Race chemistry is now formation-wide only — see the Race Composition panel */}
+                  </div>
+                );
+              })()}
               <div style={{marginTop:6,fontSize:9,color:"#888"}}>
                 <span style={{color:"#a8ff7866"}}>✓ Ideal: {pd.ideal.join(", ")}</span>
               </div>
             </div>
           );
         })}
+
+        {/* Bench — heroes not currently in formation */}
+        {(()=>{
+          const bench=heroes.filter(h=>!h.retired&&!assignedIds.has(h.id));
+          if(bench.length===0) return null;
+          return(
+            <div style={{marginTop:14,padding:"10px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
+                <span style={{fontSize:15}}>🪑</span>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#888"}}>Bench</div>
+                  <div style={{fontSize:9,color:"#888"}}>{bench.length} hero{bench.length===1?"":"es"} not in formation</div>
+                </div>
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:5}}>
+                {bench.map(h=>{
+                  const fat=h.fatigue||0;
+                  const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
+                  const {color:mCol}=moraleLabel(h.morale);
+                  const dimmed=h.injured||(h.awayWeeks||0)>0;
+                  return(
+                    <div key={h.id}
+                      style={{display:"flex",alignItems:"center",gap:6,padding:"6px 9px",borderRadius:7,
+                        background:"rgba(0,0,0,0.25)",border:"1px solid rgba(255,255,255,0.05)",
+                        opacity:dimmed?0.55:1}}>
+                      <HeroAvatar race={h.race} size={15}/>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
+                        <div style={{fontSize:9,color:"#888"}}>
+                          <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
+                          {h.injured&&<span style={{color:"#ff7878",marginLeft:4}}>🩸{h.injuryWeeks}w</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{color:"#78c8ff",marginLeft:4}}>✈️{h.awayWeeks}w</span>}
+                        </div>
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:1,flexShrink:0}}>
+                        <span style={{fontSize:9,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
+                        <span style={{fontSize:9,color:mCol}}>💛 {h.morale}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Right: race composition panel */}
@@ -5038,6 +5385,7 @@ function TacticsTab({heroes,formation,setFormation}){
                             </span>
                           ))}
                           <span style={{fontSize:9,color:"#999"}}>Morale {h.morale}%</span>
+                          <span style={{fontSize:9,color:fatigueLabel(h.fatigue||0).color}}>⚡ Fatigue {h.fatigue||0}</span>
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
@@ -5354,6 +5702,8 @@ function saveGame(state) {
       townColor: state.townColor,
       listedHeroIds: [...(state.listedHeroIds||[])],
       transferBids: state.transferBids,
+      formationPresets: state.formationPresets,
+      seasonStartSnapshot: state.seasonStartSnapshot,
       leagueTable: state.leagueTable,
       playerRecord: state.playerRecord,
       matchLog: state.matchLog,
@@ -5725,7 +6075,7 @@ function GuideTab(){
       <Section id="economy" icon="💰" title="Hero Economy — Sign, Develop, Sell">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Level 0 Prospects</b> are free to sign. Develop them through battles to raise their level, Form, and Reputation — then sell at Peak for a significant profit. This is your primary income cycle.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#ffd966"}}>Potential</b> is hidden until a hero has played 8–10 battles. The Hidden stats tab shows a progress bar. Build the <b style={{color:"#78c8ff"}}>Observatory</b> (Gold tier) to see the potential bucket (Low/Med/High/Elite) before you even sign a market hero.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to transfer bids. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much scouts bid.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to rival offers. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much rival scouts bid.</p>
         <p style={{margin:0}}>The <b style={{color:"#ffd966"}}>Career Arc</b> panel in each hero's detail shows exactly where they are: Prospect → Rising → Peak → Fading → Veteran. Sell at Peak. Once Fading, bids drop to 60% of value.</p>
       </Section>
 
@@ -5733,7 +6083,7 @@ function GuideTab(){
         {[
           ["⚙️ Iron",    [["🏰 Barracks","Heroes earn +20% XP per battle."],["🍺 Tavern","All heroes +3 morale each week."]]],
           ["🥉 Bronze",  [["⚕️ Infirmary","Injuries heal 1 week faster."],["🛖 Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
-          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Listed heroes sell at 120% value, bids 50% more frequent."]]],
+          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["🥇 Gold",    [["🏪 Grand Bazaar","Unlocks premium heroes in the market."],["🌠 Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["💎 Platinum",[["💎 Elite Sanctum","Unlocks elite heroes in the market."],["🏛️ Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
         ].map(([tier,buildings])=>(
@@ -5882,7 +6232,7 @@ export default function App(){
   const [showMore,setShowMore] = useState(false);
   const [enemy,setEnemy]             = useState(null);
   const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
-  const [marketFilter,setMarketFilter] = useState({role:"All",stage:"All",sortBy:"Value"});
+  const [marketFilter,setMarketFilter] = useState({role:"All",race:"All",position:"All",stage:"All",sortBy:"Value"});
   const [retirees,setRetirees]       = useState([]);
   const [negotiationQueue,setNegotiationQueue] = useState(saved?.negotiationQueue ?? []);
   const [season,setSeason]               = useState(saved?.season ?? 1);
@@ -5906,7 +6256,10 @@ export default function App(){
   const [pendingRaidEnemy,setPendingRaidEnemy] = useState(null);
   const [scheduledOpponent,setScheduledOpponent] = useState(saved?.scheduledOpponent ?? null);
   const [playerRecord,setPlayerRecord]         = useState(saved?.playerRecord ?? {wins:0,losses:0});
-  const [matchLog,setMatchLog]                 = useState(saved?.matchLog ?? []);
+  // Filter out legacy match entries saved before the {home, away, homeWon} shape —
+  // older saves stored {name, won} records which render as blank rows in the
+  // Recent Results list. Drop them once on load; new entries use the new shape.
+  const [matchLog,setMatchLog]                 = useState(()=>(saved?.matchLog??[]).filter(r=>r&&r.home&&r.away));
   const [activeEvent,setActiveEvent]           = useState(saved?.activeEvent ?? null);
   const [showHiddenStats,setShowHiddenStats]   = useState(saved?.showHiddenStats ?? false);
   const [squadLeaderId,setSquadLeaderId]       = useState(saved?.squadLeaderId ?? null);
@@ -5923,6 +6276,10 @@ export default function App(){
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
   const [transferBids,setTransferBids]         = useState(saved?.transferBids ?? []);
+  const [formationPresets,setFormationPresets] = useState(saved?.formationPresets ?? [null,null]); // 2 slots for quick-swap formations
+  const [seasonStartSnapshot,setSeasonStartSnapshot] = useState(saved?.seasonStartSnapshot ?? null); // diff target for the end-of-season summary
+  const [seasonSummary,setSeasonSummary]         = useState(null); // set by endSeason; modal renders while set
+  const [newOfferBids,setNewOfferBids]         = useState([]); // freshly-arrived bids for the pop-up modal
 
   const addLog=(text,type="info")=>setLog(l=>[{week,text,type},...l.slice(0,79)]);
 
@@ -5932,6 +6289,38 @@ export default function App(){
       setScheduledOpponent(generateScheduledOpponent(1, {}, tierEnemyTowns, playerTier));
     }
   },[]);
+
+  // Seed the season snapshot once heroes are available (fresh new game OR
+  // restored save that predates this feature). Fires at most once per run.
+  useEffect(()=>{
+    if(setupDone && !seasonStartSnapshot && heroes.length>0){
+      setSeasonStartSnapshot(captureSeasonSnapshot(heroes, buildings));
+    }
+  },[setupDone, heroes.length]);
+
+  // ── FORMATION SYNC — keep slot refs in sync with heroes state ─────────────
+  // Formation slots hold hero objects by reference; when per-week updates
+  // (fatigue, morale, injuries, level-ups) replace hero objects in `heroes`,
+  // the formation copy goes stale. Re-map slots to the current hero by id so
+  // displays (Tactics slots, Battle preview) and calculations (rating, battle)
+  // always see up-to-date stats.
+  useEffect(()=>{
+    setFormation(f=>{
+      const byId=new Map(heroes.map(h=>[h.id,h]));
+      let changed=false;
+      const nf={};
+      POS_KEYS.forEach(p=>{
+        nf[p]=(f[p]||[]).map(h=>{
+          if(!h) return h;
+          const fresh=byId.get(h.id);
+          if(fresh && fresh!==h){changed=true;return fresh;}
+          if(!fresh){changed=true;return null;} // hero was removed
+          return h;
+        });
+      });
+      return changed?nf:f;
+    });
+  },[heroes]);
 
   // ── AUTO-SAVE after any meaningful state change ───────────────────────────
   useEffect(()=>{
@@ -5944,14 +6333,14 @@ export default function App(){
                 playerTier,tierPosition,tierEnemyTowns,
                 scheduledOpponent,negotiationQueue,
                 townName,townColor,
-                listedHeroIds:[...listedHeroIds],transferBids,
+                listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,
                 signDiscount,gameSpeed,squadLeaderId,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -6097,7 +6486,6 @@ export default function App(){
 
   const buildBuilding=b=>{
     if(gold<b.cost)return;
-    if(playerRenown<(b.renownRequired||0))return;
     setGold(g=>g-b.cost);
     setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:true}:x));
     addLog(`🏗️ ${b.name} constructed!`,"success");
@@ -6124,6 +6512,31 @@ export default function App(){
       else next.add(h.id);
       return next;
     });
+  };
+
+  // Formation presets — store id maps; resolve to hero refs on load
+  const savePreset=(idx)=>{
+    const snap=serializeFormation(formation);
+    setFormationPresets(prev=>{
+      const next=[...prev];
+      next[idx]=snap;
+      return next;
+    });
+    addLog(`💾 Saved current formation to Preset ${idx+1}.`,"info");
+  };
+  const loadPreset=(idx)=>{
+    const p=formationPresets[idx];
+    if(!p){addLog(`Preset ${idx+1} is empty.`,"warning");return;}
+    setFormation(deserializeFormation(p,heroes));
+    addLog(`↻ Loaded Preset ${idx+1}.`,"success");
+  };
+  const clearPreset=(idx)=>{
+    setFormationPresets(prev=>{
+      const next=[...prev];
+      next[idx]=null;
+      return next;
+    });
+    addLog(`Preset ${idx+1} cleared.`,"info");
   };
 
   const generateBids=(currentHeroes,currentWeek,listed)=>{
@@ -6163,9 +6576,15 @@ export default function App(){
       const minPct = (isListed ? 0.80 : 0.65) * phaseValueMult * formBidMult * tradingValueMult;
       const maxPct = (isListed ? (1.15 + repBidBonus) : (0.95 + repBidBonus)) * phaseValueMult * formBidMult * tradingValueMult;
       const pct = Math.max(0.15, minPct + Math.random() * Math.max(0, maxPct - minPct));
-      const offer = Math.round(h.value * pct);
+      // Free-transfer fodder (value 0) still attracts nominal offers so the
+      // player can move them for a small windfall instead of taking a
+      // release morale hit.
+      const freeTransfer = (h.value || 0) === 0;
+      const offer = freeTransfer ? rand(80, 180) : Math.round(h.value * pct);
 
-      const town=pick(ENEMY_TOWNS);
+      // Bidders come from rival realms — the league towns are the natural pool
+      const townPool = (tierEnemyTowns && tierEnemyTowns.length) ? tierEnemyTowns : [{name:"A Rival Realm"}];
+      const town=pick(townPool);
 
       const combatScore=calcHeroCombatScore(h,"Vanguard");
       const reasons=[];
@@ -6176,7 +6595,7 @@ export default function App(){
       if(agePhase(h)==="peak"||agePhase(h)==="rising") reasons.push("strong career stage");
       if(h.level>=6) reasons.push(`Lv ${h.level} experience`);
       if(repStat>=60) reasons.push("renowned across the realm");
-      if(isListed) reasons.push("listed for transfer");
+      if(isListed) reasons.push("open to offers");
       const reason=reasons.length?reasons.slice(0,2).join(" & "):"scouted your roster";
 
       bidding.push({
@@ -6186,7 +6605,9 @@ export default function App(){
         town:town.name,
         offer,
         marketValue:h.value,
-        pctOfValue:Math.round(pct*100),
+        // null for free-transfer heroes (value 0) — UI shows a different label instead of "X% of 0g"
+        pctOfValue: freeTransfer ? null : Math.round(pct*100),
+        freeTransfer,
         reason,
         week:currentWeek,
         isListed,
@@ -6214,7 +6635,7 @@ export default function App(){
     setTransferBids(prev=>prev.filter(b=>b.heroId!==h.id));
     setDetailHero(null);
     setHallOfFame(prev=>({...prev, heroesSold:(prev.heroesSold||0)+1}));
-    addLog(`💰 ${h.name} transferred to ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
+    addLog(`💰 ${h.name} took service with ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
     addLog(`The squad wishes them well. Minor morale dip — better than a walkout.`,"info");
     // Complete sell_hero objective
   };
@@ -6967,11 +7388,19 @@ export default function App(){
       setRaceSynergyUsage(prev=>({...prev, [result.analysis.raceSynergy.id]:(prev[result.analysis.raceSynergy.id]||0)+1}));
     }
 
-    // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule)
+    // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule).
+    // Also record the player's match in the opponent's league row so their W/L tracks the actual outcome.
     if(!isLegendary){
       setLeagueTable(prev=>{
         const {updated,results}=simulateEnemyWeek(week+1,raidEnemy.name,prev,tierEnemyTowns);
-        if(results.length) setMatchLog(ml=>[...results.map(r=>({...r,week:week+1})),...ml.slice(0,19)]);
+        const oppRow=updated[raidEnemy.name]||{wins:0,losses:0,power:raidEnemy.power};
+        updated[raidEnemy.name]={
+          ...oppRow,
+          wins:   oppRow.wins  +(result.won?0:1),
+          losses: oppRow.losses+(result.won?1:0),
+        };
+        const playerMatch={home:townName,away:raidEnemy.name,homeWon:result.won,week:week+1,isPlayer:true};
+        setMatchLog(ml=>[playerMatch,...results.map(r=>({...r,week:week+1})),...ml.slice(0,19)]);
         return updated;
       });
     }
@@ -6980,13 +7409,18 @@ export default function App(){
     if((week+1)%4===0){
       const newBids=generateBids(heroes,week+1,listedHeroIds);
       if(newBids.length){
+        // Dedupe against already-active bids so one hero can't have two concurrent offers
+        const existingHeroIds=new Set(transferBids.filter(b=>b.week>=week-1).map(b=>b.heroId));
+        const dedupedNew=newBids.filter(b=>!existingHeroIds.has(b.heroId));
         setTransferBids(prev=>{
           const fresh=prev.filter(b=>b.week>=week-1);
-          const existingHeroIds=new Set(fresh.map(b=>b.heroId));
-          const dedupedNew=newBids.filter(b=>!existingHeroIds.has(b.heroId));
           return [...fresh,...dedupedNew];
         });
-        addLog(`📨 ${newBids.length} offer${newBids.length>1?"s":""} received! Check the Hire tab.`,"success");
+        if(dedupedNew.length){
+          // Pop the modal with the freshly-arrived bids
+          setNewOfferBids(dedupedNew);
+          addLog(`📨 ${dedupedNew.length} offer${dedupedNew.length>1?"s":""} received!`,"success");
+        }
       }
     }
 
@@ -7134,6 +7568,34 @@ export default function App(){
                         `✅ Held position in ${TIERS[playerTier].name} (${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'})`;
     addLog(`🏆 Season ${season} ended! ${movementMsg} — ${playerWins}W/${playerLosses}L`,"success");
 
+    // ── END-OF-SEASON SUMMARY ────────────────────────────────────────────
+    // Skip when the legacy ceremony is taking over (Platinum champion).
+    // Bankruptcy also routes to the legacy ceremony and never reaches endSeason.
+    if(!(isPlatinum && finalPosition === 1)){
+      const snapshot = seasonStartSnapshot || captureSeasonSnapshot(heroes, buildings);
+      const currentBuilt = new Set(buildings.filter(b=>b.built).map(b=>b.id));
+      const snapBuilt    = new Set(snapshot.built || []);
+      const buildingsBuilt = [...currentBuilt].filter(id => !snapBuilt.has(id));
+      const snapById = new Map((snapshot.heroes||[]).map(sh=>[sh.id,sh]));
+      const currentIds = new Set(heroes.map(h=>h.id));
+      const levelUps = heroes.reduce((acc,h)=>{
+        const sh = snapById.get(h.id);
+        if(sh && h.level > sh.level) acc.push({name:h.name, oldLevel:sh.level, newLevel:h.level});
+        return acc;
+      },[]);
+      const newSignings = heroes.filter(h=>!snapById.has(h.id)).map(h=>({name:h.name, level:h.level}));
+      const departures  = (snapshot.heroes||[]).filter(sh=>!currentIds.has(sh.id)).map(sh=>({name:sh.name}));
+      setSeasonSummary({
+        season, wins: playerWins, losses: playerLosses,
+        tier: playerTier, finalPosition, movement, newTier: newTierId,
+        levelUps, newSignings, departures, buildingsBuilt,
+        finances: {...seasonFinances},
+      });
+    }
+
+    // Capture a fresh snapshot for next season's diff
+    setSeasonStartSnapshot(captureSeasonSnapshot(heroes, buildings));
+
     // ── PROMOTION BONUS ───────────────────────────────────────────────────
     if(movement==="promoted"){
       setGold(g=>g+500);
@@ -7257,6 +7719,7 @@ export default function App(){
       <NegotiationModal pending={negotiationQueue} gold={gold} onAccept={handleAccept} onCounter={handleCounter} onReject={handleReject}/>
       {activeSimulation&&<RaidSimulationModal simulation={activeSimulation} enemy={pendingRaidEnemy} onComplete={applyRaidResult}/>}
       {weekSummary&&!activeSimulation&&<WeeklySummary summary={weekSummary} onDismiss={()=>setWeekSummary(null)} townColor={townColor}/>}
+      {seasonSummary&&!activeSimulation&&!legacyCeremony&&<SeasonSummaryModal summary={seasonSummary} onDismiss={()=>setSeasonSummary(null)} townColor={townColor}/>}
 
       {/* Legacy Ceremony — fires when player reaches Rank 1 */}
       {legacyCeremony&&(
@@ -7279,8 +7742,18 @@ export default function App(){
           }}
         />
       )}
-      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent}/>}
+      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent} onViewHero={(h)=>{setDetailHero(h);setPrevStats(null);}}/>}
       {activeWanderingMaster&&<WanderingMasterModal event={activeWanderingMaster} heroes={heroes} gold={gold} onAccept={acceptWanderingMaster} onDecline={declineWanderingMaster}/>}
+      {newOfferBids.length>0&&(
+        <NewOffersModal
+          bids={newOfferBids}
+          heroes={heroes}
+          onAccept={(bid)=>{ acceptBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
+          onDecline={(bid)=>{ declineBid(bid); setNewOfferBids(prev=>prev.filter(b=>b.id!==bid.id)); }}
+          onViewHero={(hero)=>{ setDetailHero(hero); setPrevStats(null); setNewOfferBids([]); }}
+          onDismiss={()=>setNewOfferBids([])}
+        />
+      )}
 
       {/* ── DESKTOP SIDEBAR ── */}
       <div className="rm-sidebar">
@@ -7591,11 +8064,11 @@ export default function App(){
             })()}
             <div className="rm-filter-bar" style={{marginBottom:12}}>
               <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:155,minWidth:0,maxWidth:"100%"}}/>
-              <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option>All</option>{ROLES.map(r=><option key={r}>{r}</option>)}</select>
-              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option>All</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r}>{r}</option>)}</select>
+              <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
+              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}</select>
               <select value={filter.position} onChange={e=>setFilter(f=>({...f,position:e.target.value}))} style={IS}><option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
-              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}>{["All","Fit","Injured","Unhappy","Contract"].map(v=><option key={v}>{v}</option>)}</select>
+              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Unhappy","Contract"].map(v=><option key={v} value={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
                 {["Value","Level","XP","Stage","Morale","Contract","Combat","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
               </select>
@@ -7608,7 +8081,7 @@ export default function App(){
         )}
 
         {/* TACTICS */}
-        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation}/>}
+        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
 
         {/* DOMINION */}
         {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier,currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
@@ -7677,8 +8150,8 @@ export default function App(){
                       {/* Position header */}
                       {(()=>{
                         const ps = calcPositionScore(assigned, pos);
-                        const hasPairing = ps.pairingMult > 1.0 || ps.raceMult !== 1.0;
-                        const hasBonus = ps.pairingMult > 1.0 || ps.raceMult > 1.0;
+                        const hasPairing = ps.pairingMult > 1.0;
+                        const hasBonus = ps.pairingMult > 1.0;
                         const pwrCol = ps.score>=60?"#a8ff78":ps.score>=35?"#78c8ff":ps.score>0?"#ffd966":"#555";
                         return(
                           <div style={{padding:"6px 10px",background:`${pd.color}14`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -7864,8 +8337,8 @@ export default function App(){
                           const p=posChances[pos];
                           const ps=posScoresPreview[pos];
                           const col=p>=0.65?"#a8ff78":p>=0.45?"#ffd966":p>=0.30?"#ff9f43":"#ff7878";
-                          const hasPairing = ps.pairingMult > 1.0 || ps.raceMult !== 1.0;
-                          const hasBonus = ps.pairingMult > 1.0 || ps.raceMult > 1.0;
+                          const hasPairing = ps.pairingMult > 1.0;
+                          const hasBonus = ps.pairingMult > 1.0;
                           return(
                             <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:7,background:"rgba(255,255,255,0.03)",border:`1px solid ${col}33`,textAlign:"center"}}>
                               <div style={{fontSize:10}}>{icon}{hasBonus?" ✦":hasPairing?" ✗":""}</div>
@@ -8053,21 +8526,40 @@ export default function App(){
                 const unlocked = bTierIdx <= tierIdx;
                 const canAfford = gold >= b.cost;
                 const bTier = TIERS[b.tierRequired||"iron"];
-                return(
-                  <div key={b.id} style={{
-                    background:b.built?"rgba(168,255,120,0.05)":unlocked?"rgba(255,255,255,0.025)":"rgba(255,255,255,0.01)",
-                    border:`1px solid ${b.built?"rgba(168,255,120,0.18)":unlocked?"rgba(255,255,255,0.07)":"rgba(255,255,255,0.03)"}`,
-                    borderRadius:9,padding:13,opacity:unlocked?1:0.55,
-                    position:"relative",overflow:"hidden",
-                  }}>
-                    {!unlocked&&(
-                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.55)",zIndex:2,borderRadius:9,gap:4}}>
-                        <div style={{fontSize:20}}>🔒</div>
-                        <div style={{fontSize:10,color:"#888",fontFamily:"'Cinzel',serif",textAlign:"center",padding:"0 16px"}}>
-                          Promote to {bTier?<TierIcon tier={b.tierRequired} size={12}/>:""} {bTier?.name||"higher tier"}
+                if(!unlocked){
+                  // Clean locked layout — no overlay, no bleed-through text
+                  return(
+                    <div key={b.id} style={{
+                      background:"rgba(255,255,255,0.015)",
+                      border:"1px dashed rgba(255,255,255,0.07)",
+                      borderRadius:9,padding:13,
+                    }}>
+                      <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8,opacity:0.55}}>
+                        <BuildingIcon id={b.id} size={22}/>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#888"}}>{b.name}</div>
+                          <div style={{fontSize:10,color:"#666"}}>{b.cost.toLocaleString()}g · locked</div>
                         </div>
                       </div>
-                    )}
+                      <div style={{
+                        padding:"10px 12px",borderRadius:7,
+                        background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",
+                        display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+                      }}>
+                        <span style={{fontSize:16}}>🔒</span>
+                        <span style={{fontSize:10,color:"#999",fontFamily:"'Cinzel',serif",textAlign:"center"}}>
+                          Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#aaa"}}>{bTier?.name||"higher tier"}</b>
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                return(
+                  <div key={b.id} style={{
+                    background:b.built?"rgba(168,255,120,0.05)":"rgba(255,255,255,0.025)",
+                    border:`1px solid ${b.built?"rgba(168,255,120,0.18)":"rgba(255,255,255,0.07)"}`,
+                    borderRadius:9,padding:13,
+                  }}>
                     <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:7}}>
                       <BuildingIcon id={b.id} size={24}/>
                       <div>
@@ -8076,7 +8568,7 @@ export default function App(){
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#999",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
-                    {!b.built&&unlocked&&(
+                    {!b.built&&(
                       <button onClick={()=>buildBuilding(b)} disabled={!canAfford}
                         style={{width:"100%",padding:"6px 0",borderRadius:5,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
@@ -8135,7 +8627,7 @@ export default function App(){
                   {transferBids.map(bid=>{
                     const hero=heroes.find(h=>h.id===bid.heroId);
                     if(!hero) return null;
-                    const aboveValue=bid.offer>bid.marketValue;
+                    const aboveValue=!bid.freeTransfer && bid.offer>bid.marketValue;
                     const weeksAgo=Math.max(0,(week||0)-bid.week);
                     const weeksLeft=Math.max(0,2-weeksAgo);
                     const urgentExpiry=weeksLeft<=1;
@@ -8155,6 +8647,12 @@ export default function App(){
                             <span style={{fontSize:11,fontWeight:700,color:"#a8ff78"}}>Above Market Value — {bid.pctOfValue}% of {bid.marketValue.toLocaleString()}g</span>
                           </div>
                         )}
+                        {bid.freeTransfer&&(
+                          <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(167,139,250,0.15),rgba(167,139,250,0.05))",borderBottom:"1px solid rgba(167,139,250,0.2)",display:"flex",alignItems:"center",gap:8}}>
+                            <span style={{fontSize:12}}>🕊️</span>
+                            <span style={{fontSize:11,fontWeight:700,color:"#a78bfa"}}>Honourable Release — a rival will take them for a parting fee</span>
+                          </div>
+                        )}
 
                         <div style={{padding:"14px 16px"}}>
                           <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
@@ -8167,7 +8665,7 @@ export default function App(){
                                   <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#f0e6d3"}}>{hero.name}</div>
                                   <div style={{fontSize:10,color:"#888"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                                 </div>
-                                {bid.isListed&&<span style={{fontSize:9,color:"#ffd966",background:"rgba(255,215,0,0.12)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🏷️ Listed</span>}
+                                {bid.isListed&&<span style={{fontSize:9,color:"#ffd966",background:"rgba(255,215,0,0.12)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🕊️ Open to Offers</span>}
                               </div>
 
                               {/* Mini stats */}
@@ -8190,7 +8688,9 @@ export default function App(){
                             {/* Offer + actions */}
                             <div style={{flexShrink:0,textAlign:"right",minWidth:140}}>
                               <div style={{fontSize:28,fontWeight:900,color:"#a8ff78",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
-                              {!aboveValue&&<div style={{fontSize:10,color:"#999",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
+                              {bid.freeTransfer
+                                ? <div style={{fontSize:10,color:"#a78bfa",marginBottom:4}}>Parting fee</div>
+                                : !aboveValue && <div style={{fontSize:10,color:"#999",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
                               <div style={{fontSize:10,color:urgentExpiry?"#ff7878":"#555",marginBottom:10}}>
                                 {urgentExpiry?"⚠️ Expires this week":"Expires in "+weeksLeft+" week"+(weeksLeft!==1?"s":"")}
                               </div>
@@ -8228,7 +8728,7 @@ export default function App(){
             <div style={{borderTop:transferBids.length>0?"1px solid rgba(255,255,255,0.06)":"none",paddingTop:transferBids.length>0?20:0}}>
               {/* Header with roster count */}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#ffd966"}}>🏪 Free Agent Market</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#ffd966"}}>🏪 Heroes For Hire</div>
                 <span style={{fontSize:11,color:"#888"}}>Treasury: <b style={{color:"#ffd966"}}>{gold.toLocaleString()}g</b></span>
                 {/* Roster count — prominent when near cap */}
                 {(()=>{
@@ -8262,14 +8762,20 @@ export default function App(){
 
               {/* Market filter bar */}
               <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
-                  <option>All</option>{ROLES.map(r=><option key={r}>{r}</option>)}
+                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                  <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                  <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
+                </select>
+                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                  <option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}
+                </select>
+                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   <option value="All">All Stages</option>
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
                 </select>
-                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.05)",color:"#aaa",cursor:"pointer"}}>
+                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
                   {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
@@ -8310,6 +8816,9 @@ export default function App(){
                       return true;
                     })
                     .filter(h=>marketFilter.role==="All"||h.role===marketFilter.role)
+                    .filter(h=>marketFilter.race==="All"||h.race===marketFilter.race)
+                    // Position filter: show heroes whose role is the natural fit for that lane
+                    .filter(h=>marketFilter.position==="All"||(POSITIONS[marketFilter.position]?.ideal||[]).includes(h.role))
                     .filter(h=>marketFilter.stage==="All"||h.stage===marketFilter.stage)
                     .sort((a,b)=>(mSorts[marketFilter.sortBy]||mSorts.Value)(a)-(mSorts[marketFilter.sortBy]||mSorts.Value)(b));
                   if(filtered.length===0) return <div style={{color:"#888",fontSize:13,padding:8}}>No heroes match your filters.</div>;
@@ -8326,22 +8835,83 @@ export default function App(){
                 })()}
               </div>
 
-              {/* Listed heroes — below the fold, low visual weight */}
-              {listedHeroIds.size>0&&(
-                <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
-                  <div style={{fontSize:11,color:"#999",marginBottom:8,display:"flex",alignItems:"center",gap:6}}>
-                    <span>🏷️ Your Listed Heroes</span>
-                    <span style={{fontSize:10,color:"#888"}}>— awaiting bids (next cycle in ~{4-(week%4)} weeks)</span>
-                  </div>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:7}}>
-                    {heroes.filter(h=>listedHeroIds.has(h.id)).map(h=>(
-                      <HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id}
-                        isListed hasBid={transferBids.some(b=>b.heroId===h.id)}
-                        onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>
-                    ))}
-                  </div>
+              {/* ══ YOUR SQUAD — list / renew / release without opening detail ══ */}
+              <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.04)"}}>
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#78c8ff"}}>👥 Your Squad</div>
+                  <span style={{fontSize:10,color:"#888"}}>
+                    Quick actions — open to offers, renew contract, or release. Next rival-offer cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
+                  </span>
                 </div>
-              )}
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:7}}>
+                  {heroes.filter(h=>!h.retired).map(h=>{
+                    const listed = listedHeroIds.has(h.id);
+                    const hasBid = transferBids.some(b=>b.heroId===h.id);
+                    const weeksLeft = h.contractWeeksLeft||0;
+                    const contractExpired = weeksLeft === 0;
+                    const canRenew = !h.negotiationPending && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
+                    return(
+                      <div key={h.id} style={{padding:"8px 10px",borderRadius:8,
+                        background:listed?"rgba(255,215,0,0.04)":hasBid?"rgba(168,255,120,0.04)":"rgba(255,255,255,0.025)",
+                        border:`1px solid ${listed?"rgba(255,215,0,0.25)":hasBid?"rgba(168,255,120,0.25)":"rgba(255,255,255,0.06)"}`}}>
+                        <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
+                          <HeroAvatar race={h.race} size={16}/>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                              {h.name}
+                              {listed&&<span style={{fontSize:8,color:"#ffd966",marginLeft:5,fontWeight:400}}>🕊️ Open</span>}
+                              {hasBid&&<span style={{fontSize:8,color:"#a8ff78",marginLeft:5,fontWeight:400}}>💰 Offer</span>}
+                            </div>
+                            <div style={{fontSize:9,color:"#888"}}>
+                              <RoleIcon role={h.role}/> {h.role} · Lv {h.level} · {h.value.toLocaleString()}g
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{fontSize:9,color:"#888",marginBottom:6}}>
+                          {contractExpired
+                            ? <span style={{color:"#ff9f43",fontWeight:700}}>Contract expired — renewal pending</span>
+                            : h.negotiationPending
+                              ? <span style={{color:"#78c8ff"}}>In negotiation · {weeksLeft}w on current deal</span>
+                              : <>Contract {weeksLeft}w left · {h.salary}g/wk</>
+                          }
+                        </div>
+                        <div style={{display:"flex",gap:4}}>
+                          <button onClick={()=>toggleListed(h)}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,
+                              border:`1px solid ${listed?"rgba(255,215,0,0.4)":"rgba(255,255,255,0.1)"}`,
+                              cursor:"pointer",
+                              background:listed?"rgba(255,215,0,0.12)":"rgba(255,255,255,0.04)",
+                              color:listed?"#ffd966":"#888",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                            {listed?"✓ Open":"🕊️ Open"}
+                          </button>
+                          <button onClick={()=>canRenew&&initiateEarlyRenewal(h)}
+                            disabled={!canRenew}
+                            title={h.negotiationPending?"Already in negotiation":canRenew?"Start contract talks":contractExpired?"Already expired":"Renew available within 2 seasons of expiry"}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(120,200,255,0.2)",
+                              cursor:canRenew?"pointer":"not-allowed",
+                              background:"rgba(120,200,255,0.06)",
+                              color:canRenew?"#78c8ff":"#555",
+                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif",
+                              opacity:canRenew?1:0.5}}>
+                            📋 Renew
+                          </button>
+                          <button onClick={()=>{
+                            const msg=contractExpired
+                              ? `Release ${h.name}? Contract expired — mutual parting, no morale hit.`
+                              : `Release ${h.name}? Morale penalty will apply to the remaining squad.`;
+                            if(window.confirm(msg)) releaseHero(h);
+                          }}
+                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(255,100,100,0.2)",
+                              cursor:"pointer",background:"rgba(255,100,100,0.05)",color:"#ff7878",
+                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                            🚪 Release
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
           </div>
@@ -8598,6 +9168,7 @@ export default function App(){
       {detailHero&&(
         <HeroDetail
           hero={heroes.find(h=>h.id===detailHero.id)||market.find(h=>h.id===detailHero.id)||detailHero}
+          isOwned={!!heroes.find(h=>h.id===detailHero.id)}
           prevStats={prevStats?.[detailHero.id]}
           onClose={()=>setDetailHero(null)}
           onRelease={releaseHero}
