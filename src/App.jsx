@@ -2430,6 +2430,21 @@ function assignTownAbilities(tierId) {
   return shuffled.slice(0,count).map(id => ENEMY_ABILITIES.find(a=>a.id===id));
 }
 
+// Rehydrate ability objects after a save/load round-trip. softDesc and hardDesc
+// are arrow functions on the canonical ENEMY_ABILITIES entries; JSON.stringify
+// drops functions, so saved tierEnemyTowns / scheduledOpponent come back with
+// stripped objects. Re-mapping by id restores the methods (and any other
+// future fields), preventing white-screen render crashes on Bronze+ tiers.
+function rehydrateAbility(a) {
+  if(!a || !a.id) return a;
+  const canonical = ENEMY_ABILITIES.find(x => x.id === a.id);
+  return canonical || a;
+}
+function rehydrateTownAbilities(t) {
+  if(!t) return t;
+  return { ...t, abilities: (t.abilities || []).map(rehydrateAbility) };
+}
+
 // Check ability outcome for a given formation + heroes
 // Returns 'pass', 'soft', or 'hard'
 function checkAbility(ability, formation, tierId) {
@@ -4152,7 +4167,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         </div>
         <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#999"}}>
           <span>💰 {hero.salary}g/wk</span>
-          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?"Unattached":hero.value.toLocaleString()+"g"}</span>
+          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?(showBuy?"Unattached":"0g"):hero.value.toLocaleString()+"g"}</span>
         </div>
         {showHiddenStats&&(()=>{
           const b = potentialBucket(hero.stats.Potential);
@@ -6243,7 +6258,7 @@ export default function App(){
   const [playerTier,setPlayerTier]       = useState(saved?.playerTier ?? "iron");
   const [tierPosition,setTierPosition]   = useState(saved?.tierPosition ?? 8); // 1=top, 8=bottom
   const [tierEnemyTowns,setTierEnemyTowns] = useState(()=>{
-    if(saved?.tierEnemyTowns) return saved.tierEnemyTowns;
+    if(saved?.tierEnemyTowns) return saved.tierEnemyTowns.map(rehydrateTownAbilities);
     return generateTierTowns("iron");
   });
   const [leagueTable,setLeagueTable]     = useState(()=>{
@@ -6254,7 +6269,7 @@ export default function App(){
   });
   const [activeSimulation,setActiveSimulation] = useState(null);
   const [pendingRaidEnemy,setPendingRaidEnemy] = useState(null);
-  const [scheduledOpponent,setScheduledOpponent] = useState(saved?.scheduledOpponent ?? null);
+  const [scheduledOpponent,setScheduledOpponent] = useState(saved?.scheduledOpponent ? rehydrateTownAbilities(saved.scheduledOpponent) : null);
   const [playerRecord,setPlayerRecord]         = useState(saved?.playerRecord ?? {wins:0,losses:0});
   // Filter out legacy match entries saved before the {home, away, homeWon} shape —
   // older saves stored {name, won} records which render as blank rows in the
@@ -6468,6 +6483,9 @@ export default function App(){
     const isElite   = !!(hasSanctum);
     const isPremium = hasBazaar || ["gold","platinum"].includes(playerTier);
     let nh={...h, id:Date.now(), baseStats: h.baseStats || {...h.stats}};
+    // Unattached free signings get a real market value the moment they join the
+    // squad — they've taken a banner now, no longer "Unattached".
+    if(!nh.value || nh.value === 0) nh.value = calcHeroValue(nh);
     setGold(g=>g-discountedValue);
     setSeasonFinances(prev=>({...prev, signingCosts:prev.signingCosts+discountedValue}));
     if(signDiscount>0){
