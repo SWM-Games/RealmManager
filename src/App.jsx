@@ -17,73 +17,182 @@ const RESPONSIVE_CSS = `
   html { font-size: 16px; }
   button, select, input { touch-action: manipulation; }
 
+  /* ── PARCHMENT CODEX DESIGN TOKENS ─────────────────────────────────────
+     Gold-on-near-black palette; hairline borders; sharp corners on cards
+     (only buttons round to 4px); three-family type system (Cinzel display,
+     Space Grotesk numerals, Lato body). */
+  :root {
+    --pa-bg: #0d0a06;
+    --pa-bg-deep: #0a0805;
+    --pa-panel-soft: rgba(201,168,106,0.02);
+    --pa-panel-warm: rgba(201,168,106,0.04);
+    --pa-border-faint: rgba(201,168,106,0.10);
+    --pa-border-soft: rgba(201,168,106,0.18);
+    --pa-border-strong: rgba(201,168,106,0.40);
+    --pa-gold: #c9a86a;
+    --pa-gold-light: #d4b87a;
+    --pa-gold-soft: #bda478;
+    --pa-parchment: #d4c9a8;
+    --pa-parchment-bright: #e6dcbf;
+    --pa-muted: #a89468;
+    --pa-muted-deep: #8a7a55;
+    --pa-muted-darker: #5e5340;
+    --pa-surface-tile: #1a1410;
+    --pa-success: #a8c97a;
+    --pa-danger: #c95757;
+    --pa-info: #7a9bc9;
+    --pa-vanguard: #c95757;
+    --pa-skirmisher: #c9a86a;
+    --pa-arbiter: #7a9bc9;
+  }
+
+  /* Page background dot-pattern lift */
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.04;
+    background-image:
+      radial-gradient(circle at 20% 30%, var(--pa-gold) 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, var(--pa-gold) 0, transparent 40%);
+  }
+
   /* Dropdown option contrast — native <option> elements inherit OS colours by
      default, which renders cream-on-white on light-theme systems. Force a
      dark background + light text so the option list stays readable when the
      select is open (supported on Chromium 119+, Firefox, modern Safari). */
-  select option { background: #0c0c1e; color: #f0e6d3; }
-  select option:checked, select option:hover { background: #1a1a2a; color: #ffd966; }
+  select option { background: #100c07; color: var(--pa-parchment); }
+  select option:checked, select option:hover { background: #1a1410; color: var(--pa-gold); }
+
+  /* ── Parchment Codex utility classes ──────────────────────────────────
+     pa-h1: Cinzel 30/700, +1 letter, line-height 1
+     pa-rule: 60×1px gold rule
+     pa-sub: Cinzel 10/500 +2 letter uppercase muted */
+  .pa-h1 { font-family:'Cinzel',serif; font-weight:700; font-size:30px; color:var(--pa-parchment); letter-spacing:1px; line-height:1; margin:0; }
+  .pa-rule { width:60px; height:1px; background:var(--pa-gold); margin:14px 0 10px; }
+  .pa-sub { font-family:'Cinzel',serif; font-weight:500; font-size:10px; letter-spacing:2px; color:var(--pa-muted); text-transform:uppercase; }
+  .pa-kicker { font-family:'Cinzel',serif; font-weight:700; font-size:9px; letter-spacing:2px; color:var(--pa-muted-deep); text-transform:uppercase; line-height:1; }
+  .pa-num { font-family:'Space Grotesk',sans-serif; font-variant-numeric:tabular-nums; line-height:1; }
+
+  /* Filter pills — used in Squad position filter */
+  .pa-pill {
+    font-family:'Cinzel',serif; font-weight:600; font-size:10px; letter-spacing:1.5px;
+    text-transform:uppercase; padding:7px 14px; border-radius:0; cursor:pointer;
+    border:1px solid rgba(201,168,106,0.22); background:transparent; color:var(--pa-muted);
+    transition:border-color 0.15s, color 0.15s; display:inline-flex; align-items:center; gap:7px;
+  }
+  .pa-pill:hover { color:var(--pa-parchment-bright); border-color:rgba(201,168,106,0.50); }
+  .pa-pill.active { color:var(--pa-bg); background:var(--pa-gold); border-color:var(--pa-gold); }
+  .pa-pill .ct { font-family:'Space Grotesk',sans-serif; letter-spacing:0; opacity:0.85; font-weight:600; }
+
+  /* Alert strip — left gold rule, no background, gold numerals + Cinzel desc */
+  .pa-alert {
+    margin-bottom:24px; padding:14px 18px; background:transparent;
+    border-left:2px solid var(--pa-gold);
+    display:flex; gap:24px; flex-wrap:wrap;
+    font-family:'Cinzel',serif; font-weight:600; font-size:10px;
+    letter-spacing:1.5px; text-transform:uppercase; color:var(--pa-gold-soft);
+  }
+  .pa-alert .num { font-family:'Space Grotesk',sans-serif; color:var(--pa-gold); font-weight:700; font-size:13px; letter-spacing:0; margin-right:4px; text-transform:none; }
+
+  /* Buttons — Lato body type, sharp 4px corners */
+  .pa-primary {
+    font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.3px;
+    padding:11px 22px; background:var(--pa-gold); color:var(--pa-bg);
+    border:none; border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+    transition: background 0.15s;
+  }
+  .pa-primary:hover { background:var(--pa-gold-light); }
+  .pa-primary:disabled { background:#3a2e1a; color:#5a4d35; cursor:not-allowed; }
+  .pa-secondary {
+    font-family:'Lato',sans-serif; font-weight:500; font-size:12px;
+    padding:10px 16px; background:transparent; color:var(--pa-muted-deep);
+    border:1px solid rgba(201,168,106,0.25); border-radius:4px; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .pa-secondary:hover { color:var(--pa-parchment); border-color:rgba(201,168,106,0.45); }
+
+  /* Card grid for Squad */
+  .pa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:12px; }
+  @media (max-width: 640px) {
+    .pa-grid { grid-template-columns: 1fr; }
+  }
 
   /* ── LAYOUT SHELL ── */
   .rm-shell { display: flex; min-height: 100vh; }
 
-  /* ── SIDEBAR (desktop) ── */
+  /* ── SIDEBAR — Parchment Codex ── */
   .rm-sidebar {
-    width: 220px; flex-shrink: 0;
+    width: 240px; flex-shrink: 0;
     position: fixed; top: 0; left: 0; height: 100vh;
-    background: rgba(0,0,0,0.6);
-    border-right: 1px solid rgba(120,200,255,0.1);
-    backdrop-filter: blur(16px);
+    background: #0a0805;
+    border-right: 1px solid rgba(201,168,106,0.14);
     display: flex; flex-direction: column;
     z-index: 50; overflow-y: auto;
   }
   .rm-sidebar-logo {
-    padding: 20px 18px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 22px 20px 18px;
+    border-bottom: 1px solid rgba(201,168,106,0.14);
   }
   .rm-sidebar-stats {
-    padding: 12px 14px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex; flex-direction: column; gap: 6px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(201,168,106,0.14);
+    display: flex; flex-direction: column; gap: 0;
   }
   .rm-stat-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 5px 8px; border-radius: 7px;
-    background: rgba(255,255,255,0.03);
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 20px; border-radius: 0;
+    background: transparent;
+    border-top: 1px solid rgba(201,168,106,0.05);
   }
-  .rm-stat-label { font-size: 10px; color: #555; }
-  .rm-stat-value { font-size: 13px; font-weight: 700; }
+  .rm-stat-row:first-child { border-top: none; }
+  .rm-stat-label {
+    font-family: 'Cinzel', serif; font-size: 10px;
+    letter-spacing: 1.5px; color: #a89468; text-transform: uppercase;
+    flex: 1; font-weight: 600;
+  }
+  .rm-stat-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+  }
   .rm-sidebar-nav {
-    padding: 10px 10px; display: flex; flex-direction: column; gap: 2px; flex: 1;
+    padding: 14px 10px; display: flex; flex-direction: column; gap: 1px; flex: 1;
+  }
+  .rm-nav-kicker {
+    font-family: 'Cinzel', serif; font-size: 9px; color: #8a7a55;
+    letter-spacing: 2.5px; padding: 0 10px 8px; text-transform: uppercase; font-weight: 700;
   }
   .rm-nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 8px; border: none;
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 12px; border: none; border-left: 2px solid transparent;
     cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px;
-    background: transparent; color: #555;
+    background: transparent; color: #a89468;
     transition: background 0.15s, color 0.15s;
     text-align: left; width: 100%; position: relative;
-    white-space: nowrap;
+    white-space: nowrap; letter-spacing: 1px; font-weight: 500;
   }
-  .rm-nav-item:hover { background: rgba(255,255,255,0.04); color: #888; }
-  .rm-nav-item.active { background: rgba(120,200,255,0.12); color: #78c8ff; }
-  .rm-nav-item.active .rm-nav-icon-wrap { color: #78c8ff; }
-  .rm-nav-icon-wrap { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+  .rm-nav-item:hover { color: #d4c9a8; }
+  .rm-nav-item.active {
+    background: rgba(201,168,106,0.10);
+    border-left: 2px solid #c9a86a;
+    color: #e6dcbf; font-weight: 700;
+  }
+  .rm-nav-item.active .rm-nav-icon-wrap { color: #c9a86a; }
+  .rm-nav-icon-wrap { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; color: #8a7a55; }
   .rm-nav-badge {
-    position: absolute; top: 7px; right: 10px;
-    width: 7px; height: 7px; border-radius: 50%; background: #ff9f43;
+    width: 5px; height: 5px; border-radius: 50%; background: #c9a86a;
+    position: static; margin-left: auto;
   }
 
   /* ── CONTENT AREA (desktop) ── */
   .rm-content {
-    margin-left: 220px;
+    margin-left: 240px;
     flex: 1; min-width: 0;
   }
   .rm-main {
-    padding: 20px 24px;
+    padding: 28px 36px;
+    transition: padding 0.2s;
   }
   /* Detail panel offset */
-  .rm-main-shifted { padding-right: 360px; }
+  .rm-main-shifted { padding-right: 380px; }
 
   /* ── MOBILE TOP BAR ── */
   .rm-topbar { display: none; }
@@ -3429,12 +3538,14 @@ function HeroAvatar({ race, size=20 }) {
 }
 function RoleIcon({ role, size=14 }) {
   const cfg = VISUAL_CONFIG.roles[role];
-  // → <img src={`/icons/roles/${cfg.key}.svg`} width={size} height={size} alt={role}/>
+  if(cfg?.key) return <img src={`/icons/roles/${cfg.key}.svg`} width={size} height={size} alt={role||""} style={{display:"inline-block",verticalAlign:"middle",objectFit:"contain"}}/>;
   return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
 }
 function PositionIcon({ position, size=16 }) {
   const cfg = VISUAL_CONFIG.positions[position];
-  // → <img src={`/icons/positions/${cfg.key}.svg`} width={size} height={size} alt={position}/>
+  if(position && ["Vanguard","Skirmisher","Arbiter"].includes(position)) {
+    return <img src={`/icons/positions/${position.toLowerCase()}.png`} width={size} height={size} alt={position} style={{display:"inline-block",verticalAlign:"middle",objectFit:"contain"}}/>;
+  }
   return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
 }
 function TierIcon({ tier, size=16 }) {
@@ -4107,89 +4218,200 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
   );
 }
 
+// Parchment Codex hero card.
+// Maps to HeroCardC in the design handoff. Sharp-cornered (4px), hairline gold borders,
+// boxed sections separated by faint dividers, Cinzel labels + Space Grotesk numerals.
 function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential}){
-  // Use best-position combat score as the displayed power figure
   const power = Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
   const avgMental=Math.round(STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length);
   const phase=agePhase(hero);
+  const stageColor = agePhaseColor(phase);
   const {label:hLabel,color:hColor}=moraleLabel(hero.morale);
   const contractUrgent=(hero.contractWeeksLeft||0)<=WEEKS_PER_CONTRACT_YEAR;
-  return(
-    <div onClick={onClick} draggable={draggable} onDragStart={onDragStart}
-      style={{background:selected?"rgba(120,200,255,0.09)":"rgba(255,255,255,0.025)",
-              border:`1px solid ${selected?"#78c8ff":hasBid?"rgba(255,215,0,0.5)":hero.negotiationPending?"rgba(255,159,67,0.5)":contractUrgent?"rgba(255,100,100,0.3)":hero.injured?"rgba(255,100,100,0.3)":"rgba(255,255,255,0.07)"}`,
-              borderRadius:10,padding:compact?"9px 12px":13,cursor:draggable?"grab":"pointer",transition:"border 0.2s",marginBottom:5}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:compact?0:7}}>
-        <HeroAvatar race={hero.race} size={compact?17:21}/>
-        <div style={{flex:1}}>
-          <div style={{fontWeight:700,fontSize:compact?12:14,color:"#f0e6d3",fontFamily:"'Cinzel',serif"}}>
-            {hero.name}
-            {hero.injured&&<span style={{fontSize:9,color:"#ff7878",marginLeft:4}}>🩸</span>}
-            {hero.negotiationPending&&<span style={{fontSize:9,color:"#ff9f43",marginLeft:4}}>📜</span>}
-            {isLeader&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}}>👑</span>}
-            {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#a78bfa",marginLeft:4}}>✨</span>}
-            {hero.fodder&&<span style={{fontSize:9,color:"#888",marginLeft:4}}>⚙️</span>}
-            {isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:4}} title="Open to offers">🕊️</span>}
-            {hasBid&&<span style={{fontSize:9,color:"#a8ff78",marginLeft:4}}>💰</span>}
-            {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#78c8ff",marginLeft:4}}>✈️{hero.awayWeeks}w</span>}
-          </div>
-          <div style={{fontSize:10,color:"#888"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level}</div>
+  const fatColor = (hero.fatigue||0) > 70 ? "#c46442" : (hero.fatigue||0) > 40 ? "#c9a86a" : "#8aa864";
+  const morColor = hero.morale > 70 ? "#8aa864" : hero.morale > 40 ? "#c9a86a" : "#c46442";
+
+  // Border priority: selected > hasBid > negotiating > contract urgent / injured > faint
+  const borderColor = selected ? "rgba(201,168,106,0.55)"
+    : hasBid ? "rgba(168,201,122,0.45)"
+    : hero.negotiationPending ? "rgba(201,168,106,0.50)"
+    : contractUrgent ? "rgba(201,87,87,0.30)"
+    : hero.injured ? "rgba(201,87,87,0.30)"
+    : "rgba(201,168,106,0.18)";
+  const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : null;
+  const stages = ["prospect","rising","peak","fading","veteran"];
+  const stageIdx = stages.indexOf(phase);
+  const nextStage = stages[stageIdx + 1];
+  const stagePctRaw = (hero.stageProgress || 0) / 100;
+  const xpForCurrent = xpForLevel(hero.level);
+  const xpForNext = xpForLevel(hero.level + 1);
+  const xpPct = xpForNext > xpForCurrent ? Math.max(0, Math.min(1, (hero.xp - xpForCurrent) / (xpForNext - xpForCurrent))) : 1;
+  const xpToLevel = Math.max(0, xpForNext - hero.xp);
+
+  if(compact){
+    return (
+      <div onClick={onClick} draggable={draggable} onDragStart={onDragStart}
+        style={{background:"#100c07",border:`1px solid ${borderColor}`,borderRadius:6,padding:"10px 12px",cursor:draggable?"grab":"pointer",display:"flex",alignItems:"center",gap:10,marginBottom:5,fontFamily:"'Lato',sans-serif"}}>
+        <div style={{width:34,height:34,background:"#1a1410",border:"1px solid rgba(201,168,106,0.20)",borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <RoleIcon role={hero.role} size={20}/>
         </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontSize:10,color:agePhaseColor(phase),fontWeight:600}}>{agePhaseLabel(phase)}</div>
-          <div style={{fontSize:9,color:hColor}}>{hLabel}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#d4c9a8",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+            {hero.name}
+            {hero.injured&&<span style={{fontSize:9,color:"#c95757",marginLeft:4}}>🩸</span>}
+            {isLeader&&<span style={{fontSize:9,color:"#c9a86a",marginLeft:4}}>👑</span>}
+            {isListed&&<span style={{fontSize:9,color:"#c9a86a",marginLeft:4}}>🕊️</span>}
+          </div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8a7a55",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
+            {hero.race} · {hero.role} · Lv <span style={{fontFamily:"'Space Grotesk',sans-serif",color:"#c9a86a",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
+          </div>
         </div>
       </div>
-      {!compact&&(<>
-        <AgeBar hero={hero}/>
-        
-        <ContractBar hero={hero}/>
-        <XPBar xp={hero.xp} level={hero.level}/>
-        <div style={{display:"flex",gap:6,marginBottom:7}}>
-          {[["⚔️","PWR",power],["🧠","MNT",avgMental],["💛","MRL",hero.morale]].map(([ic,l,v])=>(
-            <div key={l} style={{flex:1,background:"rgba(0,0,0,0.25)",borderRadius:6,padding:"4px 0",textAlign:"center"}}>
-              <div style={{fontSize:9,color:"#999"}}>{ic} {l}</div>
-              <div style={{fontSize:14,fontWeight:700,color:v>=40?"#a8ff78":v>=25?"#78c8ff":"#ffd966"}}>{l==="MRL"?v:Math.round(v)}</div>
-            </div>
-          ))}
-          <div style={{flex:1,background:"rgba(0,0,0,0.25)",borderRadius:6,padding:"4px 0",textAlign:"center"}}>
-            <div style={{fontSize:9,color:"#999"}}>⚡ FAT</div>
-            <div style={{fontSize:14,fontWeight:700,color:fatigueLabel(hero.fatigue||0).color}}>{hero.fatigue||0}</div>
+    );
+  }
+
+  return(
+    <button onClick={onClick} draggable={draggable} onDragStart={onDragStart}
+      style={{textAlign:"left",display:"flex",flexDirection:"column",width:"100%",height:"100%",
+              background:selected?"#15110a":"#100c07",
+              border:`1px solid ${borderColor}`,borderRadius:6,padding:0,cursor:draggable?"grab":"pointer",
+              fontFamily:"'Lato',sans-serif",
+              transition:"background 0.15s, border-color 0.15s, transform 0.12s",
+              transform:selected?"translateY(-1px)":"none",
+              marginBottom:0}}>
+      {/* HEADER */}
+      <div style={{padding:"14px 16px 12px",display:"flex",alignItems:"center",gap:12,borderBottom:"1px solid rgba(201,168,106,0.10)"}}>
+        <div style={{width:40,height:40,borderRadius:5,background:"#161009",border:"1px solid rgba(201,168,106,0.30)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <RoleIcon role={hero.role} size={24}/>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#d4c9a8",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+            {hero.name}
+            {hero.injured&&<span style={{fontSize:9,color:"#c95757",marginLeft:5}}>🩸</span>}
+            {hero.negotiationPending&&<span style={{fontSize:9,color:"#c9a86a",marginLeft:5}}>📜</span>}
+            {isLeader&&<span style={{fontSize:9,color:"#c9a86a",marginLeft:5}}>👑</span>}
+            {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#a78bfa",marginLeft:5}}>✨</span>}
+            {hero.fodder&&<span style={{fontSize:9,color:"#8a7a55",marginLeft:5}}>⚙️</span>}
+            {isListed&&<span style={{fontSize:9,color:"#c9a86a",marginLeft:5}} title="Open to offers">🕊️</span>}
+            {hasBid&&<span style={{fontSize:9,color:"#a8c97a",marginLeft:5}}>💰</span>}
+            {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#7a9bc9",marginLeft:5}}>✈️{hero.awayWeeks}w</span>}
+          </div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#a89468",marginTop:2,letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>
+            {hero.race} · {hero.role} · Lv <span style={{color:"#c9a86a",fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,letterSpacing:0}}>{hero.level}</span>
           </div>
         </div>
-        {(hero.awayWeeks||0)>0&&(
-          <div style={{padding:"5px 8px",borderRadius:6,background:"rgba(120,200,255,0.08)",border:"1px solid rgba(120,200,255,0.2)",fontSize:10,color:"#78c8ff",marginBottom:6}}>
-            ✈️ Away on mission: "{hero.awayEvent}" — returns in {hero.awayWeeks} week{hero.awayWeeks>1?"s":""}
+        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,padding:"3px 8px",borderRadius:3,letterSpacing:1.4,textTransform:"uppercase",color:stageColor,background:`${stageColor}14`,border:`1px solid ${stageColor}44`}}>
+          {cap(phase)}
+        </div>
+      </div>
+
+      {/* CAREER + XP STRIP */}
+      <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(201,168,106,0.10)",background:"rgba(201,168,106,0.02)"}}>
+        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
+          <span style={{width:38,fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>Career</span>
+          <div style={{flex:1,height:3,background:"#1a140d",borderRadius:1.5,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${Math.round(stagePctRaw*100)}%`,background:stageColor}}/>
           </div>
-        )}
-        <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:7}}>
-          {hero.traits.map(t=><span key={t} style={{fontSize:9,background:"rgba(167,139,250,0.1)",color:"#a78bfa",padding:"2px 7px",borderRadius:10,border:"1px solid rgba(167,139,250,0.18)"}}>{t}</span>)}
+          <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:stageColor,letterSpacing:1.2,textTransform:"uppercase"}}>{cap(phase)}</span>
+            {nextStage && <>
+              <span style={{color:"#5e5340",fontSize:10}}>→</span>
+              <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#6f6248",letterSpacing:1.2,textTransform:"uppercase"}}>{cap(nextStage)}</span>
+            </>}
+          </span>
         </div>
-        <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#999"}}>
-          <span>💰 {hero.salary}g/wk</span>
-          <span style={{color:"#ffd966"}}>⚖️ {hero.value===0?(showBuy?"Unattached":"0g"):hero.value.toLocaleString()+"g"}</span>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{width:38,fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>XP</span>
+          <div style={{flex:1,height:3,background:"#1a140d",borderRadius:1.5,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${Math.round(xpPct*100)}%`,background:"#c9a86a"}}/>
+          </div>
+          <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
+            <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:10,color:"#c9a86a",fontVariantNumeric:"tabular-nums"}}>{xpToLevel}</span>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#8a7a55",letterSpacing:1.2,textTransform:"uppercase"}}>To Level</span>
+          </span>
         </div>
-        {showHiddenStats&&(()=>{
-          const b = potentialBucket(hero.stats.Potential);
-          return(
-            <div style={{marginTop:5,padding:"3px 7px",borderRadius:5,background:"rgba(255,215,0,0.07)",border:"1px solid rgba(255,215,0,0.18)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:9,color:"#888"}}>Potential</span>
-              <span style={{fontSize:10,fontWeight:700,color:b.color}}>{b.icon} {b.label} <span style={{color:"#888",fontWeight:400}}>({hero.stats.Potential})</span></span>
-            </div>
+      </div>
+
+      {/* STATS — 4 cells */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:0}}>
+        {[
+          ["Power",   power,         "#8aa864"],
+          ["Mental",  avgMental,     "#8aa0b0"],
+          ["Morale",  hero.morale,   morColor],
+          ["Fatigue", hero.fatigue||0, fatColor],
+        ].map(([label,val,color],i)=>(
+          <div key={label} style={{padding:"10px 0 12px",textAlign:"center",borderLeft:i>0?"1px solid rgba(201,168,106,0.10)":"none"}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",color:"#8a7a55",marginBottom:4}}>{label}</div>
+            <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:18,color,fontVariantNumeric:"tabular-nums",lineHeight:1}}>{val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* AWAY BANNER */}
+      {(hero.awayWeeks||0)>0&&(
+        <div style={{padding:"6px 14px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(122,155,201,0.06)",fontSize:10,color:"#7a9bc9",fontFamily:"'Cinzel',serif",letterSpacing:1.2,textTransform:"uppercase"}}>
+          ✈️ Away · {hero.awayEvent} · {hero.awayWeeks}w
+        </div>
+      )}
+
+      {/* TRAITS — chips have hover tooltips with the effect description */}
+      <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:4,minHeight:hero.traits?.length?26:0,borderTop:"1px solid rgba(201,168,106,0.10)"}}>
+        {hero.traits.slice(0,4).map(t=>{
+          const eff = TRAIT_EFFECTS[t];
+          return (
+            <span key={t} title={eff?.desc||t}
+              style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(201,168,106,0.08)",color:"#c9a86a",border:"1px solid rgba(201,168,106,0.25)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
           );
-        })()}
-        {showScoutedPotential&&!showHiddenStats&&(()=>{
-          const b = potentialBucket(hero.stats.Potential);
-          return(
-            <div style={{marginTop:5,padding:"3px 7px",borderRadius:5,background:"rgba(120,200,255,0.06)",border:"1px solid rgba(120,200,255,0.2)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontSize:9,color:"#78c8ff"}}>🌠 Scouted</span>
-              <span style={{fontSize:10,fontWeight:700,color:b.color}}>{b.icon} {b.label}</span>
-            </div>
-          );
-        })()}
-      </>)}
-      {showBuy&&<button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull} style={{marginTop:8,width:"100%",padding:"6px 0",borderRadius:6,border:"none",cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",background:(canAfford&&!rosterFull)?"linear-gradient(135deg,#ffd966,#ff9f43)":"#1e1e30",color:(canAfford&&!rosterFull)?"#0d0d1a":"#444",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>{rosterFull?"🚫 Roster Full":canAfford?hero.value===0?"📜 Sign · No fee":(`⚔️ Sign for ${hero.value.toLocaleString()}g`):"💸 Can't Afford"}</button>}
-    </div>
+        })}
+      </div>
+
+      {/* SCOUTED / HIDDEN POTENTIAL */}
+      {showHiddenStats&&(()=>{
+        const b = potentialBucket(hero.stats.Potential);
+        return (
+          <div style={{padding:"6px 14px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(201,168,106,0.04)",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10}}>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>Potential</span>
+            <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label} <span style={{fontFamily:"'Space Grotesk',sans-serif",color:"#8a7a55",fontWeight:500,letterSpacing:0,marginLeft:4}}>({hero.stats.Potential})</span></span>
+          </div>
+        );
+      })()}
+      {showScoutedPotential&&!showHiddenStats&&(()=>{
+        const b = potentialBucket(hero.stats.Potential);
+        return (
+          <div style={{padding:"6px 14px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(122,155,201,0.05)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#7a9bc9",textTransform:"uppercase"}}>🌠 Scouted</span>
+            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label}</span>
+          </div>
+        );
+      })()}
+
+      {/* FOOTER — wage / value (auto-margin pins it to the bottom so cards
+          stay aligned in a stretch grid regardless of trait count). */}
+      <div style={{marginTop:"auto",padding:"10px 16px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(201,168,106,0.03)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{display:"flex",flexDirection:"column",gap:2}}>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>Wage / Week</span>
+          <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:13,color:"#bda478",fontVariantNumeric:"tabular-nums"}}>{hero.salary}g</span>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:2}}>
+          <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>Market Value</span>
+          <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:13,color:"#c9a86a",fontVariantNumeric:"tabular-nums"}}>{hero.value===0?(showBuy?"Unattached":"0g"):`${hero.value.toLocaleString()}g`}</span>
+        </div>
+      </div>
+
+      {/* BUY BUTTON — only on market cards */}
+      {showBuy&&(
+        <div style={{padding:"10px 14px 12px",borderTop:"1px solid rgba(201,168,106,0.10)"}}>
+          <button onClick={e=>{e.stopPropagation();onBuy(hero);}} disabled={!canAfford||rosterFull}
+            style={{width:"100%",padding:"10px 0",borderRadius:4,border:"none",
+              cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",
+              background:(canAfford&&!rosterFull)?"#c9a86a":"#3a2e1a",
+              color:(canAfford&&!rosterFull)?"#0d0a06":"#5a4d35",
+              fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,letterSpacing:0.3}}>
+            {rosterFull?"Roster Full":canAfford?(hero.value===0?"Sign · No fee":`Sign · ${hero.value.toLocaleString()}g`):"Insufficient Gold"}
+          </button>
+        </div>
+      )}
+    </button>
   );
 }
 
@@ -4201,15 +4423,25 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
   const {label:hLabel,color:hColor}=moraleLabel(hero.morale);
   const demand=calcDemand(hero);
   return(
-    <div className="rm-detail-panel" style={{background:"linear-gradient(180deg,#09091a,#0e0e20)",borderLeft:"1px solid rgba(120,200,255,0.12)",padding:0,boxSizing:"border-box"}}>
-      {/* Sticky header — always visible even when scrolled */}
-      <div className="rm-detail-header" style={{position:"sticky",top:0,zIndex:10,background:"rgba(9,9,26,0.97)",borderBottom:"1px solid rgba(255,255,255,0.07)",padding:"12px 18px",display:"flex",justifyContent:"space-between",alignItems:"center",backdropFilter:"blur(10px)"}}>
-        <span style={{fontFamily:"'Cinzel',serif",color:"#f0e6d3",fontSize:14,fontWeight:700}}>
-          {hero.name}{isListed&&<span style={{fontSize:9,color:"#ffd966",marginLeft:7,background:"rgba(255,215,0,0.12)",padding:"1px 6px",borderRadius:8,border:"1px solid rgba(255,215,0,0.2)"}}>🕊️ Open to Offers</span>}
-        </span>
-        <button onClick={onClose} className="rm-detail-close" style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",color:"#ccc",fontSize:12,cursor:"pointer",borderRadius:7,padding:"6px 14px",fontFamily:"'Lato',sans-serif",fontWeight:700,lineHeight:1}}>✕ Close</button>
+    <div className="rm-detail-panel" style={{width:380,background:"#0a0805",borderLeft:"1px solid rgba(201,168,106,0.14)",padding:0,boxSizing:"border-box",fontFamily:"'Lato',sans-serif"}}>
+      {/* Parchment Codex sticky header — avatar tile + name + meta + close */}
+      <div className="rm-detail-header" style={{position:"sticky",top:0,zIndex:10,background:"#0a0805",borderBottom:"1px solid rgba(201,168,106,0.14)",padding:"18px 20px",display:"flex",alignItems:"center",gap:12}}>
+        <div style={{width:52,height:52,borderRadius:6,background:"#161009",border:"1px solid rgba(201,168,106,0.40)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <RoleIcon role={hero.role} size={32}/>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:18,color:"#d4c9a8",letterSpacing:0.5,lineHeight:1.15,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+            {hero.name}
+            {isListed&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#c9a86a",marginLeft:8,background:"rgba(201,168,106,0.10)",padding:"2px 7px",borderRadius:2,border:"1px solid rgba(201,168,106,0.30)",letterSpacing:1.2,textTransform:"uppercase",verticalAlign:"middle"}}>Open to Offers</span>}
+          </div>
+          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#8a7a55",marginTop:4,letterSpacing:1.2,textTransform:"uppercase"}}>
+            {hero.race} · {hero.role} · Lv <span style={{color:"#c9a86a",fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
+          </div>
+        </div>
+        <button onClick={onClose} className="rm-detail-close" aria-label="Close"
+          style={{background:"transparent",border:"none",color:"#8a7a55",fontSize:18,cursor:"pointer",padding:6,display:"flex",alignItems:"center",lineHeight:1}}>✕</button>
       </div>
-      <div style={{padding:18,overflowY:"auto",height:"calc(100% - 49px)"}}>
+      <div style={{padding:18,overflowY:"auto",height:"calc(100% - 88px)"}}>
 
       <AgeBar hero={hero}/>
       
@@ -5025,43 +5257,57 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
   const fitLabel=f=>f==="ideal"?"✓ Natural fit":"– Neutral";
 
   return(
-    <div className="rm-tactics-grid" style={{display:"grid",gridTemplateColumns:"1fr 330px",gap:18}}>
+    <div className="rm-tactics-grid" style={{display:"grid",gridTemplateColumns:"1fr 320px",gap:32,alignItems:"flex-start"}}>
       <div>
-        {/* Header row */}
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14}}>⚔️ Formation Board</div>
-          <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <span style={{fontSize:11,color:"#888"}}>{placed}/6 assigned</span>
-            <button onClick={clearAll} style={{fontSize:10,padding:"4px 10px",borderRadius:5,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"#999",cursor:"pointer"}}>Clear all</button>
+        {/* Parchment Codex page header */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:20,gap:14,flexWrap:"wrap"}}>
+          <div>
+            <h1 className="pa-h1">Tactics Board</h1>
+            <div className="pa-rule"/>
+            <div className="pa-sub">{placed} of 6 assigned · Drag heroes from the bench into a lane</div>
+          </div>
+          <div style={{display:"flex",gap:10}}>
+            <button className="pa-secondary" onClick={clearAll}>Clear All</button>
           </div>
         </div>
 
         {/* Formation presets — save up to 2 formations and rotate them back in */}
         {formationPresets&&(
-          <div style={{marginBottom:10,padding:"8px 10px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.05)"}}>
-            <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:6}}>FORMATION PRESETS</div>
-            <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          <div style={{marginBottom:24}}>
+            <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
+              <div>
+                <div className="pa-kicker" style={{marginBottom:6}}>Saved</div>
+                <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#d4c9a8",letterSpacing:1,textTransform:"uppercase"}}>Formation Presets</div>
+              </div>
+              <span className="pa-kicker">2 slots</span>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               {[0,1].map(idx=>{
                 const p=formationPresets[idx]||null;
                 const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
                 const total=counts.reduce((a,n)=>a+n,0);
                 return(
-                  <div key={idx} style={{flex:1,minWidth:180,display:"flex",alignItems:"center",gap:5,padding:"6px 8px",borderRadius:7,background:"rgba(0,0,0,0.25)",border:`1px solid ${p?"rgba(120,200,255,0.2)":"rgba(255,255,255,0.05)"}`}}>
+                  <div key={idx} style={{
+                    padding:"14px 16px",display:"flex",alignItems:"center",gap:12,
+                    border:p?"1px solid rgba(201,168,106,0.25)":"1px dashed rgba(201,168,106,0.20)",
+                    background:p?"rgba(201,168,106,0.04)":"transparent"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:10,fontFamily:"'Cinzel',serif",fontWeight:700,color:p?"#78c8ff":"#666"}}>Preset {idx+1}</div>
-                      <div style={{fontSize:9,color:"#888"}}>
-                        {p?`${total}/6 · V${counts[0]} S${counts[1]} A${counts[2]}`:"Empty slot"}
+                      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:p?"#c9a86a":"#5e5340",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
+                        Preset {idx+1}
+                      </div>
+                      <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:10,color:p?"#8a7a55":"#5e5340",fontVariantNumeric:"tabular-nums"}}>
+                        {p?`${total}/6 · V${counts[0]} S${counts[1]} A${counts[2]}`:"No formation saved"}
                       </div>
                     </div>
                     {p&&(
-                      <button onClick={()=>onLoadPreset(idx)} title="Load this preset into the formation"
-                        style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(120,200,255,0.3)",background:"rgba(120,200,255,0.08)",color:"#78c8ff",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>↻ Load</button>
+                      <button onClick={()=>onLoadPreset(idx)} title="Load this preset"
+                        style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#c9a86a",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(201,168,106,0.40)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>↻ Load</button>
                     )}
                     <button onClick={()=>onSavePreset(idx)} title="Save current formation to this slot"
-                      style={{padding:"3px 8px",borderRadius:5,border:"1px solid rgba(168,255,120,0.3)",background:"rgba(168,255,120,0.08)",color:"#a8ff78",cursor:"pointer",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>💾 Save</button>
+                      style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#a89468",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(201,168,106,0.20)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
                     {p&&(
                       <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
-                        style={{padding:"3px 6px",borderRadius:5,border:"1px solid rgba(255,100,100,0.2)",background:"rgba(255,100,100,0.05)",color:"#ff7878",cursor:"pointer",fontSize:9,fontWeight:700}}>✕</button>
+                        style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#c95757",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(201,87,87,0.30)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>✕</button>
                     )}
                   </div>
                 );
@@ -5070,53 +5316,78 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           </div>
         )}
 
-        {/* Rating summary with expandable multiplier breakdown */}
+        {/* Rating summary with expandable multiplier breakdown.
+            Note on the maths: calcPositionScore bakes role-pairing bonuses
+            into each lane's score, and calcFormationRating then multiplies
+            by the formation-wide race synergy. So the `raw` value the
+            function returns already includes role pairings, which made the
+            displayed Net Modifier collapse to ×1.00 whenever there was no
+            race synergy active — even if all three lanes had ideal pairings.
+            We re-derive a true pre-bonus base here by stripping each lane's
+            pairing multiplier back out, so the displayed maths
+            (base × synergy × pairings = effective) actually adds up. */}
         {(()=>{
-          // Build multiplier list
           const mults=[];
-          analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
           if(analysis.raceSynergy) mults.push({label:analysis.raceSynergy.name,icon:analysis.raceSynergy.icon,mult:analysis.raceSynergy.ratingMult,col:analysis.raceSynergy.color});
-          // Count role pairings active — match calcPositionScore's exact logic so
-          // display and actual math agree (previous `every(h=>roles.includes)` matched
-          // two Warriors against the Warrior+Paladin entry and reported the wrong mult).
+          analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
+          // Build a true pre-bonus base by undoing each lane's pairing
+          // multiplier, while collecting active pairings for the breakdown.
+          let truePreBonus = 0;
           POS_KEYS.forEach(pos=>{
             const heroes2=(formation[pos]||[]).filter(Boolean);
-            if(heroes2.length===2){
+            if(heroes2.length===0) return;
+            const ps=calcPositionScore(heroes2,pos);
+            const lanePairing=ps.pairingMult||1.0;
+            truePreBonus += ps.score / lanePairing;
+            if(heroes2.length===2 && lanePairing>1.0){
               const sortedRoles=heroes2.map(h=>h.role).sort().join();
               const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
-              if(pp) mults.push({label:`${[...pp.roles].sort().join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
+              if(pp) mults.push({label:`${[...pp.roles].sort().join(" + ")} pairing`,icon:"🤝",mult:pp.mult,col:"#a8c97a"});
             }
           });
-          const netMult=mults.reduce((a,m)=>a*m.mult,1.0);
+          const trueBase = Math.round(truePreBonus);
+          const netMult = trueBase>0 ? effective / trueBase : 1.0;
+          const positive = effective >= trueBase;
+          const delta = effective - trueBase;
+          const LABEL={fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#8a7a55",letterSpacing:2,textTransform:"uppercase",lineHeight:1};
+          const NUM={fontFamily:"'Space Grotesk',sans-serif",fontSize:13,fontVariantNumeric:"tabular-nums",lineHeight:1};
           return(
-            <div style={{marginBottom:12,padding:"9px 13px",background:"rgba(255,255,255,0.02)",borderRadius:8,border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
-                {[["BASE",raw,"#78c8ff"],["→",null,"#333"],["RATING",effective,effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"]].map(([l,v,c],i)=>(
-                  v===null?<div key={i} style={{color:c,fontSize:18}}>→</div>:
-                  <div key={l} style={{textAlign:"center"}}><div style={{fontSize:8,color:"#888"}}>{l}</div><div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div></div>
-                ))}
-                <div style={{flex:1}}/>
-                {analysis.raceSynergy&&<div style={{fontSize:10,color:analysis.raceSynergy.color,background:`${analysis.raceSynergy.color}14`,padding:"3px 8px",borderRadius:6,border:`1px solid ${analysis.raceSynergy.color}33`}}>{analysis.raceSynergy.icon} {analysis.raceSynergy.name}</div>}
-                <button onClick={()=>setShowBreakdown(s=>!s)} style={{fontSize:9,padding:"3px 8px",borderRadius:5,border:"1px solid rgba(255,255,255,0.1)",background:"rgba(255,255,255,0.04)",color:"#888",cursor:"pointer"}}>{showBreakdown?"▲ Hide":"▼ Breakdown"}</button>
-              </div>
+            <div style={{marginBottom:24,border:"1px solid rgba(201,168,106,0.18)",background:"rgba(201,168,106,0.02)"}}>
+              <button onClick={()=>setShowBreakdown(s=>!s)}
+                style={{width:"100%",display:"flex",alignItems:"center",gap:18,padding:"16px 18px",background:"transparent",border:"none",cursor:"pointer",textAlign:"left",color:"inherit",flexWrap:"wrap"}}>
+                <span style={LABEL}>{placed} of 6</span>
+                <span style={{width:1,height:14,background:"rgba(201,168,106,0.20)"}}/>
+                <span style={LABEL}>Rating</span>
+                <span style={{...NUM,fontWeight:500,color:"#8a7a55",textDecoration:trueBase!==effective?"line-through":"none",textDecorationColor:"rgba(138,122,85,0.45)"}}>{trueBase}</span>
+                <span style={{...NUM,fontWeight:500,color:"#5e5340"}}>→</span>
+                <span style={{...NUM,fontWeight:700,color:"#d4c9a8"}}>{effective}</span>
+                <span style={LABEL}>Effective Rating</span>
+                <span style={{flex:1}}/>
+                <span style={{...LABEL,color:"#c9a86a",display:"inline-flex",alignItems:"center",gap:6}}>
+                  {showBreakdown?"Hide breakdown":"Show breakdown"}
+                  <span style={{fontSize:9,transform:showBreakdown?"rotate(180deg)":"none",transition:"transform 0.18s",display:"inline-block"}}>▾</span>
+                </span>
+              </button>
               {showBreakdown&&(
-                <div style={{marginTop:9,paddingTop:9,borderTop:"1px solid rgba(255,255,255,0.05)"}}>
-                  <div style={{fontSize:9,color:"#888",marginBottom:5,letterSpacing:1}}>RATING MULTIPLIERS</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"#888"}}>
-                      <span>Base avg hero score</span><span style={{color:"#78c8ff",fontWeight:700}}>{raw}</span>
-                    </div>
-                    {mults.length===0&&<div style={{fontSize:10,color:"#555"}}>No synergy bonuses active</div>}
+                <div style={{padding:"4px 18px 16px",borderTop:"1px solid rgba(201,168,106,0.12)"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,height:36,borderBottom:"1px solid rgba(201,168,106,0.10)"}}>
+                    <span style={{...LABEL,color:"#bda478",flex:1}}>Net Modifier</span>
+                    <span style={{...NUM,fontWeight:700,color:positive?"#a8c97a":"#c95757"}}>
+                      {positive?"+":""}{delta}
+                      <span style={{color:"#8a7a55",fontWeight:500,marginLeft:8}}>×{netMult.toFixed(2)}</span>
+                    </span>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",columnGap:28}}>
+                    {mults.length===0&&(
+                      <div style={{...LABEL,color:"#5e5340",height:32,display:"flex",alignItems:"center"}}>No synergy bonuses active</div>
+                    )}
                     {mults.map((m,i)=>(
-                      <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10}}>
-                        <span style={{color:"#888"}}>{m.icon} {m.label}</span>
-                        <span style={{color:m.col,fontWeight:700}}>×{m.mult.toFixed(2)}</span>
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:10,height:32}}>
+                        <span style={{color:"#c9a86a",fontSize:11,width:12,textAlign:"center",lineHeight:1}}>◈</span>
+                        <span style={{...LABEL,color:"#bda478",flex:1}}>{m.label}</span>
+                        <span style={{...NUM,fontWeight:700,color:m.mult>=1?"#a8c97a":"#c95757"}}>×{m.mult.toFixed(2)}</span>
                       </div>
                     ))}
-                    <div style={{display:"flex",justifyContent:"space-between",fontSize:11,fontWeight:700,borderTop:"1px solid rgba(255,255,255,0.07)",paddingTop:4,marginTop:2}}>
-                      <span style={{color:"#f0e6d3"}}>Effective rating</span>
-                      <span style={{color:effective>raw?"#a8ff78":effective<raw?"#ff7878":"#78c8ff"}}>{effective} <span style={{fontSize:9,color:"#888",fontWeight:400}}>(×{netMult.toFixed(2)})</span></span>
-                    </div>
                   </div>
                 </div>
               )}
@@ -5138,115 +5409,142 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           </div>
         )}
 
-        {/* Position lanes */}
+        {/* Position lanes — Parchment Codex */}
+        <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
+          <div>
+            <div className="pa-kicker" style={{marginBottom:6}}>Six Slots</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#d4c9a8",letterSpacing:1,textTransform:"uppercase"}}>Formation Lanes</div>
+          </div>
+        </div>
         {POS_KEYS.map(pos=>{
           const pd=POSITIONS[pos];
           const slots=formation[pos]||[null,null];
+          const posHeroes=slots.filter(Boolean);
+          const ps=posHeroes.length>0?calcPositionScore(posHeroes,pos):{score:0};
+          const sortedRoles=posHeroes.map(h=>h.role).sort().join();
+          const rolePairing=posHeroes.length===2
+            ? POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles)
+            : null;
           return(
-            <div key={pos} style={{marginBottom:9,padding:"10px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
-                <PositionIcon position={pos} size={18}/>
-                <div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:pd.color}}>{pd.label}</div>
-                  <div style={{fontSize:9,color:"#888"}}>{pd.subtitle}</div>
+            <div key={pos} style={{marginBottom:14,border:"1px solid rgba(201,168,106,0.18)",background:"rgba(201,168,106,0.02)"}}>
+              {/* Lane header */}
+              <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(201,168,106,0.12)",display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:36,height:36,border:`1px solid ${pd.color}55`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <PositionIcon position={pos} size={26}/>
                 </div>
-                <div className="rm-pos-desc" style={{marginLeft:"auto",fontSize:9,color:"#888",maxWidth:190,textAlign:"right"}}>{pd.desc}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#8a7a55",letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontStyle:"italic"}}>{pd.subtitle}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div className="pa-kicker">Lane PWR</div>
+                  <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:18,color:"#d4c9a8",fontVariantNumeric:"tabular-nums",lineHeight:1,marginTop:4}}>{posHeroes.length>0?Math.round(ps.score):"—"}</div>
+                </div>
               </div>
-              <div className="rm-formation-slots" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}}>
+              {/* Slots */}
+              <div className="rm-formation-slots" style={{padding:14,display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                 {[0,1].map(slotIdx=>{
                   const h=slots[slotIdx];
-                  const fit=h?analysis.heroMods[h.id]:null;
-                  const fc=fit?.fit==="ideal"?"#a8ff78":"rgba(255,255,255,0.12)";
+                  const fit=h?(pd.ideal.includes(h.role)?"ideal":pd.penalty.includes(h.role)?"penalty":"neutral"):null;
+                  const fitColor = fit==="ideal"?"#a8c97a":fit==="penalty"?"#c95757":"#a89468";
                   const isPickerTarget=pickerOpen?.pos===pos&&pickerOpen?.slotIdx===slotIdx;
+                  if(!h) {
+                    return(
+                      <button key={slotIdx} onClick={()=>setPickerOpen({pos,slotIdx})}
+                        style={{height:78,borderRadius:0,border:`1px dashed ${isPickerTarget?pd.color:pd.color+"55"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:8,
+                          fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:isPickerTarget?pd.color:"#8a7a55",
+                          background:isPickerTarget?`${pd.color}0a`:"rgba(201,168,106,0.02)",cursor:"pointer",transition:"all 0.15s"}}>
+                        <span style={{fontSize:14}}>+</span> Assign Hero
+                      </button>
+                    );
+                  }
+                  const stageColor=agePhaseColor(agePhase(h));
+                  const fat=h.fatigue||0;
+                  const {color:fatCol}=fatigueLabel(fat);
                   return(
-                    <div key={slotIdx}>
-                      {h?(()=>{
-                        const fat=h.fatigue||0;
-                        const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
-                        return(
-                        <div onClick={()=>setPickerOpen({pos,slotIdx})}
-                          style={{display:"flex",alignItems:"center",gap:6,background:isPickerTarget?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.04)",borderRadius:7,padding:"8px 10px",border:`1px solid ${isPickerTarget?"#78c8ff":fc}`,cursor:"pointer",position:"relative",transition:"border 0.15s"}}>
-                          <HeroAvatar race={h.race} size={16}/>
-                          <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
-                            <div style={{fontSize:9,color:"#999"}}>
-                              <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
-                              <span style={{marginLeft:6,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
-                            </div>
-                          </div>
-                          <div style={{fontSize:9,color:fc,fontWeight:700,flexShrink:0}}>{fit?.fit==="ideal"?"✓":"–"}</div>
+                    <div key={slotIdx} onClick={()=>setPickerOpen({pos,slotIdx})}
+                      style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",height:78,
+                        background:isPickerTarget?"rgba(201,168,106,0.08)":"rgba(201,168,106,0.03)",
+                        border:`1px solid ${isPickerTarget?"#c9a86a":"rgba(201,168,106,0.18)"}`,
+                        cursor:"pointer",position:"relative"}}>
+                      <div style={{width:46,height:46,background:"#1a1410",border:"1px solid rgba(201,168,106,0.20)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <RoleIcon role={h.role} size={28}/>
+                      </div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#e6dcbf",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
+                        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#8a7a55",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                          {h.race} · {h.role} · <span style={{color:stageColor}}>{agePhase(h).charAt(0).toUpperCase()+agePhase(h).slice(1)}</span>
                         </div>
-                        );
-                      })():(
-                        <button onClick={()=>setPickerOpen({pos,slotIdx})}
-                          style={{width:"100%",height:52,borderRadius:7,border:`2px dashed ${isPickerTarget?pd.color:pd.color+"44"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:6,fontSize:11,color:isPickerTarget?pd.color:"#888",background:isPickerTarget?`${pd.color}0a`:"transparent",cursor:"pointer",transition:"all 0.15s",fontFamily:"'Lato',sans-serif"}}>
-                          <span style={{fontSize:16}}>+</span> Assign hero
-                        </button>
-                      )}
+                        <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:10,fontWeight:600,color:"#bda478",marginTop:4,fontVariantNumeric:"tabular-nums"}}>
+                          PWR <span style={{color:"#d4c9a8"}}>{Math.round(calcHeroCombatScore(h,pos))}</span>
+                          <span style={{color:"#5e5340",margin:"0 6px"}}>·</span>
+                          LV <span style={{color:"#d4c9a8"}}>{h.level}</span>
+                          <span style={{color:"#5e5340",margin:"0 6px"}}>·</span>
+                          <span style={{color:fatCol}} title="Fatigue">⚡ {fat}</span>
+                        </div>
+                      </div>
+                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
+                        <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
+                          {fit==="ideal"?"✓ Ideal":fit==="penalty"?"✕ Penalty":"— Neutral"}
+                        </div>
+                      </div>
                     </div>
                   );
                 })}
               </div>
-              {/* Lane power + pairing readout — so the player can see the effect of hero choices at a glance */}
-              {(()=>{
-                const posHeroes=slots.filter(Boolean);
-                if(posHeroes.length===0) return null;
-                const ps=calcPositionScore(posHeroes,pos);
-                const sortedRoles=posHeroes.map(h=>h.role).sort().join();
-                const rolePairing=posHeroes.length===2
-                  ? POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles)
-                  : null;
-                return (
-                  <div style={{marginTop:6,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",fontSize:10}}>
-                    <span style={{color:"#78c8ff",fontWeight:700}}>⚡ Lane PWR {Math.round(ps.score)}</span>
-                    {rolePairing && <span style={{color:"#a8ff78"}}>🤝 {[...rolePairing.roles].sort().join(" + ")} ×{rolePairing.mult}</span>}
-                    {/* Race chemistry is now formation-wide only — see the Race Composition panel */}
-                  </div>
-                );
-              })()}
-              <div style={{marginTop:6,fontSize:9,color:"#888"}}>
-                <span style={{color:"#a8ff7866"}}>✓ Ideal: {pd.ideal.join(", ")}</span>
+              {/* Lane footer — pairing badge or ideal-roles hint */}
+              <div style={{padding:"8px 16px",borderTop:"1px solid rgba(201,168,106,0.10)",display:"flex",alignItems:"center",gap:10}}>
+                {rolePairing?(<>
+                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#a8c97a",letterSpacing:1.5,textTransform:"uppercase"}}>
+                    ◈ {[...rolePairing.roles].sort().join(" + ")} Pairing
+                  </span>
+                  <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:700,color:"#a8c97a",fontVariantNumeric:"tabular-nums"}}>×{rolePairing.mult.toFixed(2)}</span>
+                </>):(
+                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8a7a55",letterSpacing:1,textTransform:"uppercase"}}>Ideal · <span style={{color:"#bda478"}}>{pd.ideal.join(", ")}</span></span>
+                )}
+                <span style={{flex:1}}/>
+                {rolePairing&&(
+                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8a7a55",letterSpacing:1,textTransform:"uppercase"}}>Ideal · {pd.ideal.join(", ")}</span>
+                )}
               </div>
             </div>
           );
         })}
 
-        {/* Bench — heroes not currently in formation */}
+        {/* Bench — Parchment Codex */}
         {(()=>{
           const bench=heroes.filter(h=>!h.retired&&!assignedIds.has(h.id));
           if(bench.length===0) return null;
           return(
-            <div style={{marginTop:14,padding:"10px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
-                <span style={{fontSize:15}}>🪑</span>
-                <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#888"}}>Bench</div>
-                  <div style={{fontSize:9,color:"#888"}}>{bench.length} hero{bench.length===1?"":"es"} not in formation</div>
+            <div style={{marginTop:32}}>
+              <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
+                <div>
+                  <div className="pa-kicker" style={{marginBottom:6}}>{bench.length} {bench.length===1?"Hero":"Heroes"}</div>
+                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#d4c9a8",letterSpacing:1,textTransform:"uppercase"}}>The Bench</div>
                 </div>
+                <span className="pa-kicker">Not in Formation</span>
               </div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(190px,1fr))",gap:5}}>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
                 {bench.map(h=>{
-                  const fat=h.fatigue||0;
-                  const {color:fatCol,label:fatLbl}=fatigueLabel(fat);
-                  const {color:mCol}=moraleLabel(h.morale);
                   const dimmed=h.injured||(h.awayWeeks||0)>0;
+                  const bestPos = POS_KEYS.reduce((b,p)=>calcHeroCombatScore(h,p)>calcHeroCombatScore(h,b)?p:b, POS_KEYS[0]);
+                  const bestColor = POSITIONS[bestPos]?.color || "#bda478";
                   return(
-                    <div key={h.id}
-                      style={{display:"flex",alignItems:"center",gap:6,padding:"6px 9px",borderRadius:7,
-                        background:"rgba(0,0,0,0.25)",border:"1px solid rgba(255,255,255,0.05)",
-                        opacity:dimmed?0.55:1}}>
-                      <HeroAvatar race={h.race} size={15}/>
+                    <div key={h.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",border:"1px solid rgba(201,168,106,0.12)",background:"rgba(201,168,106,0.02)",opacity:dimmed?0.55:1}}>
+                      <div style={{width:36,height:36,background:"#1a1410",border:"1px solid rgba(201,168,106,0.18)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                        <RoleIcon role={h.role} size={22}/>
+                      </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#f0e6d3",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
-                        <div style={{fontSize:9,color:"#888"}}>
-                          <RoleIcon role={h.role}/> {h.role} · Lv {h.level}
-                          {h.injured&&<span style={{color:"#ff7878",marginLeft:4}}>🩸{h.injuryWeeks}w</span>}
-                          {(h.awayWeeks||0)>0&&<span style={{color:"#78c8ff",marginLeft:4}}>✈️{h.awayWeeks}w</span>}
+                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#d4c9a8",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
+                        <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:500,color:"#8a7a55",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                          {h.race} · {h.role} · LV <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0,fontWeight:600,color:"#bda478"}}>{h.level}</span>
+                          {h.injured&&<span style={{color:"#c95757",marginLeft:6,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0}}>🩸 {h.injuryWeeks}w</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{color:"#7a9bc9",marginLeft:6,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0}}>✈️ {h.awayWeeks}w</span>}
                         </div>
                       </div>
-                      <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:1,flexShrink:0}}>
-                        <span style={{fontSize:9,color:fatCol}} title={fatLbl}>⚡ {fat}</span>
-                        <span style={{fontSize:9,color:mCol}}>💛 {h.morale}</span>
+                      <div style={{textAlign:"right",flexShrink:0}}>
+                        <div className="pa-kicker">Best</div>
+                        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
                       </div>
                     </div>
                   );
@@ -5257,68 +5555,97 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
         })()}
       </div>
 
-      {/* Right: race composition panel */}
+      {/* RIGHT RAIL — Synergy & position guide (Parchment Codex) */}
       <div className="rm-tactics-synergy-panel">
-        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#f0e6d3",marginBottom:10}}>🧬 Race Composition</div>
-        <div style={{fontSize:10,color:"#888",marginBottom:10,lineHeight:1.5}}>Field 6 of the same race for a mono bonus, all different for rainbow, or 3+3 of two races for a duo pact. Only the strongest active bonus applies.</div>
-
-        {/* Active race synergy */}
-        {analysis.raceSynergy?(
-          <div style={{padding:"10px 12px",borderRadius:9,marginBottom:10,background:`${analysis.raceSynergy.color}15`,border:`1px solid ${analysis.raceSynergy.color}44`}}>
-            <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:3}}>
-              <span style={{fontSize:16}}>{analysis.raceSynergy.icon}</span>
-              <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:analysis.raceSynergy.color}}>{analysis.raceSynergy.name}</span>
-              <span style={{fontSize:9,padding:"1px 6px",borderRadius:8,background:`${analysis.raceSynergy.color}22`,color:analysis.raceSynergy.color,marginLeft:"auto"}}>✓ ACTIVE</span>
-            </div>
-            <div style={{fontSize:10,color:"#aaa",lineHeight:1.4}}>{analysis.raceSynergy.desc}</div>
-            <div style={{fontSize:10,fontWeight:700,marginTop:3,color:analysis.raceSynergy.color}}>×{analysis.raceSynergy.ratingMult} to all phase win chances</div>
-          </div>
-        ):(
-          <div style={{marginBottom:10,padding:"8px 10px",borderRadius:8,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.06)",fontSize:10,color:"#888",textAlign:"center"}}>
-            No race composition bonus active
-          </div>
-        )}
-
-        <div style={{fontSize:9,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:4}}>MONO-RACE (6 same)</div>
-        {RACE_SYNERGIES.filter(s=>s.type==="mono").map(s=>(
-          <div key={s.id} style={{padding:"5px 9px",borderRadius:7,marginBottom:3,background:"rgba(255,255,255,0.02)",border:`1px solid ${analysis.raceSynergy?.id===s.id?s.color+"66":"rgba(255,255,255,0.05)"}`,opacity:analysis.raceSynergy?.id===s.id?1:0.45,transition:"all 0.3s"}}>
-            <div style={{display:"flex",alignItems:"center",gap:5}}>
-              <span>{s.icon}</span>
-              <span style={{fontSize:10,fontWeight:700,color:analysis.raceSynergy?.id===s.id?s.color:"#888"}}>{s.name}</span>
-              <span style={{fontSize:9,color:"#999",marginLeft:"auto"}}>×{s.ratingMult}</span>
-            </div>
-          </div>
-        ))}
-
-        <div style={{fontSize:9,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:4,marginTop:8}}>RAINBOW (all 6 different)</div>
-        {RACE_SYNERGIES.filter(s=>s.type==="rainbow").map(s=>(
-          <div key={s.id} style={{padding:"5px 9px",borderRadius:7,marginBottom:3,background:"rgba(255,255,255,0.02)",border:`1px solid ${analysis.raceSynergy?.id===s.id?s.color+"66":"rgba(255,255,255,0.05)"}`,opacity:analysis.raceSynergy?.id===s.id?1:0.45,transition:"all 0.3s"}}>
-            <div style={{display:"flex",alignItems:"center",gap:5}}>
-              <span>{s.icon}</span>
-              <span style={{fontSize:10,fontWeight:700,color:analysis.raceSynergy?.id===s.id?s.color:"#888"}}>{s.name}</span>
-              <span style={{fontSize:9,color:"#999",marginLeft:"auto"}}>×{s.ratingMult}</span>
-            </div>
-          </div>
-        ))}
-
-        <div style={{fontSize:9,color:"#999",fontWeight:700,letterSpacing:1,marginBottom:4,marginTop:8}}>DUO PACTS (3+ each)</div>
-        {RACE_SYNERGIES.filter(s=>s.type==="duo").map(s=>{
-          // Extract the two races from the check function desc
-          const racesMatch = s.desc.match(/3\+ ([A-Za-z-]+) & 3\+ ([A-Za-z-]+)/);
-          const r1 = racesMatch?.[1] || "";
-          const r2 = racesMatch?.[2] || "";
-          const active = analysis.raceSynergy?.id===s.id;
-          return(
-            <div key={s.id} style={{padding:"5px 9px",borderRadius:7,marginBottom:3,background:"rgba(255,255,255,0.02)",border:`1px solid ${active?s.color+"66":"rgba(255,255,255,0.05)"}`,opacity:active?1:0.55,transition:"all 0.3s"}}>
-              <div style={{display:"flex",alignItems:"center",gap:5}}>
-                <span>{s.icon}</span>
-                <span style={{fontSize:10,fontWeight:700,color:active?s.color:"#888"}}>{s.name}</span>
-                <span style={{fontSize:9,color:"#999",marginLeft:"auto"}}>×{s.ratingMult}</span>
+        {(()=>{
+          const HAIR = "1px solid rgba(201,168,106,0.18)";
+          const allHeroes = POS_KEYS.flatMap(p => (formation[p]||[]).filter(Boolean));
+          const races = {};
+          allHeroes.forEach(h => { races[h.race] = (races[h.race] || 0) + 1; });
+          const raceList = Object.entries(races).sort((a,b) => b[1]-a[1]);
+          const rs = analysis.raceSynergy;
+          // Collect rating multipliers from active synergy + role pairings
+          const allMults = [];
+          if(rs) allMults.push({label:rs.name, mult:rs.ratingMult, positive: rs.ratingMult>=1});
+          POS_KEYS.forEach(pos=>{
+            const heroes2=(formation[pos]||[]).filter(Boolean);
+            if(heroes2.length===2){
+              const sortedRoles=heroes2.map(h=>h.role).sort().join();
+              const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
+              if(pp) allMults.push({label:`${[...pp.roles].sort().join(" + ")} pairing`, mult:pp.mult, positive:pp.mult>=1});
+            }
+          });
+          return (
+            <>
+              {/* Active synergy card */}
+              <div style={{border:HAIR,padding:18,marginBottom:18,background:rs?"rgba(201,168,106,0.04)":"rgba(201,168,106,0.02)"}}>
+                <div className="pa-kicker" style={{marginBottom:8}}>Active Synergy</div>
+                {rs?(<>
+                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:18,color:"#c9a86a",letterSpacing:0.5,marginBottom:6}}>{rs.name}</div>
+                  <div style={{width:30,height:1,background:"#c9a86a",marginBottom:10}}/>
+                  <div style={{fontFamily:"'Lato',sans-serif",fontSize:11,color:"#a89468",lineHeight:1.55,marginBottom:14}}>{rs.desc}</div>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                    <span className="pa-kicker">Rating Multiplier</span>
+                    <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:18,color:"#a8c97a",fontVariantNumeric:"tabular-nums"}}>×{rs.ratingMult.toFixed(2)}</span>
+                  </div>
+                </>):(
+                  <div style={{fontFamily:"'Lato',sans-serif",fontSize:11,color:"#8a7a55",lineHeight:1.55,fontStyle:"italic"}}>
+                    No race synergy active. Field 6 of the same race for a mono bonus, all different for rainbow, or 3+3 of two races for a duo pact.
+                  </div>
+                )}
               </div>
-              {r1&&r2&&<div style={{fontSize:8,color:"#555",marginTop:2}}>{r1} + {r2} (3+ each)</div>}
-            </div>
+
+              {/* Race composition */}
+              {raceList.length > 0 && (
+                <div style={{border:HAIR,padding:18,marginBottom:18}}>
+                  <div className="pa-kicker" style={{marginBottom:12}}>Race Composition</div>
+                  {raceList.map(([race,n])=>(
+                    <div key={race} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(201,168,106,0.08)"}}>
+                      <span style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:500,color:"#d4c9a8",letterSpacing:0.5}}>{race}</span>
+                      <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:600,color:"#bda478",fontVariantNumeric:"tabular-nums"}}>×{n}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Active rating multipliers */}
+              {allMults.length > 0 && (
+                <div style={{border:HAIR,padding:18,marginBottom:18}}>
+                  <div className="pa-kicker" style={{marginBottom:6}}>Rating Multipliers</div>
+                  {allMults.map((m,i)=>(
+                    <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(201,168,106,0.08)"}}>
+                      <span style={{color:"#c9a86a",fontSize:11,width:12,textAlign:"center",lineHeight:1}}>◈</span>
+                      <span style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#a89468",letterSpacing:1,textTransform:"uppercase",flex:1}}>{m.label}</span>
+                      <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:700,color:m.positive?"#a8c97a":"#c95757",fontVariantNumeric:"tabular-nums"}}>×{m.mult.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Position guide */}
+              <div style={{border:HAIR,padding:18}}>
+                <div className="pa-kicker" style={{marginBottom:12}}>Position Guide</div>
+                {POS_KEYS.map(pos=>{
+                  const pd=POSITIONS[pos];
+                  return(
+                    <div key={pos} style={{marginBottom:14}}>
+                      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                        <PositionIcon position={pos} size={14}/>
+                        <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</span>
+                      </div>
+                      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8a7a55",letterSpacing:1,textTransform:"uppercase",marginBottom:3}}>
+                        Ideal · <span style={{color:"#bda478"}}>{pd.ideal.join(", ")}</span>
+                      </div>
+                      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8a7a55",letterSpacing:1,textTransform:"uppercase"}}>
+                        Stats · <span style={{color:"#a89468"}}>{(pd.primaryStats||[]).slice(0,3).join(", ")}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           );
-        })}
+        })()}
       </div>
 
       {/* ── SLOT PICKER MODAL ── */}
@@ -5797,7 +6124,7 @@ function SetupScreen({ onComplete }) {
 
     return (
       <div style={{position:"fixed",inset:0,background:"linear-gradient(145deg,#060610,#0a0a1c,#060d14)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Lato',sans-serif",overflowY:"auto",padding:"16px 0"}}>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
         <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,215,0,0.2)",borderRadius:16}}>
           <div style={{textAlign:"center",marginBottom:24}}>
             <div style={{fontSize:28,marginBottom:6}}>🏅</div>
@@ -5860,7 +6187,7 @@ function SetupScreen({ onComplete }) {
       zIndex:300, fontFamily:"'Lato',sans-serif", overflowY:"auto",
       padding:"16px 0",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{
         width:"min(480px,92vw)", padding:"36px 32px",
         background:"rgba(255,255,255,0.025)",
@@ -7653,22 +7980,35 @@ export default function App(){
     setScheduledOpponent(generateScheduledOpponent(1, newLeagueTable, newTierTowns, newTierId));
   };
 
+  // Best position for a hero = the lane where they score highest. Cached per
+  // filter pass via a Map so we don't recompute when sorting/filtering.
+  const bestPosFor=(hero,cache)=>{
+    if(cache&&cache.has(hero.id)) return cache.get(hero.id);
+    const best=POS_KEYS.reduce((b,p)=>calcHeroCombatScore(hero,p)>calcHeroCombatScore(hero,b)?p:b, POS_KEYS[0]);
+    if(cache) cache.set(hero.id,best);
+    return best;
+  };
   const filtered=useMemo(()=>{
+    const bestCache=new Map();
     let h=[...heroes];
     if(filter.role!=="All")h=h.filter(x=>x.role===filter.role);
-    // Position filter — which lane is hero assigned to
+    // Position filter = "show heroes whose best lane is X" (matches the POSITION
+    // pill counts). Previously this filtered by formation slot, which disagreed
+    // with the pill counts and surprised players.
     if(filter.position!=="All"){
-      const posHeroIds=new Set((formation[filter.position]||[]).filter(Boolean).map(x=>x.id));
-      h=h.filter(x=>posHeroIds.has(x.id));
+      h=h.filter(x=>bestPosFor(x,bestCache)===filter.position);
     }
     if(filter.race!=="All")h=h.filter(x=>x.race===filter.race);
-    if(filter.status==="Fit")h=h.filter(x=>!x.injured);
+    if(filter.status==="Fit")h=h.filter(x=>!x.injured&&!(x.awayWeeks>0));
     if(filter.status==="Injured")h=h.filter(x=>x.injured);
+    if(filter.status==="Away")h=h.filter(x=>(x.awayWeeks||0)>0);
     if(filter.status==="Unhappy")h=h.filter(x=>x.morale<50);
+    if(filter.status==="Renewing")h=h.filter(x=>x.negotiationPending||(x.contractWeeksLeft||0)<=WEEKS_PER_CONTRACT_YEAR*2);
+    // Legacy "Contract" alias kept so older saved filter state still works.
     if(filter.status==="Contract")h=h.filter(x=>(x.contractWeeksLeft||0)<=WEEKS_PER_CONTRACT_YEAR*2);
     if(filter.phase!=="All")h=h.filter(x=>agePhase(x)===filter.phase);
     if(filter.search)h=h.filter(x=>x.name.toLowerCase().includes(filter.search.toLowerCase())||(x.traits||[]).some(t=>t.toLowerCase().includes(filter.search.toLowerCase())));
-    const sorts={Value:x=>-x.value,Potential:x=>-x.stats.Potential,Level:x=>-x.level,XP:x=>-x.xp,Stage:x=>stageToCareerWeek(x.stage||"peak",x.stageProgress||0),Morale:x=>x.morale,Contract:x=>(x.contractWeeksLeft||0),Combat:x=>-(STAT_GROUPS.Combat.reduce((a,s)=>a+x.stats[s],0)/STAT_GROUPS.Combat.length),Salary:x=>x.salary};
+    const sorts={Value:x=>-x.value,Potential:x=>-x.stats.Potential,Level:x=>-x.level,XP:x=>-x.xp,Stage:x=>stageToCareerWeek(x.stage||"peak",x.stageProgress||0),Morale:x=>x.morale,Contract:x=>(x.contractWeeksLeft||0),Combat:x=>-(STAT_GROUPS.Combat.reduce((a,s)=>a+x.stats[s],0)/STAT_GROUPS.Combat.length),Salary:x=>x.salary,Fatigue:x=>-(x.fatigue||0)};
     if(sorts[filter.sortBy])h.sort((a,b)=>sorts[filter.sortBy](a)-sorts[filter.sortBy](b));
     return h;
   },[heroes,filter]);
@@ -7693,20 +8033,23 @@ export default function App(){
     { id:"Ledger",    icon:"📒", label:"Ledger",   badge: false },
     { id:"Guide",    icon:"📖", label:"Guide",    badge: false },
   ];
-  const IS={background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:6,color:"#f0e6d3",padding:"5px 9px",fontSize:11,outline:"none"};
+  const IS={background:"rgba(201,168,106,0.04)",border:"1px solid rgba(201,168,106,0.20)",borderRadius:4,color:"#d4c9a8",padding:"6px 10px",fontSize:11,outline:"none",fontFamily:"'Lato',sans-serif"};
+  // Parchment Codex sidebar palette: gold accent for currency,
+  // parchment for neutral, danger red for trouble, success green for income.
   const STAT_ROWS = [
-    ["Gold",          gold.toLocaleString()+"g",                                                         gold<0?"#ff7878":"#ffd966"],
-    ["Week",          `S${season} · Wk ${seasonWeek}`,                                           "#f0e6d3"],
-    ["League",        `${currentTier.icon} ${currentTier.name} · ${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'} of 8`, currentTier.color],
-    ["Tribute",       `+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g/wk`,     "#a8ff78"],
-    ...(ngPlus?.wins ? [["Campaign",`⚔️ Run #${ngPlus.wins+1} · ${ngPlus.earnedBoons?.length||0} options unlocked`,"#ff9f43"]] : []),
-    ...(squadLeaderId&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`👑 ${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]} · ${Math.round(calcLeaderScore(heroes.find(h=>h.id===squadLeaderId))*100)}%`,"#ffd966"]] : []),
-    ["Formation",     `${placed}/6 · Rating ${formRating}`,                                             "#78c8ff"],
-    ["Wages",         `${wages.toLocaleString()}g/wk`,                                                  "#ff9f43"],
-    ["Squad",         `${heroes.filter(h=>!h.retired).length}/${ROSTER_CAP} heroes`,                    heroes.filter(h=>!h.retired).length>=ROSTER_CAP?"#ff9f43":"#f0e6d3"],
-    ...(unhappyCount>0   ? [["Unhappy",  `${unhappyCount} hero${unhappyCount>1?"es":""}`, "#ffd966"]] : []),
-    ...(contractAlerts>0 ? [["Contracts",`${contractAlerts} expired`,                    "#ff9f43"]] : []),
-    ...(contractWarnings>0?[["Expiring", `${contractWarnings} this week`,                "#ffd966"]] : []),
+    ["Gold",          gold.toLocaleString()+"g",                                                         gold<0?"#c95757":"#c9a86a"],
+    ["Tier",          `${currentTier.icon} ${currentTier.name}, ${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`, "#d4c9a8"],
+    ["Income",        `+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g`,    "#a8c97a"],
+    ["Wages",         `${wages.toLocaleString()}g`,                                                 "#bda478"],
+    ["Week",          `${seasonWeek}`,                                                              "#d4c9a8"],
+    ["Season",        `${season}`,                                                                  "#d4c9a8"],
+    ...(ngPlus?.wins ? [["Run",`#${ngPlus.wins+1}`,"#c9a86a"]] : []),
+    ...(squadLeaderId&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]}`,"#c9a86a"]] : []),
+    ["Formation",     `${placed}/6 · ${formRating}`,                                                "#bda478"],
+    ["Squad",         `${heroes.filter(h=>!h.retired).length}/${ROSTER_CAP}`,                       heroes.filter(h=>!h.retired).length>=ROSTER_CAP?"#c95757":"#d4c9a8"],
+    ...(unhappyCount>0   ? [["Unhappy",  `${unhappyCount}`, "#c9a86a"]] : []),
+    ...(contractAlerts>0 ? [["Expired",  `${contractAlerts}`,"#c95757"]] : []),
+    ...(contractWarnings>0?[["Expiring", `${contractWarnings}`,"#c9a86a"]] : []),
   ];
 
   if(!setupDone){
@@ -7714,9 +8057,9 @@ export default function App(){
   }
 
   return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(145deg,#060610 0%,#0a0a1c 60%,#060d14 100%)",color:"#f0e6d3",fontFamily:"'Lato',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#0d0a06",color:"#d4c9a8",fontFamily:"'Lato',sans-serif"}}>
       <InjectCSS/>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(255,255,255,0.18) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(255,255,255,0.13) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(255,255,255,0.1) 0%,transparent 100%)",pointerEvents:"none"}}/>
 
       <RetirementModal retirees={retirees} heroes={heroes.filter(h=>!h.retired)} formation={formation}
@@ -7773,12 +8116,15 @@ export default function App(){
         />
       )}
 
-      {/* ── DESKTOP SIDEBAR ── */}
+      {/* ── DESKTOP SIDEBAR — Parchment Codex ── */}
       <div className="rm-sidebar">
         <div className="rm-sidebar-logo">
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,background:"linear-gradient(135deg,#ffd966,#ff9f43)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:4,letterSpacing:1}}>⚔️ REALM MANAGER</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:16,color:townColor,marginBottom:2}}>{townName}</div>
-          <div style={{fontSize:9,color:"#888",letterSpacing:2}}>FANTASY SQUAD SIMULATOR</div>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
+            <div style={{width:22,height:22,border:"1px solid rgba(201,168,106,0.40)",display:"flex",alignItems:"center",justifyContent:"center",color:"#c9a86a",fontSize:11}}>⚔</div>
+            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#c9a86a",letterSpacing:2.5}}>REALM MANAGER</div>
+          </div>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:400,fontSize:22,color:townColor||"#d4c9a8",letterSpacing:0.5,lineHeight:1.1}}>{townName}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:400,fontSize:9,color:"#8a7a55",letterSpacing:2,marginTop:4,fontStyle:"italic"}}>Season {season} · Week {seasonWeek}</div>
         </div>
         <div className="rm-sidebar-stats">
           {STAT_ROWS.map(([l,v,c])=>(
@@ -7789,16 +8135,16 @@ export default function App(){
           ))}
         </div>
 
-        {signDiscount>0&&<div style={{padding:"6px 10px",fontSize:8,color:"#ffd966",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>🏷️ Next signing: {Math.round(signDiscount*100)}% off</div>}
+        {signDiscount>0&&<div style={{padding:"8px 20px",fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:"#c9a86a",borderBottom:"1px solid rgba(201,168,106,0.10)"}}>Next signing · {Math.round(signDiscount*100)}% off</div>}
 
         <nav className="rm-sidebar-nav">
+          <div className="rm-nav-kicker">Council</div>
           {NAV_ITEMS.map(({id,icon,label,badge})=>(
             <button key={id}
               className={`rm-nav-item${tab===id?" active":""}`}
-              onClick={()=>setTab(id)}
-              style={tab===id?{background:`${townColor}18`,color:townColor}:{}}>
+              onClick={()=>setTab(id)}>
               <span className="rm-nav-icon-wrap"><NavIcon tab={id} size={15}/></span>
-              <span>{label}</span>
+              <span style={{flex:1}}>{label}</span>
               {badge&&<span className="rm-nav-badge"/>}
             </button>
           ))}
@@ -7844,6 +8190,23 @@ export default function App(){
         {/* SQUAD */}
         {tab==="Squad"&&(
           <div>
+
+            {/* Parchment Codex page header */}
+            {(()=>{
+              const active = heroes.filter(h=>!h.retired);
+              const fit = active.filter(h=>!h.injured && !(h.awayWeeks>0)).length;
+              const fatigued = active.filter(h=>(h.fatigue||0)>=FATIGUE_WARN).length;
+              return(
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:24,gap:14,flexWrap:"wrap"}}>
+                  <div>
+                    <h1 className="pa-h1">The Roster</h1>
+                    <div className="pa-rule"/>
+                    <div className="pa-sub">{active.length} heroes under contract · {fit} fit{fatigued>0?` · ${fatigued} fatigued`:""}</div>
+                  </div>
+                  <button className="pa-primary" onClick={()=>setTab("Hire")}>Sign Contract</button>
+                </div>
+              );
+            })()}
 
             {/* Getting Started hint — shown once on week 1 with empty formation, hidden after first win */}
             {!hintDismissed && !ngPlus?.wins && week<=1 && placed===0 && (
@@ -7892,10 +8255,10 @@ export default function App(){
               </div>
             )}
             {(unhappyCount>0||contractAlerts>0||contractWarnings>0)&&(
-              <div style={{marginBottom:12,padding:"10px 14px",background:"rgba(255,159,67,0.07)",borderRadius:9,border:"1px solid rgba(255,159,67,0.2)",display:"flex",gap:16,flexWrap:"wrap",fontSize:11}}>
-                {contractAlerts>0&&<span style={{color:"#ff9f43"}}>📜 {contractAlerts} contract{contractAlerts>1?"s":""} expired — renewal required</span>}
-                {contractWarnings>0&&<span style={{color:"#ffd966"}}>⏰ {contractWarnings} contract{contractWarnings>1?"s":""} expiring this week — prepare gold</span>}
-                {unhappyCount>0&&<span style={{color:"#ffd966"}}>😟 {unhappyCount} low morale</span>}
+              <div className="pa-alert">
+                {contractAlerts>0&&<span><span className="num">{contractAlerts}</span> contract{contractAlerts>1?"s":""} expired</span>}
+                {contractWarnings>0&&<span><span className="num">{contractWarnings}</span> contract{contractWarnings>1?"s":""} expiring this week</span>}
+                {unhappyCount>0&&<span><span className="num">{unhappyCount}</span> low morale</span>}
               </div>
             )}
 
@@ -8018,82 +8381,56 @@ export default function App(){
               );
             })()}
 
-            {/* Squad composition summary */}
+            {/* POSITION pill row — primary filter */}
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
+              <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Position</span>
+              {["All",...POS_KEYS].map(p=>{
+                const count = p==="All"
+                  ? heroes.length
+                  : heroes.filter(h=>{const best=POS_KEYS.reduce((b,pos)=>calcHeroCombatScore(h,pos)>calcHeroCombatScore(h,b)?pos:b,POS_KEYS[0]); return best===p;}).length;
+                const isActive = filter.position === p;
+                return(
+                  <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,position:p}))}>
+                    {p!=="All"&&<PositionIcon position={p} size={13}/>}
+                    {p}<span className="ct">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* RACE pill row — secondary primary filter (replaces dropdown) */}
             {(()=>{
-              const active = heroes.filter(h=>!h.retired&&!h.injured);
-              // Race counts
-              const raceCounts={};
-              active.forEach(h=>{raceCounts[h.race]=(raceCounts[h.race]||0)+1;});
-              // Role counts
-              const roleCounts={};
-              active.forEach(h=>{roleCounts[h.role]=(roleCounts[h.role]||0)+1;});
-              // Position affinity — count heroes whose role is ideal for each position
-              const posSuited={};
-              POS_KEYS.forEach(pos=>{
-                posSuited[pos]=active.filter(h=>POSITIONS[pos].ideal.includes(h.role)).length;
-              });
-              // Also track how many are assigned
-              const posAssigned={};
-              POS_KEYS.forEach(pos=>{posAssigned[pos]=(formation[pos]||[]).filter(Boolean).length;});
+              const RACES_LIST = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
               return(
-                <div style={{marginBottom:12,padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.05)"}}>
-                  <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-                    {/* Positions */}
-                    <div style={{flex:1,minWidth:130}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>POSITION DEPTH</div>
-                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                        {POS_KEYS.map(pos=>{
-                          const pd=POSITIONS[pos];
-                          const suited=posSuited[pos]||0;
-                          const assigned=posAssigned[pos]||0;
-                          const col=suited>=2?"#a8ff78":suited===1?"#ffd966":"#ff7878";
-                          return(
-                            <div key={pos} style={{display:"flex",alignItems:"center",gap:3}}>
-                              <span style={{fontSize:10}}>{pd.icon}</span>
-                              <span style={{fontSize:10,color:col}}>{suited} suited</span>
-                              {assigned>0&&<span style={{fontSize:9,color:"#555"}}>({assigned} fielded)</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {/* Roles */}
-                    <div style={{flex:1,minWidth:150}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>ROLES</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                        {ROLES.map(r=>{
-                          const n=roleCounts[r]||0;
-                          return n>0?<span key={r} style={{fontSize:10,color:"#aaa"}}><RoleIcon role={r} size={11}/> {r.substring(0,3)} ×{n}</span>:null;
-                        })}
-                      </div>
-                    </div>
-                    {/* Races */}
-                    <div style={{flex:2,minWidth:180}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>RACES</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                        {Object.entries(raceCounts).sort((a,b)=>b[1]-a[1]).map(([race,n])=>(
-                          <span key={race} style={{fontSize:10,color:"#aaa"}}>{RACE_ICONS[race]} {race} ×{n}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
+                  <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Race</span>
+                  {["All",...RACES_LIST].map(r=>{
+                    const count = r==="All" ? heroes.length : heroes.filter(h=>h.race===r).length;
+                    const isActive = filter.race === r;
+                    return(
+                      <button key={r} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,race:r}))}>
+                        {r}<span className="ct">{count}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               );
             })()}
-            <div className="rm-filter-bar" style={{marginBottom:12}}>
-              <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:155,minWidth:0,maxWidth:"100%"}}/>
+
+            {/* Secondary filters — slimmer row */}
+            <div className="rm-filter-bar" style={{marginBottom:14}}>
+              <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:160,minWidth:0,maxWidth:"100%"}}/>
               <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
-              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}</select>
-              <select value={filter.position} onChange={e=>setFilter(f=>({...f,position:e.target.value}))} style={IS}><option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
-              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Unhappy","Contract"].map(v=><option key={v} value={v}>{v}</option>)}</select>
+              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Away","Unhappy","Renewing"].map(v=><option key={v} value={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
-                {["Value","Level","XP","Stage","Morale","Contract","Combat","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
+                {["Value","Level","XP","Stage","Morale","Contract","Combat","Fatigue","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
               </select>
-              <span style={{fontSize:10,color:"#888",flexShrink:0}}>{filtered.length} shown</span>
+              <span className="pa-kicker" style={{flexShrink:0,letterSpacing:1.5}}>{filtered.length} shown</span>
             </div>
-            <div className="rm-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:7}}>
-              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={false} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
+
+            <div className="pa-grid">
+              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
             </div>
           </div>
         )}
@@ -8778,22 +9115,36 @@ export default function App(){
                 </span>
               </div>
 
-              {/* Market filter bar */}
-              <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+              {/* POSITION pill row — primary market filter */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
+                <span className="pa-kicker" style={{marginRight:8}}>Position</span>
+                {["All",...POS_KEYS].map(p=>{
+                  const count = p==="All"
+                    ? market.length
+                    : market.filter(h=>(POSITIONS[p]?.ideal||[]).includes(h.role)).length;
+                  const isActive = marketFilter.position === p;
+                  return(
+                    <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,position:p}))}>
+                      {p!=="All"&&<PositionIcon position={p} size={13}/>}
+                      {p}<span className="ct">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Secondary market filters */}
+              <div className="rm-filter-bar" style={{marginBottom:10}}>
+                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={IS}>
                   <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={IS}>
                   <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
-                  <option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}
-                </select>
-                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={IS}>
                   <option value="All">All Stages</option>
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
                 </select>
-                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
                   {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
@@ -8821,7 +9172,7 @@ export default function App(){
                 );
               })()}
 
-              <div className="rm-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:7}}>
+              <div className="pa-grid">
                 {(()=>{
                   const hasBazaar=buildings.find(b=>b.id==="bazaar"&&b.built);
                   const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
