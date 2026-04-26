@@ -4272,7 +4272,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
 
   return(
     <button onClick={onClick} draggable={draggable} onDragStart={onDragStart}
-      style={{textAlign:"left",display:"block",width:"100%",
+      style={{textAlign:"left",display:"flex",flexDirection:"column",width:"100%",height:"100%",
               background:selected?"#15110a":"#100c07",
               border:`1px solid ${borderColor}`,borderRadius:6,padding:0,cursor:draggable?"grab":"pointer",
               fontFamily:"'Lato',sans-serif",
@@ -4381,8 +4381,9 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         );
       })()}
 
-      {/* FOOTER — wage / value */}
-      <div style={{padding:"10px 16px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(201,168,106,0.03)",display:"flex",justifyContent:"space-between",alignItems:"center",borderRadius:"0 0 5px 5px"}}>
+      {/* FOOTER — wage / value (auto-margin pins it to the bottom so cards
+          stay aligned in a stretch grid regardless of trait count). */}
+      <div style={{marginTop:"auto",padding:"10px 16px",borderTop:"1px solid rgba(201,168,106,0.10)",background:"rgba(201,168,106,0.03)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",flexDirection:"column",gap:2}}>
           <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#8a7a55",textTransform:"uppercase"}}>Wage / Week</span>
           <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:13,color:"#bda478",fontVariantNumeric:"tabular-nums"}}>{hero.salary}g</span>
@@ -7962,22 +7963,35 @@ export default function App(){
     setScheduledOpponent(generateScheduledOpponent(1, newLeagueTable, newTierTowns, newTierId));
   };
 
+  // Best position for a hero = the lane where they score highest. Cached per
+  // filter pass via a Map so we don't recompute when sorting/filtering.
+  const bestPosFor=(hero,cache)=>{
+    if(cache&&cache.has(hero.id)) return cache.get(hero.id);
+    const best=POS_KEYS.reduce((b,p)=>calcHeroCombatScore(hero,p)>calcHeroCombatScore(hero,b)?p:b, POS_KEYS[0]);
+    if(cache) cache.set(hero.id,best);
+    return best;
+  };
   const filtered=useMemo(()=>{
+    const bestCache=new Map();
     let h=[...heroes];
     if(filter.role!=="All")h=h.filter(x=>x.role===filter.role);
-    // Position filter — which lane is hero assigned to
+    // Position filter = "show heroes whose best lane is X" (matches the POSITION
+    // pill counts). Previously this filtered by formation slot, which disagreed
+    // with the pill counts and surprised players.
     if(filter.position!=="All"){
-      const posHeroIds=new Set((formation[filter.position]||[]).filter(Boolean).map(x=>x.id));
-      h=h.filter(x=>posHeroIds.has(x.id));
+      h=h.filter(x=>bestPosFor(x,bestCache)===filter.position);
     }
     if(filter.race!=="All")h=h.filter(x=>x.race===filter.race);
-    if(filter.status==="Fit")h=h.filter(x=>!x.injured);
+    if(filter.status==="Fit")h=h.filter(x=>!x.injured&&!(x.awayWeeks>0));
     if(filter.status==="Injured")h=h.filter(x=>x.injured);
+    if(filter.status==="Away")h=h.filter(x=>(x.awayWeeks||0)>0);
     if(filter.status==="Unhappy")h=h.filter(x=>x.morale<50);
+    if(filter.status==="Renewing")h=h.filter(x=>x.negotiationPending||(x.contractWeeksLeft||0)<=WEEKS_PER_CONTRACT_YEAR*2);
+    // Legacy "Contract" alias kept so older saved filter state still works.
     if(filter.status==="Contract")h=h.filter(x=>(x.contractWeeksLeft||0)<=WEEKS_PER_CONTRACT_YEAR*2);
     if(filter.phase!=="All")h=h.filter(x=>agePhase(x)===filter.phase);
     if(filter.search)h=h.filter(x=>x.name.toLowerCase().includes(filter.search.toLowerCase())||(x.traits||[]).some(t=>t.toLowerCase().includes(filter.search.toLowerCase())));
-    const sorts={Value:x=>-x.value,Potential:x=>-x.stats.Potential,Level:x=>-x.level,XP:x=>-x.xp,Stage:x=>stageToCareerWeek(x.stage||"peak",x.stageProgress||0),Morale:x=>x.morale,Contract:x=>(x.contractWeeksLeft||0),Combat:x=>-(STAT_GROUPS.Combat.reduce((a,s)=>a+x.stats[s],0)/STAT_GROUPS.Combat.length),Salary:x=>x.salary};
+    const sorts={Value:x=>-x.value,Potential:x=>-x.stats.Potential,Level:x=>-x.level,XP:x=>-x.xp,Stage:x=>stageToCareerWeek(x.stage||"peak",x.stageProgress||0),Morale:x=>x.morale,Contract:x=>(x.contractWeeksLeft||0),Combat:x=>-(STAT_GROUPS.Combat.reduce((a,s)=>a+x.stats[s],0)/STAT_GROUPS.Combat.length),Salary:x=>x.salary,Fatigue:x=>-(x.fatigue||0)};
     if(sorts[filter.sortBy])h.sort((a,b)=>sorts[filter.sortBy](a)-sorts[filter.sortBy](b));
     return h;
   },[heroes,filter]);
@@ -8435,9 +8449,9 @@ export default function App(){
               <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
               <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
-              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Unhappy","Contract"].map(v=><option key={v} value={v}>{v}</option>)}</select>
+              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Away","Unhappy","Renewing"].map(v=><option key={v} value={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
-                {["Value","Level","XP","Stage","Morale","Contract","Combat","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
+                {["Value","Level","XP","Stage","Morale","Contract","Combat","Fatigue","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
               </select>
               <span className="pa-kicker" style={{flexShrink:0,letterSpacing:1.5}}>{filtered.length} shown</span>
             </div>
@@ -9128,22 +9142,36 @@ export default function App(){
                 </span>
               </div>
 
-              {/* Market filter bar */}
-              <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
-                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+              {/* POSITION pill row — primary market filter */}
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
+                <span className="pa-kicker" style={{marginRight:8}}>Position</span>
+                {["All",...POS_KEYS].map(p=>{
+                  const count = p==="All"
+                    ? market.length
+                    : market.filter(h=>(POSITIONS[p]?.ideal||[]).includes(h.role)).length;
+                  const isActive = marketFilter.position === p;
+                  return(
+                    <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,position:p}))}>
+                      {p!=="All"&&<PositionIcon position={p} size={13}/>}
+                      {p}<span className="ct">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Secondary market filters */}
+              <div className="rm-filter-bar" style={{marginBottom:10}}>
+                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={IS}>
                   <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={IS}>
                   <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
                 </select>
-                <select value={marketFilter.position} onChange={e=>setMarketFilter(f=>({...f,position:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
-                  <option value="All">All Positions</option>{POS_KEYS.map(p=><option key={p} value={p}>{POSITIONS[p].icon} {p}</option>)}
-                </select>
-                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={IS}>
                   <option value="All">All Stages</option>
                   {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
                 </select>
-                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={{fontSize:10,padding:"4px 8px",borderRadius:6,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.05)",color:"#f0e6d3",cursor:"pointer"}}>
+                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
                   {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
                 </select>
               </div>
