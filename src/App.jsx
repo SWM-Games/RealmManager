@@ -4354,11 +4354,15 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         </div>
       )}
 
-      {/* TRAITS */}
+      {/* TRAITS — chips have hover tooltips with the effect description */}
       <div style={{padding:"10px 14px",display:"flex",flexWrap:"wrap",gap:4,minHeight:hero.traits?.length?26:0,borderTop:"1px solid rgba(201,168,106,0.10)"}}>
-        {hero.traits.slice(0,4).map(t=>(
-          <span key={t} style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(201,168,106,0.08)",color:"#c9a86a",border:"1px solid rgba(201,168,106,0.25)",letterSpacing:1.2,textTransform:"uppercase"}}>{t}</span>
-        ))}
+        {hero.traits.slice(0,4).map(t=>{
+          const eff = TRAIT_EFFECTS[t];
+          return (
+            <span key={t} title={eff?.desc||t}
+              style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(201,168,106,0.08)",color:"#c9a86a",border:"1px solid rgba(201,168,106,0.25)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
+          );
+        })}
       </div>
 
       {/* SCOUTED / HIDDEN POTENTIAL */}
@@ -5312,26 +5316,39 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           </div>
         )}
 
-        {/* Rating summary with expandable multiplier breakdown */}
+        {/* Rating summary with expandable multiplier breakdown.
+            Note on the maths: calcPositionScore bakes role-pairing bonuses
+            into each lane's score, and calcFormationRating then multiplies
+            by the formation-wide race synergy. So the `raw` value the
+            function returns already includes role pairings, which made the
+            displayed Net Modifier collapse to ×1.00 whenever there was no
+            race synergy active — even if all three lanes had ideal pairings.
+            We re-derive a true pre-bonus base here by stripping each lane's
+            pairing multiplier back out, so the displayed maths
+            (base × synergy × pairings = effective) actually adds up. */}
         {(()=>{
-          // Build multiplier list
           const mults=[];
-          analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
           if(analysis.raceSynergy) mults.push({label:analysis.raceSynergy.name,icon:analysis.raceSynergy.icon,mult:analysis.raceSynergy.ratingMult,col:analysis.raceSynergy.color});
-          // Count role pairings active — match calcPositionScore's exact logic so
-          // display and actual math agree (previous `every(h=>roles.includes)` matched
-          // two Warriors against the Warrior+Paladin entry and reported the wrong mult).
+          analysis.active.forEach(s=>mults.push({label:s.name,icon:s.icon,mult:s.ratingMult,col:s.negative?"#ff7878":"#a8ff78"}));
+          // Build a true pre-bonus base by undoing each lane's pairing
+          // multiplier, while collecting active pairings for the breakdown.
+          let truePreBonus = 0;
           POS_KEYS.forEach(pos=>{
             const heroes2=(formation[pos]||[]).filter(Boolean);
-            if(heroes2.length===2){
+            if(heroes2.length===0) return;
+            const ps=calcPositionScore(heroes2,pos);
+            const lanePairing=ps.pairingMult||1.0;
+            truePreBonus += ps.score / lanePairing;
+            if(heroes2.length===2 && lanePairing>1.0){
               const sortedRoles=heroes2.map(h=>h.role).sort().join();
               const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
-              if(pp) mults.push({label:`${[...pp.roles].sort().join("+")} pairing`,icon:"🤝",mult:pp.mult,col:"#78c8ff"});
+              if(pp) mults.push({label:`${[...pp.roles].sort().join(" + ")} pairing`,icon:"🤝",mult:pp.mult,col:"#a8c97a"});
             }
           });
-          const netMult=mults.reduce((a,m)=>a*m.mult,1.0);
-          const positive=effective>=raw;
-          const delta=effective-raw;
+          const trueBase = Math.round(truePreBonus);
+          const netMult = trueBase>0 ? effective / trueBase : 1.0;
+          const positive = effective >= trueBase;
+          const delta = effective - trueBase;
           const LABEL={fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#8a7a55",letterSpacing:2,textTransform:"uppercase",lineHeight:1};
           const NUM={fontFamily:"'Space Grotesk',sans-serif",fontSize:13,fontVariantNumeric:"tabular-nums",lineHeight:1};
           return(
@@ -5341,7 +5358,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                 <span style={LABEL}>{placed} of 6</span>
                 <span style={{width:1,height:14,background:"rgba(201,168,106,0.20)"}}/>
                 <span style={LABEL}>Rating</span>
-                <span style={{...NUM,fontWeight:500,color:"#8a7a55",textDecoration:"line-through",textDecorationColor:"rgba(138,122,85,0.45)"}}>{raw}</span>
+                <span style={{...NUM,fontWeight:500,color:"#8a7a55",textDecoration:trueBase!==effective?"line-through":"none",textDecorationColor:"rgba(138,122,85,0.45)"}}>{trueBase}</span>
                 <span style={{...NUM,fontWeight:500,color:"#5e5340"}}>→</span>
                 <span style={{...NUM,fontWeight:700,color:"#d4c9a8"}}>{effective}</span>
                 <span style={LABEL}>Effective Rating</span>
@@ -8364,71 +8381,9 @@ export default function App(){
               );
             })()}
 
-            {/* Squad composition summary */}
-            {(()=>{
-              const active = heroes.filter(h=>!h.retired&&!h.injured);
-              // Race counts
-              const raceCounts={};
-              active.forEach(h=>{raceCounts[h.race]=(raceCounts[h.race]||0)+1;});
-              // Role counts
-              const roleCounts={};
-              active.forEach(h=>{roleCounts[h.role]=(roleCounts[h.role]||0)+1;});
-              // Position affinity — count heroes whose role is ideal for each position
-              const posSuited={};
-              POS_KEYS.forEach(pos=>{
-                posSuited[pos]=active.filter(h=>POSITIONS[pos].ideal.includes(h.role)).length;
-              });
-              // Also track how many are assigned
-              const posAssigned={};
-              POS_KEYS.forEach(pos=>{posAssigned[pos]=(formation[pos]||[]).filter(Boolean).length;});
-              return(
-                <div style={{marginBottom:12,padding:"9px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.05)"}}>
-                  <div style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-                    {/* Positions */}
-                    <div style={{flex:1,minWidth:130}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>POSITION DEPTH</div>
-                      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                        {POS_KEYS.map(pos=>{
-                          const pd=POSITIONS[pos];
-                          const suited=posSuited[pos]||0;
-                          const assigned=posAssigned[pos]||0;
-                          const col=suited>=2?"#a8ff78":suited===1?"#ffd966":"#ff7878";
-                          return(
-                            <div key={pos} style={{display:"flex",alignItems:"center",gap:3}}>
-                              <span style={{fontSize:10}}>{pd.icon}</span>
-                              <span style={{fontSize:10,color:col}}>{suited} suited</span>
-                              {assigned>0&&<span style={{fontSize:9,color:"#555"}}>({assigned} fielded)</span>}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    {/* Roles */}
-                    <div style={{flex:1,minWidth:150}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>ROLES</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                        {ROLES.map(r=>{
-                          const n=roleCounts[r]||0;
-                          return n>0?<span key={r} style={{fontSize:10,color:"#aaa"}}><RoleIcon role={r} size={11}/> {r.substring(0,3)} ×{n}</span>:null;
-                        })}
-                      </div>
-                    </div>
-                    {/* Races */}
-                    <div style={{flex:2,minWidth:180}}>
-                      <div style={{fontSize:9,color:"#888",letterSpacing:1,marginBottom:5}}>RACES</div>
-                      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
-                        {Object.entries(raceCounts).sort((a,b)=>b[1]-a[1]).map(([race,n])=>(
-                          <span key={race} style={{fontSize:10,color:"#aaa"}}>{RACE_ICONS[race]} {race} ×{n}</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
             {/* POSITION pill row — primary filter */}
-            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
-              <span className="pa-kicker" style={{marginRight:8}}>Position</span>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
+              <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Position</span>
               {["All",...POS_KEYS].map(p=>{
                 const count = p==="All"
                   ? heroes.length
@@ -8443,11 +8398,29 @@ export default function App(){
               })}
             </div>
 
-            {/* Secondary filters — slimmer row, full functionality preserved */}
+            {/* RACE pill row — secondary primary filter (replaces dropdown) */}
+            {(()=>{
+              const RACES_LIST = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
+              return(
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
+                  <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Race</span>
+                  {["All",...RACES_LIST].map(r=>{
+                    const count = r==="All" ? heroes.length : heroes.filter(h=>h.race===r).length;
+                    const isActive = filter.race === r;
+                    return(
+                      <button key={r} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,race:r}))}>
+                        {r}<span className="ct">{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* Secondary filters — slimmer row */}
             <div className="rm-filter-bar" style={{marginBottom:14}}>
               <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:160,minWidth:0,maxWidth:"100%"}}/>
               <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
-              <select value={filter.race} onChange={e=>setFilter(f=>({...f,race:e.target.value}))} style={IS}><option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}</select>
               <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
               <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Away","Unhappy","Renewing"].map(v=><option key={v} value={v}>{v}</option>)}</select>
               <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
@@ -9199,7 +9172,7 @@ export default function App(){
                 );
               })()}
 
-              <div className="rm-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:7}}>
+              <div className="pa-grid">
                 {(()=>{
                   const hasBazaar=buildings.find(b=>b.id==="bazaar"&&b.built);
                   const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
