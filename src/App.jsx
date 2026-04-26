@@ -11,6 +11,19 @@ function useIsMobile() {
   return mobile;
 }
 
+// ─── ESCAPE KEY HOOK ─────────────────────────────────────────────────────────
+// Calls onEscape when Escape is pressed. Pass enabled=false to skip (e.g. when
+// a higher-priority modal is open). Modals/panels opt in individually so we
+// don't need a global listener that has to know overlay z-order.
+function useEscapeKey(onEscape, enabled = true) {
+  useEffect(() => {
+    if (!enabled || typeof onEscape !== "function") return;
+    const handler = (e) => { if (e.key === "Escape") onEscape(e); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onEscape, enabled]);
+}
+
 // Global responsive CSS — injected once, handles all breakpoints
 const RESPONSIVE_CSS = `
   * { box-sizing: border-box; }
@@ -2164,7 +2177,8 @@ function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
 }
 
 // Weekly tribute income — now flat per tier (no position bonus)
-function weeklyRankIncome(tierId, position) {
+function weeklyRankIncome(tierId) {
+  // Tribute is flat per tier — does not scale with league position.
   const tier = TIERS[tierId] || TIERS.iron;
   return tier.tributeBase;
 }
@@ -3802,6 +3816,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 }
 
 function WeeklySummary({summary, onDismiss, townColor}){
+  useEscapeKey(onDismiss, !!summary);
   if(!summary) return null;
   const {won,enemy,enemyDiff,enemyPower,playerTier:summaryTier,winChance,goldGain,wages,tribute,heroXP,levelUps,injuries,exhausted,nextOpp,week,topWeakLink,effective,adjustedEnemyPower,phaseWinChances,phaseRolls} = summary;
   const netGold = goldGain - wages + tribute;
@@ -4271,7 +4286,9 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   }
 
   return(
-    <button onClick={onClick} draggable={draggable} onDragStart={onDragStart}
+    <div onClick={onClick} draggable={draggable} onDragStart={onDragStart}
+      role="button" tabIndex={onClick?0:-1}
+      onKeyDown={onClick?(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(e);}}:undefined}
       style={{textAlign:"left",display:"flex",flexDirection:"column",width:"100%",height:"100%",
               background:selected?"#15110a":"#100c07",
               border:`1px solid ${borderColor}`,borderRadius:6,padding:0,cursor:draggable?"grab":"pointer",
@@ -4411,12 +4428,13 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           </button>
         </div>
       )}
-    </button>
+    </div>
   );
 }
 
 function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true}){
   const [tab,setTab]=useState("Combat");
+  useEscapeKey(onClose, !!onClose);
   if(!hero)return null;
   const phase=agePhase(hero);
   const declining=["fading","veteran"].includes(phase);
@@ -4855,6 +4873,7 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
 // Hire tab remains the canonical place to review bids over their full window.
 
 function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismiss }) {
+  useEscapeKey(onDismiss, !!(bids && bids.length));
   if (!bids || bids.length === 0) return null;
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",zIndex:160,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:20}}
@@ -4940,6 +4959,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
 // a retrospective: W/L, tier movement, hero progression, buildings, ledger.
 
 function SeasonSummaryModal({ summary, onDismiss, townColor }) {
+  useEscapeKey(onDismiss, !!summary);
   if (!summary) return null;
   const { season, wins, losses, tier, finalPosition, movement, newTier, levelUps, newSignings, departures, buildingsBuilt, finances } = summary;
   const tierMeta = TIERS[tier] || TIERS.iron;
@@ -5205,6 +5225,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
   const [showBreakdown,setShowBreakdown]=useState(false);
+  useEscapeKey(()=>setPickerOpen(null), !!pickerOpen);
 
   const {analysis,effective,raw}=calcFormationRating(formation);
   const assignedIds=new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
@@ -5226,7 +5247,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
   };
 
   const clearAll=()=>setFormation({Vanguard:[null,null],Skirmisher:[null,null],Arbiter:[null,null]});
+  const benchInjured=()=>setFormation(POS_KEYS.reduce((acc,pos)=>{
+    acc[pos]=(formation[pos]||[null,null]).map(h=>h&&h.injured?null:h);
+    return acc;
+  },{}));
   const placed=POS_KEYS.reduce((a,p)=>(formation[p]||[]).filter(Boolean).length+a,0);
+  const injuredInFormation=POS_KEYS.reduce((a,p)=>(formation[p]||[]).filter(h=>h&&h.injured).length+a,0);
 
   // Build picker hero list for the open slot
   const pickerHeroes=useMemo(()=>{
@@ -5267,6 +5293,13 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             <div className="pa-sub">{placed} of 6 assigned · Drag heroes from the bench into a lane</div>
           </div>
           <div style={{display:"flex",gap:10}}>
+            {injuredInFormation>0&&(
+              <button className="pa-secondary" onClick={benchInjured}
+                title="Move injured heroes to the bench so they can recover"
+                style={{borderColor:"rgba(201,87,87,0.45)",color:"#c95757"}}>
+                🩸 Bench Injured ({injuredInFormation})
+              </button>
+            )}
             <button className="pa-secondary" onClick={clearAll}>Clear All</button>
           </div>
         </div>
@@ -5358,7 +5391,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                 <span style={LABEL}>{placed} of 6</span>
                 <span style={{width:1,height:14,background:"rgba(201,168,106,0.20)"}}/>
                 <span style={LABEL}>Rating</span>
-                <span style={{...NUM,fontWeight:500,color:"#8a7a55",textDecoration:trueBase!==effective?"line-through":"none",textDecorationColor:"rgba(138,122,85,0.45)"}}>{trueBase}</span>
+                <span style={{...NUM,fontWeight:500,color:"#8a7a55",textDecorationLine:trueBase!==effective?"line-through":"none",textDecorationColor:"rgba(138,122,85,0.45)"}}>{trueBase}</span>
                 <span style={{...NUM,fontWeight:500,color:"#5e5340"}}>→</span>
                 <span style={{...NUM,fontWeight:700,color:"#d4c9a8"}}>{effective}</span>
                 <span style={LABEL}>Effective Rating</span>
@@ -5461,17 +5494,24 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   const stageColor=agePhaseColor(agePhase(h));
                   const fat=h.fatigue||0;
                   const {color:fatCol}=fatigueLabel(fat);
+                  const slotBorderColor = h.injured
+                    ? "rgba(201,87,87,0.55)"
+                    : (isPickerTarget?"#c9a86a":"rgba(201,168,106,0.18)");
+                  const slotBorderStyle = h.injured ? "dashed" : "solid";
                   return(
                     <div key={slotIdx} onClick={()=>setPickerOpen({pos,slotIdx})}
                       style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",height:78,
-                        background:isPickerTarget?"rgba(201,168,106,0.08)":"rgba(201,168,106,0.03)",
-                        border:`1px solid ${isPickerTarget?"#c9a86a":"rgba(201,168,106,0.18)"}`,
+                        background:isPickerTarget?"rgba(201,168,106,0.08)":h.injured?"rgba(201,87,87,0.05)":"rgba(201,168,106,0.03)",
+                        border:`1px ${slotBorderStyle} ${slotBorderColor}`,
                         cursor:"pointer",position:"relative"}}>
                       <div style={{width:46,height:46,background:"#1a1410",border:"1px solid rgba(201,168,106,0.20)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
                         <RoleIcon role={h.role} size={28}/>
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#e6dcbf",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
+                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#e6dcbf",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
+                          <span style={{overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</span>
+                          {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#c95757",background:"rgba(201,87,87,0.14)",padding:"1px 6px",borderRadius:6,letterSpacing:0.5,whiteSpace:"nowrap"}}>🩸 Injured {h.injuryWeeks}w</span>}
+                        </div>
                         <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#8a7a55",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
                           {h.race} · {h.role} · <span style={{color:stageColor}}>{agePhase(h).charAt(0).toUpperCase()+agePhase(h).slice(1)}</span>
                         </div>
@@ -5487,6 +5527,13 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
                           {fit==="ideal"?"✓ Ideal":fit==="penalty"?"✕ Penalty":"— Neutral"}
                         </div>
+                        {h.injured&&(
+                          <button onClick={e=>{e.stopPropagation();remove(pos,slotIdx);}}
+                            title="Move to bench so the hero can recover"
+                            style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,padding:"3px 7px",background:"transparent",border:"1px solid rgba(201,87,87,0.45)",color:"#c95757",borderRadius:3,cursor:"pointer",textTransform:"uppercase"}}>
+                            Bench
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -5828,7 +5875,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           const isYou=t.isPlayer;
           const played=t.wins+t.losses;
           const winPctStr=played>0?`${Math.round(t.winPct*100)}%`:"—";
-          const tribute=weeklyRankIncome(playerTier, pos);
+          const tribute=weeklyRankIncome(playerTier);
           return(
             <div key={t.name} style={{
               display:"grid",gridTemplateColumns:"36px 1fr 32px 32px 48px 56px",gap:4,
@@ -5871,14 +5918,14 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
             <div>
-              <div style={{fontSize:10,color:"#999",marginBottom:2}}>{currentTier.name} · Position {playerPos} of 8</div>
+              <div style={{fontSize:10,color:"#999",marginBottom:2}}>{currentTier.name} · flat for every town in tier</div>
               <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:"#a8ff78",lineHeight:1}}>{weeklyIncome.toLocaleString()}g</div>
-              <div style={{fontSize:10,color:"#999",marginTop:2}}>per week</div>
+              <div style={{fontSize:10,color:"#999",marginTop:2}}>per week · league rank does not change income</div>
             </div>
             {!isPlatinum&&(
               <div style={{textAlign:"right",padding:"6px 10px",background:"rgba(168,255,120,0.06)",borderRadius:7,border:"1px solid rgba(168,255,120,0.15)"}}>
                 <div style={{fontSize:9,color:"#a8ff78",marginBottom:1}}>Promote to {nextTier?.name}</div>
-                <div style={{fontSize:12,fontWeight:700,color:"#a8ff78"}}>+{Math.max(0,(nextTier?.tributeBase||0)-currentTier.tributeBase)}g/wk base</div>
+                <div style={{fontSize:12,fontWeight:700,color:"#a8ff78"}}>+{Math.max(0,(nextTier?.tributeBase||0)-currentTier.tributeBase)}g/wk on promotion</div>
               </div>
             )}
           </div>
@@ -7349,8 +7396,9 @@ export default function App(){
         const newRep = Math.min(99, (cursedStats.Reputation||0) + (result.won ? 0.5 : 0.2));
         const grownStats = {...cursedStats, Form: Math.round(postInjuryForm * 10) / 10, Reputation: Math.round(newRep * 10) / 10};
 
-        // Increment formation weeks and check potential reveal (8-10 weeks of active play)
-        const newWeeksInFormation = (h.weeksInFormation||0) + 1;
+        // Increment formation weeks and check potential reveal (8-10 weeks of active play).
+        // Injured heroes don't accrue tenure — they fought hurt, treat the week as benched.
+        const newWeeksInFormation = injured ? (h.weeksInFormation||0) : (h.weeksInFormation||0) + 1;
         const revealThreshold = 8 + Math.floor(Math.random()*3); // 8-10 weeks
         const potentialRevealed = h.potentialRevealed || newWeeksInFormation >= revealThreshold;
 
@@ -7573,7 +7621,7 @@ export default function App(){
     addLog(`💸 Weekly wages: ${wages.toLocaleString()}g`,"warning");
 
     // Bankruptcy grace period — if gold can't cover wages, start/advance counter
-    const tributeAmount=weeklyRankIncome(playerTier, tierPosition);
+    const tributeAmount=weeklyRankIncome(playerTier);
     setGold(g=>g+tributeAmount);
     addLog(`${TIERS[playerTier]?.icon||'👑'} ${TIERS[playerTier]?.name||'Iron'} tribute: +${tributeAmount.toLocaleString()}g/wk`,"success");
 
@@ -7617,7 +7665,7 @@ export default function App(){
     }
 
     // Record this week's finances for the Ledger tab
-    const weekFinances = { week:week+1, tribute:tributeAmount, wages, raidGold:result.goldSwing, eventGold:0, signingCosts:0, netGold:tributeAmount - wages + result.goldSwing, wasRaid:true };
+    const weekFinances = { week:seasonWeek+1, tribute:tributeAmount, wages, raidGold:result.goldSwing, eventGold:0, signingCosts:0, netGold:tributeAmount - wages + result.goldSwing, wasRaid:true };
     setLastWeekFinances(weekFinances);
     setSeasonFinances(prev=>({ tribute:prev.tribute+tributeAmount, raidGold:prev.raidGold+(result.goldSwing||0), wages:prev.wages+wages, eventGold:prev.eventGold, signingCosts:prev.signingCosts }));
 
@@ -8039,7 +8087,7 @@ export default function App(){
   const STAT_ROWS = [
     ["Gold",          gold.toLocaleString()+"g",                                                         gold<0?"#c95757":"#c9a86a"],
     ["Tier",          `${currentTier.icon} ${currentTier.name}, ${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`, "#d4c9a8"],
-    ["Income",        `+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g`,    "#a8c97a"],
+    ["Income",        `+${weeklyRankIncome(playerTier).toLocaleString()}g`,    "#a8c97a"],
     ["Wages",         `${wages.toLocaleString()}g`,                                                 "#bda478"],
     ["Week",          `${seasonWeek}`,                                                              "#d4c9a8"],
     ["Season",        `${season}`,                                                                  "#d4c9a8"],
@@ -8155,7 +8203,7 @@ export default function App(){
       <div className="rm-topbar">
         <span className="rm-topbar-title" style={{color:townColor}}>{townName}</span>
         <div className="rm-topbar-chips">
-          {[["Gold",gold.toLocaleString()+"g","#ffd966"],[`${currentTier.icon} ${currentTier.name}`,`${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`,currentTier.color],["Tribute",`+${weeklyRankIncome(playerTier,currentTierPosition).toLocaleString()}g`,"#a8ff78"],["Wages",wages+"g","#ff9f43"],["Week",week,"#f0e6d3"]].map(([l,v,c])=>(
+          {[["Gold",gold.toLocaleString()+"g","#ffd966"],[`${currentTier.icon} ${currentTier.name}`,`${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`,currentTier.color],["Tribute",`+${weeklyRankIncome(playerTier).toLocaleString()}g`,"#a8ff78"],["Wages",wages+"g","#ff9f43"],["Week",seasonWeek,"#f0e6d3"]].map(([l,v,c])=>(
             <div key={l} className="rm-topbar-chip">
               <div className="rm-topbar-chip-label">{l}</div>
               <div className="rm-topbar-chip-value" style={{color:c}}>{v}</div>
@@ -8439,7 +8487,7 @@ export default function App(){
         {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
 
         {/* DOMINION */}
-        {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier,currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
+        {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
 
         {/* BATTLE */}
         {tab==="Battle"&&(
@@ -8805,12 +8853,26 @@ export default function App(){
                           {formAnalysis.positive.length>0&&<div style={{fontSize:10,color:"#a8ff78",marginTop:2}}>✓ {formAnalysis.positive.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.negative.length>0&&<div style={{fontSize:10,color:"#ff7878",marginTop:2}}>⚠️ {formAnalysis.negative.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.raceSynergy&&<div style={{fontSize:10,marginTop:2}}><span style={{color:formAnalysis.raceSynergy.color}}>{formAnalysis.raceSynergy.icon} {formAnalysis.raceSynergy.name}</span><span style={{color:"#999"}}> ×{formAnalysis.raceSynergy.ratingMult}</span></div>}
-                          <div style={{fontSize:10,color:"#888",marginTop:2}}>Wages due: {wages}g · Tribute: +{weeklyRankIncome(playerTier,currentTierPosition)}g</div>
+                          <div style={{fontSize:10,color:"#888",marginTop:2}}>Wages due: {wages}g · Tribute: +{weeklyRankIncome(playerTier)}g</div>
                         </div>
                       );
                     })()}
 
-                    <button onClick={startBattle} style={{width:"100%",padding:"13px 0",borderRadius:7,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#ff9f43,#ffd966)",color:"#0d0d1a",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14}}>⚔️ GO TO BATTLE</button>
+                    {(()=>{
+                      const placedCount=POS_KEYS.reduce((a,p)=>(formation[p]||[]).filter(Boolean).length+a,0);
+                      const battleReady=placedCount>=3;
+                      return(<>
+                        <button onClick={startBattle} disabled={!battleReady}
+                          title={battleReady?undefined:"Set at least 3 heroes in Tactics first"}
+                          style={{width:"100%",padding:"13px 0",borderRadius:7,border:"none",
+                            cursor:battleReady?"pointer":"not-allowed",
+                            background:battleReady?"linear-gradient(135deg,#ff9f43,#ffd966)":"#2a2218",
+                            color:battleReady?"#0d0d1a":"#5a4d35",
+                            fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,
+                            opacity:battleReady?1:0.75}}>⚔️ GO TO BATTLE</button>
+                        {!battleReady&&<div style={{fontSize:10,color:"#ff9f43",marginTop:6,textAlign:"center"}}>Assign at least 3 heroes in Tactics to fight</div>}
+                      </>);
+                    })()}
 
                     {missionResult&&(
                       <div style={{marginTop:10,padding:"8px 12px",background:"rgba(255,255,255,0.02)",borderRadius:9,border:"1px solid rgba(255,255,255,0.06)",fontSize:10,color:"#999"}}>
@@ -9348,7 +9410,7 @@ export default function App(){
               {!f&&<div style={{fontSize:11,color:"#888"}}>No activity recorded yet — complete a battle or rest week.</div>}
               {f&&<>
                 {row("⚔️ Battle earnings",  f.raidGold>0?"+"+f.raidGold.toLocaleString()+"g":"—",  f.raidGold>0?"#a8ff78":"#888")}
-                {row("👑 Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#78c8ff", `${currentTier.icon} ${currentTier.name} · position ${currentTierPosition}`)}
+                {row("👑 Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#78c8ff", `${currentTier.icon} ${currentTier.name} · flat per tier`)}
                 {row("💸 Wages",            "−"+f.wages.toLocaleString()+"g",                             "#ff9f43", `${heroes.filter(h=>!h.retired).length} heroes on contract`)}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,marginTop:4}}>
                   <div style={{fontSize:12,fontWeight:700,color:"#f0e6d3",fontFamily:"'Cinzel',serif"}}>Net</div>
