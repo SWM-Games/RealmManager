@@ -6,7 +6,8 @@ import {
   generateHero, buildRaidSimulation, calcFormationRating, calcPositionScore,
   calcSpecPenalty, growHeroStats, calcTierPosition, weeklyRankIncome,
   applyHealScar, calcMatchScore, generateTierTowns, generateScheduledOpponent,
-  managerTaunt, TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
+  managerTaunt, generateRivalRoster, rivalAskingPrice,
+  TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -265,6 +266,66 @@ describe("towns and rivals", () => {
     const even = managerTaunt(manager, { wins: 1, losses: 1 });
     expect(ahead).not.toBe(behind);
     expect(even).not.toBe(ahead);
+  });
+});
+
+// ── rival rosters & poaching ────────────────────────────────────────────────
+describe("generateRivalRoster", () => {
+  it("produces six lane-covering notables calibrated to the town's power", () => {
+    for (let trial = 0; trial < 20; trial++) {
+      const [town] = generateTierTowns("silver");
+      const roster = generateRivalRoster(town, "silver");
+      expect(roster.length).toBe(6);
+      // two heroes per lane, ideal roles
+      expect(roster.filter((h) => ["Warrior", "Paladin"].includes(h.role)).length).toBe(2);
+      expect(roster.filter((h) => ["Ranger", "Rogue"].includes(h.role)).length).toBe(2);
+      expect(roster.filter((h) => ["Mage", "Cleric"].includes(h.role)).length).toBe(2);
+      // lanes sum near the power the player has been fighting
+      const formation = {
+        Vanguard: roster.slice(0, 2), Skirmisher: roster.slice(2, 4), Arbiter: roster.slice(4, 6),
+      };
+      const total = POS_KEYS.reduce((a, p) => a + calcPositionScore(formation[p], p).score, 0);
+      expect(total).toBeGreaterThan(town.power * 0.55);
+      expect(total).toBeLessThan(town.power * 1.75);
+      // stats stay legal and Potential covers them
+      roster.forEach((h) => {
+        expect(h.stats.Potential).toBeLessThanOrEqual(99);
+        expect(h.stats.Strength).toBeLessThanOrEqual(h.stats.Potential);
+        expect(h.value).toBeGreaterThan(0);
+      });
+    }
+  });
+});
+
+describe("rivalAskingPrice", () => {
+  const town = (arch, h2h = { wins: 0, losses: 0 }) => ({
+    manager: { name: "T", archetype: arch, title: "t" }, h2h, power: 100,
+  });
+  const hero = () => {
+    const h = generateHero(1, false, false, false, "Warrior", null, "bronze");
+    return h;
+  };
+
+  it("always demands a premium over base value", () => {
+    for (let i = 0; i < 30; i++) {
+      const h = hero();
+      expect(rivalAskingPrice(town("butcher"), h)).toBeGreaterThan(h.value);
+    }
+  });
+  it("gamblers sell cheaper than schemers", () => {
+    const h = hero();
+    expect(rivalAskingPrice(town("gambler"), h)).toBeLessThan(rivalAskingPrice(town("schemer"), h));
+  });
+  it("beating a rival raises their asking price (nobody sells cheap to their tormentor)", () => {
+    const h = hero();
+    const neutral = rivalAskingPrice(town("butcher", { wins: 0, losses: 0 }), h);
+    const tormented = rivalAskingPrice(town("butcher", { wins: 4, losses: 0 }), h);
+    expect(tormented).toBeGreaterThan(neutral);
+  });
+  it("the talisman costs dearly", () => {
+    const h = hero();
+    expect(rivalAskingPrice(town("butcher"), h, true))
+      .toBeGreaterThan(rivalAskingPrice(town("butcher"), h, false));
   });
 });
 

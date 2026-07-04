@@ -233,7 +233,7 @@ const RESPONSIVE_CSS = `
   @media (max-width: 640px) {
     .rm-sidebar { display: none; }
     .rm-content { margin-left: 0; }
-    .rm-main { padding: 12px 12px 80px; }
+    .rm-main { padding: 12px 12px 80px; overflow-x: hidden; }
     .rm-main-shifted { padding-right: 12px; }
 
     /* Top bar */
@@ -2060,7 +2060,16 @@ const MANAGER_ARCHETYPES = [
              behind:"Martyrdom is just a longer game." } },
 ];
 
-function pickManager() {
+function pickManager(usedNames) {
+  // Avoid two towns in the same league sharing a manager
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const arch = pick(MANAGER_ARCHETYPES);
+    const name = pick(arch.names);
+    if (!usedNames || !usedNames.has(name)) {
+      usedNames?.add(name);
+      return { name, archetype: arch.id, title: arch.title };
+    }
+  }
   const arch = pick(MANAGER_ARCHETYPES);
   return { name: pick(arch.names), archetype: arch.id, title: arch.title };
 }
@@ -2077,6 +2086,7 @@ export function generateTierTowns(tierId, existingNames=[]) {
   const tier = TIERS[tierId] || TIERS.iron;
   const pool = [...TIER_NAME_POOLS[tierId]].filter(n => !existingNames.includes(n));
   const shuffled = pool.sort(() => Math.random() - 0.5);
+  const usedManagerNames = new Set();
   return shuffled.slice(0, 7).map(name => ({
     name,
     tierId,
@@ -2085,7 +2095,7 @@ export function generateTierTowns(tierId, existingNames=[]) {
     wins: 0,
     losses: 0,
     abilities: assignTownAbilities(tierId),
-    manager: pickManager(),
+    manager: pickManager(usedManagerNames),
     h2h: { wins:0, losses:0 }, // player's record vs this town — persists across seasons
   }));
 }
@@ -2577,6 +2587,52 @@ export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, 
 
 const WEEKS_PER_CONTRACT_YEAR = 42; // 1 contract season = 1 game season
 const ROSTER_CAP = 12; // max heroes on squad at any time
+
+// ─── RIVAL ROSTERS ───────────────────────────────────────────────────────────
+// Every rival town keeps six notables — two per lane — generated when first
+// scouted and calibrated so their three lanes sum to roughly the town's power.
+// Rosters last one season (scouting is seasonal work) and each town will part
+// with at most one hero per season.
+export function generateRivalRoster(town, tierId) {
+  const laneRoles = [["Warrior","Paladin"],["Ranger","Rogue"],["Mage","Cleric"]];
+  const roster = laneRoles.flatMap((pair, li) =>
+    pair.map((role, ri) => generateHero(
+      Date.now() + li*100 + ri*10 + rand(0, 9) + rand(0, 999999),
+      false, Math.random() < 0.30, false, role, null, tierId
+    ))
+  );
+  // Calibrate combat weight to the town's power so a scouted squad IS the
+  // power number you've been fighting, not a random second dice roll
+  const formation = { Vanguard:[roster[0],roster[1]], Skirmisher:[roster[2],roster[3]], Arbiter:[roster[4],roster[5]] };
+  const total = POS_KEYS.reduce((a, p) => a + calcPositionScore(formation[p], p).score, 0);
+  const f = Math.min(1.6, Math.max(0.6, (town.power || 100) / Math.max(1, total)));
+  return roster.map(h => {
+    const stats = { ...h.stats };
+    ALL_STATS.forEach(s => {
+      if (s === "Potential" || s === "Form") return;
+      stats[s] = Math.max(10, Math.min(99, Math.round((stats[s] || 10) * f)));
+    });
+    stats.Potential = Math.min(99, Math.max(stats.Potential || 50,
+      ...PHYSICAL_STATS.map(s => stats[s] || 10)));
+    const scaled = { ...h, stats, baseStats: { ...stats } };
+    scaled.value = calcHeroValue(scaled);
+    scaled.salary = Math.floor(scaled.salary * f);
+    return scaled;
+  });
+}
+
+// What a rival demands for one of their own: value plus a premium set by the
+// manager's temperament, sweetened further if you've been beating them (nobody
+// sells cheap to their tormentor), and a heavy talisman surcharge.
+export function rivalAskingPrice(town, hero, isTalisman = false) {
+  const base = Math.max(hero.value || 0, calcHeroValue(hero));
+  const ARCH_MULT = { gambler: 1.15, butcher: 1.35, drillmaster: 1.35, warlock: 1.40, zealot: 1.45, schemer: 1.50 };
+  let mult = ARCH_MULT[town.manager?.archetype] ?? 1.30;
+  const grudge = Math.max(0, (town.h2h?.wins || 0) - (town.h2h?.losses || 0));
+  mult += Math.min(0.20, grudge * 0.05);
+  if (isTalisman) mult += 0.50;
+  return Math.max(100, Math.round(base * mult / 10) * 10);
+}
 
 export function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null,forcedRace=null,tierId="iron"){
   const RACES = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
@@ -7507,6 +7563,54 @@ export default function App(){
     // Complete sign_hero objective
   };
 
+  // ── RIVAL SQUADS: scout a town's notables, then buy one out ───────────────
+  const scoutTownSquad=(townName)=>{
+    const town=tierEnemyTowns.find(t=>t.name===townName);
+    if(!town||town.squadScouted) return;
+    const hasObservatory=buildings.find(b=>b.id==="scouts"&&b.built);
+    const cost=Math.round((40*(TIERS[playerTier]?.difficulty||1)+40)*(hasObservatory?0.5:1));
+    if(gold<cost){ addLog(`⚠️ A squad report on ${townName} costs ${cost}g — the coffers can't cover it.`,"warning"); return; }
+    setGold(g=>g-cost);
+    setTierEnemyTowns(ts=>ts.map(t=>t.name===townName
+      ? {...t, squadScouted:true, roster:(t.roster&&t.roster.length)?t.roster:generateRivalRoster(t, playerTier)}
+      : t));
+    addLog(`🔭 Squad report on ${townName} (−${cost}g) — six notables identified${hasObservatory?" (Observatory rate)":""}.`,"info");
+  };
+
+  const buyRivalHero=(townName, heroId)=>{
+    const town=tierEnemyTowns.find(t=>t.name===townName);
+    const hero=town?.roster?.find(h=>h.id===heroId);
+    if(!town||!hero) return;
+    if((town.soldThisSeason||0)>=1){
+      addLog(`💢 ${town.manager?.name||townName} refuses — no realm sells twice in a season.`,"warning");
+      return;
+    }
+    if(heroes.filter(x=>!x.retired).length>=ROSTER_CAP){
+      addLog(`⚠️ Roster full (${ROSTER_CAP} heroes). Release or sell a hero first.`,"warning");
+      return;
+    }
+    const scores=town.roster.map(h=>Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))));
+    const isTalisman=Math.max(...scores)===Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p)))&&town.roster.length>1;
+    const price=rivalAskingPrice(town, hero, isTalisman);
+    if(gold<price) return;
+    setGold(g=>g-price);
+    setSeasonFinances(prev=>({...prev, signingCosts:prev.signingCosts+price}));
+    const nh={...hero, id:Date.now(), morale:75, fatigue:0, injured:false, injuryWeeks:0,
+      weeksInSquad:0, weeksInFormation:0, weeksUnplayed:0, potentialRevealed:false,
+      contractYears:2, contractWeeks:2*WEEKS_PER_CONTRACT_YEAR, contractWeeksLeft:2*WEEKS_PER_CONTRACT_YEAR,
+      negotiationPending:false, negotiationIgnoredWeeks:0, mentorBonus:null,
+      baseStats:hero.baseStats||{...hero.stats}, value:calcHeroValue(hero)};
+    setHeroes(hs=>[...hs,nh]);
+    // The seller is weakened — their power drops with their notable
+    const newPower=Math.max(Math.round((TIERS[playerTier]?.powerMin||60)*0.85), town.power-Math.max(4,Math.round(town.power*0.08)));
+    setTierEnemyTowns(ts=>ts.map(t=>t.name===townName
+      ? {...t, roster:t.roster.filter(h=>h.id!==heroId), soldThisSeason:(t.soldThisSeason||0)+1, power:newPower}
+      : t));
+    setLeagueTable(prev=>prev[townName]?{...prev,[townName]:{...prev[townName],power:newPower}}:prev);
+    addLog(`🪙 Poached ${hero.name} from ${townName} for ${price.toLocaleString()}g${town.manager?` — ${town.manager.name} will not forget this`:""}.`,"success");
+    addChronicle(`🪙 ${hero.name} bought out of ${townName} for ${price.toLocaleString()}g${isTalisman?" — their talisman, taken":""}.`);
+  };
+
   const buildBuilding=b=>{
     if(gold<b.cost)return;
     setGold(g=>g-b.cost);
@@ -8672,8 +8776,9 @@ export default function App(){
     const relegatedOut = sortedAI.slice(-2).map(t=>t.name); // bottom 2 AI leave
     const staying = (tierEnemyTowns||[]).filter(t=>!promotedOut.includes(t.name)&&!relegatedOut.includes(t.name));
 
-    // Refresh power of staying teams
-    const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax)}));
+    // Refresh power of staying teams; rosters and squad reports expire with
+    // the season (scouting is seasonal work, and squads turn over)
+    const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax), roster:undefined, squadScouted:false, soldThisSeason:0}));
 
     // Generate replacements: 2 from tier above (promoted in from below), 2 from tier below (relegated from above)
     const existingNames = refreshedStaying.map(t=>t.name);
@@ -9953,8 +10058,82 @@ export default function App(){
               </div>
             )}
 
+            {/* ══ RIVAL ROSTERS — scout a league rival, buy their notables ══ */}
+            <div style={{marginBottom:28,borderTop:transferBids.length>0?"1px solid rgba(60,52,38,0.108)":"none",paddingTop:transferBids.length>0?20:0}}>
+              <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4,flexWrap:"wrap"}}>
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>The Rival Rosters</div>
+                <span style={{fontSize:10,color:"#6E6350"}}>every league rival keeps six notables — scout a squad, then buy one out of their banner</span>
+              </div>
+              <div style={{fontSize:9,color:"#6E6350",marginBottom:12,fontStyle:"italic"}}>Rivals sell at a premium set by their manager's temperament — and never more than once a season. Poaching weakens their power.</div>
+              {(()=>{
+                const hasObservatory=buildings.find(b=>b.id==="scouts"&&b.built);
+                const scoutCost=Math.round((40*(TIERS[playerTier]?.difficulty||1)+40)*(hasObservatory?0.5:1));
+                const rosterFull=heroes.filter(x=>!x.retired).length>=ROSTER_CAP;
+                return (tierEnemyTowns||[]).map(t=>{
+                  const scores=(t.roster||[]).map(h=>Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))));
+                  const talismanMax=scores.length?Math.max(...scores):0;
+                  const sold=(t.soldThisSeason||0)>=1;
+                  return(
+                    <div key={t.name} style={{marginBottom:8,border:"1px solid rgba(60,90,120,0.3)",borderRadius:3,background:"rgba(60,90,120,0.045)",overflow:"hidden"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px"}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{t.name}</span>
+                          <span style={{fontSize:10,color:"#6E6350",marginLeft:8,fontStyle:"italic"}}>{t.manager?`${t.manager.name}, ${t.manager.title}`:""}</span>
+                          <span style={{fontSize:9,color:"#6E6350",marginLeft:8}}>Power ~{t.power}</span>
+                          {sold&&<span style={{fontSize:8,fontWeight:700,color:"#9A5B2B",background:"rgba(154,91,43,0.15)",padding:"1px 6px",borderRadius:3,marginLeft:8}}>WILL NOT SELL AGAIN THIS SEASON</span>}
+                        </div>
+                        {!t.squadScouted?(
+                          <button onClick={()=>scoutTownSquad(t.name)} disabled={gold<scoutCost}
+                            style={{padding:"6px 14px",borderRadius:3,border:"1px solid rgba(60,90,120,0.5)",
+                              cursor:gold<scoutCost?"not-allowed":"pointer",
+                              background:gold<scoutCost?"rgba(60,52,38,0.054)":"rgba(60,90,120,0.15)",
+                              color:gold<scoutCost?"#8A7F68":"#3C5A78",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
+                            🔭 Scout Squad — {scoutCost}g
+                          </button>
+                        ):(
+                          <span style={{fontSize:9,fontWeight:700,color:"#3C5A78",letterSpacing:1}}>SQUAD REPORT FILED</span>
+                        )}
+                      </div>
+                      {t.squadScouted&&(t.roster||[]).length>0&&(
+                        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(240px,1fr))",gap:6,padding:"0 10px 10px"}}>
+                          {t.roster.map(h=>{
+                            const best=Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p)));
+                            const isTal=scores.length>1&&best===talismanMax;
+                            const price=rivalAskingPrice(t,h,isTal);
+                            const cantBuy=sold||rosterFull||gold<price;
+                            return(
+                              <div key={h.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:3,
+                                background:"rgba(60,52,38,0.045)",border:`1px solid ${isTal?"rgba(138,109,59,0.5)":"rgba(60,52,38,0.126)"}`}}>
+                                <HeroAvatar race={h.race} size={18}/>
+                                <div style={{flex:1,minWidth:0}}>
+                                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                                    {h.name}{isTal&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,letterSpacing:1}}>★ TALISMAN</span>}
+                                  </div>
+                                  <div style={{fontSize:9,color:"#6E6350"}}><RoleIcon role={h.role} size={10}/> {h.role} · Lv {h.level} · PWR {Math.round(best)}</div>
+                                </div>
+                                <div style={{textAlign:"right"}}>
+                                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B"}}>{price.toLocaleString()}g</div>
+                                  <button onClick={()=>buyRivalHero(t.name,h.id)} disabled={cantBuy}
+                                    style={{marginTop:2,padding:"3px 10px",borderRadius:3,border:"none",
+                                      cursor:cantBuy?"not-allowed":"pointer",
+                                      background:cantBuy?"rgba(60,52,38,0.12)":"#23201A",
+                                      color:cantBuy?"#8A7F68":"#F5EEDC",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:9}}>
+                                    Make Offer
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
             {/* ══ FREE AGENT MARKET ════════════════════════════════════════ */}
-            <div style={{borderTop:transferBids.length>0?"1px solid rgba(60,52,38,0.108)":"none",paddingTop:transferBids.length>0?20:0}}>
+            <div style={{borderTop:"1px solid rgba(60,52,38,0.108)",paddingTop:20}}>
               {/* Header with roster count */}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
                 <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#8A6D3B"}}>🏪 Heroes For Hire</div>
