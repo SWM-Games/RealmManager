@@ -1084,6 +1084,127 @@ const RANDOM_EVENTS = [
   },
 ];
 
+// ─── EVENT CORRESPONDENCE ────────────────────────────────────────────────────
+// Every event theme is a SENDER with a voice, a seal, and an ink. Events arrive
+// as letters; returns come back as dispatches written in the sender's hand.
+const EVENT_THEMES = {
+  arena: {
+    label: "The Arena Circuit", ink: "#7E2D26", seal: "V",
+    sender: "Mad Herod Vance", senderTitle: "Master of Games",
+    salutation: "Steward — the crowd is hungry and the purse is real.",
+    signoff: "Blood pays for blood,",
+    returnLines: {
+      success: [
+        "The crowd chanted {hero}'s name until the torches burnt out. Enclosed: the purse, every coin of it.",
+        "{hero} left the sand standing and the bookmakers weeping. A pleasure doing business.",
+        "Three challengers, three verdicts. {hero} is welcome on my sand any day of any year.",
+      ],
+      partial: [
+        "{hero} won ugly. The crowd wants beauty or blood, and got neither — half the purse enclosed.",
+        "A draw, called on account of the surgeon. {hero} fought well enough to be paid something.",
+        "The judges split. So does the purse. {hero} will want another go, I'd wager.",
+      ],
+      failure: [
+        "The sand takes more than it gives. {hero} learned that the hard way. No purse.",
+        "{hero} went down in the third exchange. The crowd loved it. You won't.",
+        "I've seen worse debuts, but not this season. Send {hero} back when the bruises fade.",
+      ],
+    },
+  },
+  wilds: {
+    label: "The Outer Roads", ink: "#40614F", seal: "W",
+    sender: "Warden-Captain Brask", senderTitle: "of the Outer Roads",
+    salutation: "Steward. Plain terms: the work is real and so is the danger.",
+    signoff: "Keep your walls mended,",
+    returnLines: {
+      success: [
+        "Contract fulfilled. {hero} did the work of three and complained less than one. Payment enclosed in full.",
+        "The road is clear. What was hunting it isn't hunting anything anymore. {hero} has my respect — I don't give it often.",
+        "{hero} read the country like a map and brought everyone home. Coin enclosed. Consider a standing arrangement.",
+      ],
+      partial: [
+        "Job's half done. The other half retreated somewhere we don't follow. {hero} earned half the wage — enclosed.",
+        "Weather turned. {hero} made the sensible call to come back alive. Partial payment, no hard feelings.",
+        "We got what we came for, mostly. {hero} carried the worst of it. Half wage enclosed.",
+      ],
+      failure: [
+        "The wilds won this one. {hero} comes back with nothing but the lesson. No wage. That's the contract.",
+        "Turned back at the tree line. Whatever's in there wanted us to know it saw us. No payment.",
+        "I'll be blunt: {hero} wasn't ready for that country. Few are. No coin changes hands.",
+      ],
+    },
+  },
+  courts: {
+    label: "The Courts", ink: "#8A6D3B", seal: "A",
+    sender: "Lady Amaranthe Veil", senderTitle: "Chancellor of Protocols",
+    salutation: "To the Steward, with the court's fondest regard — and its usual conditions.",
+    signoff: "Ever your servant in all things visible,",
+    returnLines: {
+      success: [
+        "{hero} navigated the season's intrigues with a delicacy I confess I did not expect. The fee is enclosed, with a little extra discretion.",
+        "The matter is resolved, the parties reconciled, and nobody important embarrassed. {hero} may return to you with the court's gratitude — and its gold.",
+        "Consider every door in the capital now slightly more open. {hero} was, in a word, exquisite.",
+      ],
+      partial: [
+        "A qualified success. The right people are pleased; the wrong people are merely not displeased. Half the agreed sum, as protocol demands.",
+        "{hero} charmed half the table. Unfortunately the other half holds the treasury. Partial payment enclosed.",
+        "The affair concluded without scandal, which at this court counts as achievement. A reduced fee, with apologies.",
+      ],
+      failure: [
+        "I shall be gentle: the court found {hero} refreshing, the way one finds a draught refreshing in winter. No fee is payable.",
+        "The negotiation collapsed over the fish course. These things happen. No payment, and we shall not speak of it again.",
+        "{hero} told the truth at a state dinner. Admirable. Catastrophic, but admirable. No fee.",
+      ],
+    },
+  },
+  arcane: {
+    label: "The Ninth Archive", ink: "#5F4B66", seal: "H",
+    sender: "Magister Hollowquill", senderTitle: "Keeper of the Ninth Archive",
+    salutation: "Steward — you will forgive the presumption; I knew you would read this before you opened it.",
+    signoff: "In anticipation of what comes,",
+    returnLines: {
+      success: [
+        "The working held. {hero} has seen things that will take a season to properly forget — the payment enclosed should ease the process.",
+        "Precisely as foreseen. {hero} performed admirably, and the Archive is quietly in your debt. The coin is the loud part of our gratitude.",
+        "Done, and well done. Tell {hero} the dreams stop after a fortnight. Usually.",
+      ],
+      partial: [
+        "A partial binding. Sufficient, for now. {hero} is owed half the fee and all of my sympathy.",
+        "The lesser outcome, though not the least. Enclosed: half payment, and my note that {hero} flinched only twice.",
+        "We achieved what could be achieved. The rest was never achievable — I simply needed that confirmed. Half fee enclosed.",
+      ],
+      failure: [
+        "The working failed. This, too, was one of the futures. {hero} bears no fault — the fault is structural, and old. No fee.",
+        "Some doors decline to open, whatever key one sends. {hero} returns unpaid but — importantly — returns.",
+        "I misread a sign. It happens once a decade and {hero} had the misfortune of being present for it. No payment; my apologies are enclosed instead.",
+      ],
+    },
+  },
+  shadows: {
+    label: "No Return Address", ink: "#23201A", seal: "•",
+    sender: "(unsigned)", senderTitle: "",
+    salutation: "Read once. Burn after.",
+    signoff: "",
+    returnLines: {
+      success: [
+        "Done. Clean. The full amount, small coins, no questions either direction.",
+        "Package delivered. Your {hero} asks fewer questions than most. We noticed. Payment in full.",
+        "The matter is closed. If anyone asks, it never opened. Coin enclosed.",
+      ],
+      partial: [
+        "Complications. Handled, but loudly. Half payment — the other half went to making it quiet again.",
+        "The job changed midway. {hero} adapted. Half the agreed sum; the client is being difficult.",
+        "Half done is how the client wants it left. Half paid is how they left it. Don't ask.",
+      ],
+      failure: [
+        "The job went wrong. Not {hero}'s doing — someone talked. We're finding out who. No payment this time.",
+        "Walk away from this one. {hero} was seen; being seen is the one unforgivable sin. Nothing enclosed.",
+        "No coin. No explanation. The less {hero} remembers about this, the better for everyone.",
+      ],
+    },
+  },
+};
+
 const SPECIAL_EVENTS = [
   {
     id:"wandering_master",
@@ -4333,7 +4454,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
 // ─── RANDOM EVENT MODAL ──────────────────────────────────────────────────────
 
-function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
+function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewHero}){
   const [selected,setSelected]=useState([]);
   if(!event)return null;
 
@@ -4422,30 +4543,51 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.574)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
       <div style={{width:"min(560px,95vw)",maxHeight:"88vh",background:"#EFE7D3",border:"1px solid rgba(138,109,59,0.45)",borderRadius:3,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
-        {/* Header */}
-        <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.105)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
-            <span style={{fontSize:26}}>{event.icon}</span>
-            <div style={{flex:1}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#8A6D3B"}}>{event.title}</div>
-              <div style={{fontSize:10,color:"#6E6350",textTransform:"capitalize"}}>{event.theme} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}</div>
-            </div>
-            {selectionConfidence&&(
-              <div style={{padding:"4px 10px",borderRadius:3,background:`${selectionConfidence.color}18`,border:`1px solid ${selectionConfidence.color}44`,fontSize:11,fontWeight:700,color:selectionConfidence.color}}>
-                {selectionConfidence.icon} {selectionConfidence.label}
+        {/* The letter — every event arrives from a sender, under their seal */}
+        {(()=>{
+          const th = EVENT_THEMES[event.theme] || EVENT_THEMES.arena;
+          return(
+            <div style={{padding:"14px 20px 12px",borderBottom:`2px solid ${th.ink}`,background:`${th.ink}0c`,position:"relative"}}>
+              {/* wax seal */}
+              <div style={{position:"absolute",top:12,right:16,width:38,height:38,borderRadius:"50%",
+                background:th.ink,color:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",
+                fontFamily:"'IM Fell English SC',serif",fontSize:19,fontWeight:700,transform:"rotate(-8deg)",
+                boxShadow:`0 0 0 2.5px ${th.ink}55, 0 1px 3px rgba(30,24,14,0.35)`,opacity:0.92}}>
+                {th.seal}
               </div>
-            )}
-          </div>
-          <div style={{fontSize:11,color:"#4A4335",lineHeight:1.6,fontStyle:"italic"}}>"{event.flavour}"</div>
-        </div>
+              <div style={{fontSize:9,letterSpacing:2,color:"#6E6350",textTransform:"uppercase",marginBottom:2}}>
+                By courier · to the Steward of {townName||"the Realm"}
+              </div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:th.ink,paddingRight:48}}>{event.title}</div>
+              <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{th.label} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}</div>
+              <div style={{fontSize:11.5,color:"#4A4335",lineHeight:1.65,fontStyle:"italic"}}>
+                {th.salutation}
+              </div>
+              <div style={{fontSize:11.5,color:"#4A4335",lineHeight:1.65,fontStyle:"italic",marginTop:4}}>
+                "{event.flavour}"
+              </div>
+              <div style={{textAlign:"right",marginTop:8}}>
+                {th.signoff&&<div style={{fontSize:10,color:"#6E6350",fontStyle:"italic"}}>{th.signoff}</div>}
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:th.ink}}>
+                  {th.sender}{th.senderTitle?<span style={{fontSize:10,color:"#6E6350"}}> · {th.senderTitle}</span>:null}
+                </div>
+              </div>
+              {selectionConfidence&&(
+                <div style={{position:"absolute",bottom:12,left:20,padding:"3px 9px",borderRadius:3,background:`${selectionConfidence.color}18`,border:`1px solid ${selectionConfidence.color}44`,fontSize:10,fontWeight:700,color:selectionConfidence.color}}>
+                  {selectionConfidence.icon} {selectionConfidence.label}
+                </div>
+              )}
+            </div>
+          );
+        })()}
 
-        {/* Reward */}
+        {/* Terms — the steward's assessment of the offer */}
         <div style={{padding:"10px 20px",borderBottom:"1px solid rgba(60,52,38,0.09)",background:"rgba(64,97,79,0.06)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <div style={{fontSize:10,color:"#40614F",fontWeight:700}}>🎁 SUCCESS REWARD</div>
+            <div style={{fontSize:10,color:"#40614F",fontWeight:700,letterSpacing:1}}>TERMS, ON SUCCESS</div>
             <div style={{fontSize:12,fontWeight:700,color:"#40614F"}}>{event.rewardDesc}</div>
           </div>
-          <div style={{fontSize:9,color:"#6E6350",marginTop:3}}>Partial success earns 50% reward · Outcome resolves on return</div>
+          <div style={{fontSize:9,color:"#6E6350",marginTop:3}}>Partial success pays half · the outcome resolves on return</div>
         </div>
 
         {/* Hero selection */}
@@ -7664,7 +7806,13 @@ export default function App(){
       }
     }
 
-    return { outcome, heroUpdates, notifications, goldGain: heroUpdates._goldGain||0 };
+    // The sender writes back — the return banner reads like a dispatch, not a receipt
+    const themeDef = EVENT_THEMES[eventDef.theme];
+    const report = themeDef
+      ? pick(themeDef.returnLines[outcome] || []).replace(/\{hero\}/g, hero.name.split(" ")[0])
+      : null;
+
+    return { outcome, heroUpdates, notifications, goldGain: heroUpdates._goldGain||0, report };
   };
 
   const acceptEvent=(event, selectedHeroes)=>{
@@ -7964,6 +8112,7 @@ export default function App(){
                 outcome: resolution.outcome,
                 notifications: resolution.notifications,
                 goldGain: resolution.goldGain,
+                report: resolution.report,
                 pendingStatChoice: u._pendingStatChoice||false,
                 heroId: h.id,
               }]);
@@ -8752,7 +8901,7 @@ export default function App(){
           }}
         />
       )}
-      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} onAccept={acceptEvent} onDecline={declineEvent} onViewHero={(h)=>{setDetailHero(h);setPrevStats(null);}}/>}
+      {activeEvent&&<RandomEventModal event={activeEvent} heroes={heroes} townName={townName} onAccept={acceptEvent} onDecline={declineEvent} onViewHero={(h)=>{setDetailHero(h);setPrevStats(null);}}/>}
       {activeWanderingMaster&&<WanderingMasterModal event={activeWanderingMaster} heroes={heroes} gold={gold} onAccept={acceptWanderingMaster} onDecline={declineWanderingMaster}/>}
       {newOfferBids.length>0&&(
         <NewOffersModal
@@ -8936,35 +9085,48 @@ export default function App(){
 
             {/* ── EVENT RETURN BANNERS ───────────────────────────────────── */}
             {pendingEventReturns.map(ret=>{
+              const th = EVENT_THEMES[ret.eventTheme];
               const outcomeColor = ret.outcome==="success" ? "#40614F" : ret.outcome==="partial" ? "#8A6D3B" : "#7E2D26";
-              const outcomeIcon  = ret.outcome==="success" ? "✅" : ret.outcome==="partial" ? "🟡" : "❌";
-              const outcomeLbl   = ret.outcome==="success" ? "Success" : ret.outcome==="partial" ? "Partial" : "Failed";
-              const themeIcons   = { arena:"⚔️", wilds:"🌿", courts:"👑", arcane:"🔮", shadows:"🌑" };
+              const outcomeLbl   = ret.outcome==="success" ? "Delivered" : ret.outcome==="partial" ? "In Part" : "Undone";
               return(
                 <div key={ret.id} style={{marginBottom:10,padding:"12px 14px",borderRadius:3,
-                  background:`${outcomeColor}0d`,border:`1px solid ${outcomeColor}33`,
+                  background:`${(th?.ink||outcomeColor)}0a`,border:`1px solid ${(th?.ink||outcomeColor)}40`,
                   position:"relative"}}>
                   <button onClick={()=>setPendingEventReturns(prev=>prev.filter(r=>r.id!==ret.id))}
                     style={{position:"absolute",top:8,right:10,background:"none",border:"none",
                       cursor:"pointer",color:"#6E6350",fontSize:16,lineHeight:1}}>×</button>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-                    <span style={{fontSize:18}}>{ret.heroIcon}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:6}}>
+                    {th&&(
+                      <div style={{width:26,height:26,borderRadius:"50%",background:th.ink,color:"#E9E1CE",
+                        display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+                        fontFamily:"'IM Fell English SC',serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
+                        {th.seal}
+                      </div>
+                    )}
                     <div style={{flex:1}}>
                       <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>
                         {ret.heroName} has returned
                       </div>
                       <div style={{fontSize:10,color:"#6E6350"}}>
-                        {themeIcons[ret.eventTheme]||"✨"} {ret.eventTitle}
+                        {ret.eventTitle}{th?` · ${th.label}`:""}
                       </div>
                     </div>
-                    <div style={{padding:"3px 8px",borderRadius:3,background:`${outcomeColor}18`,
-                      border:`1px solid ${outcomeColor}44`,fontSize:10,fontWeight:700,color:outcomeColor}}>
-                      {outcomeIcon} {outcomeLbl}
-                    </div>
+                    <span className={ret.outcome==="failure"?"rm-stamp rm-stamp-loss":"rm-stamp"}
+                      style={{fontSize:10,padding:"1px 8px 0",marginRight:14,
+                        ...(ret.outcome==="partial"?{borderColor:"#8A6D3B",color:"#8A6D3B"}:{})}}>
+                      {outcomeLbl}
+                    </span>
                   </div>
+                  {ret.report&&(
+                    <div style={{fontSize:11,color:"#4A4335",fontStyle:"italic",lineHeight:1.55,marginBottom:6,
+                      paddingLeft:10,borderLeft:`2px solid ${(th?.ink||outcomeColor)}55`}}>
+                      "{ret.report}"
+                      {th?.sender&&th.sender!=="(unsigned)"&&<span style={{color:"#6E6350"}}> — {th.sender}</span>}
+                    </div>
+                  )}
                   {ret.goldGain>0&&(
-                    <div style={{fontSize:11,color:"#8A6D3B",marginBottom:4}}>
-                      💰 +{ret.goldGain.toLocaleString()}g
+                    <div style={{fontSize:11,color:"#8A6D3B",marginBottom:4,fontWeight:700}}>
+                      Enclosed: +{ret.goldGain.toLocaleString()}g
                     </div>
                   )}
                   {ret.notifications.length>0&&(
@@ -8978,7 +9140,7 @@ export default function App(){
                       ))}
                     </div>
                   )}
-                  {ret.outcome==="failure"&&ret.notifications.length===0&&(
+                  {ret.outcome==="failure"&&ret.notifications.length===0&&!ret.report&&(
                     <div style={{fontSize:10,color:"#6E6350"}}>Returned empty-handed. No lasting harm done.</div>
                   )}
                   {ret.pendingStatChoice&&(
@@ -9226,25 +9388,33 @@ export default function App(){
 
             {/* RIGHT: This week's scheduled opponent */}
             <div>
-              {/* Active event banner */}
-              {activeEvent&&(
-                <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(138,109,59,0.105)",border:"1px solid rgba(138,109,59,0.45)",marginBottom:14,cursor:"pointer"}}
-                  onClick={()=>{}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
-                    <span style={{fontSize:20}}>{activeEvent.icon}</span>
+              {/* Active event banner — unopened correspondence */}
+              {activeEvent&&(()=>{
+                const th = EVENT_THEMES[activeEvent.theme];
+                const ink = th?.ink||"#8A6D3B";
+                return(
+                <div style={{padding:"12px 14px",borderRadius:3,background:`${ink}0c`,border:`1px solid ${ink}55`,marginBottom:14}}>
+                  <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:4}}>
+                    {th&&(
+                      <div style={{width:26,height:26,borderRadius:"50%",background:ink,color:"#E9E1CE",
+                        display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
+                        fontFamily:"'IM Fell English SC',serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
+                        {th.seal}
+                      </div>
+                    )}
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>✨ Special Event Available</div>
-                      <div style={{fontSize:11,color:"#23201A"}}>{activeEvent.title}</div>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:ink}}>A Letter Awaits Reply</div>
+                      <div style={{fontSize:11,color:"#23201A"}}>{activeEvent.title}{th?` — ${th.sender}`:""}</div>
                     </div>
                     <div style={{fontSize:10,color:"#40614F",fontWeight:700}}>{activeEvent.rewardDesc}</div>
                   </div>
-                  <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{activeEvent.desc}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>Tests: {(activeEvent.stats||[]).join(" + ")} · {activeEvent.heroesNeeded} hero{activeEvent.heroesNeeded>1?"es":""}</div>
-                  <div style={{marginTop:8,padding:"6px 10px",borderRadius:3,background:"rgba(138,109,59,0.15)",border:"1px solid rgba(138,109,59,0.3)",fontSize:10,color:"#8A6D3B",textAlign:"center",fontWeight:700}}>
-                    ↑ The event modal opened automatically — check above this screen
+                  <div style={{marginTop:8,padding:"6px 10px",borderRadius:3,background:`${ink}14`,border:`1px solid ${ink}30`,fontSize:10,color:ink,textAlign:"center",fontWeight:700}}>
+                    ↑ The letter is open above this screen
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:legendaryChallenger?"#7E2D26":"#9A5B2B",marginBottom:10,fontWeight:700}}>
                 {legendaryChallenger?"⚔️ Legendary Challenge":"This Week's Opponent"}
