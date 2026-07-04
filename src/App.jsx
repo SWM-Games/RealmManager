@@ -2769,7 +2769,7 @@ const EMISSARY_EVENT = {
 // Iron towns: no abilities. Bronze/Silver: 1. Gold/Platinum: 2.
 // Thresholds are tier-scaled at assignment time via resolveAbilityThresholds().
 
-const ENEMY_ABILITIES = [
+export const ENEMY_ABILITIES = [
   {
     id:'crushing_assault',   name:'Crushing Assault',         icon:'⚒️',
     stat:'Defense',          scope:'vanguard',
@@ -2778,7 +2778,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`Vanguard heroes: +40% injury chance, +10 fatigue.`,
     softEffect: { injuryMult:{pos:'Vanguard',mult:1.20} },
     hardEffect: { injuryMult:{pos:'Vanguard',mult:1.40}, fatigue:{pos:'Vanguard',amt:10} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'war_of_attrition',   name:'War of Attrition',         icon:'⏳',
@@ -2788,7 +2788,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes in formation: +20 fatigue, −8 morale each.`,
     softEffect: { fatigue:{pos:'all',amt:10} },
     hardEffect: { fatigue:{pos:'all',amt:20}, morale:{pos:'all',amt:-8} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'flanking_blitz',     name:'Flanking Blitz',           icon:'💨',
@@ -2798,7 +2798,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`Skirmisher heroes: +22 fatigue, −10 morale each.`,
     softEffect: { fatigue:{pos:'Skirmisher',amt:12} },
     hardEffect: { fatigue:{pos:'Skirmisher',amt:22}, morale:{pos:'Skirmisher',amt:-10} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'sniper_fire',        name:'Sniper Fire',              icon:'🎯',
@@ -2808,7 +2808,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`Skirmisher heroes: +50% injury chance, +8 fatigue.`,
     softEffect: { injuryMult:{pos:'Skirmisher',mult:1.25} },
     hardEffect: { injuryMult:{pos:'Skirmisher',mult:1.50}, fatigue:{pos:'Skirmisher',amt:8} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'brute_force',        name:'Brute Force',              icon:'💪',
@@ -2818,7 +2818,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`Gold reward −40%, Vanguard heroes: +10 fatigue.`,
     softEffect: { goldMult:0.80 },
     hardEffect: { goldMult:0.60, fatigue:{pos:'Vanguard',amt:10} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'arcane_suppression', name:'Arcane Suppression',       icon:'🔮',
@@ -2828,7 +2828,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −12 morale, Arbiter heroes: +15 fatigue.`,
     softEffect: { morale:{pos:'Arbiter',amt:-10}, fatigue:{pos:'Arbiter',amt:8} },
     hardEffect: { morale:{pos:'all',amt:-12}, fatigue:{pos:'Arbiter',amt:15} },
-    thresholds: { bronze:{pass:34,soft:26}, silver:{pass:44,soft:33}, gold:{pass:52,soft:38}, platinum:{pass:60,soft:45} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'dark_ritual',        name:'Dark Ritual',              icon:'🌑',
@@ -2838,7 +2838,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −15 morale, +20% injury chance.`,
     softEffect: { morale:{pos:'all',amt:-8} },
     hardEffect: { morale:{pos:'all',amt:-15}, injuryMult:{pos:'all',mult:1.20} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'psychological_warfare', name:'Psychological Warfare', icon:'🧠',
@@ -2848,7 +2848,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −20 morale.`,
     softEffect: { morale:{pos:'all',amt:-10} },
     hardEffect: { morale:{pos:'all',amt:-20} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'disrupt_command',    name:'Disrupt Chain of Command', icon:'📜',
@@ -2858,7 +2858,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −50% XP, −10 morale each.`,
     softEffect: { xpMult:0.75 },
     hardEffect: { xpMult:0.50, morale:{pos:'all',amt:-10} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'iron_will_test',     name:'Iron Will Test',           icon:'⚖️',
@@ -2868,7 +2868,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`Raiding heroes: −15 morale.`,
     softEffect: { morale:{pos:'all',amt:-8} },
     hardEffect: { morale:{pos:'all',amt:-15} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'guerrilla_tactics',  name:'Guerrilla Tactics',        icon:'🌿',
@@ -2878,7 +2878,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`+25% injury chance, all heroes: +8 fatigue.`,
     softEffect: { injuryMult:{pos:'all',mult:1.15} },
     hardEffect: { injuryMult:{pos:'all',mult:1.25}, fatigue:{pos:'all',amt:8} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'terror_tactics',     name:'Terror Tactics',           icon:'😱',
@@ -2888,7 +2888,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −20 morale.`,
     softEffect: { morale:{pos:'all',amt:-12} },
     hardEffect: { morale:{pos:'all',amt:-20} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
     id:'tactical_trap',      name:'Tactical Trap',            icon:'🪤',
@@ -2898,7 +2898,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: +18 fatigue, +20% injury chance.`,
     softEffect: { fatigue:{pos:'all',amt:10} },
     hardEffect: { fatigue:{pos:'all',amt:18}, injuryMult:{pos:'all',mult:1.20} },
-    thresholds: { bronze:{pass:32,soft:24}, silver:{pass:43,soft:32}, gold:{pass:56,soft:42}, platinum:{pass:69,soft:52} },
+    thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
 ];
 
@@ -2935,7 +2935,7 @@ function rehydrateTownAbilities(t) {
 
 // Check ability outcome for a given formation + heroes
 // Returns 'pass', 'soft', or 'hard'
-function checkAbility(ability, formation, tierId) {
+export function checkAbility(ability, formation, tierId) {
   const t = ability.thresholds[tierId] || ability.thresholds.bronze;
   const posHeroes = (pos) => (formation[pos]||[]).filter(Boolean);
   const allHeroes = [...posHeroes('Vanguard'),...posHeroes('Skirmisher'),...posHeroes('Arbiter')];

@@ -6,7 +6,7 @@ import {
   generateHero, buildRaidSimulation, calcFormationRating, calcPositionScore,
   calcSpecPenalty, growHeroStats, calcTierPosition, weeklyRankIncome,
   applyHealScar, calcMatchScore, generateTierTowns, generateScheduledOpponent,
-  managerTaunt, generateRivalRoster, rivalAskingPrice,
+  managerTaunt, generateRivalRoster, rivalAskingPrice, ENEMY_ABILITIES, checkAbility,
   TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
 } from "./App.jsx";
 
@@ -266,6 +266,34 @@ describe("towns and rivals", () => {
     const even = managerTaunt(manager, { wins: 1, losses: 1 });
     expect(ahead).not.toBe(behind);
     expect(even).not.toBe(ahead);
+  });
+});
+
+// ── enemy abilities ─────────────────────────────────────────────────────────
+// Regression guard for the auto-fail bug: thresholds must stay COUNTERABLE.
+// A tier-calibrated squad should mitigate sometimes and get punished sometimes;
+// if any ability becomes automatic in either direction, this fails.
+describe("enemy ability thresholds", () => {
+  it("every ability is winnable and losable by a tier-appropriate squad", () => {
+    const N = 150;
+    for (const tier of ["bronze", "gold", "platinum"]) {
+      for (const ability of ENEMY_ABILITIES) {
+        let pass = 0, hard = 0;
+        for (let i = 0; i < N; i++) {
+          const [town] = generateTierTowns(tier);
+          const roster = generateRivalRoster(town, tier);
+          const formation = { Vanguard: roster.slice(0, 2), Skirmisher: roster.slice(2, 4), Arbiter: roster.slice(4, 6) };
+          const outcome = checkAbility(ability, formation, tier);
+          if (outcome === "pass") pass++;
+          if (outcome === "hard") hard++;
+        }
+        const passRate = pass / N, hardRate = hard / N;
+        // generic squads: neither auto-mitigate nor auto-suffer
+        expect(passRate, `${ability.id}@${tier} pass rate`).toBeLessThan(0.90);
+        expect(hardRate, `${ability.id}@${tier} hard rate`).toBeLessThan(0.75);
+        expect(passRate + (N - pass - hard) / N, `${ability.id}@${tier} mitigation reachable`).toBeGreaterThan(0.20);
+      }
+    }
   });
 });
 
