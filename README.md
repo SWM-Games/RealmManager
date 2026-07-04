@@ -1,16 +1,46 @@
-# React + Vite
+# Realm Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Fantasy squad simulator in the Football Manager tradition: run a realm's
+mercenary squad through a five-tier league (Iron → Platinum), one battle a
+week. Hire and develop heroes, set your formation, manage form, fatigue,
+contracts and grudges — and win the Platinum title.
 
-Currently, two official plugins are available:
+The whole game lives in [`src/App.jsx`](src/App.jsx).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Development
 
-## React Compiler
+```
+npm install
+npm run dev      # dev server on :5173
+npm test         # engine test suite (combat calibration, growth, economy)
+npm run sim      # balance simulation — 300 campaigns × 10 seasons
+npm run build    # production build to dist/
+npm run lint     # eslint (carries known pre-existing style warnings)
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Balance changes
 
-## Expanding the ESLint configuration
+Combat and economy numbers are calibrated by simulation. If you touch tribute,
+XP ranges, growth, form, win-gold or the phase cap, update the mirrored
+formulas in [`scripts/balance-sim.mjs`](scripts/balance-sim.mjs) and re-run
+`npm run sim`. Healthy targets: week-1 win chance ~50%, season-1 40–50%,
+late-game 60–75%, bankruptcy rate low single digits, platinum reached around
+season 7–9.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Tests
+
+`src/engine.test.jsx` covers the pure engine: exchange-series calibration
+(lane outcomes must match phase odds — the battle engine is provably neutral),
+growth reaching Potential, spec counters, tribute gradients, injury scars, and
+event trait chemistry. The week-resolution path inside the `App` component is
+exercised by browser smoke tests, not unit tests.
+
+## Deployment
+
+Pushes to `main` build and deploy to GitHub Pages via
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+**One-time setup**: repo Settings → Pages → Source → **GitHub Actions**.
+
+`dist/` is not committed; the build uses relative asset paths (`base: './'`)
+so it works at any mount point.

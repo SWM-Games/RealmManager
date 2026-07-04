@@ -554,7 +554,7 @@ function agePhaseLabel(p){ return {prospect:"🌱 Prospect",rising:"📈 Rising"
 function agePhaseColor(p){ return {prospect:"#a78bfa",rising:"#78c8ff",peak:"#a8ff78",fading:"#ffd966",veteran:"#ff9f43"}[p]||"#888"; }
 
 // Recalculate a hero's market value based on current stats and level.
-function calcHeroValue(hero) {
+export function calcHeroValue(hero) {
   const ALL_STAT_KEYS = Object.values(STAT_GROUPS).flat();
   const statVals = ALL_STAT_KEYS.map(s=>hero.stats[s]||0);
   const avg = statVals.reduce((a,b)=>a+b,0)/statVals.length;
@@ -587,7 +587,7 @@ const RACE_GROWTH = {
   Tiefling:   { fast:["Charisma","Determination","Magic Power"], slow:["Endurance","Defense"] },
   Dragonborn: { fast:["Strength","Leadership","Intimidation"],   slow:["Agility","Adaptability"] },
 };
-const PHYSICAL_STATS = ["Strength","Agility","Endurance","Accuracy","Defense","Magic Power"];
+export const PHYSICAL_STATS = ["Strength","Agility","Endurance","Accuracy","Defense","Magic Power"];
 const MENTAL_STATS   = ["Tactics","Composure","Leadership","Determination","Adaptability"];
 
 const STAT_GROUPS = {
@@ -598,7 +598,7 @@ const STAT_GROUPS = {
 };
 const ALL_STATS = Object.values(STAT_GROUPS).flat();
 const XP_PER_LEVEL = [0,100,250,450,700,1000,1400,1900,2500,3200,4000,5200,6600,8200,10000,12000];
-const MAX_LEVEL = 15;
+export const MAX_LEVEL = 15;
 
 // ─── HAPPINESS SYSTEM ────────────────────────────────────────────────────────
 //
@@ -628,7 +628,7 @@ function potentialBucket(potential) {
 // ─── CONTRACT DEMAND ENGINE ──────────────────────────────────────────────────
 
 // Calculates what a hero will demand on renewal
-function calcDemand(hero) {
+export function calcDemand(hero) {
   const phase = agePhase(hero);
   const avgCombat = STAT_GROUPS.Combat.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Combat.length;
   const avgMental = STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length;
@@ -1144,7 +1144,7 @@ function eventTraitMods(hero, eventDef) {
   return (hero.traits||[]).filter(t=>mods[t]!==undefined).map(t=>({trait:t, mod:mods[t]}));
 }
 
-function calcMatchScore(hero, eventDef) {
+export function calcMatchScore(hero, eventDef) {
   const stats = eventDef.stats || [];
   if(!stats.length) return 1.0;
   const heroAvg = stats.reduce((a,s) => a + (hero.stats[s]||0), 0) / stats.length;
@@ -1161,7 +1161,7 @@ function getEventConfidence(matchScore) {
 }
 
 // Fluid success probability — hidden from player, drives outcome roll
-function calcEventSuccessChance(matchScore) {
+export function calcEventSuccessChance(matchScore) {
   const success = Math.min(0.82, Math.max(0.10, matchScore * 0.58));
   const failure = Math.min(0.65, Math.max(0.05, (1 - matchScore) * 0.65));
   const partial = Math.max(0.05, 1 - success - failure);
@@ -1560,12 +1560,12 @@ function fatigueLabel(f) {
   return                     { label:"Burned Out",color:"#ff4444" };
 }
 
-const POSITIONS = {
+export const POSITIONS = {
   Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#ff7878", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel." },
   Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#ffd966", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
   Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#78c8ff", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
 };
-const POS_KEYS = Object.keys(POSITIONS);
+export const POS_KEYS = Object.keys(POSITIONS);
 
 // Position-level role pairing bonuses — applied when 2 heroes share a position.
 // Calibrated to contribute ~×1.07 max toward the ×1.5 total tactical ceiling.
@@ -1588,7 +1588,7 @@ const POSITION_PAIRINGS = [
 // Calculate position score for 1 or 2 heroes.
 // With 2 heroes: primary (higher score) ×1.25, support ×0.75, then role pairing bonus.
 // Returns { score, primaryHero, supportHero, pairingMult }
-function calcPositionScore(heroes, pos) {
+export function calcPositionScore(heroes, pos) {
   const valid = (heroes||[]).filter(Boolean);
   if(valid.length === 0) return { score:0, primaryHero:null, supportHero:null, pairingMult:1.0 };
 
@@ -1717,7 +1717,7 @@ const EXCHANGE_TEXT = {
 
 // Called when a hero's injury countdown reaches 0. 15% scar chance:
 // ~a third of scars grant Resilient/Iron Will, the rest dent a physical stat.
-function applyHealScar(hero, addLog) {
+export function applyHealScar(hero, addLog) {
   const injName = hero.injury?.name || "injury";
   const history = [ ...(hero.injury ? [hero.injury] : []), ...(hero.injuryHistory||[]) ].slice(0,3);
   let out = { ...hero, injury: null, injuryHistory: history };
@@ -1738,7 +1738,7 @@ function applyHealScar(hero, addLog) {
 }
 
 // Returns a single combat score for one hero in a given position.
-function calcHeroCombatScore(hero, pos) {
+export function calcHeroCombatScore(hero, pos) {
   const traits = hero.traits || [];
   const weights = (pos && POSITION_WEIGHTS[pos]) ? POSITION_WEIGHTS[pos] : POSITION_WEIGHTS.Vanguard;
 
@@ -1789,7 +1789,7 @@ function calcHeroCombatScore(hero, pos) {
   return score;
 }
 
-function analyseFormation(formation){
+export function analyseFormation(formation){
   // Race synergy — the only formation-wide multiplier now.
   // Role/race pairings are handled per-position in calcPositionScore.
   const raceSynergy = calcRaceSynergy(formation);
@@ -1816,7 +1816,7 @@ function analyseFormation(formation){
   return {active:[], positive:[], negative:[], mult, laneMults, heroMods, raceSynergy};
 }
 
-function calcFormationRating(formation){
+export function calcFormationRating(formation){
   const analysis=analyseFormation(formation);
   // Sum position scores across all 3 lanes — this puts the rating on the same
   // scale as enemy total power (e.g. Iron 67-105), making comparisons intuitive.
@@ -1843,18 +1843,20 @@ function calcFormationRating(formation){
 // 8 teams per tier (player + 7 AI). Top 2 promote, bottom 2 relegate each season.
 // AI teams regenerated on promotion/relegation. Power randomised each new season.
 
-const TIERS = {
+export const TIERS = {
+  // tributeBase values are sim-calibrated (scripts/balance-sim.mjs) together
+  // with the loss purse and position bonus — retune there before changing here
   iron:     { id:"iron",     name:"Iron",     icon:"⚙️",  color:"#9ca3af", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
-  bronze:   { id:"bronze",   name:"Bronze",   icon:"🥉",  color:"#cd7f32", powerMin:93,  powerMax:147, difficulty:2, tributeBase:200, xpRange:[26,40] },
-  silver:   { id:"silver",   name:"Silver",   icon:"🥈",  color:"#c0c0c0", powerMin:127, powerMax:199, difficulty:3, tributeBase:350, xpRange:[32,48] },
-  gold:     { id:"gold",     name:"Gold",     icon:"🥇",  color:"#ffd966", powerMin:167, powerMax:262, difficulty:4, tributeBase:600, xpRange:[36,70] },
-  platinum: { id:"platinum", name:"Platinum", icon:"💎",  color:"#a78bfa", powerMin:207, powerMax:325, difficulty:5, tributeBase:950, xpRange:[45,85] },
+  bronze:   { id:"bronze",   name:"Bronze",   icon:"🥉",  color:"#cd7f32", powerMin:93,  powerMax:147, difficulty:2, tributeBase:160, xpRange:[26,40] },
+  silver:   { id:"silver",   name:"Silver",   icon:"🥈",  color:"#c0c0c0", powerMin:127, powerMax:199, difficulty:3, tributeBase:260, xpRange:[32,48] },
+  gold:     { id:"gold",     name:"Gold",     icon:"🥇",  color:"#ffd966", powerMin:167, powerMax:262, difficulty:4, tributeBase:400, xpRange:[36,70] },
+  platinum: { id:"platinum", name:"Platinum", icon:"💎",  color:"#a78bfa", powerMin:207, powerMax:325, difficulty:5, tributeBase:560, xpRange:[45,85] },
 };
-const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
+export const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
 
 // Tribute = tierBase + position bonus (1st gets most, 8th gets base)
 // Position matters: the table is a weekly income race, not just a season-end verdict
-const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
+export const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
 
 // Name pools — 15 per tier, thematically distinct
 const TIER_NAME_POOLS = {
@@ -1927,7 +1929,7 @@ function pickManager() {
   return { name: pick(arch.names), archetype: arch.id, title: arch.title };
 }
 
-function managerTaunt(manager, h2h) {
+export function managerTaunt(manager, h2h) {
   const arch = MANAGER_ARCHETYPES.find(a=>a.id===manager?.archetype);
   if(!arch) return null;
   const diff = (h2h?.losses||0) - (h2h?.wins||0); // their wins minus ours, from player POV
@@ -1935,7 +1937,7 @@ function managerTaunt(manager, h2h) {
 }
 
 // Generate 7 AI towns for a given tier with randomised power
-function generateTierTowns(tierId, existingNames=[]) {
+export function generateTierTowns(tierId, existingNames=[]) {
   const tier = TIERS[tierId] || TIERS.iron;
   const pool = [...TIER_NAME_POOLS[tierId]].filter(n => !existingNames.includes(n));
   const shuffled = pool.sort(() => Math.random() - 0.5);
@@ -1986,7 +1988,7 @@ function calcWinChance(yourEffectiveRating, enemyDifficulty, enemyPowerOverride)
 // Separate from role synergies. Applied multiplicatively on top.
 // Three types: Mono-race, Full Rainbow, Duo Pact.
 
-const RACE_SYNERGIES = [
+export const RACE_SYNERGIES = [
   // ── MONO-RACE: all 6 raiding heroes of same race ───────────────────────────
   {
     id:"mono_elf",    type:"mono",   race:"Elf",
@@ -2126,7 +2128,7 @@ const RACE_SYNERGIES = [
 
 // Only one race synergy can be active at a time — pick the strongest if multiple match.
 // (e.g. can't have both Mono-Elf and Band of Nations)
-function calcRaceSynergy(formation) {
+export function calcRaceSynergy(formation) {
   const allHeroes = POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
   if(allHeroes.length < 3) return null;
 
@@ -2242,8 +2244,8 @@ function pickTraits(n) {
 function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function pickN(arr,n){ const s=[...arr];const o=[];for(let i=0;i<n;i++){const x=Math.floor(Math.random()*s.length);o.push(s.splice(x,1)[0]);}return o; }
-function xpForLevel(l){ return XP_PER_LEVEL[Math.min(l,MAX_LEVEL)] ?? XP_PER_LEVEL[MAX_LEVEL]; }
-function levelFromXp(xp){ let l=0; for(let i=1;i<=MAX_LEVEL;i++){ if(xp>=XP_PER_LEVEL[i]) l=i; else break; } return l; }
+export function xpForLevel(l){ return XP_PER_LEVEL[Math.min(l,MAX_LEVEL)] ?? XP_PER_LEVEL[MAX_LEVEL]; }
+export function levelFromXp(xp){ let l=0; for(let i=1;i<=MAX_LEVEL;i++){ if(xp>=XP_PER_LEVEL[i]) l=i; else break; } return l; }
 
 // Bell-curve potential using Box-Muller transform.
 // Mean ~50, SD ~15. Most heroes land 35-65.
@@ -2300,7 +2302,7 @@ const SPECIALISATIONS = [
 // Returns penalty object if formation doesn't counter the specialisation, else null
 // Countering takes strength, not mere presence: the counter lane must pull its
 // weight (≥80% of the formation's average lane score) or the spec punishes it.
-function calcSpecPenalty(spec, formation) {
+export function calcSpecPenalty(spec, formation) {
   if(!spec) return null;
   const laneScore = (pos)=>calcPositionScore((formation[pos]||[]).filter(Boolean), pos).score;
   const counterScore = laneScore(spec.counter);
@@ -2310,7 +2312,7 @@ function calcSpecPenalty(spec, formation) {
 }
 
 // Derives current table position from the league table (object keyed by town name)
-function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
+export function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
   if(!leagueTable || typeof leagueTable !== 'object') return 4;
   const entries = Object.entries(leagueTable);
   if(entries.length === 0) return 4;
@@ -2328,7 +2330,7 @@ function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
 }
 
 // Weekly tribute income — now flat per tier (no position bonus)
-function weeklyRankIncome(tierId, position) {
+export function weeklyRankIncome(tierId, position) {
   // Weekly tribute income — tier base + league position bonus (1st earns most)
   const tier = TIERS[tierId] || TIERS.iron;
   return tier.tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position||8)-1)] || 0);
@@ -2337,7 +2339,7 @@ function weeklyRankIncome(tierId, position) {
 // ─── HERO STAT GROWTH ────────────────────────────────────────────────────────
 // Called on level-up. Grows each non-hidden stat toward potential.
 // Barracks building gives a small bonus to growth rolls.
-function growHeroStats(hero, newLevel, buildings) {
+export function growHeroStats(hero, newLevel, buildings) {
   const hasBarracks = buildings?.find(b=>b.id==="barracks"&&b.built);
   const potential = hero.stats.Potential || 50;
   const levelsGained = newLevel - (hero.level || 0);
@@ -2347,11 +2349,12 @@ function growHeroStats(hero, newLevel, buildings) {
     const current = newStats[s] || 10;
     if(current >= potential) return; // already at cap
     // Growth scales with the remaining gap to Potential so high-potential heroes
-    // can actually reach it before MAX_LEVEL (flat 1-3/level capped ~30pts short)
+    // can actually reach it (flat 1-3/level left ~30pt gaps pre-audit), and the
+    // final level closes whatever remains — Potential is a promise, kept at 15.
     const levelsLeft = Math.max(1, MAX_LEVEL - newLevel + 1);
     const gapPerLevel = Math.ceil((potential - current) / levelsLeft);
     const maxGain = Math.max(hasBarracks ? 4 : 3, gapPerLevel);
-    const gain = levelsGained * rand(1, maxGain);
+    const gain = newLevel >= MAX_LEVEL ? (potential - current) : levelsGained * rand(1, maxGain);
     newStats[s] = Math.min(potential, current + gain);
   });
   return newStats;
@@ -2401,13 +2404,13 @@ function simulateEnemyWeek(week, playerOpponentName, leagueTable, tierEnemyTowns
 
 // ─── SCHEDULED OPPONENT ──────────────────────────────────────────────────────
 // Picks the next AI opponent from the league table for the scheduled match
-function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
+export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
   if(!tierEnemyTowns || tierEnemyTowns.length === 0) return null;
   const idx = Math.floor(Math.random() * tierEnemyTowns.length);
   const town = tierEnemyTowns[idx];
   const tier = TIERS[tierId] || TIERS.iron;
-  // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*120
-  const goldReward = rand(300,700) + tier.difficulty * 120;
+  // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*100
+  const goldReward = rand(300,700) + tier.difficulty * 100;
   // Managers have a signature: 60% of the time their spec comes from their
   // archetype's preferred list — a pattern the player can learn and pre-counter
   let specialisation = null;
@@ -2439,7 +2442,7 @@ function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId)
 const WEEKS_PER_CONTRACT_YEAR = 42; // 1 contract season = 1 game season
 const ROSTER_CAP = 12; // max heroes on squad at any time
 
-function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null,forcedRace=null,tierId="iron"){
+export function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null,forcedRace=null,tierId="iron"){
   const RACES = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
   const race=forcedRace||pick(RACES), role=forcedRole||pick(ROLES);
   const potential=rollPotential(premium,elite,tierId);
@@ -3251,7 +3254,7 @@ function analyseWeakLinks(formation, analysis, tierId) {
   return links.sort((a,b) => a.totalImpact - b.totalImpact);
 }
 
-function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=null) {
+export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=null) {
   const allHeroes = POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
   if(!allHeroes.length) return null;
 
@@ -3358,7 +3361,9 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   const tierData = Object.values(TIERS).find(t=>t.difficulty===playerRank) || TIERS.iron;
   const [xpMin, xpMax] = tierData.xpRange || [12, 20];
   let heroXP = Math.round(rand(xpMin, xpMax) * (hasBarracks?1.2:1) * ACTIVE_SPEED.xpMult);
-  let goldSwing = won ? rand(300,700)+enemy.difficulty*120 : 0;
+  // Losers collect a small purse too — no week is worth zero. This is the
+  // anti-death-spiral valve: a cold streak stays survivable (sim-calibrated).
+  let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(60,130)+enemy.difficulty*30;
 
   // Resolve enemy abilities — check stat thresholds, collect effects
   const abilityResults = (enemy.abilities||[]).map(ability => {
@@ -6812,6 +6817,7 @@ function GuideTab(){
       <Section id="battle" icon="🗡️" title="How Battles Work">
         <p style={{margin:"0 0 8px"}}>Every battle is decided across <b style={{color:"#f0e6d3"}}>3 phases</b> — Vanguard, Skirmisher, and Arbiter. Win 2 of 3 phases to win the battle. Each phase compares your heroes' combined score in that lane against the enemy's power share for that position.</p>
         <p style={{margin:"0 0 8px"}}>Win chance per phase is <b style={{color:"#f0e6d3"}}>capped at 85% and floored at 15%</b> — even a dominant squad can lose a phase, and an underdog can always steal one.</p>
+        <p style={{margin:"0 0 8px"}}>Every battle pays: winners take the full purse, and <b style={{color:"#ffd966"}}>even defeats collect a small appearance fee</b> — a cold streak hurts, but it never starves you outright.</p>
         <p style={{margin:"0 0 8px"}}>Some opponents have a <b style={{color:"#ff9f43"}}>Specialisation</b> — a tactical style that boosts their power unless your formation counters it. The Battle tab shows what spec they're running and whether you're countering it.</p>
         <p style={{margin:0}}>After a battle the <b style={{color:"#78c8ff"}}>debrief</b> shows exactly which phase you won or lost and why. Use it to identify your weak lane.</p>
       </Section>
@@ -7811,7 +7817,10 @@ export default function App(){
         // losing lane cools less; the passenger in a winning lane heats less
         const personalBeats = (result.laneBattle?.[heroLane]?.beats||[]).filter(b=>b.actor===h.id);
         const personalNet = personalBeats.reduce((a,b)=>a+(b.won?1:-1),0);
-        const formGain = (laneWon ? (Math.random()*0.4)+0.4 : -((Math.random()*0.5)+0.1))
+        // Heat fast, cool slower — symmetric cooling created a form death
+        // spiral for weak squads (sim-verified). Asymmetry keeps the streaks
+        // without the doom loop.
+        const formGain = (laneWon ? (Math.random()*0.4)+0.4 : -((Math.random()*0.3)+0.05))
           + Math.max(-0.2, Math.min(0.2, personalNet*0.1));
         const newForm = Math.min(10, Math.max(1, (cursedStats.Form||5) + formGain));
         // Injury knocks Form — coming back rusty
@@ -8092,9 +8101,11 @@ export default function App(){
 
     // Check bankruptcy after tribute (give tribute a chance to help)
     const goldAfterAll = goldAfterWages + tributeAmount;
+    let campaignFell = false; // bankruptcy defeat this week — suppress season-end pageantry
     if(goldAfterAll <= 0){
       const newBankruptcyWeeks = bankruptcyWeeks + 1;
       setBankruptcyWeeks(newBankruptcyWeeks);
+      campaignFell = newBankruptcyWeeks >= 3;
       // Morale hit — heroes know the realm is in trouble
       setHeroes(hs=>hs.map(h=>h.retired?h:{...h,morale:Math.max(10,h.morale-5)}));
       if(newBankruptcyWeeks >= 3){
@@ -8143,10 +8154,12 @@ export default function App(){
       : { wins: playerRecord.wins + (result.won?1:0), losses: playerRecord.losses + (result.won?0:1) };
     const newSeasonWeek=seasonWeek+1;
     const seasonEnding = newSeasonWeek>=SEASON_LENGTH();
-    if(seasonEnding){
+    if(seasonEnding && !campaignFell){
+      // A bankruptcy defeat on the season's final week skips promotion pageantry —
+      // endSeason would otherwise queue a second (victory-toned) ceremony over the defeat
       endSeason(finalRecord);
     } else {
-      setSeasonWeek(newSeasonWeek);
+      setSeasonWeek(seasonEnding ? seasonWeek : newSeasonWeek);
     }
 
     // Generate random event every ~3 weeks
@@ -8348,9 +8361,15 @@ export default function App(){
     } catch(err) {
       console.error("applyRaidResult error:", err);
       addLog(`⚠️ Error applying results: ${err.message}. Check console.`, "danger");
-      // Still advance the week so the game isn't stuck
+      // Recovery guarantee: whatever failed mid-function, leave a playable state —
+      // week advances, no stuck modal, and next week has a fresh opponent.
       setWeek(w=>w+1);
       setSeasonWeek(sw=>sw+1);
+      setActiveSimulation(null);
+      setPendingRaidEnemy(null);
+      try {
+        setScheduledOpponent(generateScheduledOpponent(seasonWeek+2, leagueTable, tierEnemyTowns, playerTier));
+      } catch { /* keep the old opponent if even this fails */ }
     }
   };
 

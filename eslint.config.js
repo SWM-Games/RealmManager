@@ -26,4 +26,13 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  {
+    // App.jsx deliberately exports its pure engine functions for the vitest
+    // suite (src/engine.test.jsx). That trades fast-refresh granularity for
+    // testability — silence the HMR-purity rule for this file only.
+    files: ['src/App.jsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ])
