@@ -745,7 +745,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[450,700], traitChance:"Brave" },
-    rewardDesc:"900–1,400g + Brave trait chance",
+    rewardDesc:"450–700g + Brave trait chance",
   },
   {
     id:"grand_colosseum",
@@ -758,7 +758,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[900,1400], xp:"large" },
-    rewardDesc:"1,800–2,800g + large XP",
+    rewardDesc:"900–1,400g + large XP",
   },
   {
     id:"gauntlet_of_blades",
@@ -771,7 +771,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"high",
     reward:{ goldRange:[1200,1800], xp:"medium", xpBoth:true },
-    rewardDesc:"2,400–3,600g + XP to both",
+    rewardDesc:"1,200–1,800g + XP to both",
   },
   {
     id:"beast_pits",
@@ -784,7 +784,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,550], traitChance:"Resilient" },
-    rewardDesc:"700–1,100g + Resilient trait chance",
+    rewardDesc:"350–550g + Resilient trait chance",
   },
   {
     id:"champions_invitation",
@@ -797,7 +797,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[600,1000], traitChance:"Berserker", traitChanceAlt:"Brave" },
-    rewardDesc:"1,200–2,000g + Berserker or Brave trait chance",
+    rewardDesc:"600–1,000g + Berserker or Brave trait chance",
   },
 
   // ── THE WILDS ─────────────────────────────────────────────────────────────
@@ -812,7 +812,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[4,4],
     commitment:"high",
     reward:{ goldRange:[1400,2100], xp:"medium", xpBoth:true, traitChance:"Resilient", traitChanceAlt:"Iron Will", traitBoth:true },
-    rewardDesc:"2,800–4,200g + XP + Resilient/Iron Will trait chance to both",
+    rewardDesc:"1,400–2,100g + XP + Resilient/Iron Will trait chance to both",
   },
   {
     id:"hunters_wage",
@@ -825,7 +825,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[400,650], xp:"small" },
-    rewardDesc:"800–1,300g + XP",
+    rewardDesc:"400–650g + XP",
   },
   {
     id:"frozen_expedition",
@@ -838,7 +838,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[4,4],
     commitment:"high",
     reward:{ goldRange:[1400,2100], xp:"medium", xpBoth:true, statBoost:"Determination", statBoostBoth:true },
-    rewardDesc:"2,800–4,200g + XP + Determination boost to both",
+    rewardDesc:"1,400–2,100g + XP + Determination boost to both",
   },
   {
     id:"dragons_shadow",
@@ -851,7 +851,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[600,1000], statBoost:"Magic Resist", xp:"small" },
-    rewardDesc:"1,200–2,000g + Magic Resist boost + XP",
+    rewardDesc:"600–1,000g + Magic Resist boost + XP",
   },
   {
     id:"cursed_ruin",
@@ -864,7 +864,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,700] },
-    rewardDesc:"700–1,400g",
+    rewardDesc:"350–700g",
   },
 
   // ── THE COURTS ────────────────────────────────────────────────────────────
@@ -879,7 +879,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[600,1000], statBoost:"Leadership", xp:"small" },
-    rewardDesc:"1,200–2,000g + Leadership boost + XP",
+    rewardDesc:"600–1,000g + Leadership boost + XP",
   },
   {
     id:"trade_dispute",
@@ -892,7 +892,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[600,950] },
-    rewardDesc:"1,200–1,900g",
+    rewardDesc:"600–950g",
   },
   {
     id:"hostage_negotiation",
@@ -905,7 +905,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[1000,1500] },
-    rewardDesc:"2,000–3,000g",
+    rewardDesc:"1,000–1,500g",
   },
   {
     id:"warlords_banquet",
@@ -918,7 +918,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,550], statBoost:"Intimidation" },
-    rewardDesc:"700–1,100g + Intimidation boost",
+    rewardDesc:"350–550g + Intimidation boost",
   },
   {
     id:"royal_address",
@@ -931,7 +931,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[4,4],
     commitment:"medium",
     reward:{ goldRange:[800,1300], statBoost:"Charisma", xp:"small" },
-    rewardDesc:"1,600–2,600g + Charisma boost + XP",
+    rewardDesc:"800–1,300g + Charisma boost + XP",
   },
 
   // ── THE ARCANE ────────────────────────────────────────────────────────────
@@ -946,7 +946,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,700], xp:"large", traitChance:"Tactician" },
-    rewardDesc:"700–1,400g + large XP + Tactician trait chance",
+    rewardDesc:"350–700g + large XP + Tactician trait chance",
   },
   {
     id:"plague_ward",
@@ -959,7 +959,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,700], xp:"small", healFatigue:true },
-    rewardDesc:"700–1,400g + XP + fatigue fully recovered on return",
+    rewardDesc:"350–700g + XP + fatigue fully recovered on return",
   },
   {
     id:"oracles_chamber",
@@ -985,7 +985,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[4,4],
     commitment:"high",
     reward:{ goldRange:[1400,2100], statBoost:"Magic Resist", statBoostBoth:true, xp:"medium", xpBoth:true },
-    rewardDesc:"2,800–4,200g + Magic Resist boost to both + XP to both",
+    rewardDesc:"1,400–2,100g + Magic Resist boost to both + XP to both",
   },
   {
     id:"sealed_circle",
@@ -998,7 +998,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"high",
     reward:{ goldRange:[1000,1600], xp:"medium", xpBoth:true, traitChance:"Blessed", traitBoth:true },
-    rewardDesc:"2,000–3,200g + XP to both + Blessed trait chance",
+    rewardDesc:"1,000–1,600g + XP to both + Blessed trait chance",
   },
 
   // ── THE SHADOWS ───────────────────────────────────────────────────────────
@@ -1013,7 +1013,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[350,700] },
-    rewardDesc:"700–1,400g",
+    rewardDesc:"350–700g",
   },
   {
     id:"marked_target",
@@ -1026,7 +1026,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[600,1000] },
-    rewardDesc:"1,200–2,000g",
+    rewardDesc:"600–1,000g",
   },
   {
     id:"spys_gambit",
@@ -1039,7 +1039,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"medium",
     reward:{ goldRange:[500,800], statBoost:"Reputation" },
-    rewardDesc:"1,000–1,600g + Reputation boost",
+    rewardDesc:"500–800g + Reputation boost",
   },
   {
     id:"cult_unmasking",
@@ -1052,7 +1052,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[3,3],
     commitment:"high",
     reward:{ goldRange:[1000,1600], xp:"medium", xpBoth:true },
-    rewardDesc:"2,000–3,200g + XP to both",
+    rewardDesc:"1,000–1,600g + XP to both",
   },
   {
     id:"underworld_exchange",
@@ -1065,7 +1065,7 @@ const RANDOM_EVENTS = [
     awayWeeks:[2,2],
     commitment:"low",
     reward:{ goldRange:[600,1000] },
-    rewardDesc:"1,200–2,000g",
+    rewardDesc:"600–1,000g",
   },
 ];
 
@@ -7680,7 +7680,9 @@ export default function App(){
   // ── RAID: PHASE 2 — apply outcome after simulation completes ──────────────
   const applyRaidResult=()=>{
     try {
-    const result=activeSimulation;
+    // Shallow copy — this function reassigns result.goldSwing, and mutating a
+    // React state object directly is a concurrent-rendering hazard
+    const result=activeSimulation?{...activeSimulation}:null;
     const raidEnemy=pendingRaidEnemy;
     setActiveSimulation(null);
     setPendingRaidEnemy(null);
