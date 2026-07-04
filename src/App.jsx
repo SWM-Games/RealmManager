@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, Fragment } from "react";
 
 // ─── RESPONSIVE HOOK ─────────────────────────────────────────────────────────
 function useIsMobile() {
@@ -127,6 +127,22 @@ const RESPONSIVE_CSS = `
   .pa-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:12px; }
   @media (max-width: 640px) {
     .pa-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── VERDICT STAMPS — rotated, ink-rough, stamped down ── */
+  .rm-stamp {
+    display: inline-block; padding: 3px 14px 2px;
+    border: 3px double #40614F; color: #40614F; border-radius: 3px;
+    font-family: 'IM Fell English SC', serif; letter-spacing: .16em;
+    transform: rotate(-3deg);
+    opacity: .88; mix-blend-mode: multiply;
+  }
+  .rm-stamp-loss { border-color: #7E2D26; color: #7E2D26; transform: rotate(2.5deg); }
+  @media (prefers-reduced-motion: no-preference) {
+    .rm-stamp { animation: rmStampIn .38s cubic-bezier(.2,1.6,.4,1) both; }
+    .rm-stamp-loss { animation: rmStampInLoss .38s cubic-bezier(.2,1.6,.4,1) both; }
+    @keyframes rmStampIn { from { transform: rotate(-3deg) scale(1.7); opacity: 0; } to { transform: rotate(-3deg) scale(1); opacity: .88; } }
+    @keyframes rmStampInLoss { from { transform: rotate(2.5deg) scale(1.7); opacity: 0; } to { transform: rotate(2.5deg) scale(1); opacity: .88; } }
   }
 
   /* ── LAYOUT SHELL ── */
@@ -3669,14 +3685,15 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                 </div>
 
                 {/* Beat feed */}
-                <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                <div style={{display:"flex",flexDirection:"column",gap:4}}>
                   {shownBeats.map((b,bi)=>(
-                    <div key={bi} style={{fontSize:10,lineHeight:1.45,color:b.won?"#40614F":"#96473C",animation:bi===shownBeats.length-1?"fadeIn 0.35s ease":"none"}}>
-                      <span style={{color:b.won?"#40614F":"#7E2D26",fontWeight:700}}>{b.won?"▸":"◂"}</span>{" "}
-                      {b.kind==="crit"&&<span style={{color:"#8A6D3B",fontWeight:700}}>CRIT! </span>}
-                      {b.kind==="rally"&&<span style={{color:"#3C5A78",fontWeight:700}}>RALLY — </span>}
+                    <div key={bi} style={{fontSize:11,lineHeight:1.5,color:b.won?"#40614F":"#96473C",paddingLeft:14,textIndent:-14,animation:bi===shownBeats.length-1?"fadeIn 0.35s ease":"none"}}>
+                      <span style={{color:b.won?"#40614F":"#7E2D26",fontWeight:700}}>{b.won?"⊕":"⊖"}</span>{" "}
+                      {b.kind==="crit"&&<span style={{fontFamily:"'IM Fell English SC',serif",color:"#8A6D3B",fontWeight:700,letterSpacing:0.5}}>A Telling Blow — </span>}
+                      {b.kind==="rally"&&<span style={{fontFamily:"'IM Fell English SC',serif",color:"#3C5A78",fontWeight:700,letterSpacing:0.5}}>The Rally — </span>}
+                      {b.kind==="falter"&&<span style={{fontFamily:"'IM Fell English SC',serif",color:"#96473C",fontWeight:700,letterSpacing:0.5}}>A Faltering — </span>}
                       {b.text}
-                      {b.injuryTo&&<div style={{color:"#7E2D26",fontSize:9,marginTop:1}}>🩸 {b.injuryTo} is hurt in the exchange</div>}
+                      {b.injuryTo&&<div style={{color:"#7E2D26",fontSize:9.5,fontStyle:"italic",marginTop:1}}>— {b.injuryTo} is hurt in the exchange —</div>}
                     </div>
                   ))}
                 </div>
@@ -3694,11 +3711,13 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
         <div style={{padding:"0 18px 16px",transition:"all 0.5s",opacity:done?1:0,transform:done?"translateY(0)":"translateY(12px)"}}>
           <div style={{borderRadius:3,border:`1px solid ${outcomeCol}33`,background:`${outcomeCol}08`,padding:"14px 16px"}}>
 
-            {/* Result */}
+            {/* Result — stamped verdict; mounts on done so the stamp lands */}
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:20,color:outcomeCol}}>
-                {won ? "🏆 VICTORY" : "💀 DEFEAT"}
-              </div>
+              {done&&(
+                <span className={won?"rm-stamp":"rm-stamp rm-stamp-loss"} style={{fontSize:20}}>
+                  {won?"Victory":"Defeat"}
+                </span>
+              )}
               <div style={{flex:1}}/>
               {/* Phase summary pips */}
               <div style={{display:"flex",gap:4}}>
@@ -4183,8 +4202,10 @@ function WeeklySummary({summary, onDismiss, townColor}){
         <div style={{padding:"14px 20px",background:won?"rgba(64,97,79,0.12)":"rgba(126,45,38,0.12)",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:won?"#40614F":"#7E2D26"}}>
-                {isMiracle?"✨ AGAINST ALL ODDS":isUpset?"⚡ UPSET VICTORY":isDominant?"⚔️ A ROUT":isShock?"😱 STUNNED":won?"⚔️ VICTORY":"💀 DEFEAT"}
+              <div style={{marginBottom:3}}>
+                <span className={won?"rm-stamp":"rm-stamp rm-stamp-loss"} style={{fontSize:15}}>
+                  {isMiracle?"Against All Odds":isUpset?"Upset Victory":isDominant?"A Rout":isShock?"Stunned":won?"Victory":"Defeat"}
+                </span>
               </div>
               <div style={{fontSize:10,color:won?"#40614F":"#9A5B2B",marginTop:1,fontStyle:"italic"}}>
                 {isMiracle?"They'll sing about this one. Nobody gave you a chance.":
@@ -6310,6 +6331,13 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               <div style={{textAlign:"center",fontSize:10,fontWeight:700,color:"#40614F"}}>{tribute}g</div>
             </div>
           );
+        }).flatMap((row,i)=>{
+          // Printed rules mark the zones: dashed verdigris under 2nd (all above
+          // go up), dashed oxblood under 6th (all below go down)
+          const out=[row];
+          if(i===1) out.push(<div key="promo-rule" style={{borderTop:"2px dashed #40614F",margin:"5px 6px 8px",opacity:0.7}}/>);
+          if(i===5&&allTowns.length>=7) out.push(<div key="rele-rule" style={{borderTop:"2px dashed #7E2D26",margin:"5px 6px 8px",opacity:0.6}}/>);
+          return out;
         })}
       </div>
 
