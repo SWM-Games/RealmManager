@@ -5385,9 +5385,11 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
 
 // ─── NEGOTIATION MODAL ───────────────────────────────────────────────────────
 
-function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
+function NegotiationModal({pending, heroes, gold, onAccept, onCounter, onReject, onDelay}){
   if(!pending||pending.length===0)return null;
-  const hero=pending[0]; // handle one at a time
+  // Resolve the LIVE hero — queue entries are snapshots from when they were
+  // queued, and demands must reflect current level/morale/stats
+  const hero=(heroes||[]).find(h=>h.id===pending[0].id)||pending[0];
   const demand=calcDemand(hero);
   const canAffordWeekly=gold>demand.salary*4; // rough check
   const {color:hColor}=moraleLabel(hero.morale);
@@ -5444,6 +5446,13 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
             ✗ Reject<br/><span style={{fontSize:9,fontWeight:400}}>–10 morale</span>
           </button>
         </div>
+        {onDelay&&(
+          <button onClick={()=>onDelay(hero)}
+            style={{width:"100%",marginTop:8,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",
+              background:"rgba(60,52,38,0.045)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
+            ⏳ Decide Later — they'll stew on it (−6 morale{(hero.negotiationIgnoredWeeks||0)>=1?", patience wearing thin":""})
+          </button>
+        )}
       </div>
     </div>
   );
@@ -7470,7 +7479,20 @@ export default function App(){
     if(hero.negotiationPending) return;
     if((hero.contractWeeksLeft||0) > WEEKS_PER_CONTRACT_YEAR * 2) return;
     setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{...h, negotiationPending:true, negotiationIgnoredWeeks:0}));
+    // Queue immediately — the talks the player just asked for should open now,
+    // not after the next battle's weekly tick
+    setNegotiationQueue(q=>q.find(x=>x.id===hero.id)?q:[...q,{...hero, negotiationPending:true, negotiationIgnoredWeeks:0}]);
     addLog(`📋 ${hero.name} called in for early contract talks.`,"info");
+  };
+
+  const handleDelay=(hero)=>{
+    // "Decide later" — the dispute clock ticks and the hero stews
+    setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
+      ...h, morale:Math.max(10,h.morale-6),
+      negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
+    }));
+    setNegotiationQueue(q=>q.slice(1));
+    addLog(`⏳ ${hero.name}'s contract talks postponed. They noticed.`,"info");
   };
 
   const releaseHero=h=>{
@@ -8329,7 +8351,9 @@ export default function App(){
       if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`📜 ${h.name}'s contract has expired! Renewal required.`,"warning");}
       if(wLeft===1&&!negotiationPending){addLog(`⚠️ ${h.name}'s contract expires next week — prepare for renewal.`,"warning");}
       if(wLeft===6&&!negotiationPending){addLog(`⏰ ${h.name}'s contract expires in 6 weeks.`,"info");}
-      if(negotiationPending&&wLeft===0){negotiationIgnoredWeeks++;if(negotiationIgnoredWeeks>=3){return{...h,contractWeeksLeft:0,negotiationPending,negotiationIgnoredWeeks,morale:Math.max(0,h.morale-15)};}}
+      // Dispute clock: only ticks on weeks the hero was ALREADY waiting when
+      // this one began (testing the flag we just set double-counted week one)
+      if(h.negotiationPending&&wLeft===0){negotiationIgnoredWeeks++;if(negotiationIgnoredWeeks>=3){return{...h,contractWeeksLeft:0,negotiationPending,negotiationIgnoredWeeks,morale:Math.max(0,h.morale-15)};}}
       return{...h,contractWeeksLeft:wLeft,negotiationPending,negotiationIgnoredWeeks};
     });
 
@@ -8359,6 +8383,7 @@ export default function App(){
       addChronicle(`🚪 ${h.name} walked out on the realm.`);
       updatedHeroes=applySquadMoraleEvent(updatedHeroes.filter(x=>x.id!==h.id),h,formation,"walkout");
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===h.id?null:x);});return nf;});
+      setNegotiationQueue(q=>q.filter(x=>x.id!==h.id)); // no ghost negotiations
       if(squadLeaderId===h.id) setSquadLeaderId(null);
     });
 
@@ -8380,6 +8405,9 @@ export default function App(){
 
     const newNeg=aged.filter(h=>h.negotiationPending&&!negotiationQueue.find(x=>x.id===h.id));
     if(newNeg.length>0)setNegotiationQueue(q=>[...q,...newNeg.filter(x=>!q.find(y=>y.id===x.id))]);
+    // Prune queue entries whose hero is gone (sold mid-week, walked, retired)
+    const livingIds=new Set(aged.filter(h=>!h.retired).map(h=>h.id));
+    setNegotiationQueue(q=>q.filter(x=>livingIds.has(x.id)));
 
     if(newRetirees.length>0){
       setFormation(f=>{const nf={};const retiredIds=new Set(newRetirees.map(r=>r.id));POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(h=>h&&retiredIds.has(h.id)?null:h);});return nf;});
@@ -8980,7 +9008,7 @@ export default function App(){
           }
           setRetirees([]);
         }}/>
-      <NegotiationModal pending={negotiationQueue} gold={gold} onAccept={handleAccept} onCounter={handleCounter} onReject={handleReject}/>
+      <NegotiationModal pending={negotiationQueue} heroes={heroes} gold={gold} onAccept={handleAccept} onCounter={handleCounter} onReject={handleReject} onDelay={handleDelay}/>
       {activeSimulation&&<RaidSimulationModal simulation={activeSimulation} enemy={pendingRaidEnemy} onComplete={applyRaidResult}/>}
       {weekSummary&&!activeSimulation&&<WeeklySummary summary={weekSummary} onDismiss={()=>setWeekSummary(null)} townColor={townColor}/>}
       {seasonSummary&&!activeSimulation&&!legacyCeremony&&<SeasonSummaryModal summary={seasonSummary} onDismiss={()=>setSeasonSummary(null)} townColor={townColor}/>}
