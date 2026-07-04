@@ -32,8 +32,8 @@ const RESPONSIVE_CSS = `
 
   /* ── PARCHMENT CODEX DESIGN TOKENS ─────────────────────────────────────
      Gold-on-near-black palette; hairline borders; sharp corners on cards
-     (only buttons round to 4px); three-family type system (Cinzel display,
-     Space Grotesk numerals, Lato body). */
+     (only buttons round to 4px); three-family type system (IM Fell English SC display,
+     Alegreya Sans numerals, Alegreya Sans body). */
   :root {
     --pa-bg: #E9E1CE;
     --pa-bg-deep: #E9E1CE;
@@ -75,39 +75,39 @@ const RESPONSIVE_CSS = `
   select option:checked, select option:hover { background: #E4D9BF; color: var(--pa-gold); }
 
   /* ── Parchment Codex utility classes ──────────────────────────────────
-     pa-h1: Cinzel 30/700, +1 letter, line-height 1
+     pa-h1: IM Fell English SC 30/700, +1 letter, line-height 1
      pa-rule: 60×1px gold rule
-     pa-sub: Cinzel 10/500 +2 letter uppercase muted */
-  .pa-h1 { font-family:'Cinzel',serif; font-weight:700; font-size:30px; color:var(--pa-parchment); letter-spacing:1px; line-height:1; margin:0; }
+     pa-sub: IM Fell English SC 10/500 +2 letter uppercase muted */
+  .pa-h1 { font-family:'IM Fell English SC',serif; font-weight:700; font-size:30px; color:var(--pa-parchment); letter-spacing:1px; line-height:1; margin:0; }
   .pa-rule { width:60px; height:1px; background:var(--pa-gold); margin:14px 0 10px; }
-  .pa-sub { font-family:'Cinzel',serif; font-weight:500; font-size:10px; letter-spacing:2px; color:var(--pa-muted); text-transform:uppercase; }
-  .pa-kicker { font-family:'Cinzel',serif; font-weight:700; font-size:9px; letter-spacing:2px; color:var(--pa-muted-deep); text-transform:uppercase; line-height:1; }
-  .pa-num { font-family:'Space Grotesk',sans-serif; font-variant-numeric:tabular-nums; line-height:1; }
+  .pa-sub { font-family:'IM Fell English SC',serif; font-weight:500; font-size:10px; letter-spacing:2px; color:var(--pa-muted); text-transform:uppercase; }
+  .pa-kicker { font-family:'IM Fell English SC',serif; font-weight:700; font-size:9px; letter-spacing:2px; color:var(--pa-muted-deep); text-transform:uppercase; line-height:1; }
+  .pa-num { font-family:'Alegreya Sans',sans-serif; font-variant-numeric:tabular-nums; line-height:1; }
 
   /* Filter pills — used in Squad position filter */
   .pa-pill {
-    font-family:'Cinzel',serif; font-weight:600; font-size:10px; letter-spacing:1.5px;
+    font-family:'IM Fell English SC',serif; font-weight:600; font-size:10px; letter-spacing:1.5px;
     text-transform:uppercase; padding:7px 14px; border-radius:0; cursor:pointer;
     border:1px solid rgba(138,109,59,0.33); background:transparent; color:var(--pa-muted);
     transition:border-color 0.15s, color 0.15s; display:inline-flex; align-items:center; gap:7px;
   }
   .pa-pill:hover { color:var(--pa-parchment-bright); border-color:rgba(138,109,59,0.55); }
   .pa-pill.active { color:var(--pa-bg); background:var(--pa-gold); border-color:var(--pa-gold); }
-  .pa-pill .ct { font-family:'Space Grotesk',sans-serif; letter-spacing:0; opacity:0.85; font-weight:600; }
+  .pa-pill .ct { font-family:'Alegreya Sans',sans-serif; letter-spacing:0; opacity:0.85; font-weight:600; }
 
-  /* Alert strip — left gold rule, no background, gold numerals + Cinzel desc */
+  /* Alert strip — left gold rule, no background, gold numerals + IM Fell English SC desc */
   .pa-alert {
     margin-bottom:24px; padding:14px 18px; background:transparent;
     border-left:2px solid var(--pa-gold);
     display:flex; gap:24px; flex-wrap:wrap;
-    font-family:'Cinzel',serif; font-weight:600; font-size:10px;
+    font-family:'IM Fell English SC',serif; font-weight:600; font-size:10px;
     letter-spacing:1.5px; text-transform:uppercase; color:var(--pa-gold-soft);
   }
-  .pa-alert .num { font-family:'Space Grotesk',sans-serif; color:var(--pa-gold); font-weight:700; font-size:13px; letter-spacing:0; margin-right:4px; text-transform:none; }
+  .pa-alert .num { font-family:'Alegreya Sans',sans-serif; color:var(--pa-gold); font-weight:700; font-size:13px; letter-spacing:0; margin-right:4px; text-transform:none; }
 
-  /* Buttons — Lato body type, sharp 4px corners */
+  /* Buttons — Alegreya Sans body type, sharp 4px corners */
   .pa-primary {
-    font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.3px;
+    font-family:'Alegreya Sans',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.3px;
     padding:11px 22px; background:var(--pa-gold); color:var(--pa-bg);
     border:none; border-radius:4px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
     transition: background 0.15s;
@@ -115,7 +115,7 @@ const RESPONSIVE_CSS = `
   .pa-primary:hover { background:var(--pa-gold-light); }
   .pa-primary:disabled { background:#D5C8A9; color:#C9BA98; cursor:not-allowed; }
   .pa-secondary {
-    font-family:'Lato',sans-serif; font-weight:500; font-size:12px;
+    font-family:'Alegreya Sans',sans-serif; font-weight:500; font-size:12px;
     padding:10px 16px; background:transparent; color:var(--pa-muted-deep);
     border:1px solid rgba(138,109,59,0.375); border-radius:4px; cursor:pointer;
     display:inline-flex; align-items:center; gap:7px;
@@ -158,25 +158,25 @@ const RESPONSIVE_CSS = `
   }
   .rm-stat-row:first-child { border-top: none; }
   .rm-stat-label {
-    font-family: 'Cinzel', serif; font-size: 10px;
+    font-family: 'IM Fell English SC', serif; font-size: 10px;
     letter-spacing: 1.5px; color: #77653F; text-transform: uppercase;
     flex: 1; font-weight: 600;
   }
   .rm-stat-value {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Alegreya Sans', sans-serif;
     font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
   }
   .rm-sidebar-nav {
     padding: 14px 10px; display: flex; flex-direction: column; gap: 1px; flex: 1;
   }
   .rm-nav-kicker {
-    font-family: 'Cinzel', serif; font-size: 9px; color: #77653F;
+    font-family: 'IM Fell English SC', serif; font-size: 9px; color: #77653F;
     letter-spacing: 2.5px; padding: 0 10px 8px; text-transform: uppercase; font-weight: 700;
   }
   .rm-nav-item {
     display: flex; align-items: center; gap: 12px;
     padding: 11px 12px; border: none; border-left: 2px solid transparent;
-    cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px;
+    cursor: pointer; font-family: 'IM Fell English SC', serif; font-size: 12px;
     background: transparent; color: #77653F;
     transition: background 0.15s, color 0.15s;
     text-align: left; width: 100%; position: relative;
@@ -229,7 +229,7 @@ const RESPONSIVE_CSS = `
       padding: 8px 14px; gap: 8px;
     }
     .rm-topbar-title {
-      font-family: 'Cinzel', serif; font-weight: 900; font-size: 14px;
+      font-family: 'IM Fell English SC', serif; font-weight: 900; font-size: 14px;
       color: #23201A;
       white-space: nowrap;
     }
@@ -238,7 +238,7 @@ const RESPONSIVE_CSS = `
     .rm-topbar-chip {
       flex-shrink: 0; text-align: center;
       background: rgba(60,52,38,0.072); border: 1px solid rgba(60,52,38,0.108);
-      border-radius: 6px; padding: 3px 8px;
+      border-radius: 3px; padding: 3px 8px;
     }
     .rm-topbar-chip-label { font-size: 7px; color: #95896F; }
     .rm-topbar-chip-value { font-size: 11px; font-weight: 700; }
@@ -257,7 +257,7 @@ const RESPONSIVE_CSS = `
       justify-content: center; gap: 2px;
       padding: 8px 2px 6px; border: none; cursor: pointer;
       background: transparent; color: #8A7F68;
-      font-family: 'Lato', sans-serif;
+      font-family: 'Alegreya Sans', sans-serif;
       transition: color 0.15s; position: relative;
       min-height: 56px;
     }
@@ -271,7 +271,7 @@ const RESPONSIVE_CSS = `
     }
     .rm-bnav-battle-pill {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 52px; height: 38px; border-radius: 14px;
+      width: 52px; height: 38px; border-radius: 3px;
       background: rgba(126,45,38,0.18); border: 1px solid rgba(126,45,38,0.3);
       transition: background 0.15s, border 0.15s;
       gap: 1px;
@@ -293,9 +293,9 @@ const RESPONSIVE_CSS = `
     }
     .rm-more-item {
       flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 10px 4px; border-radius: 10px; border: 1px solid rgba(60,52,38,0.108);
+      padding: 10px 4px; border-radius: 3px; border: 1px solid rgba(60,52,38,0.108);
       background: rgba(60,52,38,0.054); cursor: pointer; color: #7A6F58;
-      font-family: 'Lato', sans-serif; font-size: 9px; font-weight: 600;
+      font-family: 'Alegreya Sans', sans-serif; font-size: 9px; font-weight: 600;
       transition: background 0.15s;
     }
     .rm-more-item.active { color: #3C5A78; background: rgba(60,90,120,0.12); border-color: rgba(60,90,120,0.3); }
@@ -3583,12 +3583,12 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
   return (
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.6)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(12px)"}}
       onClick={skip}>
-      <div style={{width:"min(520px,96vw)",maxHeight:"92vh",overflowY:"auto",background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:"1px solid rgba(60,52,38,0.144)",borderRadius:16,overflow:"hidden auto",boxShadow:"0 0 80px rgba(30,24,14,0.42)"}}>
+      <div style={{width:"min(520px,96vw)",maxHeight:"92vh",overflowY:"auto",background:"#EFE7D3",border:"1px solid rgba(60,52,38,0.144)",borderRadius:3,overflow:"hidden auto",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
         {/* Header */}
         <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(60,52,38,0.09)",display:"flex",alignItems:"center",gap:10,background:"rgba(30,24,14,0.105)"}}>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>⚔️ {enemy.name}</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>⚔️ {enemy.name}</div>
             <div style={{fontSize:9,color:"#7A6F58",marginTop:1}}>Enemy Power {enemy.power} · {Math.round(simulation.winChance*100)}% projected</div>
           </div>
           {!done && (
@@ -3612,12 +3612,12 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
             // Compact row: pending, or already resolved
             if(!isActive || !(ls.started)){
               return (
-                <div key={ls.pos} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:9,
+                <div key={ls.pos} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:3,
                   background:!ls.started?"rgba(60,52,38,0.036)":(ls.won?"rgba(64,97,79,0.075)":"rgba(126,45,38,0.075)"),
                   border:`1px solid ${!ls.started?"rgba(60,52,38,0.09)":(ls.won?"rgba(64,97,79,0.3)":"rgba(126,45,38,0.3)")}`,
                   opacity:!ls.started?0.45:1,transition:"all 0.3s"}}>
-                  <span style={{fontSize:12}}>{ls.icon}</span>
-                  <span style={{fontSize:10,fontWeight:700,color:laneCol,fontFamily:"'Cinzel',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  <PositionIcon position={ls.pos} size={12}/>
+                  <span style={{fontSize:10,fontWeight:700,color:laneCol,fontFamily:"'IM Fell English SC',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
                   {(ls.finished||done)&&ls.series?(
                     <>
                       <span style={{fontSize:10,color:"#6E6350"}}>{ls.series.wins}–{ls.series.losses}</span>
@@ -3632,10 +3632,10 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
             // Active lane: the clash
             return (
-              <div key={ls.pos} style={{borderRadius:11,border:`1px solid ${ls.color}44`,background:`${ls.color}08`,padding:"10px 12px",transition:"all 0.3s"}}>
+              <div key={ls.pos} style={{borderRadius:3,border:`1px solid ${ls.color}44`,background:`${ls.color}08`,padding:"10px 12px",transition:"all 0.3s"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
-                  <span style={{fontSize:13}}>{ls.icon}</span>
-                  <span style={{fontSize:11,fontWeight:700,color:ls.color,fontFamily:"'Cinzel',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  <PositionIcon position={ls.pos} size={13}/>
+                  <span style={{fontSize:11,fontWeight:700,color:ls.color,fontFamily:"'IM Fell English SC',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
                   <span style={{fontSize:11,fontWeight:700,color:"#23201A"}}>{w}–{lct}</span>
                 </div>
 
@@ -3646,7 +3646,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                       const acting = lastBeat && lastBeat.actor===h.id;
                       return (
                         <div key={h.id}
-                          style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:7,
+                          style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:3,
                             background:acting?`${ls.color}22`:"rgba(60,52,38,0.072)",
                             border:`1px solid ${acting?ls.color+"66":"rgba(60,52,38,0.144)"}`,
                             animation:acting?"rmLunge 0.5s ease":"none"}}>
@@ -3657,7 +3657,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                     })}
                   </div>
                   <span style={{fontSize:9,color:"#7A6F58"}}>vs</span>
-                  <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:7,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.27)"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.27)"}}>
                     <span style={{fontSize:11}}>{enemy.specialisation?.icon||"⚔️"}</span>
                     <span style={{fontSize:9,color:"#8A5A44"}}>{enemy.name?.split(" ").slice(0,2).join(" ")}</span>
                   </div>
@@ -3665,7 +3665,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
                 {/* Momentum bar */}
                 <div style={{height:5,borderRadius:3,background:"rgba(126,45,38,0.375)",overflow:"hidden",marginBottom:8}}>
-                  <div style={{height:"100%",width:`${momPct}%`,background:"linear-gradient(90deg,#3C5A78,#40614F)",borderRadius:3,transition:"width 0.45s ease"}}/>
+                  <div style={{height:"100%",width:`${momPct}%`,background:"#3C5A78",borderRadius:3,transition:"width 0.45s ease"}}/>
                 </div>
 
                 {/* Beat feed */}
@@ -3692,11 +3692,11 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
         {/* Outcome card */}
         <div style={{padding:"0 18px 16px",transition:"all 0.5s",opacity:done?1:0,transform:done?"translateY(0)":"translateY(12px)"}}>
-          <div style={{borderRadius:12,border:`1px solid ${outcomeCol}33`,background:`${outcomeCol}08`,padding:"14px 16px"}}>
+          <div style={{borderRadius:3,border:`1px solid ${outcomeCol}33`,background:`${outcomeCol}08`,padding:"14px 16px"}}>
 
             {/* Result */}
             <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:20,color:outcomeCol}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:20,color:outcomeCol}}>
                 {won ? "🏆 VICTORY" : "💀 DEFEAT"}
               </div>
               <div style={{flex:1}}/>
@@ -3712,17 +3712,17 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
             {/* Stats row */}
             <div style={{display:"flex",gap:10,marginBottom:injuredHeroes.length>0?10:0}}>
               {won && (
-                <div style={{flex:1,padding:"8px 10px",borderRadius:8,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.225)",textAlign:"center"}}>
+                <div style={{flex:1,padding:"8px 10px",borderRadius:3,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.225)",textAlign:"center"}}>
                   <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>Gold</div>
                   <div style={{fontSize:16,fontWeight:700,color:"#8A6D3B"}}>+{simulation.goldSwing?.toLocaleString()}g</div>
                 </div>
               )}
-              <div style={{flex:1,padding:"8px 10px",borderRadius:8,background:"rgba(95,75,102,0.09)",border:"1px solid rgba(95,75,102,0.225)",textAlign:"center"}}>
+              <div style={{flex:1,padding:"8px 10px",borderRadius:3,background:"rgba(95,75,102,0.09)",border:"1px solid rgba(95,75,102,0.225)",textAlign:"center"}}>
                 <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>XP</div>
                 <div style={{fontSize:16,fontWeight:700,color:"#5F4B66"}}>+{simulation.heroXP}</div>
               </div>
               {simulation.abilityResults?.some(r=>r.outcome!=="pass")&&(
-                <div style={{flex:1,padding:"8px 10px",borderRadius:8,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)",textAlign:"center"}}>
+                <div style={{flex:1,padding:"8px 10px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)",textAlign:"center"}}>
                   <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>Ability</div>
                   <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B"}}>⚠️ Effect</div>
                 </div>
@@ -3731,11 +3731,11 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
             {/* Injuries */}
             {injuredHeroes.length > 0 && (
-              <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
+              <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
                 <div style={{fontSize:10,fontWeight:700,color:"#7E2D26",marginBottom:3}}>🩸 Injured</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                   {injuredHeroes.map(h=>(
-                    <div key={h.id} style={{fontSize:9,color:"#9A5B2B",padding:"2px 6px",borderRadius:5,background:"rgba(126,45,38,0.15)",border:"1px solid rgba(126,45,38,0.3)"}}>
+                    <div key={h.id} style={{fontSize:9,color:"#9A5B2B",padding:"2px 6px",borderRadius:3,background:"rgba(126,45,38,0.15)",border:"1px solid rgba(126,45,38,0.3)"}}>
                       <HeroAvatar race={h.race} size={14}/> {h.name}
                     </div>
                   ))}
@@ -3756,9 +3756,9 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
               const phaseWon = phaseResult?.won;
               const wc = simulation.phaseWinChances?.[pos];
               return(
-                <div key={pos} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 8px",borderRadius:7,background:"rgba(60,52,38,0.036)",border:`1px solid ${phaseWon?"rgba(64,97,79,0.15)":"rgba(126,45,38,0.15)"}`}}>
+                <div key={pos} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 8px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:`1px solid ${phaseWon?"rgba(64,97,79,0.15)":"rgba(126,45,38,0.15)"}`}}>
                   <span style={{fontSize:11}}>{icon}</span>
-                  <span style={{fontSize:10,fontWeight:700,color,flex:1,fontFamily:"'Cinzel',serif"}}>{pos}</span>
+                  <span style={{fontSize:10,fontWeight:700,color,flex:1,fontFamily:"'IM Fell English SC',serif"}}>{pos}</span>
                   {ps?.pairingMult>1&&<span style={{fontSize:9,color:"#8A6D3B"}}>✦</span>}
                   <span style={{fontSize:9,color:"#6E6350"}}>{wc?Math.round(wc*100)+"% win chance":""}</span>
                   <span style={{fontSize:10,fontWeight:700,color:phaseWon?"#40614F":"#7E2D26"}}>{phaseWon?"✓ Won":"✗ Lost"}</span>
@@ -3803,10 +3803,10 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
         <div style={{padding:"12px 18px",borderTop:"1px solid rgba(60,52,38,0.09)",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(30,24,14,0.07)"}}>
           {done?(
             <>
-              <button onClick={(e)=>{e.stopPropagation();setShowDetails(d=>!d);}} style={{padding:"7px 14px",borderRadius:7,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:11,fontFamily:"'Cinzel',serif"}}>
+              <button onClick={(e)=>{e.stopPropagation();setShowDetails(d=>!d);}} style={{padding:"7px 14px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
                 {showDetails?"Hide Details":"Show Details"}
               </button>
-              <button onClick={(e)=>{e.stopPropagation();onComplete();}} style={{padding:"9px 24px",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${won?"#40614F,#3C5A78":"#9A5B2B,#8A6D3B"})`,color:"#F0E8D5",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+              <button onClick={(e)=>{e.stopPropagation();onComplete();}} style={{padding:"9px 24px",borderRadius:3,border:"none",cursor:"pointer",background:`${won?"#40614F":"#9A5B2B"}`,color:"#F0E8D5",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
                 Continue →
               </button>
             </>
@@ -3824,41 +3824,93 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 // ─── COMPONENTS ───────────────────────────────────────────────────────────────
 
 // ─── ICON / AVATAR COMPONENTS ────────────────────────────────────────────────
-// Each is a thin wrapper — swap the return line when assets are ready.
-// File convention: /public/icons/{category}/{key}.svg
-//                  /public/sprites/races/{key}.png
+// Engraved single-ink stroke glyphs — one path per mark, 24×24 grid.
+// Replaces the emoji icon system (and the old golden filled SVGs).
+
+const GLYPH_PATHS = {
+  // races — heraldic marks, not portraits
+  race_human:      "M6 4h12v7c0 5-4 8-6 9-2-1-6-4-6-9z",
+  race_elf:        "M5 19C5 10 12 4 20 4c0 9-7 15-15 15zM5 19c4-4 9-9 15-15",
+  race_dwarf:      "M5 5h11v6H5zM10 11v10M16 6.5h4",
+  race_half_orc:   "M5 19h14M8 19V9c0-3 1.5-5 1.5-5M16 19V9c0-3-1.5-5-1.5-5",
+  race_gnome:      "M12 8.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 1 0 0-9M12 5v3.5M12 17.5V21M5 13h2.5M16.5 13H19M12 11.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3",
+  race_tiefling:   "M6 21c0-5 2.5-8 6-8s6 3 6 8M8 13C5 11 4 7 5 3c2 2 3.5 4.5 3.5 8M16 13c3-2 4-6 3-10-2 2-3.5 4.5-3.5 8",
+  race_dragonborn: "M12 21c-3.5 0-6-2.5-6-6 0-4 3-5 3-9 2 2 3 3.5 3 5.5 1-1 2-3 2-5 3 3 4 5.5 4 8.5 0 3.5-2.5 6-6 6z",
+  // roles
+  role_warrior:  "M4 20L17 7M17 7l3-3M14 4l6 6M7 17l-3 3M5 15l4 4",
+  role_ranger:   "M6 4c6 2 6 14 0 16M6 4v16M6 12h12M15 9l3 3-3 3",
+  role_mage:     "M12 22V9M12 8.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 1 0 0 7M6 11l2.5 1.5M18 11l-2.5 1.5",
+  role_rogue:    "M12 3L9.5 12h5zM12 12v9M9 15h6",
+  role_cleric:   "M12 4v16M7 9h10M9 20h6",
+  role_paladin:  "M6 4h12v7c0 5-4 8-6 9-2-1-6-4-6-9zM12 7v8M9 10.5h6",
+  // positions
+  pos_vanguard:   "M5 4l15 15M19 4L4 19M8 3L3 8M21 16l-5 5",
+  pos_skirmisher: "M3 12h15M14 7l5 5-5 5M3 8v8",
+  pos_arbiter:    "M6 21V3M6 4h12l-3 4 3 4H6",
+  // tiers — chevrons climb, then coronets
+  tier_iron:     "M6 15l6-5 6 5",
+  tier_bronze:   "M6 12l6-5 6 5M6 17l6-5 6 5",
+  tier_silver:   "M6 9.5l6-5 6 5M6 14.5l6-5 6 5M6 19.5l6-5 6 5",
+  tier_gold:     "M5 18h14l1.5-9-4.5 3.5L12 6l-4 6.5L3.5 9zM5 21h14",
+  tier_platinum: "M5 18h14l1.5-9-4.5 3.5L12 6l-4 6.5L3.5 9zM5 21h14M12 12.5l1 2h-2z",
+  // nav
+  nav_squad:    "M9 4.5a3 3 0 1 0 0 6 3 3 0 1 0 0-6M4 20c0-4 2-6.5 5-6.5s5 2.5 5 6.5M16.5 7a2.5 2.5 0 1 0 0 5M15 13.8c2.8.3 4.5 2.6 4.5 6.2",
+  nav_tactics:  "M4 4h16v16H4zM4 12h16M12 4v16M8 8l2 2M16 14l-2 2",
+  nav_battle:   "M5 4l15 15M19 4L4 19M8 3L3 8M21 16l-5 5",
+  nav_dominion: "M7 3C4.5 8 4.5 14 8 19M17 3c2.5 5 2.5 11-1 16M7 7l-2.5-1M8 12l-3 0M17 7l2.5-1M16 12l3 0",
+  nav_town:     "M6 21V9l-2 1V7l8-4 8 4v3l-2-1v12M10 21v-5h4v5",
+  nav_hire:     "M20 4c-6 0-11 4-13 10l-3 6M6 15c3 1 6 0 8-2M4 20l3-6",
+  nav_ledger:   "M4 5c3-1.5 5-1.5 8 0 3-1.5 5-1.5 8 0v14c-3-1.5-5-1.5-8 0-3-1.5-5-1.5-8 0zM12 5v14",
+  nav_guide:    "M7 3h11v14c0 2-1 3-3 3H6c-1.8 0-2.8-2.6 0-3h9M7 3C5.5 3 5 4 5 5.5V17",
+  // buildings
+  bld_barracks:  "M5 21V8h3V5h2.5v3h3V5H16v3h3v13M10 21v-4h4v4",
+  bld_tavern:    "M6 7h9v13H6zM15 10h3.5c1 0 1 5 0 5H15M6 7c1.5-2 7.5-2 9 0",
+  bld_infirmary: "M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z",
+  bld_lodge:     "M4 12l8-8 8 8M6 11v9h12v-9M9 20v-5h6v5",
+  bld_trainyard: "M12 4a8 8 0 1 0 0 16 8 8 0 1 0 0-16M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 1 0 0-7M12 11a1 1 0 1 0 0 2 1 1 0 1 0 0-2",
+  bld_network:   "M2 12c3-5 6.5-7 10-7s7 2 10 7c-3 5-6.5 7-10 7s-7-2-10-7zM12 9.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 1 0 0-5",
+  bld_trading:   "M12 3v18M5 6l7-2 7 2M5 6L2.5 12c0 2 5 2 5 0zM19 6l-2.5 6c0 2 5 2 5 0zM8 21h8",
+  bld_bazaar:    "M3 20L12 5l9 15zM7.5 20L12 12l4.5 8M12 5V2l3 1-3 1.2",
+  bld_scouts:    "M3 17l10-7 3 4.5L6 21zM13 10l3 4.5M18.5 4v4M16.5 6h4",
+  bld_sanctum:   "M7 4h10l4 5-9 11L3 9zM3 9h18M7 4l5 5 5-5M12 20L7 9M12 20l5-11",
+  bld_legends:   "M5 4h14M5 20h14M8 4v16M12 4v16M16 4v16M4 4h16",
+};
+
+function Glyph({ id, size = 16, color = "#23201A", style }) {
+  const d = GLYPH_PATHS[id];
+  if (!d) return null;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
+      strokeWidth="1.7" strokeLinecap="square" strokeLinejoin="miter"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0, ...style }}>
+      <path d={d} />
+    </svg>
+  );
+}
 
 function HeroAvatar({ race, size=20 }) {
   const cfg = VISUAL_CONFIG.races[race];
-  // → <img src={`/sprites/races/${cfg.key}.png`} width={size} height={size} alt={race}/>
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+  return <Glyph id={`race_${cfg?.key||"human"}`} size={size}/>;
 }
 function RoleIcon({ role, size=14 }) {
   const cfg = VISUAL_CONFIG.roles[role];
-  if(cfg?.key) return <img src={`/icons/roles/${cfg.key}.svg`} width={size} height={size} alt={role||""} style={{display:"inline-block",verticalAlign:"middle",objectFit:"contain"}}/>;
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+  return <Glyph id={`role_${cfg?.key||"warrior"}`} size={size}/>;
 }
 function PositionIcon({ position, size=16 }) {
   const cfg = VISUAL_CONFIG.positions[position];
-  if(position && ["Vanguard","Skirmisher","Arbiter"].includes(position)) {
-    return <img src={`/icons/positions/${position.toLowerCase()}.png`} width={size} height={size} alt={position} style={{display:"inline-block",verticalAlign:"middle",objectFit:"contain"}}/>;
-  }
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+  return <Glyph id={`pos_${cfg?.key||"vanguard"}`} size={size}/>;
 }
 function TierIcon({ tier, size=16 }) {
   const cfg = VISUAL_CONFIG.tiers[tier];
-  // → <img src={`/icons/tiers/${cfg.key}.svg`} width={size} height={size} alt={tier}/>
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚙️"}</span>;
+  return <Glyph id={cfg?.key||"tier_iron"} size={size}/>;
 }
 function BuildingIcon({ id, size=20 }) {
   const cfg = VISUAL_CONFIG.buildings[id];
-  // → <img src={`/icons/buildings/${cfg.key}.svg`} width={size} height={size} alt={id}/>
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"🏰"}</span>;
+  return <Glyph id={`bld_${cfg?.key||"barracks"}`} size={size}/>;
 }
 function NavIcon({ tab, size=18 }) {
   const cfg = VISUAL_CONFIG.nav[tab];
-  // → <img src={`/icons/nav/${cfg.key}.svg`} width={size} height={size} alt={tab}/>
-  return <span style={{fontSize:size,lineHeight:1}}>{cfg?.emoji||"⚔️"}</span>;
+  return <Glyph id={cfg?.key||"nav_squad"} size={size}/>;
 }
 
 function StatBar({label,value,prev,base,max=99,highlight,dimmed}){
@@ -3901,7 +3953,7 @@ function XPBar({xp,level}){
         <span style={{color:"#6E6350",fontSize:9}}>{xp} XP</span>
       </div>
       <div style={{height:4,background:"#DFD3B8",borderRadius:3,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:"linear-gradient(90deg,#5F4B66,#5F4B66)",borderRadius:3,transition:"width 0.5s"}}/>
+        <div style={{height:"100%",width:`${pct}%`,background:"#5F4B66",borderRadius:3,transition:"width 0.5s"}}/>
       </div>
     </div>
   );
@@ -3920,7 +3972,7 @@ function ContractBar({hero}){
         {hero.negotiationPending&&<span style={{fontSize:9,color:"#9A5B2B",fontWeight:700,animation:"pulse 1s infinite"}}>⚠️ RENEWAL PENDING</span>}
       </div>
       <div style={{height:4,background:"#DFD3B8",borderRadius:2,overflow:"hidden"}}>
-        <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${col}88,${col})`,borderRadius:2,transition:"width 0.5s"}}/>
+        <div style={{height:"100%",width:`${pct}%`,background:`${col}`,borderRadius:2,transition:"width 0.5s"}}/>
       </div>
     </div>
   );
@@ -4007,12 +4059,12 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.6)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)",overflowY:"auto",padding:"16px 0"}}>
-      <div style={{background:"linear-gradient(160deg,#E9E1CE,#EDE4CE,#0a1020)",border:"1px solid rgba(138,109,59,0.55)",borderRadius:16,maxWidth:520,width:"92%",overflow:"hidden",boxShadow:"0 0 60px rgba(138,109,59,0.15)"}}>
+      <div style={{background:"#E9E1CE",border:"1px solid rgba(138,109,59,0.55)",borderRadius:3,maxWidth:520,width:"92%",overflow:"hidden",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
         {/* Header */}
         <div style={{padding:"28px 28px 18px",textAlign:"center",background:"linear-gradient(180deg,rgba(138,109,59,0.12),transparent)"}}>
           <div style={{fontSize:40,marginBottom:8}}>{defeat?"🕯️":"🏆"}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:22,color:defeat?"#9A5B2B":"#8A6D3B",marginBottom:4}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:22,color:defeat?"#9A5B2B":"#8A6D3B",marginBottom:4}}>
             {defeat?"The Campaign Ends":"A Legend is Born"}
           </div>
           <div style={{fontSize:13,color:"#6E6350"}}>{defeat
@@ -4027,7 +4079,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
               ["Seasons played", season, "#23201A"],
               ["Win rate", `${winPct}% · ${wins}W/${losses}L`, "#40614F"],
             ].map(([label,val,col])=>(
-              <div key={label} style={{padding:"10px 8px",borderRadius:9,background:"rgba(60,52,38,0.072)",border:"1px solid rgba(60,52,38,0.144)",textAlign:"center"}}>
+              <div key={label} style={{padding:"10px 8px",borderRadius:3,background:"rgba(60,52,38,0.072)",border:"1px solid rgba(60,52,38,0.144)",textAlign:"center"}}>
                 <div style={{fontSize:11,fontWeight:700,color:col}}>{val}</div>
                 <div style={{fontSize:9,color:"#6E6350",marginTop:2}}>{label}</div>
               </div>
@@ -4035,7 +4087,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
           </div>
 
           {topSynergy&&(
-            <div style={{padding:"10px 14px",borderRadius:9,background:`${topSynergy.color}10`,border:`1px solid ${topSynergy.color}30`,marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
+            <div style={{padding:"10px 14px",borderRadius:3,background:`${topSynergy.color}10`,border:`1px solid ${topSynergy.color}30`,marginBottom:14,display:"flex",alignItems:"center",gap:10}}>
               <span style={{fontSize:20}}>{topSynergy.icon}</span>
               <div>
                 <div style={{fontSize:11,fontWeight:700,color:topSynergy.color}}>Signature: {topSynergy.name}</div>
@@ -4046,8 +4098,8 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
           {/* Final Chronicle */}
           {narrativeParts.length>0&&(
-            <div style={{padding:"12px 14px",borderRadius:9,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.225)",marginBottom:14}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,fontFamily:"'Cinzel',serif",letterSpacing:0.5}}>📜 THE CHRONICLE OF {townName.toUpperCase()}</div>
+            <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.225)",marginBottom:14}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,fontFamily:"'IM Fell English SC',serif",letterSpacing:0.5}}>📜 THE CHRONICLE OF {townName.toUpperCase()}</div>
               {narrativeParts.map((p,i)=>(
                 <p key={i} style={{margin:"0 0 5px",fontSize:11,color:"#6E6350",lineHeight:1.6}}>{p}</p>
               ))}
@@ -4071,13 +4123,13 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
                 const a=ACHIEVEMENTS.find(x=>x.id===id);
                 if(!a) return null;
                 return(
-                  <div key={id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:8,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.3)",marginBottom:5}}>
+                  <div key={id} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 12px",borderRadius:3,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.3)",marginBottom:5}}>
                     <span style={{fontSize:18}}>{a.icon}</span>
                     <div style={{flex:1}}>
                       <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B"}}>{a.name}</div>
                       <div style={{fontSize:9,color:"#6E6350"}}>{a.boon?.desc||""}</div>
                     </div>
-                    <span style={{fontSize:9,color:"#40614F",background:"rgba(64,97,79,0.15)",padding:"2px 7px",borderRadius:6}}>Unlocked</span>
+                    <span style={{fontSize:9,color:"#40614F",background:"rgba(64,97,79,0.15)",padding:"2px 7px",borderRadius:3}}>Unlocked</span>
                   </div>
                 );
               })}
@@ -4085,18 +4137,18 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
           )}
 
           {allBoons.length>0&&(
-            <div style={{padding:"10px 14px",borderRadius:9,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:16,fontSize:10,color:"#3C5A78"}}>
+            <div style={{padding:"10px 14px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:16,fontSize:10,color:"#3C5A78"}}>
               🎖️ <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when starting your next campaign.
             </div>
           )}
 
           <div style={{display:"flex",gap:10}}>
             <button onClick={onPlayOn}
-              style={{flex:1,padding:"11px 0",borderRadius:8,border:"1px solid rgba(60,52,38,0.264)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12}}>
+              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12}}>
               Continue Playing
             </button>
             <button onClick={()=>onNewLegacy(allBoons)}
-              style={{flex:2,padding:"11px 0",borderRadius:8,border:"none",background:"linear-gradient(135deg,#9A5B2B,#8A6D3B)",color:"#F0E8D5",cursor:"pointer",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:12}}>
+              style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
               ⚔️ Begin New Campaign
             </button>
           </div>
@@ -4125,13 +4177,13 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.525)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}}>
-      <div style={{width:"min(440px,92vw)",maxHeight:"90vh",overflowY:"auto",background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:`1px solid ${won?"rgba(64,97,79,0.45)":"rgba(126,45,38,0.375)"}`,borderRadius:14,overflow:"hidden",boxShadow:`0 0 60px ${won?"rgba(64,97,79,0.105)":"rgba(126,45,38,0.105)"}`}}>
+      <div style={{width:"min(440px,92vw)",maxHeight:"90vh",overflowY:"auto",background:"#EFE7D3",border:`1px solid ${won?"rgba(64,97,79,0.45)":"rgba(126,45,38,0.375)"}`,borderRadius:3,overflow:"hidden",boxShadow:`0 0 60px ${won?"rgba(64,97,79,0.105)":"rgba(126,45,38,0.105)"}`}}>
 
         {/* Outcome banner */}
         <div style={{padding:"14px 20px",background:won?"rgba(64,97,79,0.12)":"rgba(126,45,38,0.12)",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:won?"#40614F":"#7E2D26"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:won?"#40614F":"#7E2D26"}}>
                 {isMiracle?"✨ AGAINST ALL ODDS":isUpset?"⚡ UPSET VICTORY":isDominant?"⚔️ A ROUT":isShock?"😱 STUNNED":won?"⚔️ VICTORY":"💀 DEFEAT"}
               </div>
               <div style={{fontSize:10,color:won?"#40614F":"#9A5B2B",marginTop:1,fontStyle:"italic"}}>
@@ -4170,11 +4222,11 @@ function WeeklySummary({summary, onDismiss, townColor}){
                   const pChance = phaseWinChances[pos];
                   const col = pWon?"#40614F":"#7E2D26";
                   return(
-                    <div key={pos} style={{flex:1,padding:"9px 8px",borderRadius:9,
+                    <div key={pos} style={{flex:1,padding:"9px 8px",borderRadius:3,
                       background:pWon?"rgba(64,97,79,0.105)":"rgba(126,45,38,0.105)",
                       border:`1px solid ${pWon?"rgba(64,97,79,0.375)":"rgba(126,45,38,0.3)"}`,
                       textAlign:"center"}}>
-                      <div style={{fontSize:14,marginBottom:3}}>{icon}</div>
+                      <div style={{marginBottom:3}}><PositionIcon position={pos} size={14}/></div>
                       <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
                       <div style={{fontSize:13,fontWeight:900,color:col}}>{pWon?"✓":"✗"}</div>
                       <div style={{fontSize:9,color:"#6E6350",marginTop:2}}>{Math.round(pChance*100)}% chance</div>
@@ -4190,9 +4242,9 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
           {/* Weak Link */}
           {topWeakLink&&(
-            <div style={{padding:"9px 10px",borderRadius:8,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.27)",marginBottom:8}}>
+            <div style={{padding:"9px 10px",borderRadius:3,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.27)",marginBottom:8}}>
               <div style={{fontSize:9,color:"#7E2D26",fontWeight:700,marginBottom:3}}>⚠️ WEAK LINK</div>
-              <div style={{fontSize:11,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>{topWeakLink.hero.name}</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{topWeakLink.hero.name}</div>
               <div style={{fontSize:9,color:"#6E6350"}}>{topWeakLink.issues[0]?.reason.slice(0,40)}</div>
             </div>
           )}
@@ -4207,7 +4259,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
               ["⭐ XP earned",    `+${heroXP} per raider`,                                  "#3C5A78"],
               ["📈 Level-ups",    levelUps.length ? levelUps.map(l=>l.name).join(", ") : "—","#5F4B66"],
             ].map(([label,val,col])=>(
-              <div key={label} style={{padding:"8px 10px",background:"rgba(60,52,38,0.045)",borderRadius:7}}>
+              <div key={label} style={{padding:"8px 10px",background:"rgba(60,52,38,0.045)",borderRadius:3}}>
                 <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
                 <div style={{fontSize:12,fontWeight:700,color:col,wordBreak:"break-word"}}>{val}</div>
               </div>
@@ -4218,12 +4270,12 @@ function WeeklySummary({summary, onDismiss, townColor}){
           {(injuries.length>0||exhausted.length>0)&&(
             <div style={{marginBottom:12}}>
               {injuries.length>0&&(
-                <div style={{padding:"7px 10px",borderRadius:7,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:5,fontSize:11,color:"#9A5B2B"}}>
+                <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:5,fontSize:11,color:"#9A5B2B"}}>
                   🩸 Injured: {injuries.join(", ")}
                 </div>
               )}
               {exhausted.length>0&&(
-                <div style={{padding:"7px 10px",borderRadius:7,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.22)",fontSize:11,color:"#7E2D26"}}>
+                <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.22)",fontSize:11,color:"#7E2D26"}}>
                   ⚡ Burned out: {exhausted.join(", ")} — rest them urgently
                 </div>
               )}
@@ -4232,11 +4284,11 @@ function WeeklySummary({summary, onDismiss, townColor}){
 
           {/* Next opponent preview */}
           {nextOpp&&(
-            <div style={{padding:"9px 12px",borderRadius:8,background:"rgba(60,52,38,0.045)",border:"1px solid rgba(60,52,38,0.126)",marginBottom:12}}>
+            <div style={{padding:"9px 12px",borderRadius:3,background:"rgba(60,52,38,0.045)",border:"1px solid rgba(60,52,38,0.126)",marginBottom:12}}>
               <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>NEXT WEEK</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>{nextOpp.name}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{nextOpp.name}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}><span style={{color:starsColor(nextOppStars)}}>{nextDiffStars}</span> · Power {nextOpp.power}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
@@ -4247,9 +4299,9 @@ function WeeklySummary({summary, onDismiss, townColor}){
           )}
 
           <button onClick={onDismiss}
-            style={{width:"100%",padding:"11px 0",borderRadius:8,border:"none",cursor:"pointer",
-              background:`linear-gradient(135deg,${townColor}cc,${townColor}88)`,
-              color:"#F0E8D5",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+            style={{width:"100%",padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
+              background:`${townColor}cc`,
+              color:"#F0E8D5",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
             Continue →
           </button>
         </div>
@@ -4269,26 +4321,26 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
     const lc=event.challenger;
     return(
       <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.6)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)"}}>
-        <div style={{width:"min(500px,92vw)",background:"linear-gradient(160deg,#E9E1CE,#E7D8C4,#E9E1CE)",border:"1px solid rgba(126,45,38,0.55)",borderRadius:14,overflow:"hidden",boxShadow:"0 0 80px rgba(143,42,30,0.15)"}}>
+        <div style={{width:"min(500px,92vw)",background:"#E9E1CE",border:"1px solid rgba(126,45,38,0.55)",borderRadius:3,overflow:"hidden",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
           {/* Dramatic header */}
           <div style={{padding:"24px 24px 16px",textAlign:"center",background:"linear-gradient(180deg,rgba(143,42,30,0.15),transparent)"}}>
             <div style={{fontSize:42,marginBottom:8}}>{lc.icon}</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:20,color:"#7E2D26",marginBottom:4}}>A Legendary Challenge</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:20,color:"#7E2D26",marginBottom:4}}>A Legendary Challenge</div>
             <div style={{fontSize:13,color:"#6E6350"}}>An emissary has arrived</div>
           </div>
 
           <div style={{padding:"0 24px 24px"}}>
             {/* Challenger card */}
-            <div style={{padding:"14px 16px",borderRadius:10,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.375)",marginBottom:16}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:17,color:"#23201A",marginBottom:4}}>{lc.name}</div>
+            <div style={{padding:"14px 16px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.375)",marginBottom:16}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:17,color:"#23201A",marginBottom:4}}>{lc.name}</div>
               <div style={{fontSize:11,color:"#6E6350",fontStyle:"italic",marginBottom:10}}>"{lc.flavour}"</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
                 {[
                   ["⚔️ Power",lc.power,"#7E2D26"],
                   ["💰 Reward",`${lc.goldReward?.toLocaleString()||"?"}g`,"#8A6D3B"],
                 ].map(([label,val,col])=>(
-                  <div key={label} style={{textAlign:"center",padding:"8px 4px",borderRadius:7,background:"rgba(30,24,14,0.087)"}}>
+                  <div key={label} style={{textAlign:"center",padding:"8px 4px",borderRadius:3,background:"rgba(30,24,14,0.087)"}}>
                     <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
                     <div style={{fontSize:13,fontWeight:700,color:col}}>{val}</div>
                   </div>
@@ -4303,18 +4355,18 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
 
             {/* Specialisation warning if set */}
             {lc.specialisation&&(
-              <div style={{padding:"8px 12px",borderRadius:8,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.225)",marginBottom:14,fontSize:10,color:"#6E6350"}}>
+              <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.225)",marginBottom:14,fontSize:10,color:"#6E6350"}}>
                 {lc.specialisation.icon} They fight with <b style={{color:"#9A5B2B"}}>{lc.specialisation.label}</b> — prepare your counter accordingly.
               </div>
             )}
 
             <div style={{display:"flex",gap:10}}>
               <button onClick={onDecline}
-                style={{flex:1,padding:"11px 0",borderRadius:8,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>
+                style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
                 Decline with Honour
               </button>
               <button onClick={()=>onAccept(event,[])}
-                style={{flex:2,padding:"11px 0",borderRadius:8,border:"none",background:"linear-gradient(135deg,#8F2A1E,#8F2A1E)",color:"#F5EEDC",cursor:"pointer",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+                style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#8F2A1E",color:"#F5EEDC",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
                 ⚔️ Accept the Challenge
               </button>
             </div>
@@ -4347,18 +4399,18 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.574)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
-      <div style={{width:"min(560px,95vw)",maxHeight:"88vh",background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:"1px solid rgba(138,109,59,0.45)",borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 0 60px rgba(138,109,59,0.12)"}}>
+      <div style={{width:"min(560px,95vw)",maxHeight:"88vh",background:"#EFE7D3",border:"1px solid rgba(138,109,59,0.45)",borderRadius:3,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
         {/* Header */}
         <div style={{padding:"16px 20px",borderBottom:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.105)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
             <span style={{fontSize:26}}>{event.icon}</span>
             <div style={{flex:1}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,color:"#8A6D3B"}}>{event.title}</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#8A6D3B"}}>{event.title}</div>
               <div style={{fontSize:10,color:"#6E6350",textTransform:"capitalize"}}>{event.theme} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}</div>
             </div>
             {selectionConfidence&&(
-              <div style={{padding:"4px 10px",borderRadius:7,background:`${selectionConfidence.color}18`,border:`1px solid ${selectionConfidence.color}44`,fontSize:11,fontWeight:700,color:selectionConfidence.color}}>
+              <div style={{padding:"4px 10px",borderRadius:3,background:`${selectionConfidence.color}18`,border:`1px solid ${selectionConfidence.color}44`,fontSize:11,fontWeight:700,color:selectionConfidence.color}}>
                 {selectionConfidence.icon} {selectionConfidence.label}
               </div>
             )}
@@ -4390,12 +4442,12 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
             const {label:fl, color:fc} = fatigueLabel(h.fatigue||0);
             return(
               <div key={h.id} onClick={()=>toggleHero(h)}
-                style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:9,marginBottom:5,cursor:"pointer",
+                style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:3,marginBottom:5,cursor:"pointer",
                   background:isSelected?"rgba(64,97,79,0.12)":"rgba(60,52,38,0.054)",
                   border:`1px solid ${isSelected?"rgba(64,97,79,0.55)":"rgba(60,52,38,0.126)"}`,transition:"all 0.15s"}}>
                 <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
                   <div style={{display:"flex",gap:8,fontSize:10,color:"#6E6350",flexWrap:"wrap",marginTop:2}}>
                     <span>{h.role} · Lv {h.level}</span>
                     <span style={{color:fc}}>{fl} fatigue</span>
@@ -4413,7 +4465,7 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
                 {onViewHero&&(
                   <button onClick={(e)=>{e.stopPropagation();onViewHero(h);}}
                     title="Open full hero sheet"
-                    style={{padding:"4px 8px",borderRadius:6,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.12)",color:"#3C5A78",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                    style={{padding:"4px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.12)",color:"#3C5A78",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
                     👁️ View
                   </button>
                 )}
@@ -4426,14 +4478,14 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
         {/* Actions */}
         <div style={{padding:"12px 20px",borderTop:"1px solid rgba(60,52,38,0.09)",display:"flex",gap:8,background:"rgba(30,24,14,0.07)"}}>
           <button onClick={()=>canAccept&&onAccept(event,selected)} disabled={!canAccept}
-            style={{flex:2,padding:"11px 0",borderRadius:8,border:"none",cursor:canAccept?"pointer":"not-allowed",
-              background:canAccept?"linear-gradient(135deg,#40614F,#35543F)":"#E4DAC2",
-              color:canAccept?"#F0E8D5":"#95896F",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+            style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:canAccept?"pointer":"not-allowed",
+              background:canAccept?"#40614F":"#E4DAC2",
+              color:canAccept?"#F0E8D5":"#95896F",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
             {canAccept?`✓ Send ${selected.map(h=>h.name).join(" & ")}`:`Select ${event.heroesNeeded} hero${event.heroesNeeded>1?"es":""}`}
           </button>
           <button onClick={onDecline}
-            style={{flex:1,padding:"11px 0",borderRadius:8,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",
-              background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12}}>
+            style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",
+              background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12}}>
             ✗ Decline
           </button>
         </div>
@@ -4456,14 +4508,14 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
   if(!event) return null;
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.595)",zIndex:260,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",padding:"16px"}}>
-      <div style={{width:"min(520px,95vw)",maxHeight:"88vh",background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:"1px solid rgba(95,75,102,0.55)",borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 0 60px rgba(95,75,102,0.15)"}}>
+      <div style={{width:"min(520px,95vw)",maxHeight:"88vh",background:"#EFE7D3",border:"1px solid rgba(95,75,102,0.55)",borderRadius:3,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
         {/* Header */}
         <div style={{padding:"20px 22px 14px",borderBottom:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.105)"}}>
           <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
             <span style={{fontSize:28}}>{event.icon}</span>
             <div>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,color:"#5F4B66"}}>{event.title}</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#5F4B66"}}>{event.title}</div>
               <div style={{fontSize:10,color:"#6E6350"}}>Cost: {event.cost}g · Choose a hero to receive training</div>
             </div>
           </div>
@@ -4477,13 +4529,13 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
             const isSel = selectedHero?.id===h.id;
             return(
               <div key={h.id} onClick={()=>setSelectedHero(h)}
-                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:9,
+                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:3,
                   marginBottom:5,cursor:"pointer",transition:"all 0.15s",
                   background:isSel?"rgba(95,75,102,0.15)":"rgba(60,52,38,0.054)",
                   border:`1px solid ${isSel?"rgba(95,75,102,0.55)":"rgba(60,52,38,0.126)"}`}}>
                 <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>{h.role} · Lv {h.level}</div>
                 </div>
                 {isSel&&<div style={{fontSize:14,color:"#5F4B66",fontWeight:700}}>✓</div>}
@@ -4500,7 +4552,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
                   const isSel = selectedStat===s;
                   return(
                     <button key={s} onClick={()=>setSelectedStat(s)}
-                      style={{padding:"5px 10px",borderRadius:7,border:`1px solid ${isSel?"rgba(95,75,102,0.55)":"rgba(60,52,38,0.22)"}`,
+                      style={{padding:"5px 10px",borderRadius:3,border:`1px solid ${isSel?"rgba(95,75,102,0.55)":"rgba(60,52,38,0.22)"}`,
                         background:isSel?"rgba(95,75,102,0.225)":"rgba(60,52,38,0.072)",
                         color:isSel?"#5F4B66":"#6E6350",cursor:"pointer",fontSize:10,fontWeight:isSel?700:400}}>
                       {s}
@@ -4517,16 +4569,16 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
           {!canAfford&&<div style={{fontSize:10,color:"#7E2D26",marginBottom:8}}>⚠️ Not enough gold ({gold}g / {event.cost}g required)</div>}
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>canAccept&&onAccept(selectedHero, selectedStat)} disabled={!canAccept}
-              style={{flex:2,padding:"11px 0",borderRadius:8,border:"none",
+              style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",
                 cursor:canAccept?"pointer":"not-allowed",
-                background:canAccept?"linear-gradient(135deg,#5F4B66,#5F4B66)":"#E4DAC2",
-                color:canAccept?"#F5EEDC":"#95896F",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:12}}>
+                background:canAccept?"#5F4B66":"#E4DAC2",
+                color:canAccept?"#F5EEDC":"#95896F",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
               {canAccept?`✓ Pay ${event.cost}g & Train ${selectedHero?.name}`:"Select hero & stat"}
             </button>
             <button onClick={onDecline}
-              style={{flex:1,padding:"11px 0",borderRadius:8,border:"1px solid rgba(60,52,38,0.22)",
+              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",
                 cursor:"pointer",background:"rgba(60,52,38,0.054)",color:"#6E6350",
-                fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>
+                fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
               Decline
             </button>
           </div>
@@ -4538,7 +4590,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
 
 // Parchment Codex hero card.
 // Maps to HeroCardC in the design handoff. Sharp-cornered (4px), hairline gold borders,
-// boxed sections separated by faint dividers, Cinzel labels + Space Grotesk numerals.
+// boxed sections separated by faint dividers, IM Fell English SC labels + Alegreya Sans numerals.
 function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential}){
   const power = Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
   const avgMental=Math.round(STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length);
@@ -4569,19 +4621,19 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   if(compact){
     return (
       <div onClick={onClick} draggable={draggable} onDragStart={onDragStart}
-        style={{background:"#EDE4CE",border:`1px solid ${borderColor}`,borderRadius:6,padding:"10px 12px",cursor:draggable?"grab":"pointer",display:"flex",alignItems:"center",gap:10,marginBottom:5,fontFamily:"'Lato',sans-serif"}}>
-        <div style={{width:34,height:34,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.3)",borderRadius:5,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        style={{background:"#EDE4CE",border:`1px solid ${borderColor}`,borderRadius:3,padding:"10px 12px",cursor:draggable?"grab":"pointer",display:"flex",alignItems:"center",gap:10,marginBottom:5,fontFamily:"'Alegreya Sans',sans-serif"}}>
+        <div style={{width:34,height:34,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <RoleIcon role={hero.role} size={20}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}>🩸</span>}
             {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}>👑</span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}>🕊️</span>}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
-            {hero.race} · {hero.role} · Lv <span style={{fontFamily:"'Space Grotesk',sans-serif",color:"#8A6D3B",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
+            {hero.race} · {hero.role} · Lv <span style={{fontFamily:"'Alegreya Sans',sans-serif",color:"#8A6D3B",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
           </div>
         </div>
       </div>
@@ -4594,18 +4646,18 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
       onKeyDown={onClick?(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();onClick(e);}}:undefined}
       style={{textAlign:"left",display:"flex",flexDirection:"column",width:"100%",height:"100%",
               background:selected?"#E4D9BF":"#EDE4CE",
-              border:`1px solid ${borderColor}`,borderRadius:6,padding:0,cursor:draggable?"grab":"pointer",
-              fontFamily:"'Lato',sans-serif",
+              border:`1px solid ${borderColor}`,borderRadius:3,padding:0,cursor:draggable?"grab":"pointer",
+              fontFamily:"'Alegreya Sans',sans-serif",
               transition:"background 0.15s, border-color 0.15s, transform 0.12s",
               transform:selected?"translateY(-1px)":"none",
               marginBottom:0}}>
       {/* HEADER */}
       <div style={{padding:"14px 16px 12px",display:"flex",alignItems:"center",gap:12,borderBottom:"1px solid rgba(138,109,59,0.15)"}}>
-        <div style={{width:40,height:40,borderRadius:5,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.45)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{width:40,height:40,borderRadius:3,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.45)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <RoleIcon role={hero.role} size={24}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}>🩸</span>}
             {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}>📜</span>}
@@ -4616,11 +4668,11 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hasBid&&<span style={{fontSize:9,color:"#4A6B45",marginLeft:5}}>💰</span>}
             {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#4A6178",marginLeft:5}}>✈️{hero.awayWeeks}w</span>}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#77653F",marginTop:2,letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>
-            {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,letterSpacing:0}}>{hero.level}</span>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",marginTop:2,letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>
+            {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,letterSpacing:0}}>{hero.level}</span>
           </div>
         </div>
-        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,padding:"3px 8px",borderRadius:3,letterSpacing:1.4,textTransform:"uppercase",color:stageColor,background:`${stageColor}14`,border:`1px solid ${stageColor}44`}}>
+        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,padding:"3px 8px",borderRadius:3,letterSpacing:1.4,textTransform:"uppercase",color:stageColor,background:`${stageColor}14`,border:`1px solid ${stageColor}44`}}>
           {cap(phase)}
         </div>
       </div>
@@ -4628,26 +4680,26 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
       {/* CAREER + XP STRIP */}
       <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.04)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
-          <span style={{width:38,fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Career</span>
+          <span style={{width:38,fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Career</span>
           <div style={{flex:1,height:3,background:"#E4D9BF",borderRadius:1.5,overflow:"hidden"}}>
             <div style={{height:"100%",width:`${Math.round(stagePctRaw*100)}%`,background:stageColor}}/>
           </div>
           <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:stageColor,letterSpacing:1.2,textTransform:"uppercase"}}>{cap(phase)}</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:stageColor,letterSpacing:1.2,textTransform:"uppercase"}}>{cap(phase)}</span>
             {nextStage && <>
               <span style={{color:"#C9BA98",fontSize:10}}>→</span>
-              <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#9C8F73",letterSpacing:1.2,textTransform:"uppercase"}}>{cap(nextStage)}</span>
+              <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#9C8F73",letterSpacing:1.2,textTransform:"uppercase"}}>{cap(nextStage)}</span>
             </>}
           </span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{width:38,fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>XP</span>
+          <span style={{width:38,fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>XP</span>
           <div style={{flex:1,height:3,background:"#E4D9BF",borderRadius:1.5,overflow:"hidden"}}>
             <div style={{height:"100%",width:`${Math.round(xpPct*100)}%`,background:"#8A6D3B"}}/>
           </div>
           <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
-            <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:10,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{xpToLevel}</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.2,textTransform:"uppercase"}}>To Level</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{xpToLevel}</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.2,textTransform:"uppercase"}}>To Level</span>
           </span>
         </div>
       </div>
@@ -4661,15 +4713,15 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           ["Fatigue", hero.fatigue||0, fatColor],
         ].map(([label,val,color],i)=>(
           <div key={label} style={{padding:"10px 0 12px",textAlign:"center",borderLeft:i>0?"1px solid rgba(138,109,59,0.15)":"none"}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",color:"#77653F",marginBottom:4}}>{label}</div>
-            <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:18,color,fontVariantNumeric:"tabular-nums",lineHeight:1}}>{val}</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",color:"#77653F",marginBottom:4}}>{label}</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:18,color,fontVariantNumeric:"tabular-nums",lineHeight:1}}>{val}</div>
           </div>
         ))}
       </div>
 
       {/* AWAY BANNER */}
       {(hero.awayWeeks||0)>0&&(
-        <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.09)",fontSize:10,color:"#4A6178",fontFamily:"'Cinzel',serif",letterSpacing:1.2,textTransform:"uppercase"}}>
+        <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.09)",fontSize:10,color:"#4A6178",fontFamily:"'IM Fell English SC',serif",letterSpacing:1.2,textTransform:"uppercase"}}>
           ✈️ Away · {hero.awayEvent} · {hero.awayWeeks}w
         </div>
       )}
@@ -4680,7 +4732,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           const eff = TRAIT_EFFECTS[t];
           return (
             <span key={t} title={eff?.desc||t}
-              style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(138,109,59,0.12)",color:"#8A6D3B",border:"1px solid rgba(138,109,59,0.375)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
+              style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(138,109,59,0.12)",color:"#8A6D3B",border:"1px solid rgba(138,109,59,0.375)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
           );
         })}
       </div>
@@ -4690,8 +4742,8 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         const b = potentialBucket(hero.stats.Potential);
         return (
           <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Potential</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label} <span style={{fontFamily:"'Space Grotesk',sans-serif",color:"#77653F",fontWeight:500,letterSpacing:0,marginLeft:4}}>({hero.stats.Potential})</span></span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Potential</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label} <span style={{fontFamily:"'Alegreya Sans',sans-serif",color:"#77653F",fontWeight:500,letterSpacing:0,marginLeft:4}}>({hero.stats.Potential})</span></span>
           </div>
         );
       })()}
@@ -4699,8 +4751,8 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         const b = potentialBucket(hero.stats.Potential);
         return (
           <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.08)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#4A6178",textTransform:"uppercase"}}>🌠 Scouted</span>
-            <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label}</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#4A6178",textTransform:"uppercase"}}>🌠 Scouted</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label}</span>
           </div>
         );
       })()}
@@ -4709,12 +4761,12 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           stay aligned in a stretch grid regardless of trait count). */}
       <div style={{marginTop:"auto",padding:"10px 16px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.045)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",flexDirection:"column",gap:2}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Wage / Week</span>
-          <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:13,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>{hero.salary}g</span>
+          <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Wage / Week</span>
+          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:13,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>{hero.salary}g</span>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:2}}>
-          <span style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Market Value</span>
-          <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:600,fontSize:13,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{hero.value===0?(showBuy?"Unattached":"0g"):`${hero.value.toLocaleString()}g`}</span>
+          <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Market Value</span>
+          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:13,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{hero.value===0?(showBuy?"Unattached":"0g"):`${hero.value.toLocaleString()}g`}</span>
         </div>
       </div>
 
@@ -4726,7 +4778,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
               cursor:(canAfford&&!rosterFull)?"pointer":"not-allowed",
               background:(canAfford&&!rosterFull)?"#8A6D3B":"#D5C8A9",
               color:(canAfford&&!rosterFull)?"#E9E1CE":"#C9BA98",
-              fontFamily:"'Lato',sans-serif",fontWeight:700,fontSize:12,letterSpacing:0.3}}>
+              fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,letterSpacing:0.3}}>
             {rosterFull?"Roster Full":canAfford?(hero.value===0?"Sign · No fee":`Sign · ${hero.value.toLocaleString()}g`):"Insufficient Gold"}
           </button>
         </div>
@@ -4744,19 +4796,19 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
   const {label:hLabel,color:hColor}=moraleLabel(hero.morale);
   const demand=calcDemand(hero);
   return(
-    <div className="rm-detail-panel" style={{width:380,background:"#E9E1CE",borderLeft:"1px solid rgba(138,109,59,0.21)",padding:0,boxSizing:"border-box",fontFamily:"'Lato',sans-serif"}}>
+    <div className="rm-detail-panel" style={{width:380,background:"#E9E1CE",borderLeft:"1px solid rgba(138,109,59,0.21)",padding:0,boxSizing:"border-box",fontFamily:"'Alegreya Sans',sans-serif"}}>
       {/* Parchment Codex sticky header — avatar tile + name + meta + close */}
       <div className="rm-detail-header" style={{position:"sticky",top:0,zIndex:10,background:"#E9E1CE",borderBottom:"1px solid rgba(138,109,59,0.21)",padding:"18px 20px",display:"flex",alignItems:"center",gap:12}}>
-        <div style={{width:52,height:52,borderRadius:6,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <div style={{width:52,height:52,borderRadius:3,background:"#E4D9BF",border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <RoleIcon role={hero.role} size={32}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:18,color:"#3A3427",letterSpacing:0.5,lineHeight:1.15,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:18,color:"#3A3427",letterSpacing:0.5,lineHeight:1.15,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
-            {isListed&&<span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#8A6D3B",marginLeft:8,background:"rgba(138,109,59,0.15)",padding:"2px 7px",borderRadius:2,border:"1px solid rgba(138,109,59,0.45)",letterSpacing:1.2,textTransform:"uppercase",verticalAlign:"middle"}}>Open to Offers</span>}
+            {isListed&&<span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#8A6D3B",marginLeft:8,background:"rgba(138,109,59,0.15)",padding:"2px 7px",borderRadius:2,border:"1px solid rgba(138,109,59,0.45)",letterSpacing:1.2,textTransform:"uppercase",verticalAlign:"middle"}}>Open to Offers</span>}
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#77653F",marginTop:4,letterSpacing:1.2,textTransform:"uppercase"}}>
-            {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",marginTop:4,letterSpacing:1.2,textTransform:"uppercase"}}>
+            {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
           </div>
         </div>
         <button onClick={onClose} className="rm-detail-close" aria-label="Close"
@@ -4790,14 +4842,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
 
       {/* Away on mission */}
       {(hero.awayWeeks||0)>0&&(
-        <div style={{padding:"7px 10px",borderRadius:7,background:"rgba(60,90,120,0.105)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:10,fontSize:10,color:"#3C5A78"}}>
+        <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(60,90,120,0.105)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:10,fontSize:10,color:"#3C5A78"}}>
           ✈️ Away: "{hero.awayEvent}" — returns in {hero.awayWeeks} week{hero.awayWeeks>1?"s":""}
         </div>
       )}
 
       {/* Mentor bonus */}
       {hero.mentorBonus&&hero.mentorBonus.weeksLeft>0&&(
-        <div style={{padding:"7px 10px",borderRadius:7,background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.375)",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
+        <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.375)",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
           <span style={{fontSize:14}}>🎖️</span>
           <div style={{flex:1}}>
             <div style={{fontSize:10,fontWeight:700,color:"#9A5B2B"}}>Mentored by {hero.mentorBonus.mentorName}</div>
@@ -4811,13 +4863,13 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {heroBids&&heroBids.length>0&&(
         <div style={{marginBottom:10}}>
           {heroBids.map(bid=>(
-            <div key={bid.id} style={{padding:"10px 12px",borderRadius:8,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.375)",marginBottom:6}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#8A6D3B",marginBottom:3}}>💰 Bid from {bid.town}</div>
+            <div key={bid.id} style={{padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.375)",marginBottom:6}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B",marginBottom:3}}>💰 Bid from {bid.town}</div>
               <div style={{fontSize:13,fontWeight:900,color:"#40614F",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#6E6350",fontWeight:400}}>({bid.freeTransfer?"parting fee":`${bid.pctOfValue}% of market value`})</span></div>
               <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>Interested in: {bid.reason}</div>
               <div style={{display:"flex",gap:6}}>
-                <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#40614F,#35543F)",color:"#F0E8D5",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
-                <button onClick={()=>onDeclineBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>✗ Decline</button>
+                <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
+                <button onClick={()=>onDeclineBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>✗ Decline</button>
               </div>
             </div>
           ))}
@@ -4825,7 +4877,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       )}
 
       {/* Morale breakdown */}
-      <div style={{padding:"8px 10px",borderRadius:7,background:`${hColor}10`,border:`1px solid ${hColor}25`,marginBottom:10,fontSize:10,color:hColor}}>
+      <div style={{padding:"8px 10px",borderRadius:3,background:`${hColor}10`,border:`1px solid ${hColor}25`,marginBottom:10,fontSize:10,color:hColor}}>
         <strong>{hLabel}</strong>
         {hero.morale>=80&&" — Squad spirit is high. Performing at their best."}
         {hero.morale>=60&&hero.morale<80&&" — Morale is stable. No major concerns."}
@@ -4836,7 +4888,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       </div>
 
       {/* Contract forecast */}
-      <div style={{padding:"8px 10px",borderRadius:7,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)",marginBottom:10,fontSize:10,color:"#6E6350"}}>
+      <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)",marginBottom:10,fontSize:10,color:"#6E6350"}}>
         <div style={{fontWeight:700,color:"#8A6D3B",marginBottom:3}}>📜 Contract Forecast</div>
         <div>Current salary: <b style={{color:"#23201A"}}>{hero.salary}g/wk</b></div>
         <div>Estimated renewal demand: <b style={{color:"#9A5B2B"}}>{demand.salary}g/wk</b> · {demand.years}s</div>
@@ -4862,8 +4914,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           const te=TRAIT_EFFECTS[t];
           const col=te?.color||"#5F4B66";
           return(
-            <div key={t} style={{padding:"5px 9px",borderRadius:8,background:`${col}12`,border:`1px solid ${col}30`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-              <span style={{fontSize:11,fontWeight:700,color:col,fontFamily:"'Cinzel',serif"}}>{t}</span>
+            <div key={t} style={{padding:"5px 9px",borderRadius:3,background:`${col}12`,border:`1px solid ${col}30`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+              <span style={{fontSize:11,fontWeight:700,color:col,fontFamily:"'IM Fell English SC',serif"}}>{t}</span>
               {te?.desc&&<span style={{fontSize:9,color:"#6E6350",textAlign:"right",flex:1}}>{te.desc}</span>}
             </div>
           );
@@ -4875,14 +4927,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           ["Salary",`${hero.salary}g/wk`],["Value",`${hero.value.toLocaleString()}g`],
           ["Morale",`${hero.morale}%`],["Status",hero.injured?`🩸 ${hero.injury?.name||"Injured"} · ${hero.injuryWeeks}w`:"✅ Fit"],
         ].map(([k,v])=>(
-          <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:6,padding:"5px 8px"}}>
+          <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"5px 8px"}}>
             <div style={{fontSize:9,color:"#6E6350",marginBottom:1}}>{k}</div>
             <div style={{fontSize:11,fontWeight:700,color:"#23201A"}}>{v}</div>
           </div>
         ))}
       </div>
       {(hero.injured&&hero.injury?.from)||hero.injuryHistory?.length?(
-        <div style={{marginBottom:10,padding:"6px 10px",borderRadius:7,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.225)",fontSize:9,color:"#6E6350",lineHeight:1.6}}>
+        <div style={{marginBottom:10,padding:"6px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.225)",fontSize:9,color:"#6E6350",lineHeight:1.6}}>
           {hero.injured&&hero.injury?.from&&<div style={{color:"#7E2D26"}}>🩸 {hero.injury.name} — sustained against {hero.injury.from} (Wk {hero.injury.week})</div>}
           {hero.injuryHistory?.slice(0,3).map((inj,i)=>(
             <div key={i}>🩹 {inj.name}{inj.from?` — vs ${inj.from}`:""}{inj.week?` (Wk ${inj.week})`:""}</div>
@@ -4900,7 +4952,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           const formLabel = form>=9?"In the form of their life":form>=7?"Good form":form>=5?"Average form":form>=3?"Poor form":"Out of form";
           const repLabel  = rep>=70?"Renowned":rep>=50?"Well known":rep>=30?"Building reputation":"Unknown";
           return(<>
-            <div style={{background:"rgba(60,52,38,0.054)",borderRadius:6,padding:"7px 8px",border:`1px solid ${formCol}22`}}>
+            <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"7px 8px",border:`1px solid ${formCol}22`}}>
               <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>📈 Form (offer premium)</div>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <div style={{flex:1,height:4,background:"rgba(60,52,38,0.108)",borderRadius:2}}>
@@ -4912,7 +4964,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
               {form>=7&&<div style={{fontSize:8,color:"#6E6350",marginTop:1}}>+{Math.round(((form-7)/3)*25)}% offer premium</div>}
               {form<4&&<div style={{fontSize:8,color:"#9A5B2B",marginTop:1}}>−10% bid discount</div>}
             </div>
-            <div style={{background:"rgba(60,52,38,0.054)",borderRadius:6,padding:"7px 8px",border:`1px solid ${repCol}22`}}>
+            <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"7px 8px",border:`1px solid ${repCol}22`}}>
               <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>👁️ Reputation (scout interest)</div>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <div style={{flex:1,height:4,background:"rgba(60,52,38,0.108)",borderRadius:2}}>
@@ -4926,7 +4978,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           </>);
         })()}
       </div>
-      {declining&&<div style={{padding:"7px 10px",borderRadius:7,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:10,fontSize:10,color:"#9A5B2B"}}>⚠️ {agePhaseLabel(phase)} — consider moving to Arbiter where mental stats carry.</div>}
+      {declining&&<div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:10,fontSize:10,color:"#9A5B2B"}}>⚠️ {agePhaseLabel(phase)} — consider moving to Arbiter where mental stats carry.</div>}
 
       {/* Career arc guidance — sell window signal */}
       {(()=>{
@@ -4946,11 +4998,11 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         }[phase]||{col:"#6E6350",icon:"?",title:"Unknown",advice:"",action:null};
 
         return(
-          <div style={{padding:"9px 11px",borderRadius:8,background:`${arcConfig.col}0d`,border:`1px solid ${arcConfig.col}30`,marginBottom:10}}>
+          <div style={{padding:"9px 11px",borderRadius:3,background:`${arcConfig.col}0d`,border:`1px solid ${arcConfig.col}30`,marginBottom:10}}>
             <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
               <span style={{fontSize:14}}>{arcConfig.icon}</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11,fontWeight:700,color:arcConfig.col,fontFamily:"'Cinzel',serif"}}>{arcConfig.title}</div>
+                <div style={{fontSize:11,fontWeight:700,color:arcConfig.col,fontFamily:"'IM Fell English SC',serif"}}>{arcConfig.title}</div>
                 <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{seasonsLeft}s until retirement · Bids: {Math.round(bidFreq*100)}% chance · Quality: {bidQual}</div>
               </div>
               <div style={{textAlign:"right"}}>
@@ -4960,7 +5012,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             </div>
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5,marginBottom:arcConfig.action?5:0}}>{arcConfig.advice}</div>
             {arcConfig.action&&(
-              <div style={{fontSize:10,fontWeight:700,color:arcConfig.col,padding:"4px 8px",borderRadius:5,background:`${arcConfig.col}14`,marginTop:3}}>
+              <div style={{fontSize:10,fontWeight:700,color:arcConfig.col,padding:"4px 8px",borderRadius:3,background:`${arcConfig.col}14`,marginTop:3}}>
                 💡 {arcConfig.action}
               </div>
             )}
@@ -4974,7 +5026,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           const isActive = tab === g;
           return (
             <button key={g} onClick={()=>!isLocked&&setTab(g)}
-              style={{flex:1,minWidth:55,padding:"5px 0",borderRadius:5,border:isLocked?"1px solid rgba(60,52,38,0.108)":"none",
+              style={{flex:1,minWidth:55,padding:"5px 0",borderRadius:3,border:isLocked?"1px solid rgba(60,52,38,0.108)":"none",
                 cursor:isLocked?"default":"pointer",fontSize:9,
                 background:isActive?"rgba(60,90,120,0.225)":isLocked?"rgba(60,52,38,0.036)":"rgba(60,52,38,0.072)",
                 color:isActive?"#3C5A78":isLocked?"#A39781":"#7A6F58",
@@ -4989,7 +5041,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         tab==="Hidden" ? (
           <div>
             {/* Potential — bucket until revealed, exact with showHiddenStats */}
-            <div style={{marginBottom:8,padding:"8px 10px",borderRadius:7,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.225)"}}>
+            <div style={{marginBottom:8,padding:"8px 10px",borderRadius:3,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.225)"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
                 <span style={{fontSize:11,color:"#8A6D3B",fontWeight:700}}>Potential</span>
                 {(hero.potentialRevealed || showHiddenStats) ? (()=>{
@@ -5009,7 +5061,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
               </div>
               {!hero.potentialRevealed&&(
                 <div style={{height:3,borderRadius:2,background:"#DFD3B8",overflow:"hidden"}}>
-                  <div style={{height:"100%",width:`${Math.min(100,((hero.weeksInFormation||0)/9)*100)}%`,background:"linear-gradient(90deg,#5F4B66,#8A6D3B)",borderRadius:2,transition:"width 0.5s"}}/>
+                  <div style={{height:"100%",width:`${Math.min(100,((hero.weeksInFormation||0)/9)*100)}%`,background:"#5F4B66",borderRadius:2,transition:"width 0.5s"}}/>
                 </div>
               )}
             </div>
@@ -5033,13 +5085,13 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         const scorePct=Math.round(score*100);
         const col=isLeader?"#8A6D3B":score>0.5?"#3C5A78":"#8A7F68";
         return(
-          <div style={{marginBottom:10,padding:"10px 12px",borderRadius:8,
+          <div style={{marginBottom:10,padding:"10px 12px",borderRadius:3,
             background:isLeader?"rgba(138,109,59,0.105)":"rgba(60,52,38,0.054)",
             border:`1px solid ${isLeader?"rgba(138,109,59,0.45)":"rgba(60,52,38,0.126)"}`}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
               <span style={{fontSize:14}}>👑</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11,fontWeight:700,color:isLeader?"#8A6D3B":"#6E6350",fontFamily:"'Cinzel',serif"}}>
+                <div style={{fontSize:11,fontWeight:700,color:isLeader?"#8A6D3B":"#6E6350",fontFamily:"'IM Fell English SC',serif"}}>
                   {isLeader?"Squad Leader":"Squad Leader Candidate"}
                 </div>
                 <div style={{fontSize:9,color:"#6E6350"}}>
@@ -5057,7 +5109,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                 ["⭐ XP mult",`×${lb.xpMult.toFixed(2)}`,"#3C5A78"],
                 ["🛡️ Defeat",`−${lb.defeatMoralePct}%`,"#8A6D3B"],
               ].map(([label,val,c])=>(
-                <div key={label} style={{padding:"4px 6px",borderRadius:5,background:"rgba(30,24,14,0.07)",textAlign:"center"}}>
+                <div key={label} style={{padding:"4px 6px",borderRadius:3,background:"rgba(30,24,14,0.07)",textAlign:"center"}}>
                   <div style={{fontSize:8,color:"#6E6350"}}>{label}</div>
                   <div style={{fontSize:11,fontWeight:700,color:c}}>{val}</div>
                 </div>
@@ -5065,9 +5117,9 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             </div>
             <div style={{fontSize:9,color:"#6E6350",marginBottom:6}}>Bonuses apply only when in formation</div>
             <button onClick={onSetLeader}
-              style={{width:"100%",padding:"6px 0",borderRadius:6,border:`1px solid ${isLeader?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.264)"}`,
+              style={{width:"100%",padding:"6px 0",borderRadius:3,border:`1px solid ${isLeader?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.264)"}`,
                 cursor:"pointer",background:isLeader?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",
-                color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Cinzel',serif"}}>
+                color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
               {isLeader?"👑 Remove as Squad Leader":"👑 Appoint as Squad Leader"}
             </button>
           </div>
@@ -5078,13 +5130,13 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {isOwned&&(
       <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
         {onToggleListed&&(
-          <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:6,border:`1px solid ${isListed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.33)"}`,background:isListed?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",color:isListed?"#8A6D3B":"#6E6350",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+          <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:`1px solid ${isListed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.33)"}`,background:isListed?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",color:isListed?"#8A6D3B":"#6E6350",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
             {isListed?"🕊️ Close to Offers":"🕊️ Open to Offers"}
           </button>
         )}
         {/* Early renewal — available within 2 seasons of expiry, not already pending */}
         {onEarlyRenew && !hero.negotiationPending && (hero.contractWeeksLeft||0) > 0 && (hero.contractWeeksLeft||0) <= WEEKS_PER_CONTRACT_YEAR*2 && (
-          <button onClick={()=>onEarlyRenew(hero)} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.105)",color:"#3C5A78",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+          <button onClick={()=>onEarlyRenew(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.105)",color:"#3C5A78",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
             📋 Renew Early
           </button>
         )}
@@ -5104,7 +5156,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             ?`Release ${hero.name}? They'll barely be missed.`
             :`Release ${hero.name}?\n\nSquad morale penalty: −${penalty} to all heroes${penalty>=25?" (devastating)":penalty>=15?" (significant)":""}\n\nThis is a last resort. Consider selling them instead.`;
           if(window.confirm(msg)) onRelease(hero);
-        }} style={{flex:1,padding:"7px 0",borderRadius:6,border:"1px solid rgba(126,45,38,0.375)",background:"rgba(126,45,38,0.12)",color:"#7E2D26",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>🚪 Release</button>
+        }} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",background:"rgba(126,45,38,0.12)",color:"#7E2D26",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>🚪 Release</button>
       </div>
       )}
       </div>{/* end scroll wrapper */}
@@ -5125,18 +5177,18 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.56)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
-      <div className="rm-neg-modal" style={{background:"linear-gradient(160deg,#DFD3B8,#EDE4CE)",border:"1px solid rgba(154,91,43,0.525)",borderRadius:14,padding:28,maxWidth:500,width:"92%",boxShadow:"0 0 60px rgba(154,91,43,0.18)"}}>
-        <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>📜 Contract Negotiation</div>
+      <div className="rm-neg-modal" style={{background:"#DFD3B8",border:"1px solid rgba(154,91,43,0.525)",borderRadius:3,padding:28,maxWidth:500,width:"92%",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
+        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>📜 Contract Negotiation</div>
         <div style={{fontSize:11,color:"#6E6350",marginBottom:18}}>{hero.name} is seeking a new contract.</div>
 
-        <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:10,border:"1px solid rgba(60,52,38,0.126)"}}>
+        <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
           <HeroAvatar race={hero.race} size={28}/>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#23201A"}}>{hero.name}</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#23201A"}}>{hero.name}</div>
             <div style={{fontSize:11,color:"#6E6350"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Level {hero.level} · {agePhaseLabel(agePhase(hero))}</div>
             <div style={{fontSize:10,color:hColor,marginTop:2}}>{moraleLabel(hero.morale).label}</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>
-              {hero.traits.map(t=><span key={t} style={{fontSize:9,background:"rgba(95,75,102,0.15)",color:"#5F4B66",padding:"1px 6px",borderRadius:8}}>{t}</span>)}
+              {hero.traits.map(t=><span key={t} style={{fontSize:9,background:"rgba(95,75,102,0.15)",color:"#5F4B66",padding:"1px 6px",borderRadius:3}}>{t}</span>)}
             </div>
           </div>
         </div>
@@ -5147,7 +5199,7 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
             {[["Current salary",`${hero.salary}g/wk`],["Demanded salary",`${demand.salary}g/wk`,demand.salary>hero.salary?"#9A5B2B":"#40614F"],
               ["Contract length",`${demand.years} season${demand.years>1?"s":""}`],["Total cost",`${(demand.salary*WEEKS_PER_CONTRACT_YEAR*demand.years).toLocaleString()}g`]
             ].map(([k,v,c="#23201A"])=>(
-              <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:7,padding:"8px 10px",border:"1px solid rgba(60,52,38,0.126)"}}>
+              <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"8px 10px",border:"1px solid rgba(60,52,38,0.126)"}}>
                 <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{k}</div>
                 <div style={{fontSize:14,fontWeight:700,color:c}}>{v}</div>
               </div>
@@ -5155,21 +5207,21 @@ function NegotiationModal({pending, gold, onAccept, onCounter, onReject}){
           </div>
         </div>
 
-        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:6,marginBottom:10}}>⚠️ Greedy: demands are inflated. They won't accept anything far below this.</div>}
-        {hero.traits?.includes("Loyal")&&<div style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.105)",padding:"6px 10px",borderRadius:6,marginBottom:10}}>✓ Loyal: will accept a reasonable counter-offer without walking out.</div>}
-        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:6,marginBottom:10}}>⚠️ Hot-headed: reject this and they leave immediately — no second chance.</div>}
+        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>⚠️ Greedy: demands are inflated. They won't accept anything far below this.</div>}
+        {hero.traits?.includes("Loyal")&&<div style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>✓ Loyal: will accept a reasonable counter-offer without walking out.</div>}
+        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>⚠️ Hot-headed: reject this and they leave immediately — no second chance.</div>}
         {}
 
         <div className="rm-neg-buttons" style={{display:"flex",gap:8}}>
-          <button onClick={()=>onAccept(hero,demand)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#40614F,#35543F)",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'Cinzel',serif"}}>
+          <button onClick={()=>onAccept(hero,demand)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
             ✓ Accept<br/><span style={{fontSize:9,fontWeight:400}}>{demand.salary}g/wk · {demand.years}s</span>
           </button>
           {!hero.traits?.includes("Stubborn")&&(
-            <button onClick={()=>onCounter(hero,{salary:counterSalary,years:counterYears})} style={{flex:1,padding:"10px 0",borderRadius:8,border:"1px solid rgba(154,91,43,0.55)",cursor:"pointer",background:"rgba(154,91,43,0.15)",color:"#9A5B2B",fontWeight:700,fontSize:12,fontFamily:"'Cinzel',serif"}}>
+            <button onClick={()=>onCounter(hero,{salary:counterSalary,years:counterYears})} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(154,91,43,0.55)",cursor:"pointer",background:"rgba(154,91,43,0.15)",color:"#9A5B2B",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
               ↔ Counter<br/><span style={{fontSize:9,fontWeight:400}}>{counterSalary}g/wk · {counterYears}yr</span>
             </button>
           )}
-          <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontWeight:700,fontSize:12,fontFamily:"'Cinzel',serif"}}>
+          <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
             ✗ Reject<br/><span style={{fontSize:9,fontWeight:400}}>–10 morale</span>
           </button>
         </div>
@@ -5190,11 +5242,11 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.525)",zIndex:160,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)",padding:20}}
       onClick={onDismiss}>
       <div onClick={e=>e.stopPropagation()}
-        style={{background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:"1px solid rgba(64,97,79,0.525)",borderRadius:14,width:"min(620px,96vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 0 40px rgba(64,97,79,0.15)"}}>
+        style={{background:"#EFE7D3",border:"1px solid rgba(64,97,79,0.525)",borderRadius:3,width:"min(620px,96vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
         <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(60,52,38,0.108)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
           <span style={{fontSize:22}}>📨</span>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#40614F"}}>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#40614F"}}>
               {bids.length===1?"A Rival Offer Arrives":`${bids.length} Offers from Rival Realms`}
             </div>
             <div style={{fontSize:10,color:"#6E6350"}}>Envoys ride in with pledges of gold for your heroes. Act now or review them later in the Hire tab.</div>
@@ -5208,7 +5260,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
             const aboveValue = !bid.freeTransfer && bid.offer > bid.marketValue;
             return (
               <div key={bid.id}
-                style={{borderRadius:10,overflow:"hidden",
+                style={{borderRadius:3,overflow:"hidden",
                   border:`1px solid ${bid.freeTransfer?"rgba(95,75,102,0.45)":aboveValue?"rgba(64,97,79,0.55)":"rgba(64,97,79,0.3)"}`,
                   background:bid.freeTransfer?"rgba(95,75,102,0.075)":aboveValue?"rgba(64,97,79,0.075)":"rgba(60,52,38,0.045)"}}>
                 {aboveValue&&(
@@ -5224,26 +5276,26 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
                 <div style={{padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
                   <HeroAvatar race={hero.race} size={20}/>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{hero.name}</div>
+                    <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{hero.name}</div>
                     <div style={{fontSize:9,color:"#6E6350"}}>{hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                     <div style={{fontSize:9,color:"#6E6350",fontStyle:"italic",marginTop:2}}>"{bid.town} — {bid.reason}"</div>
                   </div>
                   <div style={{textAlign:"right",flexShrink:0}}>
-                    <div style={{fontSize:18,fontWeight:900,color:"#40614F",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
+                    <div style={{fontSize:18,fontWeight:900,color:"#40614F",fontFamily:"'IM Fell English SC',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
                     {!bid.freeTransfer && bid.pctOfValue!=null && <div style={{fontSize:9,color:"#6E6350"}}>{bid.pctOfValue}% of value</div>}
                   </div>
                 </div>
                 <div style={{padding:"0 12px 10px",display:"flex",gap:6}}>
                   <button onClick={()=>onAccept(bid)}
-                    style={{flex:2,padding:"8px 0",borderRadius:6,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#40614F,#35543F)",color:"#F0E8D5",fontWeight:900,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    style={{flex:2,padding:"8px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:900,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
                     ✓ Accept {bid.offer.toLocaleString()}g
                   </button>
                   <button onClick={()=>onViewHero&&onViewHero(hero)}
-                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(60,90,120,0.375)",cursor:"pointer",background:"rgba(60,90,120,0.09)",color:"#3C5A78",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.375)",cursor:"pointer",background:"rgba(60,90,120,0.09)",color:"#3C5A78",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
                     👁️ View
                   </button>
                   <button onClick={()=>onDecline(bid)}
-                    style={{flex:1,padding:"8px 0",borderRadius:6,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
                     ✗ Decline
                   </button>
                 </div>
@@ -5253,7 +5305,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
         </div>
         <div style={{padding:"10px 16px",borderTop:"1px solid rgba(60,52,38,0.09)",flexShrink:0}}>
           <button onClick={onDismiss}
-            style={{width:"100%",padding:"9px 0",borderRadius:7,border:"1px solid rgba(60,52,38,0.264)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#4A4335",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+            style={{width:"100%",padding:"9px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#4A4335",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
             Decide later (offers stay in the Hire tab for 2 weeks)
           </button>
         </div>
@@ -5298,14 +5350,14 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.595)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",padding:20}}>
-      <div style={{width:"min(640px,96vw)",maxHeight:"90vh",background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:`1px solid ${col}44`,borderRadius:14,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 0 60px ${col}14`}}>
+      <div style={{width:"min(640px,96vw)",maxHeight:"90vh",background:"#EFE7D3",border:`1px solid ${col}44`,borderRadius:3,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 0 60px ${col}14`}}>
         {/* Header */}
         <div style={{padding:"18px 22px",textAlign:"center",background:"linear-gradient(180deg,rgba(60,52,38,0.054),transparent)",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#6E6350",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,color:col,lineHeight:1,marginBottom:6}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:col,lineHeight:1,marginBottom:6}}>
             {wins}W · {losses}L · Finished {posLabel}
           </div>
-          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'Cinzel',serif"}}>
+          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'IM Fell English SC',serif"}}>
             {movementConfig.icon} {movementConfig.label}
           </div>
         </div>
@@ -5314,13 +5366,13 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
           {/* Hero progression */}
           {(levelUps.length > 0 || newSignings.length > 0 || departures.length > 0) && (
             <div style={{marginBottom:16}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
               {levelUps.length > 0 && (
                 <div style={{marginBottom:8}}>
                   <div style={{fontSize:10,color:"#40614F",fontWeight:700,marginBottom:4}}>⭐ Level-ups · {levelUps.length}</div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
                     {levelUps.map((h,i) => (
-                      <div key={i} style={{padding:"4px 8px",borderRadius:5,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)",fontSize:11,color:"#23201A"}}>
+                      <div key={i} style={{padding:"4px 8px",borderRadius:3,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)",fontSize:11,color:"#23201A"}}>
                         {h.name} <span style={{color:"#6E6350"}}>L{h.oldLevel}→L{h.newLevel}</span>
                       </div>
                     ))}
@@ -5345,13 +5397,13 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
           {/* Buildings */}
           {buildingsBuilt.length > 0 && (
             <div style={{marginBottom:16}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
                 {buildingsBuilt.map(id => {
                   const b = BUILDINGS.find(x => x.id === id);
                   if (!b) return null;
                   return (
-                    <div key={id} style={{padding:"6px 10px",borderRadius:6,background:"rgba(64,97,79,0.06)",border:"1px solid rgba(64,97,79,0.225)",display:"flex",alignItems:"center",gap:6}}>
+                    <div key={id} style={{padding:"6px 10px",borderRadius:3,background:"rgba(64,97,79,0.06)",border:"1px solid rgba(64,97,79,0.225)",display:"flex",alignItems:"center",gap:6}}>
                       <BuildingIcon id={b.id} size={14}/>
                       <span style={{fontSize:11,color:"#23201A",fontWeight:700}}>{b.name}</span>
                     </div>
@@ -5363,8 +5415,8 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
 
           {/* Ledger */}
           <div style={{marginBottom:10}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
-            <div style={{padding:"10px 12px",background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",borderRadius:8}}>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
+            <div style={{padding:"10px 12px",background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",borderRadius:3}}>
               {ledgerRows.map(([label,val,c],i) => (
                 <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11,borderBottom:"1px solid rgba(60,52,38,0.072)"}}>
                   <span style={{color:"#23201A"}}>{label}</span>
@@ -5372,8 +5424,8 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
                 </div>
               ))}
               <div style={{display:"flex",justifyContent:"space-between",paddingTop:6,marginTop:2}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>Season net</span>
-                <span style={{fontSize:14,fontWeight:900,color:netGold>=0?"#40614F":"#7E2D26",fontFamily:"'Cinzel',serif"}}>
+                <span style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Season net</span>
+                <span style={{fontSize:14,fontWeight:900,color:netGold>=0?"#40614F":"#7E2D26",fontFamily:"'IM Fell English SC',serif"}}>
                   {netGold>=0?"+":""}{netGold.toLocaleString()}g
                 </span>
               </div>
@@ -5384,7 +5436,7 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
         {/* Footer */}
         <div style={{padding:"12px 20px",borderTop:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.087)"}}>
           <button onClick={onDismiss}
-            style={{width:"100%",padding:"11px 0",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${col},#9A5B2B)`,color:"#F0E8D5",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14}}>
+            style={{width:"100%",padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",background:`${col}`,color:"#F0E8D5",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:14}}>
             Begin Season {season + 1} →
           </button>
         </div>
@@ -5436,21 +5488,21 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.574)",zIndex:210,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
-      <div style={{background:"linear-gradient(160deg,#DFD3B8,#EDE4CE)",border:"1px solid rgba(154,91,43,0.525)",borderRadius:14,padding:0,maxWidth:520,width:"92%",maxHeight:"88vh",overflow:"hidden",display:"flex",flexDirection:"column"}}>
+      <div style={{background:"#DFD3B8",border:"1px solid rgba(154,91,43,0.525)",borderRadius:3,padding:0,maxWidth:520,width:"92%",maxHeight:"88vh",overflow:"hidden",display:"flex",flexDirection:"column"}}>
 
         {/* Header */}
         <div style={{padding:"20px 24px 14px",textAlign:"center",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:3}}>🎖️ Retirement Ceremony</div>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:3}}>🎖️ Retirement Ceremony</div>
           {retirees.length>1&&<div style={{fontSize:10,color:"#6E6350"}}>{step+1} of {retirees.length}</div>}
         </div>
 
         {/* Retiree card */}
         <div style={{padding:"14px 20px 10px"}}>
-          <div style={{background:"rgba(154,91,43,0.09)",borderRadius:10,padding:"12px 14px",border:"1px solid rgba(154,91,43,0.3)",marginBottom:14}}>
+          <div style={{background:"rgba(154,91,43,0.09)",borderRadius:3,padding:"12px 14px",border:"1px solid rgba(154,91,43,0.3)",marginBottom:14}}>
             <div style={{display:"flex",gap:10,alignItems:"center"}}>
               <HeroAvatar race={retiree.race} size={28}/>
               <div style={{flex:1}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{retiree.name}</div>
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{retiree.name}</div>
                 <div style={{fontSize:11,color:"#6E6350"}}>{retiree.race} <RoleIcon role={retiree.role}/> {retiree.role} · {agePhaseLabel(agePhase(retiree))} · Level {retiree.level}</div>
                 <div style={{fontSize:10,color:"#5F4B66",marginTop:2}}>{retiree.traits.join(", ")}</div>
               </div>
@@ -5463,7 +5515,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
           {/* Mentee selection */}
           <div style={{fontSize:11,color:"#6E6350",marginBottom:8}}>
-            <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,color:"#8A6D3B"}}>Choose a Mentee</span>
+            <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,color:"#8A6D3B"}}>Choose a Mentee</span>
             <span style={{marginLeft:6}}>— {retiree.name} will pass on their wisdom, granting +10 XP/week for a full season.</span>
           </div>
           {retiredPos&&<div style={{fontSize:9,color:"#6E6350",marginBottom:8}}>Heroes from {retiredPos} are shown first — same position means more relevant experience.</div>}
@@ -5473,7 +5525,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
         <div style={{flex:1,overflowY:"auto",padding:"0 20px 12px"}}>
           {/* Skip option */}
           <div onClick={()=>setMentees(m=>({...m,[retiree.id]:null}))}
-            style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,marginBottom:6,cursor:"pointer",
+            style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:3,marginBottom:6,cursor:"pointer",
               background:chosenMenteeId===null?"rgba(60,52,38,0.108)":"rgba(60,52,38,0.036)",
               border:`1px solid ${chosenMenteeId===null?"rgba(60,52,38,0.44)":"rgba(60,52,38,0.108)"}`}}>
             <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${chosenMenteeId===null?"#F5EEDC":"#A39781"}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -5489,7 +5541,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
             const pwr = Math.round(calcHeroCombatScore(h, pos||"Vanguard"));
             return(
               <div key={h.id} onClick={()=>setMentees(m=>({...m,[retiree.id]:h.id}))}
-                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:9,marginBottom:5,cursor:"pointer",
+                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:3,marginBottom:5,cursor:"pointer",
                   background:isSelected?"rgba(138,109,59,0.12)":"rgba(60,52,38,0.045)",
                   border:`1px solid ${isSelected?"rgba(138,109,59,0.55)":isSamePos?"rgba(60,52,38,0.22)":"rgba(60,52,38,0.09)"}`,
                   transition:"all 0.15s"}}>
@@ -5498,7 +5550,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
                 </div>
                 <HeroAvatar race={h.race} size={18}/>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{h.name}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>{h.role} · Lv {h.level} · {pos?pos:"bench"}{isSamePos&&<span style={{color:"#40614F",marginLeft:4}}>★ Same position</span>}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
@@ -5514,11 +5566,11 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
         <div style={{padding:"12px 20px",borderTop:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.07)"}}>
           <button onClick={handleNext}
             disabled={!(retiree.id in mentees)}
-            style={{width:"100%",padding:"12px 0",borderRadius:8,border:"none",
+            style={{width:"100%",padding:"12px 0",borderRadius:3,border:"none",
               cursor:(retiree.id in mentees)?"pointer":"not-allowed",
-              background:(retiree.id in mentees)?"linear-gradient(135deg,#9A5B2B,#8A6D3B)":"#E4DAC2",
+              background:(retiree.id in mentees)?"#9A5B2B":"#E4DAC2",
               color:(retiree.id in mentees)?"#F0E8D5":"#95896F",
-              fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+              fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
             {isLast
               ? (chosenMenteeId ? `✦ Farewell — ${heroes.find(h=>h.id===chosenMenteeId)?.name} will carry the torch` : "✦ Farewell, Hero")
               : "Next Retiree →"}
@@ -5621,7 +5673,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
               <div>
                 <div className="pa-kicker" style={{marginBottom:6}}>Saved</div>
-                <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>Formation Presets</div>
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>Formation Presets</div>
               </div>
               <span className="pa-kicker">2 slots</span>
             </div>
@@ -5636,22 +5688,22 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     border:p?"1px solid rgba(138,109,59,0.375)":"1px dashed rgba(138,109,59,0.3)",
                     background:p?"rgba(138,109,59,0.06)":"transparent"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
                         Preset {idx+1}
                       </div>
-                      <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:10,color:p?"#77653F":"#C9BA98",fontVariantNumeric:"tabular-nums"}}>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:p?"#77653F":"#C9BA98",fontVariantNumeric:"tabular-nums"}}>
                         {p?`${total}/6 · V${counts[0]} S${counts[1]} A${counts[2]}`:"No formation saved"}
                       </div>
                     </div>
                     {p&&(
                       <button onClick={()=>onLoadPreset(idx)} title="Load this preset"
-                        style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#8A6D3B",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.55)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>↻ Load</button>
+                        style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#8A6D3B",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.55)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>↻ Load</button>
                     )}
                     <button onClick={()=>onSavePreset(idx)} title="Save current formation to this slot"
-                      style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.3)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
+                      style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.3)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
                     {p&&(
                       <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
-                        style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>✕</button>
+                        style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>✕</button>
                     )}
                   </div>
                 );
@@ -5693,8 +5745,8 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           const netMult = trueBase>0 ? effective / trueBase : 1.0;
           const positive = effective >= trueBase;
           const delta = effective - trueBase;
-          const LABEL={fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:2,textTransform:"uppercase",lineHeight:1};
-          const NUM={fontFamily:"'Space Grotesk',sans-serif",fontSize:13,fontVariantNumeric:"tabular-nums",lineHeight:1};
+          const LABEL={fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:2,textTransform:"uppercase",lineHeight:1};
+          const NUM={fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,fontVariantNumeric:"tabular-nums",lineHeight:1};
           return(
             <div style={{marginBottom:24,border:"1px solid rgba(138,109,59,0.27)",background:"rgba(138,109,59,0.04)"}}>
               <button onClick={()=>setShowBreakdown(s=>!s)}
@@ -5742,10 +5794,10 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
         {/* Active race synergy inline */}
         {analysis.raceSynergy&&(
           <div className="rm-tactics-active-summary" style={{marginBottom:10}}>
-            <div style={{padding:"7px 10px",borderRadius:7,background:`${analysis.raceSynergy.color}10`,border:`1px solid ${analysis.raceSynergy.color}33`}}>
+            <div style={{padding:"7px 10px",borderRadius:3,background:`${analysis.raceSynergy.color}10`,border:`1px solid ${analysis.raceSynergy.color}33`}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <span style={{fontSize:11}}>{analysis.raceSynergy.icon}</span>
-                <span style={{fontSize:11,fontWeight:700,color:analysis.raceSynergy.color,fontFamily:"'Cinzel',serif",flex:1}}>{analysis.raceSynergy.name}</span>
+                <span style={{fontSize:11,fontWeight:700,color:analysis.raceSynergy.color,fontFamily:"'IM Fell English SC',serif",flex:1}}>{analysis.raceSynergy.name}</span>
                 <span style={{fontSize:9,fontWeight:700,color:analysis.raceSynergy.color}}>×{analysis.raceSynergy.ratingMult}</span>
               </div>
               <div style={{fontSize:9,color:"#6E6350",marginTop:2,lineHeight:1.4}}>{analysis.raceSynergy.desc}</div>
@@ -5754,7 +5806,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   {POS_KEYS.map(p=>{
                     const lm=analysis.raceSynergy.laneMults[p];
                     const lmCol=lm>1.0?"#40614F":lm<1.0?"#9A5B2B":"#6E6350";
-                    return <span key={p} style={{fontSize:8,fontWeight:700,color:lmCol,background:"rgba(60,52,38,0.072)",padding:"2px 6px",borderRadius:5}}>{POSITIONS[p].icon} ×{lm.toFixed(2)}</span>;
+                    return <span key={p} style={{fontSize:8,fontWeight:700,color:lmCol,background:"rgba(60,52,38,0.072)",padding:"2px 6px",borderRadius:3}}>{POSITIONS[p].icon} ×{lm.toFixed(2)}</span>;
                   })}
                 </div>
               )}
@@ -5766,7 +5818,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
         <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
           <div>
             <div className="pa-kicker" style={{marginBottom:6}}>Six Slots</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>Formation Lanes</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>Formation Lanes</div>
           </div>
         </div>
         {POS_KEYS.map(pos=>{
@@ -5786,12 +5838,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <PositionIcon position={pos} size={26}/>
                 </div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontStyle:"italic"}}>{pd.subtitle}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontStyle:"italic"}}>{pd.subtitle}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div className="pa-kicker">Lane PWR</div>
-                  <div style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:18,color:"#3A3427",fontVariantNumeric:"tabular-nums",lineHeight:1,marginTop:4}}>{posHeroes.length>0?Math.round(ps.score):"—"}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:18,color:"#3A3427",fontVariantNumeric:"tabular-nums",lineHeight:1,marginTop:4}}>{posHeroes.length>0?Math.round(ps.score):"—"}</div>
                 </div>
               </div>
               {/* Slots */}
@@ -5805,7 +5857,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     return(
                       <button key={slotIdx} onClick={()=>setPickerOpen({pos,slotIdx})}
                         style={{height:78,borderRadius:0,border:`1px dashed ${isPickerTarget?pd.color:pd.color+"55"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:8,
-                          fontFamily:"'Cinzel',serif",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:isPickerTarget?pd.color:"#77653F",
+                          fontFamily:"'IM Fell English SC',serif",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:isPickerTarget?pd.color:"#77653F",
                           background:isPickerTarget?`${pd.color}0a`:"rgba(138,109,59,0.04)",cursor:"pointer",transition:"all 0.15s"}}>
                         <span style={{fontSize:14}}>+</span> Assign Hero
                       </button>
@@ -5828,14 +5880,14 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         <RoleIcon role={h.role} size={28}/>
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
                           <span style={{overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</span>
-                          {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:6,letterSpacing:0.5,whiteSpace:"nowrap"}}>🩸 Injured {h.injuryWeeks}w</span>}
+                          {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:3,letterSpacing:0.5,whiteSpace:"nowrap"}}>🩸 Injured {h.injuryWeeks}w</span>}
                         </div>
-                        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
                           {h.race} · {h.role} · <span style={{color:stageColor}}>{agePhase(h).charAt(0).toUpperCase()+agePhase(h).slice(1)}</span>
                         </div>
-                        <div style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:10,fontWeight:600,color:"#77653F",marginTop:4,fontVariantNumeric:"tabular-nums"}}>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,fontWeight:600,color:"#77653F",marginTop:4,fontVariantNumeric:"tabular-nums"}}>
                           PWR <span style={{color:"#3A3427"}}>{Math.round(calcHeroCombatScore(h,pos))}</span>
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
                           LV <span style={{color:"#3A3427"}}>{h.level}</span>
@@ -5844,13 +5896,13 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         </div>
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
-                        <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
                           {fit==="ideal"?"✓ Ideal":fit==="penalty"?"✕ Penalty":"— Neutral"}
                         </div>
                         {h.injured&&(
                           <button onClick={e=>{e.stopPropagation();remove(pos,slotIdx);}}
                             title="Move to bench so the hero can recover"
-                            style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,padding:"3px 7px",background:"transparent",border:"1px solid rgba(126,45,38,0.55)",color:"#7E2D26",borderRadius:3,cursor:"pointer",textTransform:"uppercase"}}>
+                            style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,padding:"3px 7px",background:"transparent",border:"1px solid rgba(126,45,38,0.55)",color:"#7E2D26",borderRadius:3,cursor:"pointer",textTransform:"uppercase"}}>
                             Bench
                           </button>
                         )}
@@ -5862,16 +5914,16 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               {/* Lane footer — pairing badge or ideal-roles hint */}
               <div style={{padding:"8px 16px",borderTop:"1px solid rgba(138,109,59,0.15)",display:"flex",alignItems:"center",gap:10}}>
                 {rolePairing?(<>
-                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:"#4A6B45",letterSpacing:1.5,textTransform:"uppercase"}}>
+                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#4A6B45",letterSpacing:1.5,textTransform:"uppercase"}}>
                     ◈ {[...rolePairing.roles].sort().join(" + ")} Pairing
                   </span>
-                  <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:700,color:"#4A6B45",fontVariantNumeric:"tabular-nums"}}>×{rolePairing.mult.toFixed(2)}</span>
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#4A6B45",fontVariantNumeric:"tabular-nums"}}>×{rolePairing.mult.toFixed(2)}</span>
                 </>):(
-                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span></span>
+                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span></span>
                 )}
                 <span style={{flex:1}}/>
                 {rolePairing&&(
-                  <span style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · {pd.ideal.join(", ")}</span>
+                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · {pd.ideal.join(", ")}</span>
                 )}
               </div>
             </div>
@@ -5887,7 +5939,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",gap:14,marginBottom:14}}>
                 <div>
                   <div className="pa-kicker" style={{marginBottom:6}}>{bench.length} {bench.length===1?"Hero":"Heroes"}</div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>The Bench</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:1,textTransform:"uppercase"}}>The Bench</div>
                 </div>
                 <span className="pa-kicker">Not in Formation</span>
               </div>
@@ -5902,16 +5954,16 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         <RoleIcon role={h.role} size={22}/>
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
-                        <div style={{fontFamily:"'Cinzel',serif",fontSize:8,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
-                          {h.race} · {h.role} · LV <span style={{fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0,fontWeight:600,color:"#77653F"}}>{h.level}</span>
-                          {h.injured&&<span style={{color:"#7E2D26",marginLeft:6,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0}}>🩸 {h.injuryWeeks}w</span>}
-                          {(h.awayWeeks||0)>0&&<span style={{color:"#4A6178",marginLeft:6,fontFamily:"'Space Grotesk',sans-serif",letterSpacing:0}}>✈️ {h.awayWeeks}w</span>}
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                          {h.race} · {h.role} · LV <span style={{fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0,fontWeight:600,color:"#77653F"}}>{h.level}</span>
+                          {h.injured&&<span style={{color:"#7E2D26",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>🩸 {h.injuryWeeks}w</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{color:"#4A6178",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>✈️ {h.awayWeeks}w</span>}
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
                         <div className="pa-kicker">Best</div>
-                        <div style={{fontFamily:"'Cinzel',serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
                       </div>
                     </div>
                   );
@@ -5948,15 +6000,15 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <div style={{border:HAIR,padding:18,marginBottom:18,background:rs?"rgba(138,109,59,0.06)":"rgba(138,109,59,0.04)"}}>
                 <div className="pa-kicker" style={{marginBottom:8}}>Active Synergy</div>
                 {rs?(<>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:18,color:"#8A6D3B",letterSpacing:0.5,marginBottom:6}}>{rs.name}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:18,color:"#8A6D3B",letterSpacing:0.5,marginBottom:6}}>{rs.name}</div>
                   <div style={{width:30,height:1,background:"#8A6D3B",marginBottom:10}}/>
-                  <div style={{fontFamily:"'Lato',sans-serif",fontSize:11,color:"#77653F",lineHeight:1.55,marginBottom:14}}>{rs.desc}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#77653F",lineHeight:1.55,marginBottom:14}}>{rs.desc}</div>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                     <span className="pa-kicker">Rating Multiplier</span>
-                    <span style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:18,color:"#4A6B45",fontVariantNumeric:"tabular-nums"}}>×{rs.ratingMult.toFixed(2)}</span>
+                    <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:18,color:"#4A6B45",fontVariantNumeric:"tabular-nums"}}>×{rs.ratingMult.toFixed(2)}</span>
                   </div>
                 </>):(
-                  <div style={{fontFamily:"'Lato',sans-serif",fontSize:11,color:"#77653F",lineHeight:1.55,fontStyle:"italic"}}>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#77653F",lineHeight:1.55,fontStyle:"italic"}}>
                     No race synergy active. Field 6 of the same race for a mono bonus, all different for rainbow, or 3+3 of two races for a duo pact.
                   </div>
                 )}
@@ -5968,8 +6020,8 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <div className="pa-kicker" style={{marginBottom:12}}>Race Composition</div>
                   {raceList.map(([race,n])=>(
                     <div key={race} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(138,109,59,0.12)"}}>
-                      <span style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:500,color:"#3A3427",letterSpacing:0.5}}>{race}</span>
-                      <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:600,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>×{n}</span>
+                      <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:500,color:"#3A3427",letterSpacing:0.5}}>{race}</span>
+                      <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:600,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>×{n}</span>
                     </div>
                   ))}
                 </div>
@@ -5982,8 +6034,8 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   {allMults.map((m,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(138,109,59,0.12)"}}>
                       <span style={{color:"#8A6D3B",fontSize:11,width:12,textAlign:"center",lineHeight:1}}>◈</span>
-                      <span style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#77653F",letterSpacing:1,textTransform:"uppercase",flex:1}}>{m.label}</span>
-                      <span style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:11,fontWeight:700,color:m.positive?"#4A6B45":"#7E2D26",fontVariantNumeric:"tabular-nums"}}>×{m.mult.toFixed(2)}</span>
+                      <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",letterSpacing:1,textTransform:"uppercase",flex:1}}>{m.label}</span>
+                      <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:m.positive?"#4A6B45":"#7E2D26",fontVariantNumeric:"tabular-nums"}}>×{m.mult.toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -5998,12 +6050,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     <div key={pos} style={{marginBottom:14}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
                         <PositionIcon position={pos} size={14}/>
-                        <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</span>
+                        <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</span>
                       </div>
-                      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase",marginBottom:3}}>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase",marginBottom:3}}>
                         Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span>
                       </div>
-                      <div style={{fontFamily:"'Cinzel',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>
                         Stats · <span style={{color:"#77653F"}}>{(pd.primaryStats||[]).slice(0,3).join(", ")}</span>
                       </div>
                     </div>
@@ -6023,29 +6075,29 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.525)",zIndex:150,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}}
             onClick={()=>setPickerOpen(null)}>
             <div onClick={e=>e.stopPropagation()}
-              style={{background:"linear-gradient(160deg,#EFE7D3,#EDE4CE)",border:`1px solid ${pd.color}44`,borderRadius:14,width:"min(540px,96vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:`0 0 40px ${pd.color}18`}}>
+              style={{background:"#EFE7D3",border:`1px solid ${pd.color}44`,borderRadius:3,width:"min(540px,96vw)",maxHeight:"80vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:`0 0 40px ${pd.color}18`}}>
 
               {/* Picker header */}
               <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(60,52,38,0.108)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
                 <PositionIcon position={pickerOpen.pos} size={20}/>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:pd.color}}>{pd.label} — Slot {pickerOpen.slotIdx+1}</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:pd.color}}>{pd.label} — Slot {pickerOpen.slotIdx+1}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>{pd.subtitle} · Ideal: {pd.ideal.filter(x=>ROLES.includes(x)).join(", ")}</div>
                 </div>
-                <button onClick={()=>setPickerOpen(null)} style={{background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#4A4335",fontSize:12,cursor:"pointer",borderRadius:6,padding:"5px 12px"}}>✕ Close</button>
+                <button onClick={()=>setPickerOpen(null)} style={{background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#4A4335",fontSize:12,cursor:"pointer",borderRadius:3,padding:"5px 12px"}}>✕ Close</button>
               </div>
 
               {/* Sort controls + clear option */}
               <div style={{padding:"8px 18px",borderBottom:"1px solid rgba(60,52,38,0.072)",display:"flex",gap:6,alignItems:"center",flexShrink:0,flexWrap:"wrap"}}>
                 <span style={{fontSize:10,color:"#6E6350",marginRight:2}}>Sort:</span>
                 {[["fit","Best fit"],["combat","Combat"],["level","Level"],["name","Name"]].map(([v,l])=>(
-                  <button key={v} onClick={()=>setPickerSort(v)} style={{fontSize:10,padding:"3px 9px",borderRadius:5,border:"none",cursor:"pointer",background:pickerSort===v?"rgba(60,90,120,0.27)":"rgba(60,52,38,0.09)",color:pickerSort===v?"#3C5A78":"#7A6F58",fontWeight:pickerSort===v?700:400}}>
+                  <button key={v} onClick={()=>setPickerSort(v)} style={{fontSize:10,padding:"3px 9px",borderRadius:3,border:"none",cursor:"pointer",background:pickerSort===v?"rgba(60,90,120,0.27)":"rgba(60,52,38,0.09)",color:pickerSort===v?"#3C5A78":"#7A6F58",fontWeight:pickerSort===v?700:400}}>
                     {l}
                   </button>
                 ))}
                 {currentHero&&(
                   <button onClick={()=>remove(pickerOpen.pos,pickerOpen.slotIdx)}
-                    style={{marginLeft:"auto",fontSize:10,padding:"3px 10px",borderRadius:5,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26"}}>
+                    style={{marginLeft:"auto",fontSize:10,padding:"3px 10px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26"}}>
                     ✕ Remove {currentHero.name}
                   </button>
                 )}
@@ -6063,7 +6115,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     <div key={h.id}
                       onClick={()=>h.injured||(h.awayWeeks||0)>0?null:assign(pickerOpen.pos,pickerOpen.slotIdx,h)}
                       style={{
-                        display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:9,marginBottom:5,
+                        display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:3,marginBottom:5,
                         background:isCurrentlyHere?"rgba(60,90,120,0.15)":h.injured?"rgba(60,52,38,0.03)":"rgba(60,52,38,0.054)",
                         border:`1px solid ${isCurrentlyHere?"#3C5A78":(h.awayWeeks||0)>0?"rgba(60,90,120,0.45)":fc+"33"}`,
                         cursor:h.injured||(h.awayWeeks||0)>0?"not-allowed":"pointer",
@@ -6073,12 +6125,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                       <HeroAvatar race={h.race} size={20}/>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                          <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</span>
-                          {h.injured&&<span style={{fontSize:9,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 5px",borderRadius:6}}>🩸 Injured {h.injuryWeeks}wk</span>}
-                          {isCurrentlyHere&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:6}}>Current</span>}
-                          {movedFrom&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.12)",padding:"1px 5px",borderRadius:6}}>Moves from {movedFrom}</span>}
-                          {(h.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:6}}>✈️ Away {h.awayWeeks}w</span>}
-                          {(h.fatigue||0)>=FATIGUE_WARN&&<span style={{fontSize:9,color:fatigueLabel(h.fatigue).color,background:"rgba(126,45,38,0.12)",padding:"1px 5px",borderRadius:6}}>⚡ {fatigueLabel(h.fatigue).label}</span>}
+                          <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</span>
+                          {h.injured&&<span style={{fontSize:9,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 5px",borderRadius:3}}>🩸 Injured {h.injuryWeeks}wk</span>}
+                          {isCurrentlyHere&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:3}}>Current</span>}
+                          {movedFrom&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.12)",padding:"1px 5px",borderRadius:3}}>Moves from {movedFrom}</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:3}}>✈️ Away {h.awayWeeks}w</span>}
+                          {(h.fatigue||0)>=FATIGUE_WARN&&<span style={{fontSize:9,color:fatigueLabel(h.fatigue).color,background:"rgba(126,45,38,0.12)",padding:"1px 5px",borderRadius:3}}>⚡ {fatigueLabel(h.fatigue).label}</span>}
                         </div>
                         <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
                           <span style={{fontSize:10,color:"#6E6350"}}><RoleIcon role={h.role}/> {h.role}</span>
@@ -6143,23 +6195,23 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
       {/* LEFT: Standings */}
       <div>
         {/* Season progress */}
-        <div style={{marginBottom:16,padding:"12px 16px",background:"rgba(60,52,38,0.036)",borderRadius:10,border:`1px solid ${currentTier.color}30`}}>
+        <div style={{marginBottom:16,padding:"12px 16px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:`1px solid ${currentTier.color}30`}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
             <div>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:currentTier.color}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:currentTier.color}}>
                 <TierIcon tier={playerTier} size={14}/> {currentTier.name} League · Season {season}
               </div>
               <div style={{fontSize:10,color:"#6E6350"}}>Week {seasonWeek} of {SEASON_LENGTH()} · {SEASON_LENGTH()-seasonWeek} remaining · {isPlatinum?"Finish 1st to win the campaign":"Top 2 promote · Bottom 2 relegate"}</div>
             </div>
             <div style={{textAlign:"right"}}>
               <div style={{fontSize:10,color:"#6E6350"}}>Position</div>
-              <div style={{fontSize:26,fontWeight:900,fontFamily:"'Cinzel',serif",color:playerPos<=2?"#40614F":playerPos>=7?"#7E2D26":"#23201A"}}>
+              <div style={{fontSize:26,fontWeight:900,fontFamily:"'IM Fell English SC',serif",color:playerPos<=2?"#40614F":playerPos>=7?"#7E2D26":"#23201A"}}>
                 {playerPos}{['st','nd','rd'][playerPos-1]||'th'}
               </div>
             </div>
           </div>
           <div style={{height:6,background:"#DFD3B8",borderRadius:3,overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${seasonPct}%`,background:`linear-gradient(90deg,${currentTier.color}99,${currentTier.color})`,borderRadius:3,transition:"width 0.5s"}}/>
+            <div style={{height:"100%",width:`${seasonPct}%`,background:`${currentTier.color}`,borderRadius:3,transition:"width 0.5s"}}/>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:"#6E6350",marginTop:3}}>
             <span>Season start</span><span>Season end — promotion/relegation decided</span>
@@ -6188,7 +6240,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               if(gap<=weeksLeft) msg = `${gap} win${gap===1?"":"s"} off ${isPlatinum?"the title":"promotion"} with ${weeksLeft} to play — the run-in starts now.`;
             }
             return msg ? (
-              <div style={{marginTop:8,padding:"6px 10px",borderRadius:7,background:`${col}10`,border:`1px solid ${col}30`,fontSize:10,fontWeight:700,color:col}}>
+              <div style={{marginTop:8,padding:"6px 10px",borderRadius:3,background:`${col}10`,border:`1px solid ${col}30`,fontSize:10,fontWeight:700,color:col}}>
                 🏁 {msg}
               </div>
             ) : null;
@@ -6231,29 +6283,29 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               alignItems:"center",padding:"8px 12px",marginBottom:3,
               background:isYou?`${townColor}12`:zoneBg,
               border:`1px solid ${isYou?`${townColor}44`:zoneBorder}`,
-              borderRadius:9,
+              borderRadius:3,
             }}>
               <div style={{textAlign:"center"}}>
-                <span style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:12,
+                <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12,
                   color:isPromo?"#40614F":isRele?"#7E2D26":"#6E6350"}}>
                   {pos}
                 </span>
               </div>
               <div style={{minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,
+                  <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,
                     color:isYou?townColor:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {t.name}
                   </span>
-                  {isYou&&<span style={{fontSize:8,color:townColor,background:`${townColor}18`,padding:"1px 5px",borderRadius:6,flexShrink:0}}>YOU</span>}
+                  {isYou&&<span style={{fontSize:8,color:townColor,background:`${townColor}18`,padding:"1px 5px",borderRadius:3,flexShrink:0}}>YOU</span>}
                 </div>
                 {!isYou&&<div style={{fontSize:9,color:"#6E6350",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                   {t.manager?`${t.manager.name} · `:""}Power ~{Math.round(leagueTable?.[t.name]?.power||t.power||0)}
                   {(t.h2h?.wins||t.h2h?.losses)?<span style={{color:(t.h2h.wins>=t.h2h.losses)?"#40614F":"#9A5B2B"}}> · {t.h2h.wins}–{t.h2h.losses} vs you</span>:null}
                 </div>}
               </div>
-              <div style={{textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#40614F"}}>{t.wins}</div>
-              <div style={{textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#7E2D26"}}>{t.losses}</div>
+              <div style={{textAlign:"center",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#40614F"}}>{t.wins}</div>
+              <div style={{textAlign:"center",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#7E2D26"}}>{t.losses}</div>
               <div style={{textAlign:"center",fontSize:11,fontWeight:700,color:t.winPct>=0.6?"#40614F":t.winPct>=0.4?"#8A6D3B":"#9A5B2B"}}>{winPctStr}</div>
               <div style={{textAlign:"center",fontSize:10,fontWeight:700,color:"#40614F"}}>{tribute}g</div>
             </div>
@@ -6264,18 +6316,18 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
       {/* RIGHT: Income + win chance + match feed + trophies */}
       <div className="rm-dominion-right">
         {/* Tribute */}
-        <div style={{marginBottom:14,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:10,border:`1px solid ${currentTier.color}33`}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:currentTier.color,marginBottom:10}}>
+        <div style={{marginBottom:14,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:`1px solid ${currentTier.color}33`}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:currentTier.color,marginBottom:10}}>
             <TierIcon tier={playerTier} size={13}/> Tribute Income
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
             <div>
               <div style={{fontSize:10,color:"#6E6350",marginBottom:2}}>{currentTier.name} · base {currentTier.tributeBase}g + position bonus</div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:28,fontWeight:900,color:"#40614F",lineHeight:1}}>{weeklyIncome.toLocaleString()}g</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:28,fontWeight:900,color:"#40614F",lineHeight:1}}>{weeklyIncome.toLocaleString()}g</div>
               <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>per week at {tierPosition}{['st','nd','rd'][tierPosition-1]||'th'} — climb the table, raise the tribute</div>
             </div>
             {!isPlatinum&&(
-              <div style={{textAlign:"right",padding:"6px 10px",background:"rgba(64,97,79,0.09)",borderRadius:7,border:"1px solid rgba(64,97,79,0.225)"}}>
+              <div style={{textAlign:"right",padding:"6px 10px",background:"rgba(64,97,79,0.09)",borderRadius:3,border:"1px solid rgba(64,97,79,0.225)"}}>
                 <div style={{fontSize:9,color:"#40614F",marginBottom:1}}>Promote to {nextTier?.name}</div>
                 <div style={{fontSize:12,fontWeight:700,color:"#40614F"}}>+{Math.max(0,(nextTier?.tributeBase||0)-currentTier.tributeBase)}g/wk on promotion</div>
               </div>
@@ -6287,9 +6339,9 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Recent match results */}
         {matchLog&&matchLog.length>0&&(
           <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>RECENT RESULTS</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>RECENT RESULTS</div>
             {matchLog.slice(0,8).map((r,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:6,marginBottom:3,background:"rgba(60,52,38,0.036)"}}>
+              <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:3,marginBottom:3,background:"rgba(60,52,38,0.036)"}}>
                 <span style={{fontSize:9,color:"#6E6350",minWidth:28}}>Wk{r.week}</span>
                 <span style={{fontSize:10,color:r.homeWon?"#40614F":"#8A7F68",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.home}</span>
                 <span style={{fontSize:9,color:"#6E6350"}}>vs</span>
@@ -6302,9 +6354,9 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Season chronicle — the stories worth retelling */}
         {(chronicleEntries||[]).length>0&&(
           <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#8A6D3B",marginBottom:8,fontWeight:700,letterSpacing:1}}>📜 THE CHRONICLE</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#8A6D3B",marginBottom:8,fontWeight:700,letterSpacing:1}}>📜 THE CHRONICLE</div>
             {(chronicleEntries||[]).slice(0,10).map((e,i)=>(
-              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:6,padding:"5px 8px",borderRadius:6,marginBottom:3,background:"rgba(138,109,59,0.05)",border:"1px solid rgba(138,109,59,0.12)"}}>
+              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:6,padding:"5px 8px",borderRadius:3,marginBottom:3,background:"rgba(138,109,59,0.05)",border:"1px solid rgba(138,109,59,0.12)"}}>
                 <span style={{fontSize:8,color:"#6E6350",minWidth:34,marginTop:1}}>S{e.season}·W{e.week}</span>
                 <span style={{fontSize:10,color:"#4A4335",lineHeight:1.4}}>{e.text}</span>
               </div>
@@ -6315,11 +6367,11 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Past season trophies */}
         {trophies.length>0&&(
           <div style={{marginTop:4}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>SEASON TROPHIES</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>SEASON TROPHIES</div>
             {trophies.map((t,i)=>(
-              <div key={i} style={{padding:"8px 12px",borderRadius:8,marginBottom:5,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.18)"}}>
+              <div key={i} style={{padding:"8px 12px",borderRadius:3,marginBottom:5,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.18)"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>Season {t.season}</span>
+                  <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>Season {t.season}</span>
                   <span style={{fontSize:12,fontWeight:700,color:t.rank===1?"#8A6D3B":t.rank<=3?"#3C5A78":"#6E6350"}}>#{t.rank} of {t.totalTowns}</span>
                 </div>
                 {t.wins!=null&&<div style={{fontSize:10,color:"#6E6350",marginTop:2}}>{t.wins}W / {t.losses}L · {t.tier}</div>}
@@ -6331,15 +6383,15 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Hall of Fame */}
         {hallOfFame&&Object.keys(hallOfFame).length>0&&(
           <div style={{marginTop:16}}>
-            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>🏛️ HALL OF FAME</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>🏛️ HALL OF FAME</div>
 
             {/* Star Player */}
             {hallOfFame.starPlayer&&(
-              <div style={{padding:"10px 12px",borderRadius:9,background:"rgba(95,75,102,0.09)",border:"1px solid rgba(95,75,102,0.3)",marginBottom:6}}>
+              <div style={{padding:"10px 12px",borderRadius:3,background:"rgba(95,75,102,0.09)",border:"1px solid rgba(95,75,102,0.3)",marginBottom:6}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <HeroAvatar race={hallOfFame.starPlayer.race} size={18}/>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"#5F4B66",fontFamily:"'Cinzel',serif"}}>🌟 Star Player</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#5F4B66",fontFamily:"'IM Fell English SC',serif"}}>🌟 Star Player</div>
                     <div style={{fontSize:12,fontWeight:700,color:"#23201A"}}>{hallOfFame.starPlayer.name}</div>
                     <div style={{fontSize:9,color:"#6E6350"}}>{hallOfFame.starPlayer.race} {hallOfFame.starPlayer.role} · Lv {hallOfFame.starPlayer.level} · {hallOfFame.starPlayer.pos}</div>
                     {hallOfFame.starPlayer.traits?.length>0&&<div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{hallOfFame.starPlayer.traits.join(", ")}</div>}
@@ -6355,37 +6407,37 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
             {/* Records row */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
               {hallOfFame.bestSeason&&(
-                <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)"}}>
+                <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)"}}>
                   <div style={{fontSize:9,color:"#40614F",fontWeight:700,marginBottom:2}}>📈 Best Season</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.bestSeason.wins}W</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>S{hallOfFame.bestSeason.season} · {hallOfFame.bestSeason.losses}L</div>
                 </div>
               )}
               {hallOfFame.longestStreak&&(
-                <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.225)"}}>
+                <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.225)"}}>
                   <div style={{fontSize:9,color:"#3C5A78",fontWeight:700,marginBottom:2}}>🔥 Longest Streak</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.longestStreak.count}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>consecutive wins · S{hallOfFame.longestStreak.season}</div>
                 </div>
               )}
               {hallOfFame.biggestUpset&&(
-                <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(154,91,43,0.075)",border:"1px solid rgba(154,91,43,0.225)"}}>
+                <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(154,91,43,0.075)",border:"1px solid rgba(154,91,43,0.225)"}}>
                   <div style={{fontSize:9,color:"#9A5B2B",fontWeight:700,marginBottom:2}}>⚡ Biggest Upset</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{Math.round(hallOfFame.biggestUpset.winChance*100)}%</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>vs {hallOfFame.biggestUpset.enemy} · S{hallOfFame.biggestUpset.season}</div>
                 </div>
               )}
               {hallOfFame.longestStreak&&(
-                <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.225)"}}>
+                <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.225)"}}>
                   <div style={{fontSize:9,color:"#8A6D3B",fontWeight:700,marginBottom:2}}>⚜️ Highest Tier</div>
-                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B",fontFamily:"'Cinzel',serif"}}>
+                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B",fontFamily:"'IM Fell English SC',serif"}}>
                     {(()=>{const highestTier=trophies.reduce((best,t)=>{const ti=TIER_ORDER.indexOf(t.tier||"iron");return ti>TIER_ORDER.indexOf(best)? (t.tier||"iron"):best;},"iron");return `${TIERS[highestTier]?.icon} ${TIERS[highestTier]?.name}`;})()}
                   </div>
                   <div style={{fontSize:9,color:"#6E6350"}}>best tier reached</div>
                 </div>
               )}
               {(hallOfFame.buildingsBuilt||0)>0&&(
-                <div style={{padding:"8px 10px",borderRadius:8,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)"}}>
+                <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)"}}>
                   <div style={{fontSize:9,color:"#6E6350",fontWeight:700,marginBottom:2}}>🏰 Builder</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.buildingsBuilt}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>of {BUILDINGS.length} buildings constructed</div>
@@ -6543,12 +6595,12 @@ function SetupScreen({ onComplete }) {
     const uniqueBoonIds = Object.keys(boonCounts);
 
     return (
-      <div style={{position:"fixed",inset:0,background:"linear-gradient(145deg,#E9E1CE,#E9E1CE,#E9E1CE)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Lato',sans-serif",overflowY:"auto",padding:"16px 0"}}>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-        <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:16}}>
+      <div style={{position:"fixed",inset:0,background:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Alegreya Sans',sans-serif",overflowY:"auto",padding:"16px 0"}}>
+        <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet"/>
+        <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3}}>
           <div style={{textAlign:"center",marginBottom:24}}>
             <div style={{fontSize:28,marginBottom:6}}>🏅</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Legacy Boons</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Legacy Boons</div>
             <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate this run. Each can be used once. You can choose none for a clean start.</div>
           </div>
 
@@ -6560,7 +6612,7 @@ function SetupScreen({ onComplete }) {
               const count = boonCounts[id];
               return(
                 <div key={id} onClick={()=>toggleBoon(id)}
-                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:10,cursor:"pointer",
+                  style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:3,cursor:"pointer",
                     background:isSelected?"rgba(138,109,59,0.105)":"rgba(60,52,38,0.054)",
                     border:`1px solid ${isSelected?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.144)"}`,
                     transition:"all 0.15s"}}>
@@ -6569,7 +6621,7 @@ function SetupScreen({ onComplete }) {
                   </div>
                   <span style={{fontSize:22,flexShrink:0}}>{a.boon.icon}</span>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,fontWeight:700,color:isSelected?"#8A6D3B":"#23201A",fontFamily:"'Cinzel',serif"}}>
+                    <div style={{fontSize:12,fontWeight:700,color:isSelected?"#8A6D3B":"#23201A",fontFamily:"'IM Fell English SC',serif"}}>
                       {a.boon.name}
                       {count>1&&<span style={{fontSize:9,color:"#9A5B2B",marginLeft:6}}>×{count}</span>}
                     </div>
@@ -6583,14 +6635,14 @@ function SetupScreen({ onComplete }) {
 
           <div style={{display:"flex",gap:10}}>
             <button onClick={()=>onComplete(name.trim(), color, speed, [])}
-              style={{flex:1,padding:"11px 0",borderRadius:8,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>
+              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
               No Boons
             </button>
             <button onClick={()=>onComplete(name.trim(), color, speed, [...selectedBoons])}
-              style={{flex:2,padding:"11px 0",borderRadius:8,border:"none",cursor:"pointer",
-                background:selectedBoons.size>0?"linear-gradient(135deg,#9A5B2B,#8A6D3B)":"rgba(60,52,38,0.108)",
+              style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
+                background:selectedBoons.size>0?"#9A5B2B":"rgba(60,52,38,0.108)",
                 color:selectedBoons.size>0?"#F0E8D5":"#8A7F68",
-                fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:12}}>
+                fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
               {selectedBoons.size>0 ? `Begin with ${selectedBoons.size} Boon${selectedBoons.size>1?"s":""}` : "Begin without Boons"}
             </button>
           </div>
@@ -6602,21 +6654,21 @@ function SetupScreen({ onComplete }) {
   return (
     <div style={{
       position:"fixed", inset:0,
-      background:"linear-gradient(145deg,#E9E1CE 0%,#E9E1CE 60%,#E9E1CE 100%)",
+      background:"#E9E1CE",
       display:"flex", alignItems:"center", justifyContent:"center",
-      zIndex:300, fontFamily:"'Lato',sans-serif", overflowY:"auto",
+      zIndex:300, fontFamily:"'Alegreya Sans',sans-serif", overflowY:"auto",
       padding:"16px 0",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{
         width:"min(480px,92vw)", padding:"36px 32px",
         background:"rgba(60,52,38,0.045)",
         border:"1px solid rgba(60,52,38,0.144)",
-        borderRadius:16,
+        borderRadius:3,
       }}>
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:10}}>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:26,background:"linear-gradient(135deg,#8A6D3B,#9A5B2B)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:4}}>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,background:"#8A6D3B",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:4}}>
             ⚔️ REALM MANAGER
           </div>
           <div style={{fontSize:10,color:"#6E6350",letterSpacing:2,marginBottom:12}}>FANTASY SQUAD SIMULATOR</div>
@@ -6630,9 +6682,9 @@ function SetupScreen({ onComplete }) {
               {icon:"🧑", label:"Manage", sub:"Sign, rest, rotate"},
               {icon:"🏆", label:"Conquer", sub:"Reach Rank #1"},
             ].map(({icon,label,sub})=>(
-              <div key={label} style={{flex:1,padding:"8px 6px",borderRadius:8,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.108)",textAlign:"center"}}>
+              <div key={label} style={{flex:1,padding:"8px 6px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.108)",textAlign:"center"}}>
                 <div style={{fontSize:16,marginBottom:3}}>{icon}</div>
-                <div style={{fontSize:10,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>{label}</div>
+                <div style={{fontSize:10,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{label}</div>
                 <div style={{fontSize:8,color:"#6E6350",marginTop:1}}>{sub}</div>
               </div>
             ))}
@@ -6644,7 +6696,7 @@ function SetupScreen({ onComplete }) {
 
         {/* NG+ returning champion notice */}
         {ng?.wins>0&&(
-          <div style={{marginBottom:20,padding:"10px 14px",borderRadius:9,background:"rgba(154,91,43,0.12)",border:"1px solid rgba(154,91,43,0.45)"}}>
+          <div style={{marginBottom:20,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.12)",border:"1px solid rgba(154,91,43,0.45)"}}>
             <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>⚡ New Legacy — Run #{ng.wins+1}</div>
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
               You've conquered the realm {ng.wins} time{ng.wins>1?"s":""}. Your unlocked game options are available below.
@@ -6662,11 +6714,11 @@ function SetupScreen({ onComplete }) {
             placeholder="e.g. Ironveil, The Black Keep…"
             maxLength={28}
             style={{
-              width:"100%", padding:"10px 14px", borderRadius:8,
+              width:"100%", padding:"10px 14px", borderRadius:3,
               background:"rgba(60,52,38,0.108)",
               border:`1px solid ${nameError?"#7E2D26":"rgba(60,52,38,0.264)"}`,
               color:"#23201A", fontSize:15, outline:"none",
-              fontFamily:"'Lato',sans-serif", boxSizing:"border-box",
+              fontFamily:"'Alegreya Sans',sans-serif", boxSizing:"border-box",
             }}
           />
           {nameError&&<div style={{fontSize:10,color:"#7E2D26",marginTop:4}}>Please name your realm before continuing.</div>}
@@ -6680,7 +6732,7 @@ function SetupScreen({ onComplete }) {
               <button key={c.value} onClick={()=>setColor(c.value)}
                 style={{
                   display:"flex",alignItems:"center",gap:7,
-                  padding:"7px 12px", borderRadius:8, border:"none", cursor:"pointer",
+                  padding:"7px 12px", borderRadius:3, border:"none", cursor:"pointer",
                   background:color===c.value?`${c.value}22`:"rgba(60,52,38,0.072)",
                   outline:`2px solid ${color===c.value?c.value:"transparent"}`,
                   transition:"all 0.15s",
@@ -6694,13 +6746,13 @@ function SetupScreen({ onComplete }) {
 
         {/* Preview */}
         <div style={{
-          padding:"12px 14px", borderRadius:8, marginBottom:24,
+          padding:"12px 14px", borderRadius:3, marginBottom:24,
           background:`${color}0d`, border:`1px solid ${color}33`,
         }}>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <div style={{width:10,height:10,borderRadius:"50%",background:color,flexShrink:0,boxShadow:`0 0 8px ${color}88`}}/>
             <div>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:14,color:color}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:color}}>
                 {name.trim()||"Your Realm"}
               </div>
               <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold</div>
@@ -6710,10 +6762,10 @@ function SetupScreen({ onComplete }) {
 
         <button onClick={handleStart}
           style={{
-            width:"100%", padding:"13px 0", borderRadius:9,
+            width:"100%", padding:"13px 0", borderRadius:3,
             border:"none", cursor:"pointer",
-            background:`linear-gradient(135deg,${color},${color}aa)`,
-            color:"#F0E8D5", fontFamily:"'Cinzel',serif",
+            background:`${color}`,
+            color:"#F0E8D5", fontFamily:"'IM Fell English SC',serif",
             fontWeight:900, fontSize:15, letterSpacing:1,
           }}>
           Begin Your Legacy
@@ -6726,7 +6778,7 @@ function SetupScreen({ onComplete }) {
 function AbandonButton({onAbandon}){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
-    <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:8,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)"}}>
+    <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)"}}>
       <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Abandon this run?</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
         Your run ends here. Achievements earned so far<br/>
@@ -6734,11 +6786,11 @@ function AbandonButton({onAbandon}){
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{setConfirming(false);onAbandon();}}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
           Yes, abandon run
         </button>
         <button onClick={()=>setConfirming(false)}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
           Cancel
         </button>
       </div>
@@ -6746,7 +6798,7 @@ function AbandonButton({onAbandon}){
   );
   return(
     <button onClick={()=>setConfirming(true)}
-      style={{fontSize:10,padding:"5px 12px",borderRadius:6,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'Cinzel',serif"}}>
+      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'IM Fell English SC',serif"}}>
       Abandon Run
     </button>
   );
@@ -6755,7 +6807,7 @@ function AbandonButton({onAbandon}){
 function NewGameButton(){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
-    <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:8,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
+    <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
       <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>⚠️ This will erase everything:</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
         • Current run progress and gold<br/>
@@ -6765,11 +6817,11 @@ function NewGameButton(){
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{clearSave();clearNGPlus();window.location.reload();}}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
           Yes, start New Realm
         </button>
         <button onClick={()=>setConfirming(false)}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:6,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
           Cancel
         </button>
       </div>
@@ -6777,7 +6829,7 @@ function NewGameButton(){
   );
   return(
     <button onClick={()=>setConfirming(true)}
-      style={{fontSize:10,padding:"5px 12px",borderRadius:6,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'Cinzel',serif"}}>
+      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'IM Fell English SC',serif"}}>
       New Realm
     </button>
   );
@@ -6787,13 +6839,13 @@ function GuideTab(){
   const [openSection,setOpenSection]=useState(null);
   const toggle=(id)=>setOpenSection(s=>s===id?null:id);
   const Section=({id,icon,title,children})=>(
-    <div style={{marginBottom:8,borderRadius:9,overflow:"hidden",border:"1px solid rgba(60,52,38,0.126)"}}>
+    <div style={{marginBottom:8,borderRadius:3,overflow:"hidden",border:"1px solid rgba(60,52,38,0.126)"}}>
       <button onClick={()=>toggle(id)}
         style={{width:"100%",display:"flex",alignItems:"center",gap:10,padding:"11px 14px",
           background:openSection===id?"rgba(60,52,38,0.09)":"rgba(60,52,38,0.036)",
           border:"none",cursor:"pointer",textAlign:"left"}}>
         <span style={{fontSize:16}}>{icon}</span>
-        <span style={{flex:1,fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{title}</span>
+        <span style={{flex:1,fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{title}</span>
         <span style={{fontSize:12,color:"#6E6350"}}>{openSection===id?"▼":"▶"}</span>
       </button>
       {openSection===id&&(
@@ -6805,7 +6857,7 @@ function GuideTab(){
   );
   return(
     <div style={{maxWidth:640}}>
-      <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:700,color:"#3C5A78",marginBottom:14}}>📖 How to Play</div>
+      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#3C5A78",marginBottom:14}}>📖 How to Play</div>
 
       <Section id="loop" icon="⚔️" title="The Core Loop">
         <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#23201A"}}>set your formation</b>, <b style={{color:"#23201A"}}>fight a battle</b>, and manage the aftermath. Winning earns gold and XP. Use gold to sign heroes, build your town, and grow your squad.</p>
@@ -8601,7 +8653,7 @@ export default function App(){
     { id:"Ledger",    icon:"📒", label:"Ledger",   badge: false },
     { id:"Guide",    icon:"📖", label:"Guide",    badge: false },
   ];
-  const IS={background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:4,color:"#3A3427",padding:"6px 10px",fontSize:11,outline:"none",fontFamily:"'Lato',sans-serif"};
+  const IS={background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:4,color:"#3A3427",padding:"6px 10px",fontSize:11,outline:"none",fontFamily:"'Alegreya Sans',sans-serif"};
   // Parchment Codex sidebar palette: gold accent for currency,
   // parchment for neutral, danger red for trouble, success green for income.
   const STAT_ROWS = [
@@ -8625,9 +8677,9 @@ export default function App(){
   }
 
   return(
-    <div style={{minHeight:"100vh",background:"#E9E1CE",color:"#3A3427",fontFamily:"'Lato',sans-serif"}}>
+    <div style={{minHeight:"100vh",background:"#E9E1CE",color:"#3A3427",fontFamily:"'Alegreya Sans',sans-serif"}}>
       <InjectCSS/>
-      <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=Lato:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       {/* was a starfield; now faint paper grain */}
       <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
 
@@ -8690,10 +8742,10 @@ export default function App(){
         <div className="rm-sidebar-logo">
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
             <div style={{width:22,height:22,border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",color:"#8A6D3B",fontSize:11}}>⚔</div>
-            <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:"#8A6D3B",letterSpacing:2.5}}>REALM MANAGER</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#8A6D3B",letterSpacing:2.5}}>REALM MANAGER</div>
           </div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:400,fontSize:22,color:townColor||"#3A3427",letterSpacing:0.5,lineHeight:1.1}}>{townName}</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:400,fontSize:9,color:"#77653F",letterSpacing:2,marginTop:4,fontStyle:"italic"}}>Season {season} · Week {seasonWeek}</div>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:400,fontSize:22,color:townColor||"#3A3427",letterSpacing:0.5,lineHeight:1.1}}>{townName}</div>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:400,fontSize:9,color:"#77653F",letterSpacing:2,marginTop:4,fontStyle:"italic"}}>Season {season} · Week {seasonWeek}</div>
         </div>
         <div className="rm-sidebar-stats">
           {STAT_ROWS.map(([l,v,c])=>(
@@ -8704,7 +8756,7 @@ export default function App(){
           ))}
         </div>
 
-        {signDiscount>0&&<div style={{padding:"8px 20px",fontFamily:"'Cinzel',serif",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:"#8A6D3B",borderBottom:"1px solid rgba(138,109,59,0.15)"}}>Next signing · {Math.round(signDiscount*100)}% off</div>}
+        {signDiscount>0&&<div style={{padding:"8px 20px",fontFamily:"'IM Fell English SC',serif",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:"#8A6D3B",borderBottom:"1px solid rgba(138,109,59,0.15)"}}>Next signing · {Math.round(signDiscount*100)}% off</div>}
 
         <nav className="rm-sidebar-nav">
           <div className="rm-nav-kicker">Council</div>
@@ -8739,13 +8791,13 @@ export default function App(){
 
         {/* Bankruptcy warning banner */}
         {bankruptcyWeeks>0&&(
-          <div style={{marginBottom:12,padding:"10px 14px",borderRadius:9,
+          <div style={{marginBottom:12,padding:"10px 14px",borderRadius:3,
             background:bankruptcyWeeks>=2?"rgba(126,45,38,0.15)":"rgba(154,91,43,0.12)",
             border:`1px solid ${bankruptcyWeeks>=2?"rgba(126,45,38,0.55)":"rgba(154,91,43,0.45)"}`,
             display:"flex",alignItems:"center",gap:10}}>
             <span style={{fontSize:18}}>{bankruptcyWeeks>=2?"🚨":"⚠️"}</span>
             <div style={{flex:1}}>
-              <div style={{fontSize:11,fontWeight:700,color:bankruptcyWeeks>=2?"#7E2D26":"#9A5B2B",fontFamily:"'Cinzel',serif"}}>
+              <div style={{fontSize:11,fontWeight:700,color:bankruptcyWeeks>=2?"#7E2D26":"#9A5B2B",fontFamily:"'IM Fell English SC',serif"}}>
                 {bankruptcyWeeks>=2?"FINAL WARNING — ":"BANKRUPTCY WARNING — "}
                 {3-bankruptcyWeeks} week{3-bankruptcyWeeks>1?"s":""} remaining
               </div>
@@ -8779,13 +8831,13 @@ export default function App(){
 
             {/* Getting Started hint — shown once on week 1 with empty formation, hidden after first win */}
             {!hintDismissed && !ngPlus?.wins && week<=1 && placed===0 && (
-              <div style={{marginBottom:14,padding:"14px 16px",borderRadius:10,
+              <div style={{marginBottom:14,padding:"14px 16px",borderRadius:3,
                 background:"rgba(60,90,120,0.09)",border:"1px solid rgba(60,90,120,0.3)",
                 position:"relative"}}>
                 <button onClick={()=>setHintDismissed(true)}
                   style={{position:"absolute",top:8,right:10,background:"none",border:"none",
                     cursor:"pointer",color:"#6E6350",fontSize:16,lineHeight:1}}>×</button>
-                <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#3C5A78",marginBottom:10}}>
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#3C5A78",marginBottom:10}}>
                   ⚔️ Welcome to Realm Manager
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -8796,7 +8848,7 @@ export default function App(){
                   ].map(({step,label,sub,tab:target,col})=>(
                     <div key={step} onClick={()=>setTab(target)}
                       style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",
-                        borderRadius:7,background:"rgba(60,52,38,0.054)",
+                        borderRadius:3,background:"rgba(60,52,38,0.054)",
                         border:"1px solid rgba(60,52,38,0.126)",cursor:"pointer",
                         transition:"background 0.15s"}}
                       onMouseEnter={e=>e.currentTarget.style.background="rgba(60,52,38,0.108)"}
@@ -8833,12 +8885,12 @@ export default function App(){
 
             {/* ── WANDERING MASTER BANNER ──────────────────────────────── */}
             {activeWanderingMaster&&(
-              <div style={{marginBottom:10,padding:"12px 14px",borderRadius:10,
+              <div style={{marginBottom:10,padding:"12px 14px",borderRadius:3,
                 background:"rgba(95,75,102,0.105)",border:"1px solid rgba(95,75,102,0.525)",
                 display:"flex",alignItems:"center",gap:10}}>
                 <span style={{fontSize:22}}>🧙</span>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#5F4B66"}}>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#5F4B66"}}>
                     The Wandering Master has arrived
                   </div>
                   <div style={{fontSize:10,color:"#4A4335",marginTop:2}}>
@@ -8846,9 +8898,9 @@ export default function App(){
                   </div>
                 </div>
                 <button onClick={()=>setActiveWanderingMaster(SPECIAL_EVENTS.find(e=>e.id==="wandering_master"))}
-                  style={{padding:"7px 12px",borderRadius:7,border:"none",cursor:"pointer",
+                  style={{padding:"7px 12px",borderRadius:3,border:"none",cursor:"pointer",
                     background:"rgba(95,75,102,0.3)",color:"#5F4B66",
-                    fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
+                    fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
                   Meet them →
                 </button>
               </div>
@@ -8861,7 +8913,7 @@ export default function App(){
               const outcomeLbl   = ret.outcome==="success" ? "Success" : ret.outcome==="partial" ? "Partial" : "Failed";
               const themeIcons   = { arena:"⚔️", wilds:"🌿", courts:"👑", arcane:"🔮", shadows:"🌑" };
               return(
-                <div key={ret.id} style={{marginBottom:10,padding:"12px 14px",borderRadius:10,
+                <div key={ret.id} style={{marginBottom:10,padding:"12px 14px",borderRadius:3,
                   background:`${outcomeColor}0d`,border:`1px solid ${outcomeColor}33`,
                   position:"relative"}}>
                   <button onClick={()=>setPendingEventReturns(prev=>prev.filter(r=>r.id!==ret.id))}
@@ -8870,14 +8922,14 @@ export default function App(){
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                     <span style={{fontSize:18}}>{ret.heroIcon}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>
                         {ret.heroName} has returned
                       </div>
                       <div style={{fontSize:10,color:"#6E6350"}}>
                         {themeIcons[ret.eventTheme]||"✨"} {ret.eventTitle}
                       </div>
                     </div>
-                    <div style={{padding:"3px 8px",borderRadius:6,background:`${outcomeColor}18`,
+                    <div style={{padding:"3px 8px",borderRadius:3,background:`${outcomeColor}18`,
                       border:`1px solid ${outcomeColor}44`,fontSize:10,fontWeight:700,color:outcomeColor}}>
                       {outcomeIcon} {outcomeLbl}
                     </div>
@@ -8891,7 +8943,7 @@ export default function App(){
                     <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
                       {ret.notifications.map((n,i)=>(
                         <span key={i} style={{fontSize:10,color:outcomeColor,
-                          background:`${outcomeColor}10`,padding:"2px 7px",borderRadius:5,
+                          background:`${outcomeColor}10`,padding:"2px 7px",borderRadius:3,
                           border:`1px solid ${outcomeColor}30`}}>
                           {n}
                         </span>
@@ -8923,7 +8975,7 @@ export default function App(){
                             addLog(`🔮 Oracle's gift: ${ret.heroName} +${actual} ${s}!`,"success");
                             setPendingEventReturns(prev=>prev.map(r=>r.id===ret.id?{...r,pendingStatChoice:false,notifications:[...r.notifications,`+${actual} ${s}`]}:r));
                           }}
-                            style={{padding:"3px 8px",borderRadius:6,border:"1px solid rgba(95,75,102,0.45)",
+                            style={{padding:"3px 8px",borderRadius:3,border:"1px solid rgba(95,75,102,0.45)",
                               background:"rgba(95,75,102,0.12)",color:"#5F4B66",cursor:"pointer",fontSize:9}}>
                             {s}
                           </button>
@@ -8940,10 +8992,10 @@ export default function App(){
               const rs = formAnalysis.raceSynergy;
               if(!rs) return null;
               return(
-                <div style={{marginBottom:12,borderRadius:9,overflow:"hidden",border:`1px solid ${rs.color}33`}}>
+                <div style={{marginBottom:12,borderRadius:3,overflow:"hidden",border:`1px solid ${rs.color}33`}}>
                   <div style={{padding:"8px 12px",background:`${rs.color}0a`,borderBottom:`1px solid ${rs.color}22`,display:"flex",alignItems:"center",gap:8}}>
                     <span style={{fontSize:14}}>{rs.icon}</span>
-                    <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:rs.color}}>{rs.name}</div>
+                    <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:rs.color}}>{rs.name}</div>
                     <div style={{fontSize:9,color:"#40614F",marginLeft:"auto"}}>✓ Active · ×{rs.ratingMult}</div>
                   </div>
                 </div>
@@ -9016,12 +9068,12 @@ export default function App(){
 
             {/* ── THE CHALLENGE BANNER ───────────────────────────────────── */}
             {pendingChallenge&&(
-              <div style={{gridColumn:"1/-1",marginBottom:4,padding:"14px 16px",borderRadius:10,
+              <div style={{gridColumn:"1/-1",marginBottom:4,padding:"14px 16px",borderRadius:3,
                 background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.525)",
                 display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
                 <span style={{fontSize:24}}>⚔️</span>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13,color:"#9A5B2B",marginBottom:2}}>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13,color:"#9A5B2B",marginBottom:2}}>
                     A Formal Challenge
                   </div>
                   <div style={{fontSize:11,color:"#4A4335",lineHeight:1.5}}>
@@ -9034,15 +9086,15 @@ export default function App(){
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   <button onClick={startBattle}
-                    style={{padding:"8px 16px",borderRadius:7,border:"none",cursor:"pointer",
-                      background:"linear-gradient(135deg,#9A5B2B,#8A6D3B)",color:"#F0E8D5",
-                      fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:11,whiteSpace:"nowrap"}}>
+                    style={{padding:"8px 16px",borderRadius:3,border:"none",cursor:"pointer",
+                      background:"#9A5B2B",color:"#F0E8D5",
+                      fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:11,whiteSpace:"nowrap"}}>
                     ⚔️ Accept
                   </button>
                   <button onClick={declineChallenge}
-                    style={{padding:"8px 16px",borderRadius:7,border:"1px solid rgba(60,52,38,0.264)",
+                    style={{padding:"8px 16px",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",
                       cursor:"pointer",background:"rgba(60,52,38,0.054)",color:"#6E6350",
-                      fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,whiteSpace:"nowrap"}}>
+                      fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,whiteSpace:"nowrap"}}>
                     Decline
                   </button>
                 </div>
@@ -9051,8 +9103,8 @@ export default function App(){
 
             {/* LEFT: Visual formation preview */}
             <div>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:"#5F4B66",marginBottom:10,fontWeight:700}}>Your Formation</div>
-              {placed===0&&<div style={{padding:12,background:"rgba(126,45,38,0.105)",borderRadius:9,border:"1px solid rgba(126,45,38,0.3)",fontSize:12,color:"#7E2D26",marginBottom:10}}>⚠️ No heroes assigned. Set formation in <strong>Tactics</strong> first.</div>}
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:"#5F4B66",marginBottom:10,fontWeight:700}}>Your Formation</div>
+              {placed===0&&<div style={{padding:12,background:"rgba(126,45,38,0.105)",borderRadius:3,border:"1px solid rgba(126,45,38,0.3)",fontSize:12,color:"#7E2D26",marginBottom:10}}>⚠️ No heroes assigned. Set formation in <strong>Tactics</strong> first.</div>}
 
               {/* 3-lane visual */}
               <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:10}}>
@@ -9064,7 +9116,7 @@ export default function App(){
                   const specPen=spec?calcSpecPenalty(spec,formation):null;
                   const posWarning=specPen&&spec.counter===pos;
                   return(
-                    <div key={pos} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${posWarning?"rgba(154,91,43,0.55)":pd.color+"33"}`,background:posWarning?"rgba(154,91,43,0.06)":"rgba(60,52,38,0.036)"}}>
+                    <div key={pos} style={{borderRadius:3,overflow:"hidden",border:`1px solid ${posWarning?"rgba(154,91,43,0.55)":pd.color+"33"}`,background:posWarning?"rgba(154,91,43,0.06)":"rgba(60,52,38,0.036)"}}>
                       {/* Position header */}
                       {(()=>{
                         const ps = calcPositionScore(assigned, pos);
@@ -9073,7 +9125,7 @@ export default function App(){
                         const pwrCol = ps.score>=60?"#40614F":ps.score>=35?"#3C5A78":ps.score>0?"#8A6D3B":"#8A7F68";
                         return(
                           <div style={{padding:"6px 10px",background:`${pd.color}14`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                            <span style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11,color:pd.color}}>{pd.icon} {pd.label}</span>
+                            <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:pd.color}}>{pd.icon} {pd.label}</span>
                             <div style={{display:"flex",alignItems:"center",gap:8}}>
                               {ps.primaryHero&&<span style={{fontSize:8,color:"#40614F"}}>▲{ps.primaryHero.name.split(" ")[0]}</span>}
                               {ps.supportHero&&<span style={{fontSize:8,color:"#6E6350"}}>▼{ps.supportHero.name.split(" ")[0]}</span>}
@@ -9095,11 +9147,11 @@ export default function App(){
                           const {color:fatCol}=fatigueLabel(h.fatigue||0);
                           const pwrCol=pwr>=40?"#40614F":pwr>=25?"#3C5A78":"#8A6D3B";
                           return(
-                            <div key={h.id} style={{flex:1,minWidth:0,padding:"7px 9px",borderRadius:8,background:"rgba(30,24,14,0.105)",border:`1px solid ${fitCol}33`}}>
+                            <div key={h.id} style={{flex:1,minWidth:0,padding:"7px 9px",borderRadius:3,background:"rgba(30,24,14,0.105)",border:`1px solid ${fitCol}33`}}>
                               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
                                 <HeroAvatar race={h.race} size={15}/>
                                 <div style={{flex:1,minWidth:0}}>
-                                  <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
+                                  <div style={{fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
                                   <div style={{fontSize:9,color:"#6E6350"}}>{h.role} · Lv {h.level}</div>
                                 </div>
                               </div>
@@ -9130,14 +9182,14 @@ export default function App(){
 
               {/* Formation effects */}
               {formAnalysis.active.length>0&&(
-                <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:9,border:"1px solid rgba(60,52,38,0.108)"}}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#23201A",marginBottom:4,fontFamily:"'Cinzel',serif"}}>Active Synergies</div>
+                <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)"}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"#23201A",marginBottom:4,fontFamily:"'IM Fell English SC',serif"}}>Active Synergies</div>
                   {formAnalysis.active.map(s=><div key={s.id} style={{fontSize:10,color:s.negative?"#7E2D26":"#40614F",marginBottom:2}}>{s.icon} {s.name} ×{s.ratingMult}</div>)}
                   <div style={{marginTop:5,fontSize:12,fontWeight:700,color:"#3C5A78"}}>⚡ Formation Rating: {formRating}</div>
                 </div>
               )}
               {formAnalysis.active.length===0&&placed>0&&(
-                <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:9,border:"1px solid rgba(60,52,38,0.108)"}}>
+                <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)"}}>
                   <div style={{fontSize:12,fontWeight:700,color:"#3C5A78"}}>⚡ Formation Rating: {formRating}</div>
                   <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>No synergies active</div>
                 </div>
@@ -9148,45 +9200,45 @@ export default function App(){
             <div>
               {/* Active event banner */}
               {activeEvent&&(
-                <div style={{padding:"12px 14px",borderRadius:10,background:"rgba(138,109,59,0.105)",border:"1px solid rgba(138,109,59,0.45)",marginBottom:14,cursor:"pointer"}}
+                <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(138,109,59,0.105)",border:"1px solid rgba(138,109,59,0.45)",marginBottom:14,cursor:"pointer"}}
                   onClick={()=>{}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
                     <span style={{fontSize:20}}>{activeEvent.icon}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>✨ Special Event Available</div>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>✨ Special Event Available</div>
                       <div style={{fontSize:11,color:"#23201A"}}>{activeEvent.title}</div>
                     </div>
                     <div style={{fontSize:10,color:"#40614F",fontWeight:700}}>{activeEvent.rewardDesc}</div>
                   </div>
                   <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{activeEvent.desc}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>Tests: {(activeEvent.stats||[]).join(" + ")} · {activeEvent.heroesNeeded} hero{activeEvent.heroesNeeded>1?"es":""}</div>
-                  <div style={{marginTop:8,padding:"6px 10px",borderRadius:6,background:"rgba(138,109,59,0.15)",border:"1px solid rgba(138,109,59,0.3)",fontSize:10,color:"#8A6D3B",textAlign:"center",fontWeight:700}}>
+                  <div style={{marginTop:8,padding:"6px 10px",borderRadius:3,background:"rgba(138,109,59,0.15)",border:"1px solid rgba(138,109,59,0.3)",fontSize:10,color:"#8A6D3B",textAlign:"center",fontWeight:700}}>
                     ↑ The event modal opened automatically — check above this screen
                   </div>
                 </div>
               )}
 
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:13,color:legendaryChallenger?"#7E2D26":"#9A5B2B",marginBottom:10,fontWeight:700}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:legendaryChallenger?"#7E2D26":"#9A5B2B",marginBottom:10,fontWeight:700}}>
                 {legendaryChallenger?"⚔️ Legendary Challenge":"This Week's Opponent"}
               </div>
 
               {/* Legendary challenger banner */}
               {legendaryChallenger&&(
-                <div style={{padding:"12px 14px",borderRadius:10,background:"rgba(143,42,30,0.105)",border:"1px solid rgba(126,45,38,0.525)",marginBottom:10}}>
+                <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(143,42,30,0.105)",border:"1px solid rgba(126,45,38,0.525)",marginBottom:10}}>
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
                     <span style={{fontSize:26}}>{legendaryChallenger.icon}</span>
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#7E2D26"}}>{legendaryChallenger.name}</div>
+                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#7E2D26"}}>{legendaryChallenger.name}</div>
                       <div style={{fontSize:10,color:"#6E6350"}}>Power {legendaryChallenger.power} · {"★".repeat(6)} · Legendary</div>
                     </div>
                   </div>
                   <div style={{fontSize:10,color:"#6E6350",fontStyle:"italic",marginBottom:8}}>"{legendaryChallenger.flavour}"</div>
                   <div style={{display:"flex",gap:8}}>
-                    <div style={{flex:1,padding:"6px 8px",borderRadius:6,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.225)",textAlign:"center"}}>
+                    <div style={{flex:1,padding:"6px 8px",borderRadius:3,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.225)",textAlign:"center"}}>
                       <div style={{fontSize:9,color:"#6E6350"}}>Win reward</div>
                       <div style={{fontSize:13,fontWeight:700,color:"#8A6D3B"}}>{legendaryChallenger.goldReward?.toLocaleString()}g</div>
                     </div>
-                    <div style={{flex:1,padding:"6px 8px",borderRadius:6,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.225)",textAlign:"center"}}>
+                    <div style={{flex:1,padding:"6px 8px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.225)",textAlign:"center"}}>
                       <div style={{fontSize:9,color:"#6E6350"}}>Rank impact</div>
                       <div style={{fontSize:11,fontWeight:700,color:"#40614F"}}>Exhibition</div>
                     </div>
@@ -9232,11 +9284,11 @@ export default function App(){
                 return(
                   <>
                     {/* Opponent card */}
-                    <div style={{padding:"14px 16px",background:"rgba(154,91,43,0.09)",borderRadius:10,border:"1px solid rgba(154,91,43,0.375)",marginBottom:12}}>
+                    <div style={{padding:"14px 16px",background:"rgba(154,91,43,0.09)",borderRadius:3,border:"1px solid rgba(154,91,43,0.375)",marginBottom:12}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
                         <span style={{fontSize:28}}>{spec?.icon||"⚔️"}</span>
                         <div style={{flex:1}}>
-                          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,color:"#23201A"}}>{opp.name}</div>
+                          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#23201A"}}>{opp.name}</div>
                           <div style={{fontSize:10,color:oppStarCol}}>{renderStars(oppStars)}
                             <span style={{color:"#6E6350",marginLeft:6}}>{fogged?`Power ~${fogBand[0]}–${fogBand[1]}`:`Power ${opp.power}`}</span>
                           </div>
@@ -9254,11 +9306,11 @@ export default function App(){
                         const isGrudge=h2h.losses-h2h.wins>=2;
                         const taunt=managerTaunt(opp.manager,h2h);
                         return(
-                          <div style={{padding:"8px 10px",borderRadius:8,background:isGrudge?"rgba(126,45,38,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${isGrudge?"rgba(126,45,38,0.375)":"rgba(60,52,38,0.126)"}`,marginBottom:10}}>
+                          <div style={{padding:"8px 10px",borderRadius:3,background:isGrudge?"rgba(126,45,38,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${isGrudge?"rgba(126,45,38,0.375)":"rgba(60,52,38,0.126)"}`,marginBottom:10}}>
                             <div style={{display:"flex",alignItems:"center",gap:6}}>
                               <span style={{fontSize:10,fontWeight:700,color:"#23201A"}}>{opp.manager.name}</span>
                               <span style={{fontSize:9,color:"#6E6350",fontStyle:"italic"}}>{opp.manager.title}</span>
-                              {isGrudge&&<span style={{fontSize:8,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 6px",borderRadius:5}}>GRUDGE MATCH</span>}
+                              {isGrudge&&<span style={{fontSize:8,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 6px",borderRadius:3}}>GRUDGE MATCH</span>}
                               <span style={{marginLeft:"auto",fontSize:9,color:played>0?(h2h.wins>=h2h.losses?"#40614F":"#9A5B2B"):"#6E6350"}}>
                                 {played>0?`H2H ${h2h.wins}W–${h2h.losses}L`:"first meeting"}
                               </span>
@@ -9281,8 +9333,8 @@ export default function App(){
                           const hasPairing = ps.pairingMult > 1.0;
                           const hasBonus = ps.pairingMult > 1.0;
                           return(
-                            <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:7,background:"rgba(60,52,38,0.054)",border:`1px solid ${fogged?"rgba(60,52,38,0.22)":col+"33"}`,textAlign:"center"}}>
-                              <div style={{fontSize:10}}>{icon}{!fogged&&(hasBonus?" ✦":hasPairing?" ✗":"")}</div>
+                            <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:`1px solid ${fogged?"rgba(60,52,38,0.22)":col+"33"}`,textAlign:"center"}}>
+                              <div style={{fontSize:10}}><PositionIcon position={pos} size={11}/>{!fogged&&(hasBonus?" ✦":hasPairing?" ✗":"")}</div>
                               <div style={{fontSize:9,color:"#6E6350"}}>{label}</div>
                               <div style={{fontSize:12,fontWeight:700,color:fogged?"#6E6350":col}}>{fogged?"?":`${Math.round(p*100)}%`}</div>
                               {ps.primaryHero&&<div style={{fontSize:7,color:"#40614F",marginTop:2}}>▲ {ps.primaryHero.name.split(" ")[0]}</div>}
@@ -9295,7 +9347,7 @@ export default function App(){
 
                       {/* Scouting fog — the unknown, and the way to know it */}
                       {fogged&&(
-                        <div style={{padding:"10px 12px",borderRadius:8,background:"rgba(60,90,120,0.075)",border:"1px dashed rgba(60,90,120,0.375)",marginBottom:8}}>
+                        <div style={{padding:"10px 12px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px dashed rgba(60,90,120,0.375)",marginBottom:8}}>
                           <div style={{fontSize:10,fontWeight:700,color:"#3C5A78",marginBottom:3}}>🕵️ Doctrine unknown</div>
                           <div style={{fontSize:9,color:"#6E6350",lineHeight:1.5,marginBottom:8}}>
                             Their formation style and battle abilities are hidden. A scout report reveals exact power, win odds, specialisation and abilities.
@@ -9306,10 +9358,10 @@ export default function App(){
                               addLog(`🔭 Scout report on ${opp.name}${scoutCost>0?` (−${scoutCost}g)`:" — the Observatory sees all"}.`,"info");
                             }}
                             disabled={scoutCost>0&&gold<scoutCost}
-                            style={{width:"100%",padding:"8px 0",borderRadius:7,border:"1px solid rgba(60,90,120,0.525)",
+                            style={{width:"100%",padding:"8px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.525)",
                               cursor:(scoutCost>0&&gold<scoutCost)?"not-allowed":"pointer",
                               background:(scoutCost>0&&gold<scoutCost)?"rgba(60,52,38,0.054)":"rgba(60,90,120,0.18)",
-                              color:(scoutCost>0&&gold<scoutCost)?"#8A7F68":"#3C5A78",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>
+                              color:(scoutCost>0&&gold<scoutCost)?"#8A7F68":"#3C5A78",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
                             {scoutCost===0?"🔭 Observatory Report — Free":`🔭 Send Scout — ${scoutCost}g`}
                           </button>
                         </div>
@@ -9319,17 +9371,17 @@ export default function App(){
                       {!fogged&&spec&&(()=>{
                         const penCol=pen?"#9A5B2B":"#40614F";
                         return(
-                          <div style={{padding:"8px 10px",background:"rgba(60,52,38,0.072)",borderRadius:7,border:`1px solid ${penCol}33`,marginBottom:8}}>
+                          <div style={{padding:"8px 10px",background:"rgba(60,52,38,0.072)",borderRadius:3,border:`1px solid ${penCol}33`,marginBottom:8}}>
                             <div style={{fontSize:10,fontWeight:700,color:penCol,marginBottom:3}}>{spec.icon} {spec.label}</div>
                             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5,marginBottom:5}}>{spec.desc}</div>
                             {pen?(
-                              <div style={{padding:"5px 8px",borderRadius:6,background:"rgba(126,45,38,0.12)",border:"1px solid rgba(126,45,38,0.3)"}}>
+                              <div style={{padding:"5px 8px",borderRadius:3,background:"rgba(126,45,38,0.12)",border:"1px solid rgba(126,45,38,0.3)"}}>
                                 <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>⚠️ Not countered — Enemy power +{Math.round(pen.penalty*100)}%</div>
                                 <div style={{fontSize:9,color:"#6E6350",marginTop:2}}>{pen.reason}</div>
                                 <div style={{fontSize:9,color:"#3C5A78",marginTop:2}}>Fix: {spec.counter}</div>
                               </div>
                             ):(
-                              <div style={{padding:"5px 8px",borderRadius:6,background:"rgba(64,97,79,0.105)",border:"1px solid rgba(64,97,79,0.3)"}}>
+                              <div style={{padding:"5px 8px",borderRadius:3,background:"rgba(64,97,79,0.105)",border:"1px solid rgba(64,97,79,0.3)"}}>
                                 <div style={{fontSize:10,color:"#40614F",fontWeight:700}}>✓ Countered — No power penalty</div>
                               </div>
                             )}
@@ -9357,7 +9409,7 @@ export default function App(){
                             const outcomeLabel = outcome==='pass'?'✓ Mitigated':outcome==='soft'?'⚠️ Partial':'✗ Full effect';
                             const effectText = outcome==='pass'?'No effect.':outcome==='soft'?ability.softDesc():ability.hardDesc();
                             return(
-                              <div key={ability.id} style={{padding:"8px 10px",background:"rgba(60,52,38,0.054)",borderRadius:7,border:`1px solid ${outcomeCol}33`,marginBottom:6}}>
+                              <div key={ability.id} style={{padding:"8px 10px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:`1px solid ${outcomeCol}33`,marginBottom:6}}>
                                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
                                   <span style={{fontSize:10,fontWeight:700,color:"#23201A"}}>{ability.icon} {ability.name}</span>
                                   <span style={{fontSize:9,fontWeight:700,color:outcomeCol}}>{outcomeLabel}</span>
@@ -9372,7 +9424,7 @@ export default function App(){
                                   </div>
                                 </div>
                                 {outcome!=='pass'&&(
-                                  <div style={{marginTop:4,padding:"4px 6px",borderRadius:5,background:`${outcomeCol}10`,border:`1px solid ${outcomeCol}33`}}>
+                                  <div style={{marginTop:4,padding:"4px 6px",borderRadius:3,background:`${outcomeCol}10`,border:`1px solid ${outcomeCol}33`}}>
                                     <div style={{fontSize:9,color:outcomeCol}}>{effectText}</div>
                                   </div>
                                 )}
@@ -9384,7 +9436,7 @@ export default function App(){
 
                       {/* Rewards */}
                       <div style={{display:"flex",gap:8}}>
-                        <div style={{flex:1,background:"rgba(138,109,59,0.09)",borderRadius:6,padding:"6px 8px",border:"1px solid rgba(138,109,59,0.18)"}}>
+                        <div style={{flex:1,background:"rgba(138,109,59,0.09)",borderRadius:3,padding:"6px 8px",border:"1px solid rgba(138,109,59,0.18)"}}>
                           <div style={{fontSize:9,color:"#6E6350"}}>Win reward</div>
                           <div style={{fontSize:13,fontWeight:700,color:"#8A6D3B"}}>~{opp.goldReward?.toLocaleString()||"?"}g</div>
                         </div>
@@ -9399,7 +9451,7 @@ export default function App(){
                       // Use the already-computed per-phase overall win chance — consistent with the phase display above
                       const wcAdjCol=overallWC>=0.6?"#40614F":overallWC>=0.45?"#8A6D3B":overallWC>=0.25?"#9A5B2B":"#7E2D26";
                       return(
-                        <div style={{padding:10,background:"rgba(95,75,102,0.075)",borderRadius:8,border:"1px solid rgba(95,75,102,0.15)",marginBottom:10}}>
+                        <div style={{padding:10,background:"rgba(95,75,102,0.075)",borderRadius:3,border:"1px solid rgba(95,75,102,0.15)",marginBottom:10}}>
                           <div style={{fontSize:11,color:"#5F4B66",marginBottom:4}}>📊 Match Preview</div>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <div style={{fontSize:11,color:"#6E6350"}}>
@@ -9426,18 +9478,18 @@ export default function App(){
                       return(<>
                         <button onClick={startBattle} disabled={!battleReady}
                           title={battleReady?undefined:"Set at least 3 heroes in Tactics first"}
-                          style={{width:"100%",padding:"13px 0",borderRadius:7,border:"none",
+                          style={{width:"100%",padding:"13px 0",borderRadius:3,border:"none",
                             cursor:battleReady?"pointer":"not-allowed",
-                            background:battleReady?"linear-gradient(135deg,#9A5B2B,#8A6D3B)":"#DCCFAF",
+                            background:battleReady?"#9A5B2B":"#DCCFAF",
                             color:battleReady?"#F0E8D5":"#C9BA98",
-                            fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:14,
+                            fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:14,
                             opacity:battleReady?1:0.75}}>⚔️ GO TO BATTLE</button>
                         {!battleReady&&<div style={{fontSize:10,color:"#9A5B2B",marginTop:6,textAlign:"center"}}>Assign at least 3 heroes in Tactics to fight</div>}
                       </>);
                     })()}
 
                     {missionResult&&(
-                      <div style={{marginTop:10,padding:"8px 12px",background:"rgba(60,52,38,0.036)",borderRadius:9,border:"1px solid rgba(60,52,38,0.108)",fontSize:10,color:"#6E6350"}}>
+                      <div style={{marginTop:10,padding:"8px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)",fontSize:10,color:"#6E6350"}}>
                         <span style={{color:missionResult.won?"#40614F":"#7E2D26",fontWeight:700,marginRight:8}}>{missionResult.won?"🏆 Last battle: Victory":"💀 Last battle: Defeat"}</span>
                         {missionResult.goldSwing>=0?"+":""}{missionResult.goldSwing.toLocaleString()}g · +{missionResult.heroXP} XP{levelUps.length>0&&` · ${levelUps.length} level-up(s)`}
                       </div>
@@ -9460,14 +9512,14 @@ export default function App(){
           return(
           <div>
             {/* League tier progress header */}
-            <div style={{marginBottom:18,padding:"14px 16px",background:"rgba(60,52,38,0.036)",borderRadius:10,border:`1px solid ${currentTier.color}22`}}>
+            <div style={{marginBottom:18,padding:"14px 16px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:`1px solid ${currentTier.color}22`}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                 <div>
-                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:currentTier.color}}>{currentTier.icon} {currentTier.name} League</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:currentTier.color}}>{currentTier.icon} {currentTier.name} League</div>
                   <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>Buildings unlock as you promote through tiers</div>
                 </div>
                 {nextTierData&&(
-                  <div style={{textAlign:"right",padding:"6px 10px",background:"rgba(60,52,38,0.054)",borderRadius:7,border:"1px solid rgba(60,52,38,0.126)"}}>
+                  <div style={{textAlign:"right",padding:"6px 10px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
                     <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>Promote to {nextTierData.icon} {nextTierData.name} to unlock</div>
                     <div style={{fontSize:10,color:nextTierData.color,fontWeight:700}}>
                       {BUILDINGS.filter(b=>b.tierRequired===nextTierId).map(b=>b.name).join(", ")||"Elite heroes"}
@@ -9481,7 +9533,7 @@ export default function App(){
                   const t=TIERS[tid];
                   const reached=TIER_ORDER.indexOf(tid)<=tierIdx;
                   return(
-                    <div key={tid} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:6,
+                    <div key={tid} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 8px",borderRadius:3,
                       background:reached?`${t.color}18`:"rgba(60,52,38,0.036)",
                       border:`1px solid ${reached?t.color+"44":"rgba(60,52,38,0.108)"}`}}>
                       <span style={{fontSize:10}}>{t.icon}</span>
@@ -9495,7 +9547,7 @@ export default function App(){
 
             {/* Buildings grouped by tier */}
             <div style={{marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:14,fontWeight:700,color:"#40614F"}}>🏰 Town Upgrades</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:14,fontWeight:700,color:"#40614F"}}>🏰 Town Upgrades</div>
               <div style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></div>
             </div>
 
@@ -9511,22 +9563,22 @@ export default function App(){
                     <div key={b.id} style={{
                       background:"rgba(60,52,38,0.03)",
                       border:"1px dashed rgba(60,52,38,0.126)",
-                      borderRadius:9,padding:13,
+                      borderRadius:3,padding:13,
                     }}>
                       <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8,opacity:0.55}}>
                         <BuildingIcon id={b.id} size={22}/>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#6E6350"}}>{b.name}</div>
+                          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#6E6350"}}>{b.name}</div>
                           <div style={{fontSize:10,color:"#7A6F58"}}>{b.cost.toLocaleString()}g · locked</div>
                         </div>
                       </div>
                       <div style={{
-                        padding:"10px 12px",borderRadius:7,
+                        padding:"10px 12px",borderRadius:3,
                         background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",
                         display:"flex",alignItems:"center",justifyContent:"center",gap:8,
                       }}>
                         <span style={{fontSize:16}}>🔒</span>
-                        <span style={{fontSize:10,color:"#6E6350",fontFamily:"'Cinzel',serif",textAlign:"center"}}>
+                        <span style={{fontSize:10,color:"#6E6350",fontFamily:"'IM Fell English SC',serif",textAlign:"center"}}>
                           Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#4A4335"}}>{bTier?.name||"higher tier"}</b>
                         </span>
                       </div>
@@ -9537,22 +9589,22 @@ export default function App(){
                   <div key={b.id} style={{
                     background:b.built?"rgba(64,97,79,0.075)":"rgba(60,52,38,0.045)",
                     border:`1px solid ${b.built?"rgba(64,97,79,0.27)":"rgba(60,52,38,0.126)"}`,
-                    borderRadius:9,padding:13,
+                    borderRadius:3,padding:13,
                   }}>
                     <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:7}}>
                       <BuildingIcon id={b.id} size={24}/>
                       <div>
-                        <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:b.built?"#40614F":"#23201A"}}>{b.name}</div>
+                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:b.built?"#40614F":"#23201A"}}>{b.name}</div>
                         <div style={{fontSize:10,color:b.built?"#40614F":"#8A6D3B"}}>{b.built?"✅ Constructed":`${b.cost.toLocaleString()}g`}</div>
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#6E6350",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
                     {!b.built&&(
                       <button onClick={()=>buildBuilding(b)} disabled={!canAfford}
-                        style={{width:"100%",padding:"6px 0",borderRadius:5,border:"none",
+                        style={{width:"100%",padding:"6px 0",borderRadius:3,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
-                          background:canAfford?"linear-gradient(135deg,#40614F,#35543F)":"#E4DAC2",
-                          color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'Cinzel',serif"}}>
+                          background:canAfford?"#40614F":"#E4DAC2",
+                          color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
                         {canAfford?`🏗️ Build for ${b.cost.toLocaleString()}g`:"💸 Need More Gold"}
                       </button>
                     )}
@@ -9562,8 +9614,8 @@ export default function App(){
             </div>
 
             {/* Elite market unlock status */}
-            <div style={{marginTop:18,padding:"12px 14px",borderRadius:9,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:12,fontWeight:700,color:"#6E6350",marginBottom:8}}>⭐ Market Hero Tiers</div>
+            <div style={{marginTop:18,padding:"12px 14px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:12,fontWeight:700,color:"#6E6350",marginBottom:8}}>⭐ Market Hero Tiers</div>
               {[
                 {label:"Standard Heroes",  desc:"Always available",               tierReq:"iron",     icon:"🧑"},
                 {label:"Premium Heroes",   desc:"Grand Bazaar — Gold tier+",      tierReq:"gold",     icon:"⭐"},
@@ -9595,7 +9647,7 @@ export default function App(){
               <div style={{marginBottom:28}}>
                 {/* Section header with urgency */}
                 <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:14}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:16,fontWeight:900,color:"#40614F"}}>💰 Offers</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:16,fontWeight:900,color:"#40614F"}}>💰 Offers</div>
                   <div style={{fontSize:11,color:"#6E6350"}}>{transferBids.length} offer{transferBids.length>1?"s":""} waiting · expire after 2 weeks</div>
                   <div style={{flex:1}}/>
                   <div style={{fontSize:11,color:"#8A6D3B",fontWeight:700}}>Treasury: {gold.toLocaleString()}g</div>
@@ -9614,10 +9666,10 @@ export default function App(){
                     const pwr=Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
                     return(
                       <div key={bid.id} style={{
-                        borderRadius:12,overflow:"hidden",
+                        borderRadius:3,overflow:"hidden",
                         border:`1px solid ${aboveValue?"rgba(64,97,79,0.55)":urgentExpiry?"rgba(126,45,38,0.525)":"rgba(64,97,79,0.3)"}`,
                         background:aboveValue?"rgba(64,97,79,0.075)":"rgba(60,52,38,0.036)",
-                        boxShadow:aboveValue?"0 0 24px rgba(64,97,79,0.09)":"none",
+                        boxShadow:aboveValue?"0 2px 12px rgba(60,52,38,0.3)":"none",
                       }}>
                         {/* Above-market banner */}
                         {aboveValue&&(
@@ -9641,10 +9693,10 @@ export default function App(){
                               <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                                 <HeroAvatar race={hero.race} size={24}/>
                                 <div>
-                                  <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{hero.name}</div>
+                                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{hero.name}</div>
                                   <div style={{fontSize:10,color:"#6E6350"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                                 </div>
-                                {bid.isListed&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.18)",padding:"2px 7px",borderRadius:8,border:"1px solid rgba(138,109,59,0.3)"}}>🕊️ Open to Offers</span>}
+                                {bid.isListed&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.18)",padding:"2px 7px",borderRadius:3,border:"1px solid rgba(138,109,59,0.3)"}}>🕊️ Open to Offers</span>}
                               </div>
 
                               {/* Mini stats */}
@@ -9653,7 +9705,7 @@ export default function App(){
                                   ["💛 MRL",hero.morale,hero.morale>=70?"#40614F":hero.morale>=50?"#8A6D3B":"#9A5B2B"],
                                   ["⚡ FAT",hero.fatigue||0,fatigueLabel(hero.fatigue||0).color],
                                 ].map(([label,val,col])=>(
-                                  <div key={label} style={{padding:"4px 8px",borderRadius:6,background:"rgba(30,24,14,0.087)"}}>
+                                  <div key={label} style={{padding:"4px 8px",borderRadius:3,background:"rgba(30,24,14,0.087)"}}>
                                     <span style={{fontSize:9,color:"#6E6350"}}>{label} </span>
                                     <span style={{fontSize:12,fontWeight:700,color:col}}>{val}</span>
                                   </div>
@@ -9666,7 +9718,7 @@ export default function App(){
 
                             {/* Offer + actions */}
                             <div style={{flexShrink:0,textAlign:"right",minWidth:140}}>
-                              <div style={{fontSize:28,fontWeight:900,color:"#40614F",fontFamily:"'Cinzel',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
+                              <div style={{fontSize:28,fontWeight:900,color:"#40614F",fontFamily:"'IM Fell English SC',serif",lineHeight:1}}>{bid.offer.toLocaleString()}g</div>
                               {bid.freeTransfer
                                 ? <div style={{fontSize:10,color:"#5F4B66",marginBottom:4}}>Parting fee</div>
                                 : !aboveValue && <div style={{fontSize:10,color:"#6E6350",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
@@ -9675,19 +9727,19 @@ export default function App(){
                               </div>
                               <div style={{display:"flex",flexDirection:"column",gap:5}}>
                                 <button onClick={()=>acceptBid(bid)}
-                                  style={{padding:"10px 16px",borderRadius:8,border:"none",cursor:"pointer",
-                                    background:"linear-gradient(135deg,#40614F,#35543F)",
-                                    color:"#F0E8D5",fontWeight:900,fontSize:13,fontFamily:"'Cinzel',serif",
+                                  style={{padding:"10px 16px",borderRadius:3,border:"none",cursor:"pointer",
+                                    background:"#40614F",
+                                    color:"#F0E8D5",fontWeight:900,fontSize:13,fontFamily:"'IM Fell English SC',serif",
                                     whiteSpace:"nowrap"}}>
                                   ✓ Accept {bid.offer.toLocaleString()}g
                                 </button>
                                 <div style={{display:"flex",gap:5}}>
                                   <button onClick={()=>{setDetailHero(hero);setPrevStats(null);}}
-                                    style={{flex:1,padding:"6px 0",borderRadius:6,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:10,fontFamily:"'Cinzel',serif"}}>
+                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
                                     View Hero
                                   </button>
                                   <button onClick={()=>declineBid(bid)}
-                                    style={{flex:1,padding:"6px 0",borderRadius:6,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontSize:10,fontFamily:"'Cinzel',serif"}}>
+                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
                                     ✗ Decline
                                   </button>
                                 </div>
@@ -9707,7 +9759,7 @@ export default function App(){
             <div style={{borderTop:transferBids.length>0?"1px solid rgba(60,52,38,0.108)":"none",paddingTop:transferBids.length>0?20:0}}>
               {/* Header with roster count */}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-                <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#8A6D3B"}}>🏪 Heroes For Hire</div>
+                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#8A6D3B"}}>🏪 Heroes For Hire</div>
                 <span style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></span>
                 {/* Roster count — prominent when near cap */}
                 {(()=>{
@@ -9717,17 +9769,17 @@ export default function App(){
                     <span style={{fontSize:10,fontWeight:700,
                       color:full?"#9A5B2B":rCount>=ROSTER_CAP-2?"#8A6D3B":"#8A7F68",
                       background:full?"rgba(154,91,43,0.15)":"rgba(60,52,38,0.072)",
-                      padding:"2px 8px",borderRadius:8,
+                      padding:"2px 8px",borderRadius:3,
                       border:`1px solid ${full?"rgba(154,91,43,0.45)":"rgba(60,52,38,0.144)"}`}}>
                       {full?"🚫":"👥"} {rCount}/{ROSTER_CAP} roster
                     </span>
                   );
                 })()}
                 {buildings.find(b=>b.id==="bazaar"&&b.built)&&(
-                  <span style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.12)",padding:"2px 8px",borderRadius:10,border:"1px solid rgba(64,97,79,0.27)"}}>🏪 Bazaar Active</span>
+                  <span style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(64,97,79,0.27)"}}>🏪 Bazaar Active</span>
                 )}
                 {buildings.find(b=>b.id==="scouts"&&b.built)&&(
-                  <span style={{fontSize:10,color:"#3C5A78",background:"rgba(60,90,120,0.12)",padding:"2px 8px",borderRadius:10,border:"1px solid rgba(60,90,120,0.27)"}}>🌠 Observatory Active</span>
+                  <span style={{fontSize:10,color:"#3C5A78",background:"rgba(60,90,120,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.27)"}}>🌠 Observatory Active</span>
                 )}
                 <span style={{fontSize:10,color:"#8A7F68",marginLeft:"auto"}}>
                   {(()=>{
@@ -9783,12 +9835,12 @@ export default function App(){
                 return(
                   <div style={{marginBottom:12,display:"flex",flexDirection:"column",gap:4}}>
                     {!hasBazaar&&premiumCount>0&&(
-                      <div style={{padding:"8px 12px",borderRadius:8,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
+                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
                         <span>🔒</span><span>{premiumCount} premium hero{premiumCount>1?"es":""} hidden — build Grand Bazaar (Gold tier) to access</span>
                       </div>
                     )}
                     {!hasSanctum&&eliteCount>0&&(
-                      <div style={{padding:"8px 12px",borderRadius:8,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
+                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
                         <span>🔒</span><span>{eliteCount} elite hero{eliteCount>1?"es":""} hidden — build Elite Sanctum (Platinum tier) to access</span>
                       </div>
                     )}
@@ -9831,7 +9883,7 @@ export default function App(){
               {/* ══ YOUR SQUAD — list / renew / release without opening detail ══ */}
               <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(60,52,38,0.072)"}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
-                  <div style={{fontFamily:"'Cinzel',serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>👥 Your Squad</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>👥 Your Squad</div>
                   <span style={{fontSize:10,color:"#6E6350"}}>
                     Quick actions — open to offers, renew contract, or release. Next rival-offer cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
                   </span>
@@ -9844,13 +9896,13 @@ export default function App(){
                     const contractExpired = weeksLeft === 0;
                     const canRenew = !h.negotiationPending && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
                     return(
-                      <div key={h.id} style={{padding:"8px 10px",borderRadius:8,
+                      <div key={h.id} style={{padding:"8px 10px",borderRadius:3,
                         background:listed?"rgba(138,109,59,0.06)":hasBid?"rgba(64,97,79,0.06)":"rgba(60,52,38,0.045)",
                         border:`1px solid ${listed?"rgba(138,109,59,0.375)":hasBid?"rgba(64,97,79,0.375)":"rgba(60,52,38,0.108)"}`}}>
                         <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
                           <HeroAvatar race={h.race} size={16}/>
                           <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                               {h.name}
                               {listed&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,fontWeight:400}}>🕊️ Open</span>}
                               {hasBid&&<span style={{fontSize:8,color:"#40614F",marginLeft:5,fontWeight:400}}>💰 Offer</span>}
@@ -9870,21 +9922,21 @@ export default function App(){
                         </div>
                         <div style={{display:"flex",gap:4}}>
                           <button onClick={()=>toggleListed(h)}
-                            style={{flex:1,padding:"5px 0",borderRadius:5,
+                            style={{flex:1,padding:"5px 0",borderRadius:3,
                               border:`1px solid ${listed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.22)"}`,
                               cursor:"pointer",
                               background:listed?"rgba(138,109,59,0.18)":"rgba(60,52,38,0.072)",
-                              color:listed?"#8A6D3B":"#6E6350",fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                              color:listed?"#8A6D3B":"#6E6350",fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
                             {listed?"✓ Open":"🕊️ Open"}
                           </button>
                           <button onClick={()=>canRenew&&initiateEarlyRenewal(h)}
                             disabled={!canRenew}
                             title={h.negotiationPending?"Already in negotiation":canRenew?"Start contract talks":contractExpired?"Already expired":"Renew available within 2 seasons of expiry"}
-                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(60,90,120,0.3)",
+                            style={{flex:1,padding:"5px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.3)",
                               cursor:canRenew?"pointer":"not-allowed",
                               background:"rgba(60,90,120,0.09)",
                               color:canRenew?"#3C5A78":"#8A7F68",
-                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif",
+                              fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif",
                               opacity:canRenew?1:0.5}}>
                             📋 Renew
                           </button>
@@ -9894,9 +9946,9 @@ export default function App(){
                               : `Release ${h.name}? Morale penalty will apply to the remaining squad.`;
                             if(window.confirm(msg)) releaseHero(h);
                           }}
-                            style={{flex:1,padding:"5px 0",borderRadius:5,border:"1px solid rgba(126,45,38,0.3)",
+                            style={{flex:1,padding:"5px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.3)",
                               cursor:"pointer",background:"rgba(126,45,38,0.075)",color:"#7E2D26",
-                              fontSize:9,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                              fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
                             🚪 Release
                           </button>
                         </div>
@@ -9930,7 +9982,7 @@ export default function App(){
           return(
           <div style={{maxWidth:500}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:15,fontWeight:700,color:"#8A6D3B"}}>📒 Ledger</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#8A6D3B"}}>📒 Ledger</div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:10,color:"#6E6350"}}>✓ Auto-saved</span>
                 <AbandonButton onAbandon={()=>{
@@ -9959,15 +10011,15 @@ export default function App(){
             </div>
 
             {/* Persistence note */}
-            <div style={{marginBottom:14,padding:"8px 12px",borderRadius:8,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
+            <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
                 💾 <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
             </div>
 
             {/* Last week */}
-            <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:10,border:"1px solid rgba(60,52,38,0.144)"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
+            <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
                 LAST WEEK {f?`(Week ${f.week})`:""}
               </div>
               {!f&&<div style={{fontSize:11,color:"#6E6350"}}>No activity recorded yet — complete a battle or rest week.</div>}
@@ -9976,15 +10028,15 @@ export default function App(){
                 {row("👑 Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#3C5A78", `${currentTier.icon} ${currentTier.name} · flat per tier`)}
                 {row("💸 Wages",            "−"+f.wages.toLocaleString()+"g",                             "#9A5B2B", `${heroes.filter(h=>!h.retired).length} heroes on contract`)}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,marginTop:4}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>Net</div>
-                  <div style={{fontSize:16,fontWeight:900,color:col(weekNet),fontFamily:"'Cinzel',serif"}}>{g(weekNet)}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Net</div>
+                  <div style={{fontSize:16,fontWeight:900,color:col(weekNet),fontFamily:"'IM Fell English SC',serif"}}>{g(weekNet)}</div>
                 </div>
               </>}
             </div>
 
             {/* Season to date */}
-            <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:10,border:"1px solid rgba(60,52,38,0.144)"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
+            <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
                 SEASON {season} TO DATE
               </div>
               {row("⚔️ Battle earnings",  sf.raidGold>0?"+"+sf.raidGold.toLocaleString()+"g":"—",  "#40614F")}
@@ -9993,27 +10045,27 @@ export default function App(){
               {row("💸 Wages",            "−"+sf.wages.toLocaleString()+"g",                           "#9A5B2B")}
               {sf.signingCosts>0&&row("🤝 Signings",  "−"+sf.signingCosts.toLocaleString()+"g",        "#7E2D26", "hero acquisition costs")}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,marginTop:4}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Cinzel',serif"}}>Season net</div>
-                <div style={{fontSize:16,fontWeight:900,color:col(seasonNet),fontFamily:"'Cinzel',serif"}}>{g(seasonNet)}</div>
+                <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Season net</div>
+                <div style={{fontSize:16,fontWeight:900,color:col(seasonNet),fontFamily:"'IM Fell English SC',serif"}}>{g(seasonNet)}</div>
               </div>
             </div>
 
             {/* Treasury */}
-            <div style={{marginBottom:24,padding:"12px 16px",background:`${townColor}0d`,borderRadius:10,border:`1px solid ${townColor}33`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontSize:11,fontWeight:700,color:townColor}}>💰 Treasury</div>
-              <div style={{fontSize:22,fontWeight:900,color:townColor,fontFamily:"'Cinzel',serif"}}>{gold.toLocaleString()}g</div>
+            <div style={{marginBottom:24,padding:"12px 16px",background:`${townColor}0d`,borderRadius:3,border:`1px solid ${townColor}33`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:townColor}}>💰 Treasury</div>
+              <div style={{fontSize:22,fontWeight:900,color:townColor,fontFamily:"'IM Fell English SC',serif"}}>{gold.toLocaleString()}g</div>
             </div>
 
             {/* Realm Settings */}
-            <div style={{padding:"14px 16px",background:"rgba(60,52,38,0.045)",borderRadius:10,border:"1px solid rgba(60,52,38,0.126)"}}>
-              <div style={{fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:12,color:"#6E6350",marginBottom:12,letterSpacing:1}}>⚙️ REALM SETTINGS</div>
+            <div style={{padding:"14px 16px",background:"rgba(60,52,38,0.045)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#6E6350",marginBottom:12,letterSpacing:1}}>⚙️ REALM SETTINGS</div>
               <div style={{marginBottom:10}}>
                 <div style={{fontSize:10,color:"#6E6350",marginBottom:5}}>Realm name</div>
                 <div style={{display:"flex",gap:6}}>
                   <input defaultValue={townName} id="realm-name-input" maxLength={28}
-                    style={{flex:1,padding:"7px 10px",borderRadius:6,background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#23201A",fontSize:12,outline:"none",fontFamily:"'Lato',sans-serif"}}/>
+                    style={{flex:1,padding:"7px 10px",borderRadius:3,background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#23201A",fontSize:12,outline:"none",fontFamily:"'Alegreya Sans',sans-serif"}}/>
                   <button onClick={()=>{const v=document.getElementById("realm-name-input").value.trim();if(v)setTownName(v);}}
-                    style={{padding:"7px 14px",borderRadius:6,border:"none",cursor:"pointer",background:`${townColor}22`,color:townColor,fontSize:11,fontWeight:700,fontFamily:"'Cinzel',serif"}}>
+                    style={{padding:"7px 14px",borderRadius:3,border:"none",cursor:"pointer",background:`${townColor}22`,color:townColor,fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
                     Save
                   </button>
                 </div>
@@ -10023,7 +10075,7 @@ export default function App(){
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                   {TOWN_COLORS.map(c=>(
                     <button key={c.value} onClick={()=>setTownColor(c.value)}
-                      style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:6,border:"none",cursor:"pointer",
+                      style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:3,border:"none",cursor:"pointer",
                         background:townColor===c.value?`${c.value}22`:"rgba(60,52,38,0.072)",
                         outline:`2px solid ${townColor===c.value?c.value:"transparent"}`,transition:"all 0.15s"}}>
                       <div style={{width:9,height:9,borderRadius:"50%",background:c.value}}/>
@@ -10034,7 +10086,7 @@ export default function App(){
               </div>
               <div style={{paddingTop:12,borderTop:"1px solid rgba(60,52,38,0.09)"}}>
                 <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>Scouting Intelligence</div>
-                <div style={{padding:"10px 12px",borderRadius:8,background:showHiddenStats?"rgba(60,90,120,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${showHiddenStats?"rgba(60,90,120,0.3)":"rgba(60,52,38,0.126)"}`,transition:"all 0.2s"}}>
+                <div style={{padding:"10px 12px",borderRadius:3,background:showHiddenStats?"rgba(60,90,120,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${showHiddenStats?"rgba(60,90,120,0.3)":"rgba(60,52,38,0.126)"}`,transition:"all 0.2s"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
                     <div style={{flex:1}}>
                       <div style={{fontSize:11,fontWeight:700,color:showHiddenStats?"#3C5A78":"#6E6350",marginBottom:3}}>
@@ -10047,14 +10099,14 @@ export default function App(){
                       </div>
                     </div>
                     <button onClick={()=>setShowHiddenStats(v=>!v)}
-                      style={{flexShrink:0,padding:"7px 14px",borderRadius:6,border:`1px solid ${showHiddenStats?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
+                      style={{flexShrink:0,padding:"7px 14px",borderRadius:3,border:`1px solid ${showHiddenStats?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
                         background:showHiddenStats?"rgba(60,90,120,0.18)":"rgba(60,52,38,0.09)",
-                        color:showHiddenStats?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",whiteSpace:"nowrap"}}>
+                        color:showHiddenStats?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif",whiteSpace:"nowrap"}}>
                       {showHiddenStats?"Hide Stats":"Reveal Stats"}
                     </button>
                   </div>
                 </div>
-                <div style={{marginTop:8,padding:"10px 12px",borderRadius:8,background:scoutingFog?"rgba(60,90,120,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${scoutingFog?"rgba(60,90,120,0.3)":"rgba(60,52,38,0.126)"}`,transition:"all 0.2s"}}>
+                <div style={{marginTop:8,padding:"10px 12px",borderRadius:3,background:scoutingFog?"rgba(60,90,120,0.09)":"rgba(60,52,38,0.054)",border:`1px solid ${scoutingFog?"rgba(60,90,120,0.3)":"rgba(60,52,38,0.126)"}`,transition:"all 0.2s"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
                     <div style={{flex:1}}>
                       <div style={{fontSize:11,fontWeight:700,color:scoutingFog?"#3C5A78":"#6E6350",marginBottom:3}}>
@@ -10067,9 +10119,9 @@ export default function App(){
                       </div>
                     </div>
                     <button onClick={()=>setScoutingFog(v=>!v)}
-                      style={{flexShrink:0,padding:"7px 14px",borderRadius:6,border:`1px solid ${scoutingFog?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
+                      style={{flexShrink:0,padding:"7px 14px",borderRadius:3,border:`1px solid ${scoutingFog?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
                         background:scoutingFog?"rgba(60,90,120,0.18)":"rgba(60,52,38,0.09)",
-                        color:scoutingFog?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",whiteSpace:"nowrap"}}>
+                        color:scoutingFog?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif",whiteSpace:"nowrap"}}>
                       {scoutingFog?"Disable Fog":"Enable Fog"}
                     </button>
                   </div>
