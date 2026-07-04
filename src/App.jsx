@@ -1129,12 +1129,29 @@ function starsColor(stars) {
   return stars <= 2 ? "#a8ff78" : stars === 3 ? "#ffd966" : stars === 4 ? "#ff9f43" : "#ff7878";
 }
 
+// Trait × event-theme chemistry — who a hero IS changes what they're suited for.
+// A Coward in the arena is a liability; a Cursed hero resonates with arcane work.
+const EVENT_TRAIT_MODS = {
+  arena:   { "Berserker":0.15, "Brave":0.10, "Glass Cannon":0.10, "Hot-headed":0.08, "Coward":-0.20 },
+  wilds:   { "Night Vision":0.15, "Resilient":0.10, "Swift":0.08, "Glass Cannon":-0.10 },
+  courts:  { "Inspiring":0.12, "Calm":0.10, "Greedy":0.08, "Hot-headed":-0.15, "Stubborn":-0.10 },
+  arcane:  { "Blessed":0.12, "Iron Will":0.10, "Cursed":0.10, "Coward":-0.10 },
+  shadows: { "Swift":0.12, "Night Vision":0.12, "Greedy":0.10, "Loyal":-0.08, "Brave":-0.05 },
+};
+
+function eventTraitMods(hero, eventDef) {
+  const mods = EVENT_TRAIT_MODS[eventDef?.theme] || {};
+  return (hero.traits||[]).filter(t=>mods[t]!==undefined).map(t=>({trait:t, mod:mods[t]}));
+}
+
 function calcMatchScore(hero, eventDef) {
   const stats = eventDef.stats || [];
   if(!stats.length) return 1.0;
   const heroAvg = stats.reduce((a,s) => a + (hero.stats[s]||0), 0) / stats.length;
   const reqAvg  = stats.reduce((a,s) => a + (EVENT_STAT_MIDPOINTS[s]||50), 0) / stats.length;
-  return reqAvg > 0 ? heroAvg / reqAvg : 1.0;
+  let score = reqAvg > 0 ? heroAvg / reqAvg : 1.0;
+  eventTraitMods(hero, eventDef).forEach(({mod})=>{ score += mod; });
+  return Math.max(0.1, score);
 }
 
 function getEventConfidence(matchScore) {
@@ -1616,10 +1633,11 @@ function calcPositionScore(heroes, pos) {
 // genuinely matters in Vanguard but is nearly irrelevant in Arbiter.
 const POSITION_WEIGHTS = {
   Vanguard: {
-    Strength:        0.30,
-    Endurance:       0.23,
-    Defense:         0.21,
-    Determination:   0.09,
+    Strength:        0.28,
+    Endurance:       0.22,
+    Defense:         0.20,
+    Determination:   0.08,
+    Intimidation:    0.06, // UI lists it as a primary Vanguard stat — now it actually fights
     Composure:       0.04,
     Agility:         0.04,
     Accuracy:        0.02,
@@ -1658,6 +1676,66 @@ const POSITION_WEIGHTS = {
     Strength:        0.01,
   },
 };
+
+// ─── NAMED INJURIES ──────────────────────────────────────────────────────────
+// Injuries carry a name and an origin — "Cracked ribs, from the Coalwatch match".
+// On healing there's a small chance of a scar: a permanent stat dent, or —
+// rarely — a trait earned by fighting through it.
+const INJURY_NAMES_BY_POS = {
+  Vanguard:   ["Cracked ribs","Shield-arm fracture","Torn shoulder","Crushed gauntlet hand","Split brow"],
+  Skirmisher: ["Twisted ankle","Torn hamstring","Arrow through the calf","Dislocated wrist","Bruised spine"],
+  Arbiter:    ["Mana burn","Concussion","Seared palms","Ruptured focus","Backlash tremors"],
+};
+const INJURY_NAMES_ALL = Object.values(INJURY_NAMES_BY_POS).flat();
+
+// ─── EXCHANGE BEAT TEXT ──────────────────────────────────────────────────────
+// One line per exchange in the battle replay. {A} = acting hero's first name.
+// Kinds: crit/hit/rally (won exchange) · blocked/falter (lost exchange).
+const EXCHANGE_TEXT = {
+  Vanguard: {
+    crit:   ["{A} splits a shield clean in two","{A} drops their champion with a single blow","{A} breaks the line single-handed"],
+    hit:    ["{A} grinds the line back a step","{A} holds the wall and answers hard","{A} trades blows and comes off better"],
+    rally:  ["{A} bellows the line back into shape","{A} plants the standard — the wall reforms"],
+    blocked:["Their front absorbs the push","{A} is shoved back behind the shields","The wall bends and barely holds"],
+    falter: ["{A} hesitates at the worst moment","{A} loses footing in the crush"],
+  },
+  Skirmisher: {
+    crit:   ["{A} finds the seam no one else saw","{A} takes their flag-bearer mid-stride","{A} turns the flank completely"],
+    hit:    ["{A} darts in, cuts, and is gone","{A} wins the race to the ridge","{A} picks off a straggler"],
+    rally:  ["{A} regroups the runners and goes again","{A} calls the second wave in low"],
+    blocked:["Their outriders read the ambush","{A} is cut off and forced back","The flank closes before {A} arrives"],
+    falter: ["{A} springs the trap too early","{A} loses the line in the smoke"],
+  },
+  Arbiter: {
+    crit:   ["{A}'s casting cracks the sky open","{A} unmakes their ward with one gesture","{A} seizes command of the whole field"],
+    hit:    ["{A} keeps the lines fed and standing","{A} counters spell for spell","{A} reads their play and answers"],
+    rally:  ["{A} steadies the rear — orders land again","{A} rewrites the plan mid-battle"],
+    blocked:["Their casters match every counter","{A}'s working fizzles against their wards","Command contested — no ground gained"],
+    falter: ["{A}'s concentration snaps","{A} misreads the field entirely"],
+  },
+};
+
+// Called when a hero's injury countdown reaches 0. 15% scar chance:
+// ~a third of scars grant Resilient/Iron Will, the rest dent a physical stat.
+function applyHealScar(hero, addLog) {
+  const injName = hero.injury?.name || "injury";
+  const history = [ ...(hero.injury ? [hero.injury] : []), ...(hero.injuryHistory||[]) ].slice(0,3);
+  let out = { ...hero, injury: null, injuryHistory: history };
+  if(Math.random() < 0.15) {
+    const traits = hero.traits||[];
+    const scarTrait = ["Resilient","Iron Will"].find(t=>!traits.includes(t));
+    if(scarTrait && traits.length < 3 && Math.random() < 0.35) {
+      out = { ...out, traits: [...traits, scarTrait] };
+      addLog?.(`💪 ${hero.name} returns from the ${injName.toLowerCase()} harder than before — gained ${scarTrait}.`,"success");
+    } else {
+      const stat = pick(PHYSICAL_STATS);
+      const loss = rand(1,2);
+      out = { ...out, stats: { ...out.stats, [stat]: Math.max(10, (out.stats[stat]||10) - loss) } };
+      addLog?.(`🩹 ${hero.name}'s ${injName.toLowerCase()} never fully healed — permanent −${loss} ${stat}.`,"warning");
+    }
+  }
+  return out;
+}
 
 // Returns a single combat score for one hero in a given position.
 function calcHeroCombatScore(hero, pos) {
@@ -1716,6 +1794,11 @@ function analyseFormation(formation){
   // Role/race pairings are handled per-position in calcPositionScore.
   const raceSynergy = calcRaceSynergy(formation);
   const mult = raceSynergy ? Math.min(1.5, raceSynergy.ratingMult) : 1.0;
+  // Per-lane synergy multipliers — race identities are asymmetric by design
+  const laneMults = {};
+  POS_KEYS.forEach(p=>{
+    laneMults[p] = Math.min(1.5, Math.max(0.3, raceSynergy?.laneMults?.[p] ?? (raceSynergy?Math.min(1.5,raceSynergy.ratingMult):1.0)));
+  });
 
   const heroMods={};
   POS_KEYS.forEach(pos=>{
@@ -1730,7 +1813,7 @@ function analyseFormation(formation){
       };
     });
   });
-  return {active:[], positive:[], negative:[], mult, heroMods, raceSynergy};
+  return {active:[], positive:[], negative:[], mult, laneMults, heroMods, raceSynergy};
 }
 
 function calcFormationRating(formation){
@@ -1738,22 +1821,21 @@ function calcFormationRating(formation){
   // Sum position scores across all 3 lanes — this puts the rating on the same
   // scale as enemy total power (e.g. Iron 67-105), making comparisons intuitive.
   // calcPositionScore handles primary×1.25 + support×0.75 + role pairing bonuses.
-  let totalPositionPower=0;
+  let raw=0, effective=0;
   POS_KEYS.forEach(pos=>{
     const posHeroes=(formation[pos]||[]).filter(Boolean);
     if(posHeroes.length===0) return;
     const {score}=calcPositionScore(posHeroes, pos);
-    totalPositionPower+=score;
+    raw+=score;
+    effective+=score*analysis.laneMults[pos];
   });
-  const effective=Math.round(totalPositionPower*analysis.mult);
-  return {raw:Math.round(totalPositionPower), effective, analysis};
+  return {raw:Math.round(raw), effective:Math.round(effective), analysis};
 }
 
 // ─── WIN CHANCE ENGINE ────────────────────────────────────────────────────────
 // Sigmoid ratio: winChance = 1 / (1 + (enemyPower / yourEffective)^k)
-// k=2.5 gives a moderately steep curve:
-//   Equal (50 vs 50) → 50%    |  2× stronger → ~83%   |  0.5× → ~17%
-//   3× stronger → ~91%        |  10× stronger → ~99%  |  10× weaker → ~1%
+// k=2.0 gives a moderately steep curve:
+//   Equal (50 vs 50) → 50%    |  2× stronger → ~80%   |  0.5× → ~20%
 // Enemy power anchored to match the new hero stat scale.
 
 // ─── TIERED LEAGUE SYSTEM ────────────────────────────────────────────────────
@@ -1763,21 +1845,16 @@ function calcFormationRating(formation){
 
 const TIERS = {
   iron:     { id:"iron",     name:"Iron",     icon:"⚙️",  color:"#9ca3af", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
-  bronze:   { id:"bronze",   name:"Bronze",   icon:"🥉",  color:"#cd7f32", powerMin:93,  powerMax:147, difficulty:2, tributeBase:145, xpRange:[26,40] },
-  silver:   { id:"silver",   name:"Silver",   icon:"🥈",  color:"#c0c0c0", powerMin:127, powerMax:199, difficulty:3, tributeBase:240, xpRange:[32,48] },
-  gold:     { id:"gold",     name:"Gold",     icon:"🥇",  color:"#ffd966", powerMin:167, powerMax:262, difficulty:4, tributeBase:350, xpRange:[36,56] },
-  platinum: { id:"platinum", name:"Platinum", icon:"💎",  color:"#a78bfa", powerMin:207, powerMax:325, difficulty:5, tributeBase:495, xpRange:[40,64] },
+  bronze:   { id:"bronze",   name:"Bronze",   icon:"🥉",  color:"#cd7f32", powerMin:93,  powerMax:147, difficulty:2, tributeBase:200, xpRange:[26,40] },
+  silver:   { id:"silver",   name:"Silver",   icon:"🥈",  color:"#c0c0c0", powerMin:127, powerMax:199, difficulty:3, tributeBase:350, xpRange:[32,48] },
+  gold:     { id:"gold",     name:"Gold",     icon:"🥇",  color:"#ffd966", powerMin:167, powerMax:262, difficulty:4, tributeBase:600, xpRange:[36,70] },
+  platinum: { id:"platinum", name:"Platinum", icon:"💎",  color:"#a78bfa", powerMin:207, powerMax:325, difficulty:5, tributeBase:950, xpRange:[45,85] },
 };
 const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
 
 // Tribute = tierBase + position bonus (1st gets most, 8th gets base)
-// Position bonus scales: 1st +280g, 2nd +200g, 3rd +140g, 4th +80g, 5th-8th +0g
-const TIER_POSITION_BONUS = [0, 0, 0, 0, 0, 0, 0, 0]; // flat tribute — no position bonus
-
-function tierTribute(tierId, position) {
-  const tier = TIERS[tierId] || TIERS.iron;
-  return tier.tributeBase + (TIER_POSITION_BONUS[Math.max(0, position-1)] || 0);
-}
+// Position matters: the table is a weekly income race, not just a season-end verdict
+const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
 
 // Name pools — 15 per tier, thematically distinct
 const TIER_NAME_POOLS = {
@@ -1798,15 +1875,64 @@ const TIER_NAME_POOLS = {
   ],
   gold: [
     "Goldspire","Valdris","The Iron Throne","Crownhaven","The Golden Hold",
-    "Aurelian","The Crowned Keep","Glorymere","Imperion","Brightcrown",
+    "Aurelian","The Crowned Keep","Glorymere","The Debt of Kings","Brightcrown",
     "The Gilded Fort","Conquestholm","The Grand Bastion","Valorwall","Kingsreach",
   ],
   platinum: [
-    "The Eternal Court","Obsidian Peak","Sovereignty","The Void Throne","Celestia",
-    "The Black Citadel","Apex","The Diamond Hold","Dominus","Exalted Keep",
-    "The Platinum Crown","Zenith","The Last Bastion","Ascendancy","The Final Hold",
+    "The Court of Broken Banners","Obsidian Peak","Ninth Reach","The Void Throne","Widow's Crown",
+    "The Black Citadel","The Unforgiven See","The Diamond Hold","The Silent Concord","Exalted Keep",
+    "The Platinum Crown","The Hall of First Blood","The Last Bastion","The Ashen Accord","The Final Hold",
   ],
 };
+
+// ─── RIVAL MANAGERS ──────────────────────────────────────────────────────────
+// Every AI town is run by a named manager with an archetype. Archetypes bias
+// which specialisation the town brings (learnable pattern), and their taunts
+// track the head-to-head record — the league remembers you.
+const MANAGER_ARCHETYPES = [
+  { id:"butcher",     title:"the Butcher",     preferredSpecs:["siege","phalanx"],
+    names:["Gorvek Hale","Bruna Kessel","Ram Ostler","Hadda Cleft"],
+    taunts:{ ahead:"Your shieldwall splinters like kindling. It always has.",
+             even:"Meat is meat. Line yours up.",
+             behind:"Enjoy the wins. Bones remember." } },
+  { id:"schemer",     title:"the Schemer",     preferredSpecs:["ambush","guerrilla"],
+    names:["Serra Vayne","Fen Whisperlock","Odo the Quiet","Liss Marrow"],
+    taunts:{ ahead:"You still haven't found where I hide the knives.",
+             even:"I've read your formation. Twice.",
+             behind:"A setback. The trap is patient." } },
+  { id:"warlock",     title:"the Warlock",     preferredSpecs:["arcane","sorcery"],
+    names:["Malachai Dren","Ysolde Nine-Candles","Corvin Ashe","Petra Vell"],
+    taunts:{ ahead:"Your arbiters pray. Mine answer.",
+             even:"Magic favours the prepared. Are you?",
+             behind:"Every defeat teaches me a new rune." } },
+  { id:"drillmaster", title:"the Drillmaster", preferredSpecs:["phalanx","siege"],
+    names:["Marshal Krieg","Tova Ironlung","Sarn Halberd","Colm Redgrave"],
+    taunts:{ ahead:"Discipline beats talent. Again, apparently.",
+             even:"My lines don't break. Do yours?",
+             behind:"We drill at dawn. You'll hear us." } },
+  { id:"gambler",     title:"the Gambler",     preferredSpecs:[],
+    names:["Silas Two-Coins","Marla Dice","Finn Weaver","Jack Copperfield"],
+    taunts:{ ahead:"The dice love me this year.",
+             even:"Coin's in the air. Call it.",
+             behind:"Luck turns. Mine always does." } },
+  { id:"zealot",      title:"the Zealot",      preferredSpecs:["sorcery","siege"],
+    names:["Mother Cinder","Brand Ashvow","Sister Havoc","Aldous Flame"],
+    taunts:{ ahead:"The fire finds the faithless first.",
+             even:"Conviction is a weapon. Bring yours.",
+             behind:"Martyrdom is just a longer game." } },
+];
+
+function pickManager() {
+  const arch = pick(MANAGER_ARCHETYPES);
+  return { name: pick(arch.names), archetype: arch.id, title: arch.title };
+}
+
+function managerTaunt(manager, h2h) {
+  const arch = MANAGER_ARCHETYPES.find(a=>a.id===manager?.archetype);
+  if(!arch) return null;
+  const diff = (h2h?.losses||0) - (h2h?.wins||0); // their wins minus ours, from player POV
+  return diff > 0 ? arch.taunts.ahead : diff < 0 ? arch.taunts.behind : arch.taunts.even;
+}
 
 // Generate 7 AI towns for a given tier with randomised power
 function generateTierTowns(tierId, existingNames=[]) {
@@ -1821,6 +1947,8 @@ function generateTierTowns(tierId, existingNames=[]) {
     wins: 0,
     losses: 0,
     abilities: assignTownAbilities(tierId),
+    manager: pickManager(),
+    h2h: { wins:0, losses:0 }, // player's record vs this town — persists across seasons
   }));
 }
 
@@ -1862,32 +1990,36 @@ const RACE_SYNERGIES = [
   // ── MONO-RACE: all 6 raiding heroes of same race ───────────────────────────
   {
     id:"mono_elf",    type:"mono",   race:"Elf",
-    name:"Elven Unity",      icon:"🌿", color:"#86efac",
+    name:"The Long Watch",   icon:"🌿", color:"#86efac",
     ratingMult:1.11, winBonus:0.05,
+    laneMults:{Vanguard:0.94, Skirmisher:1.30, Arbiter:1.10},
     desc:"6 Elves — precision and speed at their peak. Dominant Skirmishers but fragile Vanguard.",
     flavour:"The elves moved as one, silent and devastating.",
     check: h => h.filter(x=>x.race==="Elf").length>=6,
   },
   {
     id:"mono_dwarf",  type:"mono",   race:"Dwarf",
-    name:"Dwarven Phalanx",  icon:"⛏️", color:"#fbbf24",
+    name:"Deep-Wall Doctrine", icon:"⛏️", color:"#fbbf24",
     ratingMult:1.11, winBonus:0.05,
+    laneMults:{Vanguard:1.32, Skirmisher:0.92, Arbiter:1.10},
     desc:"6 Dwarves — unbreakable iron wall. Vanguard is near-impenetrable, Skirmishers suffer.",
     flavour:"The Dwarven phalanx ground forward — nothing stopped it.",
     check: h => h.filter(x=>x.race==="Dwarf").length>=6,
   },
   {
     id:"mono_human",  type:"mono",   race:"Human",
-    name:"Human Resolve",    icon:"🛡️", color:"#93c5fd",
+    name:"The Mortal Wager", icon:"🛡️", color:"#93c5fd",
     ratingMult:1.11, winBonus:0.04,
+    laneMults:{Vanguard:1.11, Skirmisher:1.11, Arbiter:1.11},
     desc:"6 Humans — adaptable and resilient. No soft spots, steady across all positions.",
     flavour:"Human tenacity — they just wouldn't quit.",
     check: h => h.filter(x=>x.race==="Human").length>=6,
   },
   {
     id:"mono_halforc",type:"mono",   race:"Half-Orc",
-    name:"Orcish Rampage",   icon:"💢", color:"#f87171",
+    name:"The Red Tide",     icon:"💢", color:"#f87171",
     ratingMult:1.11, winBonus:0.06,
+    laneMults:{Vanguard:1.35, Skirmisher:1.12, Arbiter:0.90},
     desc:"6 Half-Orcs — terrifying raw aggression. Shatters frontlines but has no subtlety.",
     flavour:"The Half-Orc charge shook the earth.",
     check: h => h.filter(x=>x.race==="Half-Orc").length>=6,
@@ -1896,22 +2028,25 @@ const RACE_SYNERGIES = [
     id:"mono_tiefling",type:"mono",  race:"Tiefling",
     name:"Infernal Pact",    icon:"😈", color:"#c084fc",
     ratingMult:1.11, winBonus:0.05,
+    laneMults:{Vanguard:0.92, Skirmisher:1.08, Arbiter:1.32},
     desc:"6 Tieflings — dark power and guile. Arbiters are supercharged, physical roles thin.",
     flavour:"Infernal energy surged through the Tiefling ranks.",
     check: h => h.filter(x=>x.race==="Tiefling").length>=6,
   },
   {
     id:"mono_gnome",  type:"mono",   race:"Gnome",
-    name:"Gnomish Ingenuity", icon:"⚙️", color:"#67e8f9",
+    name:"Cog-Court Logic",  icon:"⚙️", color:"#67e8f9",
     ratingMult:1.11, winBonus:0.04,
+    laneMults:{Vanguard:0.85, Skirmisher:1.05, Arbiter:1.35},
     desc:"6 Gnomes — brilliant command and magic. Vanguard is paper-thin.",
     flavour:"Gnomish tactics outsmarted every counter.",
     check: h => h.filter(x=>x.race==="Gnome").length>=6,
   },
   {
     id:"mono_dragonborn",type:"mono",race:"Dragonborn",
-    name:"Draconic Might",   icon:"🐉", color:"#fb923c",
+    name:"The Old Fire",     icon:"🐉", color:"#fb923c",
     ratingMult:1.11, winBonus:0.06,
+    laneMults:{Vanguard:1.20, Skirmisher:1.12, Arbiter:1.05},
     desc:"6 Dragonborn — overwhelming presence and raw power across the board.",
     flavour:"Draconic fire swept the field.",
     check: h => h.filter(x=>x.race==="Dragonborn").length>=6,
@@ -1922,6 +2057,7 @@ const RACE_SYNERGIES = [
     id:"rainbow",     type:"rainbow",
     name:"Band of Nations",  icon:"🌈", color:"#f0e6d3",
     ratingMult:1.08, winBonus:0.04,
+    laneMults:{Vanguard:1.08, Skirmisher:1.08, Arbiter:1.08},
     desc:"All 6 heroes from different races — diverse strengths cover every weakness.",
     flavour:"United by purpose, not by blood — every weakness covered.",
     check: h => {
@@ -1936,6 +2072,7 @@ const RACE_SYNERGIES = [
     id:"pact_elf_tiefling",  type:"duo",
     name:"Shadow Pact",      icon:"🌑", color:"#a78bfa",
     ratingMult:1.05, winBonus:0.03,
+    laneMults:{Vanguard:0.95, Skirmisher:1.15, Arbiter:1.12},
     desc:"3+ Elves & 3+ Tieflings — dark and swift. Skirmishers and Arbiters reach peak form.",
     flavour:"Shadow and moonlight — an eerie, deadly combination.",
     check: h => h.filter(x=>x.race==="Elf").length>=3 && h.filter(x=>x.race==="Tiefling").length>=3,
@@ -1944,6 +2081,7 @@ const RACE_SYNERGIES = [
     id:"pact_dwarf_halforc", type:"duo",
     name:"Iron Warbond",     icon:"⚒️", color:"#fbbf24",
     ratingMult:1.05, winBonus:0.03,
+    laneMults:{Vanguard:1.22, Skirmisher:0.98, Arbiter:0.95},
     desc:"3+ Dwarves & 3+ Half-Orcs — unstoppable Vanguard. The two toughest frontline races.",
     flavour:"Nothing breaches a wall of iron and fury.",
     check: h => h.filter(x=>x.race==="Dwarf").length>=3 && h.filter(x=>x.race==="Half-Orc").length>=3,
@@ -1952,6 +2090,7 @@ const RACE_SYNERGIES = [
     id:"pact_gnome_tiefling",type:"duo",
     name:"Arcane Covenant",  icon:"🔮", color:"#c084fc",
     ratingMult:1.05, winBonus:0.03,
+    laneMults:{Vanguard:0.92, Skirmisher:1.00, Arbiter:1.25},
     desc:"3+ Gnomes & 3+ Tieflings — devastating magical command. Arbiter rating skyrockets.",
     flavour:"Arcane intellect fused with infernal power.",
     check: h => h.filter(x=>x.race==="Gnome").length>=3 && h.filter(x=>x.race==="Tiefling").length>=3,
@@ -1960,6 +2099,7 @@ const RACE_SYNERGIES = [
     id:"pact_human_elf",     type:"duo",
     name:"Elder Alliance",   icon:"🤝", color:"#86efac",
     ratingMult:1.05, winBonus:0.02,
+    laneMults:{Vanguard:1.05, Skirmisher:1.08, Arbiter:1.03},
     desc:"3+ Humans & 3+ Elves — balanced and reliable. No weaknesses, strong across all positions.",
     flavour:"The oldest alliance — still unbroken.",
     check: h => h.filter(x=>x.race==="Human").length>=3 && h.filter(x=>x.race==="Elf").length>=3,
@@ -1968,6 +2108,7 @@ const RACE_SYNERGIES = [
     id:"pact_dragonborn_halforc",type:"duo",
     name:"Warbeast Pact",    icon:"🐉", color:"#fb923c",
     ratingMult:1.05, winBonus:0.03,
+    laneMults:{Vanguard:1.18, Skirmisher:1.08, Arbiter:0.90},
     desc:"3+ Dragonborn & 3+ Half-Orcs — terrifying physical dominance front-to-back.",
     flavour:"Scale and muscle — a wall of living violence.",
     check: h => h.filter(x=>x.race==="Dragonborn").length>=3 && h.filter(x=>x.race==="Half-Orc").length>=3,
@@ -1976,6 +2117,7 @@ const RACE_SYNERGIES = [
     id:"pact_human_dwarf",   type:"duo",
     name:"Order's Vow",      icon:"⚖️", color:"#93c5fd",
     ratingMult:1.05, winBonus:0.02,
+    laneMults:{Vanguard:1.15, Skirmisher:1.00, Arbiter:1.02},
     desc:"3+ Humans & 3+ Dwarves — disciplined and dependable. Excellent Vanguard and morale.",
     flavour:"Law and stone — a foundation nothing shakes.",
     check: h => h.filter(x=>x.race==="Human").length>=3 && h.filter(x=>x.race==="Dwarf").length>=3,
@@ -1997,21 +2139,21 @@ function calcRaceSynergy(formation) {
 
 const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
-  { id:"barracks",  name:"Barracks",         icon:"🏰", cost:1200, tierRequired:"iron",     desc:"Heroes gain +20% XP from battles." },
-  { id:"tavern",    name:"Tavern",            icon:"🍺", cost:1000, tierRequired:"iron",     desc:"All heroes +3 morale each week." },
+  { id:"barracks",  name:"Barracks",         icon:"🏰", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
+  { id:"tavern",    name:"Tavern",            icon:"🍺", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"⚕️",  cost:1000, tierRequired:"bronze",   desc:"Injuries heal 1 week faster." },
-  { id:"lodge",     name:"Recovery Lodge",    icon:"🛖", cost:1100, tierRequired:"bronze",   desc:"Bench heroes recover fatigue 60% faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"⚕️",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Injuries heal 1 week faster." },
+  { id:"lodge",     name:"Recovery Lodge",    icon:"🛖", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Bench heroes earn 20% of that week's battle XP." },
-  { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Heroes open to offers sell at 120% value and attract bids 50% more often." },
+  { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
+  { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
+  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
-  { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Unlocks premium heroes in the market." },
-  { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
+  { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
+  { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
   // ── PLATINUM ─────────────────────────────────────────────────────────────────
-  { id:"sanctum",   name:"Elite Sanctum",     icon:"💎", cost:2200, tierRequired:"platinum", desc:"Unlocks elite heroes in the market." },
-  { id:"legends",   name:"Hall of Legends",   icon:"🏛️", cost:2000, tierRequired:"platinum", desc:"Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
+  { id:"sanctum",   name:"Elite Sanctum",     icon:"💎", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
+  { id:"legends",   name:"Hall of Legends",   icon:"🏛️", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
 const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
@@ -2023,7 +2165,7 @@ const TRAIT_EFFECTS = {
   "Resilient":    {color:"#a8ff78", desc:"−30% fatigue gain · −50% injury risk"},
   "Glass Cannon": {color:"#ff9f43", desc:"+7% power in all positions · 2× injury risk"},
   "Blessed":      {color:"#ffd966", desc:"+3% power"},
-  "Cursed":       {color:"#c084fc", desc:"−5% power · random form drain each week"},
+  "Cursed":       {color:"#c084fc", desc:"−5% power · random form drain each week · +15% XP (suffering teaches)"},
   "Brave":        {color:"#a8ff78", desc:"Immune to morale loss on defeat"},
   "Iron Will":    {color:"#78c8ff", desc:"Morale floor at 50 during combat · never walks out"},
   "Eagle Eye":    {color:"#ffd966", desc:"Accuracy weighted ×1.5 in combat score"},
@@ -2044,6 +2186,13 @@ const FIRST_NAMES = [
   "Quinn","Rhett","Soren","Tess","Uvar","Vale","Wynn","Xan","Yael","Zell",
   "Adra","Bael","Cira","Drax","Evyn","Fyra","Gael","Holt","Iren","Jace",
   "Kira","Lund","Mael","Nell","Osric","Pryn","Raen","Skye","Tove","Ulric",
+];
+// ~10% of heroes carry an epithet earned somewhere off-page — a hint of a life
+// before your realm. Purely cosmetic, entirely load-bearing for the fiction.
+const EPITHETS = [
+  "the Widow","Two-Coins","the Unbent","Half-Hanged","the Quiet","Marrow",
+  "Oath-Breaker","the Lamplighter","Never-Bled","the Debt","Six-Fingers",
+  "the Stray","Kettle","the Pilgrim","Last-Out-the-Gate","the Bell",
 ];
 const LAST_NAMES = [
   "Ironforge","Dawnwhisper","Ashveil","Stoneback","Emberthorn","Coldwater",
@@ -2149,12 +2298,14 @@ const SPECIALISATIONS = [
 ];
 
 // Returns penalty object if formation doesn't counter the specialisation, else null
+// Countering takes strength, not mere presence: the counter lane must pull its
+// weight (≥80% of the formation's average lane score) or the spec punishes it.
 function calcSpecPenalty(spec, formation) {
   if(!spec) return null;
-  const counterPos = spec.counter;
-  const counterHeroes = (formation[counterPos]||[]).filter(Boolean);
-  // Countered if at least 1 hero in the counter position
-  if(counterHeroes.length >= 1) return null;
+  const laneScore = (pos)=>calcPositionScore((formation[pos]||[]).filter(Boolean), pos).score;
+  const counterScore = laneScore(spec.counter);
+  const avgScore = POS_KEYS.reduce((a,p)=>a+laneScore(p),0)/POS_KEYS.length;
+  if(avgScore > 0 && counterScore >= avgScore * 0.8) return null;
   return { penalty: spec.penalty, reason: spec.reason, injuryBonus: spec.injuryBonus || 0 };
 }
 
@@ -2177,10 +2328,10 @@ function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
 }
 
 // Weekly tribute income — now flat per tier (no position bonus)
-function weeklyRankIncome(tierId) {
-  // Tribute is flat per tier — does not scale with league position.
+function weeklyRankIncome(tierId, position) {
+  // Weekly tribute income — tier base + league position bonus (1st earns most)
   const tier = TIERS[tierId] || TIERS.iron;
-  return tier.tributeBase;
+  return tier.tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position||8)-1)] || 0);
 }
 
 // ─── HERO STAT GROWTH ────────────────────────────────────────────────────────
@@ -2191,12 +2342,15 @@ function growHeroStats(hero, newLevel, buildings) {
   const potential = hero.stats.Potential || 50;
   const levelsGained = newLevel - (hero.level || 0);
   const newStats = {...hero.stats};
-  PHYSICAL_STATS.concat(MENTAL_STATS).concat(["Charisma","Negotiation","Intimidation","Reputation"]).forEach(s => {
+  PHYSICAL_STATS.concat(["Magic Resist"]).concat(MENTAL_STATS).concat(["Charisma","Negotiation","Intimidation","Reputation"]).forEach(s => {
     if(s === "Potential" || s === "Form" || s === "Reputation") return;
     const current = newStats[s] || 10;
     if(current >= potential) return; // already at cap
-    // Each level gives 1-3 points, capped at potential, barracks gives +1 max
-    const maxGain = hasBarracks ? 4 : 3;
+    // Growth scales with the remaining gap to Potential so high-potential heroes
+    // can actually reach it before MAX_LEVEL (flat 1-3/level capped ~30pts short)
+    const levelsLeft = Math.max(1, MAX_LEVEL - newLevel + 1);
+    const gapPerLevel = Math.ceil((potential - current) / levelsLeft);
+    const maxGain = Math.max(hasBarracks ? 4 : 3, gapPerLevel);
     const gain = levelsGained * rand(1, maxGain);
     newStats[s] = Math.min(potential, current + gain);
   });
@@ -2254,14 +2408,30 @@ function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId)
   const tier = TIERS[tierId] || TIERS.iron;
   // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*120
   const goldReward = rand(300,700) + tier.difficulty * 120;
+  // Managers have a signature: 60% of the time their spec comes from their
+  // archetype's preferred list — a pattern the player can learn and pre-counter
+  let specialisation = null;
+  if(Math.random() < 0.35){
+    const arch = MANAGER_ARCHETYPES.find(a=>a.id===town.manager?.archetype);
+    const preferred = arch?.preferredSpecs?.length
+      ? SPECIALISATIONS.filter(s=>arch.preferredSpecs.includes(s.id)) : [];
+    specialisation = (preferred.length && Math.random() < 0.6) ? pick(preferred) : pick(SPECIALISATIONS);
+  }
+  const power = town.power || rand(tier.powerMin, tier.powerMax);
   return {
     name:           town.name,
-    power:          town.power || rand(tier.powerMin, tier.powerMax),
+    power,
+    // What the rumor mill knows before you scout: a band around the truth,
+    // rolled once at generation so it doesn't wobble between renders
+    powerBand:      [Math.max(10, power - rand(8, 18)), power + rand(8, 18)],
+    scouted:        false,
     difficulty:     tier.difficulty,
     tierId,
     treasury:       rand(3000, 10000),
-    specialisation: Math.random() < 0.35 ? pick(SPECIALISATIONS) : null,
+    specialisation,
     abilities:      town.abilities || [],
+    manager:        town.manager || null,
+    h2h:            town.h2h || { wins:0, losses:0 },
     goldReward,
   };
 }
@@ -2326,7 +2496,7 @@ function generateHero(id,forSale=false,premium=false,elite=false,forcedRole=null
   const value = isFreeProsepct ? 0 : Math.max(100,Math.floor(baseValue*valueMult));
 
   return {
-    id, name:`${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`, race, role,
+    id, name:Math.random()<0.10?`${pick(FIRST_NAMES)} '${pick(EPITHETS)}' ${pick(LAST_NAMES)}`:`${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`, race, role,
     stage, stageProgress,
     stats, traits, salary, value, morale:rand(70,95),
         contractYears, contractWeeks, contractWeeksLeft:contractWeeks,
@@ -2463,7 +2633,7 @@ const ENEMY_ABILITIES = [
     hardDesc: (t)=>`All heroes: −12 morale, Arbiter heroes: +15 fatigue.`,
     softEffect: { morale:{pos:'Arbiter',amt:-10}, fatigue:{pos:'Arbiter',amt:8} },
     hardEffect: { morale:{pos:'all',amt:-12}, fatigue:{pos:'Arbiter',amt:15} },
-    thresholds: { bronze:{pass:37,soft:28}, silver:{pass:48,soft:36}, gold:{pass:64,soft:48}, platinum:{pass:78,soft:58} },
+    thresholds: { bronze:{pass:34,soft:26}, silver:{pass:44,soft:33}, gold:{pass:52,soft:38}, platinum:{pass:60,soft:45} },
   },
   {
     id:'dark_ritual',        name:'Dark Ritual',              icon:'🌑',
@@ -2588,37 +2758,6 @@ function checkAbility(ability, formation, tierId) {
   return 'hard';
 }
 
-// Apply ability secondary effects to heroes after raid
-function applyAbilityEffects(ability, outcome, formation, heroes) {
-  if(outcome === 'pass') return heroes;
-  const effects = outcome === 'soft' ? ability.softEffect : ability.hardEffect;
-  const posHeroIds = (pos) => new Set((formation[pos]||[]).filter(Boolean).map(h=>h.id));
-  const allIds = new Set([...posHeroIds('Vanguard'),...posHeroIds('Skirmisher'),...posHeroIds('Arbiter')]);
-
-  return heroes.map(h => {
-    const inPos = (pos) => posHeroIds(pos).has(h.id);
-    const isRaiding = allIds.has(h.id);
-    if(!isRaiding) return h;
-
-    let updated = {...h};
-
-    // Fatigue
-    if(effects.fatigue) {
-      const {pos,amt} = effects.fatigue;
-      if(pos==='all' || inPos(pos)) {
-        updated = {...updated, fatigue: Math.min(100, (updated.fatigue||0)+amt)};
-      }
-    }
-    // Morale
-    if(effects.morale) {
-      const {pos,amt} = effects.morale;
-      if(pos==='all' || inPos(pos)) {
-        updated = {...updated, morale: Math.max(0, Math.min(100, (updated.morale||0)+amt))};
-      }
-    }
-    return updated;
-  });
-}
 
 function weeklyChance(timesPerStage) {
   const avgStageWeeks = 100; // approximate weeks per stage
@@ -2665,7 +2804,11 @@ function ageHero(hero, buildings) {
         if(Math.random() < 0.1) newStats[s] = Math.max(10, newStats[s] - rand(1,2));
       });
       if(Math.random() < 0.4) newStats.Form = Math.max(1, newStats.Form - 1);
-      if(decayed > 0) declineNote = `📉 ${hero.name} shows signs of fading (${decayed} stats declined)`;
+      if(decayed > 0) declineNote = pick([
+        `📉 ${hero.name} is slowing — the younger ones are faster to the wall now, and they know it.`,
+        `📉 ${hero.name} takes longer to warm up these days. The edge is dulling.`,
+        `📉 Time is collecting its debts from ${hero.name}.`,
+      ]);
     }
   }
 
@@ -3140,35 +3283,47 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
   // Cap 0.80 → max overall win ~90% (dominant). Floor 0.20 → min ~10% (miracle).
   // This preserves the DnD Nat 1/20 feel while making each position matter.
 
-  const PHASE_WIN_CAP   = 0.77;
+  const PHASE_WIN_CAP   = 0.85;
   const PHASE_WIN_FLOOR = 0.15;
   const k = 2.0;
 
   // Enemy power is split equally across 3 positions
   const posEnemyShare = adjustedEnemyPower / 3;
 
-  // Formation synergy multiplier — now applied to actual phase outcomes, not just display.
-  // analysis.mult includes all active SYNERGIES ratingMults and race synergy ratingMult.
-  // Capped at 1.5 to match our calibrated tactical ceiling.
-  const synergyMult = Math.min(1.5, Math.max(0.3, analysis.mult));
-
+  // Per-lane synergy multipliers — a Dwarf wall boosts Vanguard and thins the
+  // Skirmisher line; the race identity shows up in the phase odds themselves.
   const phaseWinChances = {};
   const positionScores = {};
   POS_KEYS.forEach(pos => {
     const posHeroes = (formation[pos]||[]).filter(Boolean);
     const { score, primaryHero, supportHero, pairingMult } = calcPositionScore(posHeroes, pos);
-    // Apply formation-wide synergy multiplier to position score
-    const effectiveScore = score * synergyMult;
+    const laneSynergyMult = analysis.laneMults?.[pos] ?? Math.min(1.5, Math.max(0.3, analysis.mult));
+    const effectiveScore = score * laneSynergyMult;
     positionScores[pos] = { score, effectiveScore, primaryHero, supportHero, pairingMult };
     const ratio     = effectiveScore > 0 ? posEnemyShare / effectiveScore : 999;
     const rawChance = 1 / (1 + Math.pow(ratio, k));
     phaseWinChances[pos] = Math.min(PHASE_WIN_CAP, Math.max(PHASE_WIN_FLOOR, rawChance + nightBonus));
   });
 
-  // Roll each position phase
+  // ── EXCHANGE ENGINE ────────────────────────────────────────────────────
+  // Each lane resolves as a first-to-3 series of exchanges (max 5). The
+  // per-exchange probability q is derived from the lane's phase chance p so
+  // that P(win the series at q) === p EXACTLY — the macro balance curve is
+  // unchanged by construction. Exchanges add texture, drama and attribution.
+  const invertBest3of5 = (p) => {
+    const seriesProb = (q) => { const l=1-q; return 10*q*q*q*l*l + 5*Math.pow(q,4)*l + Math.pow(q,5); };
+    let lo=0.001, hi=0.999;
+    for(let i=0;i<30;i++){ const mid=(lo+hi)/2; if(seriesProb(mid)<p) lo=mid; else hi=mid; }
+    return (lo+hi)/2;
+  };
+
   const phaseRolls = {};
+  const laneSequences = {};
   POS_KEYS.forEach(pos => {
-    phaseRolls[pos] = Math.random() < phaseWinChances[pos];
+    const q = invertBest3of5(phaseWinChances[pos]);
+    const seq = Array.from({length:5}, () => Math.random() < q);
+    laneSequences[pos] = seq;
+    phaseRolls[pos] = seq.filter(Boolean).length >= 3;
   });
 
   // 2-of-3 majority determines the battle outcome
@@ -3249,7 +3404,9 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
     if(injuryCount >= 2) return false; // cap at 2 per raid
     const fat = h.fatigue || 0;
     // Fatigue-primary sigmoid curve
-    const fatigueFactor = fat < 40  ? 0.0
+    // Floor of ~3% (after the 2× loss modifier) on a loss so fresh heroes
+    // aren't invulnerable and injury traits always mean something.
+    const fatigueFactor = fat < 40  ? (won ? 0.0 : 0.015)
       : fat < 70  ? ((fat-40)/30) * 0.08
       : fat < 88  ? 0.08 + ((fat-70)/18) * 0.12
       : 0.20 + ((fat-88)/12) * 0.15;
@@ -3267,6 +3424,47 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
     if(injured) injuryCount++;
     return injured;
   }).map(h => h.id);
+
+  // ── DRESS EXCHANGES INTO BEATS ─────────────────────────────────────────
+  // Win/loss of each exchange is already decided (calibrated above); this
+  // pass decides WHO acted and what it looked like — crits from Accuracy,
+  // rallies from Leadership, falters from Cowardice — attribution, not odds.
+  const laneBattle = {};
+  POS_KEYS.forEach(pos => {
+    const seq = laneSequences[pos];
+    const ps = positionScores[pos];
+    const actors = [ps.primaryHero, ps.supportHero].filter(Boolean);
+    const beats = [];
+    let w=0, l=0;
+    for(let i=0;i<seq.length;i++){
+      const wonEx = seq[i];
+      wonEx ? w++ : l++;
+      const actor = actors.length ? (actors.length>1 && Math.random()<0.4 ? actors[1] : actors[0]) : null;
+      let kind;
+      if(wonEx){
+        const prevLost = i>0 && !seq[i-1];
+        const critChance = Math.min(0.5, (actor?.stats?.Accuracy||30)/160
+          + (actor?.traits?.includes("Eagle Eye")?0.12:0)
+          + (prevLost && actor?.traits?.includes("Berserker")?0.20:0));
+        kind = prevLost && (actor?.stats?.Leadership||0)>=45 && Math.random()<0.5 ? "rally"
+             : Math.random()<critChance ? "crit" : "hit";
+      } else {
+        kind = (actor?.traits?.includes("Coward") && Math.random()<0.4)
+            || ((actor?.stats?.Composure||50)<30 && Math.random()<0.3) ? "falter" : "blocked";
+      }
+      const text = pick(EXCHANGE_TEXT[pos][kind]).replace(/\{A\}/g, actor ? actor.name.split(" ")[0].replace(/'/g,"") : "The line");
+      beats.push({ won:wonEx, kind, actor:actor?.id??null, actorName:actor?actor.name.split(" ")[0]:null, actorRace:actor?.race??null, text });
+      if(w===3 || l===3) break; // series clinched
+    }
+    // Attach injury markers to this lane's beats (visual attribution — the
+    // injury roll itself is unchanged)
+    actors.filter(h=>injuries.includes(h.id)).forEach(h=>{
+      const lastLost = [...beats].reverse().find(b=>!b.won);
+      const target = lastLost || beats[beats.length-1];
+      if(target) target.injuryTo = h.name.split(" ")[0];
+    });
+    laneBattle[pos] = { beats, wins:beats.filter(b=>b.won).length, losses:beats.filter(b=>!b.won).length };
+  });
 
   // Win swing computed once; loss swing is per-hero (scales with individual morale)
   const moraleSwing = won ? rand(6,10) : 0;
@@ -3305,6 +3503,7 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
     events: summaryEvents, winChance: overallWinChance, effective, analysis, allHeroes, weakLinks,
     specPenalty, adjustedEnemyPower, starPerformer, topWeakLink,
     phaseWinChances, phaseRolls, positionScores,
+    laneBattle,
     abilityResults,
     enemy: enemy.name, enemyDiff: enemy.difficulty,
   };
@@ -3312,24 +3511,40 @@ function buildRaidSimulation(formation, enemy, buildings, playerRank, ngPlus=nul
 
 // ─── RAID SIMULATION MODAL ────────────────────────────────────────────────────
 
-function RaidSimulationModal({ simulation, enemy, onComplete }) {
-  const [stage, setStage]         = useState("countdown"); // countdown → vanguard → skirmisher → arbiter → outcome → done
-  const [revealed, setRevealed]   = useState([]);           // which lanes are revealed
-  const [showOutcome, setShowOutcome] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
+const SIM_LANES = [
+  { pos:"Vanguard",   icon:"🗡️", color:"#ff7878" },
+  { pos:"Skirmisher", icon:"🏹", color:"#ffd966" },
+  { pos:"Arbiter",    icon:"✨", color:"#78c8ff" },
+];
 
-  // Staggered reveal sequence
-  useEffect(() => {
-    if(!simulation) return;
-    const timers = [];
-    // Short countdown before first lane
-    timers.push(setTimeout(()=>{ setStage("vanguard");   setRevealed(["Vanguard"]); }, 900));
-    timers.push(setTimeout(()=>{ setStage("skirmisher"); setRevealed(r=>[...r,"Skirmisher"]); }, 1700));
-    timers.push(setTimeout(()=>{ setStage("arbiter");    setRevealed(r=>[...r,"Arbiter"]); }, 2500));
-    timers.push(setTimeout(()=>{ setStage("outcome");    setShowOutcome(true); }, 3400));
-    timers.push(setTimeout(()=>{ setStage("done"); }, 3800));
-    return () => timers.forEach(clearTimeout);
-  }, [simulation]);
+function RaidSimulationModal({ simulation, enemy, onComplete }) {
+  const [showDetails, setShowDetails] = useState(false);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [fast, setFast] = useState(false);
+
+  // Flatten the exchange series into a playback script:
+  // laneStart → beat… → verdict, per lane, then outcome.
+  const steps = useMemo(()=>{
+    if(!simulation) return [];
+    const s=[];
+    SIM_LANES.forEach((l,li)=>{
+      s.push({type:"laneStart", lane:li});
+      (simulation.laneBattle?.[l.pos]?.beats||[]).forEach((b,bi)=>s.push({type:"beat", lane:li, beat:bi}));
+      s.push({type:"verdict", lane:li});
+    });
+    s.push({type:"outcome"});
+    return s;
+  },[simulation]);
+
+  const done = steps.length===0 || stepIdx >= steps.length-1;
+
+  useEffect(()=>{
+    if(!simulation || done) return;
+    const cur = steps[stepIdx];
+    const delay = fast ? 220 : cur?.type==="laneStart" ? 750 : cur?.type==="verdict" ? 650 : 950;
+    const t = setTimeout(()=>setStepIdx(i=>Math.min(steps.length-1, i+1)), delay);
+    return ()=>clearTimeout(t);
+  },[simulation, stepIdx, fast, steps, done]);
 
   if(!simulation) return null;
 
@@ -3337,15 +3552,34 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
   const outcomeCol = won ? "#a8ff78" : "#ff7878";
   const injuredHeroes = simulation.allHeroes?.filter(h => simulation.injuries?.includes(h.id)) || [];
 
-  const LANES = [
-    { pos:"Vanguard",   icon:"🗡️", color:"#ff7878" },
-    { pos:"Skirmisher", icon:"🏹", color:"#ffd966" },
-    { pos:"Arbiter",    icon:"✨", color:"#78c8ff" },
-  ];
+  // Tap once to speed up, tap again to jump to the verdict
+  const skip = ()=>{ if(done) return; if(!fast) setFast(true); else setStepIdx(steps.length-1); };
+
+  // Per-lane playback state derived from the step cursor
+  const laneStates = SIM_LANES.map((l,li)=>{
+    const startIdx   = steps.findIndex(s=>s.type==="laneStart"&&s.lane===li);
+    const verdictIdx = steps.findIndex(s=>s.type==="verdict"&&s.lane===li);
+    const beats = simulation.laneBattle?.[l.pos]?.beats||[];
+    const visibleCount = beats.filter((b,bi)=>{
+      const idx = steps.findIndex(s=>s.type==="beat"&&s.lane===li&&s.beat===bi);
+      return idx>=0 && idx<=stepIdx;
+    }).length;
+    return {
+      ...l,
+      started:  startIdx>=0 && stepIdx>=startIdx,
+      finished: verdictIdx>=0 && stepIdx>=verdictIdx,
+      beats, visibleCount,
+      won: simulation.phaseRolls?.[l.pos],
+      series: simulation.laneBattle?.[l.pos],
+      ps: simulation.positionScores?.[l.pos],
+    };
+  });
+  const activeLane = laneStates.find(l=>l.started&&!l.finished);
 
   return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(12px)"}}>
-      <div style={{width:"min(520px,96vw)",background:"linear-gradient(160deg,#0c0c1e,#12102a)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,overflow:"hidden",boxShadow:"0 0 80px rgba(0,0,0,0.6)"}}>
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.92)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(12px)"}}
+      onClick={skip}>
+      <div style={{width:"min(520px,96vw)",maxHeight:"92vh",overflowY:"auto",background:"linear-gradient(160deg,#0c0c1e,#12102a)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:16,overflow:"hidden auto",boxShadow:"0 0 80px rgba(0,0,0,0.6)"}}>
 
         {/* Header */}
         <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(255,255,255,0.05)",display:"flex",alignItems:"center",gap:10,background:"rgba(0,0,0,0.3)"}}>
@@ -3353,55 +3587,99 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
             <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:15,color:"#f0e6d3"}}>⚔️ {enemy.name}</div>
             <div style={{fontSize:9,color:"#666",marginTop:1}}>Enemy Power {enemy.power} · {Math.round(simulation.winChance*100)}% projected</div>
           </div>
-          {stage === "countdown" && (
-            <div style={{fontSize:11,color:"#888",fontStyle:"italic"}}>Engaging…</div>
+          {!done && (
+            <div style={{fontSize:9,color:"#666",fontStyle:"italic"}}>{fast?"▸▸":"tap to speed up"}</div>
           )}
         </div>
 
-        {/* Three lane reveal */}
-        <div style={{display:"flex",gap:8,padding:"20px 18px 16px"}}>
-          {LANES.map(({pos,icon,color}) => {
-            const isRevealed = revealed.includes(pos);
-            const phaseResult = simulation.phases?.find(p=>p.pos===pos);
-            const phaseWon = phaseResult?.won;
-            const ps = simulation.positionScores?.[pos];
-            const heroes = simulation.allHeroes?.filter(h=>
-              simulation.phases?.find(p=>p.pos===pos) &&
-              Object.keys(simulation.positionScores||{}).includes(pos)
-            );
+        {/* Battle replay — lanes play out as exchange series */}
+        <div style={{display:"flex",flexDirection:"column",gap:6,padding:"14px 18px 12px"}}>
+          {laneStates.map((ls,li)=>{
+            const isActive = activeLane?.pos===ls.pos && !done;
+            const laneCol = !ls.started ? "#444" : (ls.finished||done) ? (ls.won?"#a8ff78":"#ff7878") : ls.color;
+            const shownBeats = (done?ls.beats:ls.beats.slice(0,ls.visibleCount));
+            const w = shownBeats.filter(b=>b.won).length, lct = shownBeats.filter(b=>!b.won).length;
+            // Momentum: walks with the shown beats, lands where the series landed
+            const mom = shownBeats.reduce((a,b)=>a+(b.won?1:-1),0);
+            const momPct = Math.max(10, Math.min(90, 50 + mom*13));
+            const lastBeat = shownBeats[shownBeats.length-1];
+            const posHeroes = [ls.ps?.primaryHero, ls.ps?.supportHero].filter(Boolean);
 
-            // Get heroes in this position
-            const posHeroes = [ps?.primaryHero, ps?.supportHero].filter(Boolean);
-            const laneCol = !isRevealed ? "#333" : phaseWon ? "#a8ff78" : "#ff7878";
-            const laneBg  = !isRevealed ? "rgba(255,255,255,0.02)" : phaseWon ? "rgba(168,255,120,0.06)" : "rgba(255,100,100,0.06)";
-            const laneBorder = !isRevealed ? "rgba(255,255,255,0.06)" : phaseWon ? "rgba(168,255,120,0.25)" : "rgba(255,100,100,0.25)";
+            // Compact row: pending, or already resolved
+            if(!isActive || !(ls.started)){
+              return (
+                <div key={ls.pos} style={{display:"flex",alignItems:"center",gap:8,padding:"7px 12px",borderRadius:9,
+                  background:!ls.started?"rgba(255,255,255,0.02)":(ls.won?"rgba(168,255,120,0.05)":"rgba(255,100,100,0.05)"),
+                  border:`1px solid ${!ls.started?"rgba(255,255,255,0.05)":(ls.won?"rgba(168,255,120,0.2)":"rgba(255,100,100,0.2)")}`,
+                  opacity:!ls.started?0.45:1,transition:"all 0.3s"}}>
+                  <span style={{fontSize:12}}>{ls.icon}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:laneCol,fontFamily:"'Cinzel',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  {(ls.finished||done)&&ls.series?(
+                    <>
+                      <span style={{fontSize:10,color:"#888"}}>{ls.series.wins}–{ls.series.losses}</span>
+                      <span style={{fontSize:10,fontWeight:700,color:ls.won?"#a8ff78":"#ff7878"}}>{ls.won?"✓ WON":"✗ LOST"}</span>
+                    </>
+                  ):(
+                    <span style={{fontSize:10,color:"#555"}}>…</span>
+                  )}
+                </div>
+              );
+            }
 
+            // Active lane: the clash
             return (
-              <div key={pos} style={{flex:1,borderRadius:10,border:`1px solid ${laneBorder}`,background:laneBg,padding:"12px 10px",textAlign:"center",transition:"all 0.4s ease",transform:isRevealed?"translateY(0)":"translateY(4px)",opacity:isRevealed?1:0.4}}>
-                {/* Position label */}
-                <div style={{fontSize:9,color:isRevealed?color:"#555",fontWeight:700,letterSpacing:1,marginBottom:6,fontFamily:"'Cinzel',serif"}}>{icon} {pos.toUpperCase()}</div>
-
-                {/* Outcome symbol */}
-                <div style={{fontSize:28,marginBottom:6,transition:"all 0.3s",transform:isRevealed?"scale(1)":"scale(0.5)"}}>
-                  {!isRevealed ? "⋯" : phaseWon ? "✓" : "✗"}
+              <div key={ls.pos} style={{borderRadius:11,border:`1px solid ${ls.color}44`,background:`${ls.color}08`,padding:"10px 12px",transition:"all 0.3s"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                  <span style={{fontSize:13}}>{ls.icon}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:ls.color,fontFamily:"'Cinzel',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:"#f0e6d3"}}>{w}–{lct}</span>
                 </div>
 
-                {/* Result label */}
-                <div style={{fontSize:11,fontWeight:700,color:laneCol,marginBottom:8,fontFamily:"'Cinzel',serif"}}>
-                  {!isRevealed ? "—" : phaseWon ? "WON" : "LOST"}
-                </div>
-
-                {/* Hero names */}
-                {posHeroes.length > 0 && (
-                  <div style={{borderTop:`1px solid ${laneBorder}`,paddingTop:6,display:"flex",flexDirection:"column",gap:2}}>
-                    {posHeroes.map((h,i)=>(
-                      <div key={h.id} style={{fontSize:8,color:isRevealed?"#aaa":"#555",display:"flex",alignItems:"center",gap:3,justifyContent:"center"}}>
-                        <HeroAvatar race={h.race} size={9}/>
-                        <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:60}}>{h.name.split(" ")[0]}</span>
-                        {i===0&&ps?.pairingMult>1&&<span style={{color:"#ffd966",fontSize:8}}>✦</span>}
-                      </div>
-                    ))}
+                {/* The clash: your heroes vs their banner */}
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+                  <div style={{display:"flex",gap:5,flex:1}}>
+                    {posHeroes.map(h=>{
+                      const acting = lastBeat && lastBeat.actor===h.id;
+                      return (
+                        <div key={h.id}
+                          style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:7,
+                            background:acting?`${ls.color}22`:"rgba(255,255,255,0.04)",
+                            border:`1px solid ${acting?ls.color+"66":"rgba(255,255,255,0.08)"}`,
+                            animation:acting?"rmLunge 0.5s ease":"none"}}>
+                          <HeroAvatar race={h.race} size={13}/>
+                          <span style={{fontSize:9,color:acting?"#f0e6d3":"#999",fontWeight:acting?700:400}}>{h.name.split(" ")[0]}</span>
+                        </div>
+                      );
+                    })}
                   </div>
+                  <span style={{fontSize:9,color:"#666"}}>vs</span>
+                  <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:7,background:"rgba(255,100,100,0.06)",border:"1px solid rgba(255,100,100,0.18)"}}>
+                    <span style={{fontSize:11}}>{enemy.specialisation?.icon||"⚔️"}</span>
+                    <span style={{fontSize:9,color:"#c98"}}>{enemy.name?.split(" ").slice(0,2).join(" ")}</span>
+                  </div>
+                </div>
+
+                {/* Momentum bar */}
+                <div style={{height:5,borderRadius:3,background:"rgba(255,100,100,0.25)",overflow:"hidden",marginBottom:8}}>
+                  <div style={{height:"100%",width:`${momPct}%`,background:"linear-gradient(90deg,#78c8ff,#a8ff78)",borderRadius:3,transition:"width 0.45s ease"}}/>
+                </div>
+
+                {/* Beat feed */}
+                <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                  {shownBeats.map((b,bi)=>(
+                    <div key={bi} style={{fontSize:10,lineHeight:1.45,color:b.won?"#c9e8b5":"#d89b9b",animation:bi===shownBeats.length-1?"fadeIn 0.35s ease":"none"}}>
+                      <span style={{color:b.won?"#a8ff78":"#ff7878",fontWeight:700}}>{b.won?"▸":"◂"}</span>{" "}
+                      {b.kind==="crit"&&<span style={{color:"#ffd966",fontWeight:700}}>CRIT! </span>}
+                      {b.kind==="rally"&&<span style={{color:"#78c8ff",fontWeight:700}}>RALLY — </span>}
+                      {b.text}
+                      {b.injuryTo&&<div style={{color:"#ff7878",fontSize:9,marginTop:1}}>🩸 {b.injuryTo} is hurt in the exchange</div>}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Grudge interjection at the mid-battle lull */}
+                {li===1&&enemy.manager&&shownBeats.length===0&&(
+                  <div style={{fontSize:9,color:"#998",fontStyle:"italic"}}>“{managerTaunt(enemy.manager, enemy.h2h)}” — {enemy.manager.name}</div>
                 )}
               </div>
             );
@@ -3409,7 +3687,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
         </div>
 
         {/* Outcome card */}
-        <div style={{padding:"0 18px 16px",transition:"all 0.5s",opacity:showOutcome?1:0,transform:showOutcome?"translateY(0)":"translateY(12px)"}}>
+        <div style={{padding:"0 18px 16px",transition:"all 0.5s",opacity:done?1:0,transform:done?"translateY(0)":"translateY(12px)"}}>
           <div style={{borderRadius:12,border:`1px solid ${outcomeCol}33`,background:`${outcomeCol}08`,padding:"14px 16px"}}>
 
             {/* Result */}
@@ -3420,7 +3698,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
               <div style={{flex:1}}/>
               {/* Phase summary pips */}
               <div style={{display:"flex",gap:4}}>
-                {LANES.map(({pos})=>{
+                {SIM_LANES.map(({pos})=>{
                   const pw = simulation.phases?.find(p=>p.pos===pos)?.won;
                   return <div key={pos} style={{width:8,height:8,borderRadius:"50%",background:pw?"#a8ff78":"#ff7878"}}/>;
                 })}
@@ -3468,7 +3746,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
           <div style={{borderTop:"1px solid rgba(255,255,255,0.05)",padding:"12px 18px",maxHeight:220,overflowY:"auto"}}>
             {/* Phase breakdown */}
             <div style={{fontSize:10,color:"#888",fontWeight:700,letterSpacing:1,marginBottom:8}}>PHASE BREAKDOWN</div>
-            {LANES.map(({pos,icon,color})=>{
+            {SIM_LANES.map(({pos,icon,color})=>{
               const phaseResult = simulation.phases?.find(p=>p.pos===pos);
               const ps = simulation.positionScores?.[pos];
               const phaseWon = phaseResult?.won;
@@ -3519,21 +3797,22 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
 
         {/* Footer */}
         <div style={{padding:"12px 18px",borderTop:"1px solid rgba(255,255,255,0.05)",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(0,0,0,0.2)"}}>
-          {stage==="done"?(
+          {done?(
             <>
-              <button onClick={()=>setShowDetails(d=>!d)} style={{padding:"7px 14px",borderRadius:7,border:"1px solid rgba(255,255,255,0.1)",cursor:"pointer",background:"rgba(255,255,255,0.04)",color:"#888",fontSize:11,fontFamily:"'Cinzel',serif"}}>
+              <button onClick={(e)=>{e.stopPropagation();setShowDetails(d=>!d);}} style={{padding:"7px 14px",borderRadius:7,border:"1px solid rgba(255,255,255,0.1)",cursor:"pointer",background:"rgba(255,255,255,0.04)",color:"#888",fontSize:11,fontFamily:"'Cinzel',serif"}}>
                 {showDetails?"Hide Details":"Show Details"}
               </button>
-              <button onClick={onComplete} style={{padding:"9px 24px",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${won?"#a8ff78,#78c8ff":"#ff9f43,#ffd966"})`,color:"#0d0d1a",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
+              <button onClick={(e)=>{e.stopPropagation();onComplete();}} style={{padding:"9px 24px",borderRadius:8,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${won?"#a8ff78,#78c8ff":"#ff9f43,#ffd966"})`,color:"#0d0d1a",fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:13}}>
                 Continue →
               </button>
             </>
           ):(
-            <div style={{fontSize:11,color:"#888",fontStyle:"italic"}}>Resolving…</div>
+            <div style={{fontSize:11,color:"#888",fontStyle:"italic"}}>The battle unfolds…</div>
           )}
         </div>
       </div>
-      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}`}</style>
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@keyframes rmLunge{0%{transform:translateX(0)}35%{transform:translateX(7px)}100%{transform:translateX(0)}}`}</style>
     </div>
   );
 }
@@ -3703,13 +3982,19 @@ function AgeBar({hero}){
 
 function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
   if(!data) return null;
-  const {season, wins, losses, tier, topSynergy, newlyEarned=[], allBoons=[], chronicle} = data;
-  const winPct = Math.round(wins/(wins+losses)*100);
+  const {season, wins, losses, tier, topSynergy, newlyEarned=[], allBoons=[], chronicle, defeat, defeatReason} = data;
+  const winPct = (wins+losses)>0 ? Math.round(wins/(wins+losses)*100) : 0;
 
   const narrativeParts = [];
   if(chronicle){
     const c = chronicle;
-    narrativeParts.push(`In ${c.totalSeasons} season${c.totalSeasons>1?"s":""}, ${townName} climbed from Iron to conquer the Platinum League.`);
+    if(defeat){
+      narrativeParts.push(defeatReason==="bankruptcy"
+        ? `After ${c.totalSeasons} season${c.totalSeasons>1?"s":""}, the coffers of ${townName} ran dry and the banners came down.`
+        : `After ${c.totalSeasons} season${c.totalSeasons>1?"s":""}, ${townName} laid down its arms and walked away from the campaign.`);
+    } else {
+      narrativeParts.push(`In ${c.totalSeasons} season${c.totalSeasons>1?"s":""}, ${townName} climbed from Iron to conquer the Platinum League.`);
+    }
     if(c.totalRaids>0) narrativeParts.push(`You won ${c.totalWins} of ${c.totalRaids} battles across the campaign.`);
     if(c.builtCount>0) narrativeParts.push(`${c.builtCount} building${c.builtCount>1?"s were":"was"} constructed to strengthen your realm.`);
     if(c.biggestUpset) narrativeParts.push(`Your greatest upset came against ${c.biggestUpset.enemy} at just ${Math.round(c.biggestUpset.winChance*100)}% win chance in Season ${c.biggestUpset.season}.`);
@@ -3722,11 +4007,13 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
         {/* Header */}
         <div style={{padding:"28px 28px 18px",textAlign:"center",background:"linear-gradient(180deg,rgba(255,215,0,0.08),transparent)"}}>
-          <div style={{fontSize:40,marginBottom:8}}>🏆</div>
-          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:22,color:"#ffd966",marginBottom:4}}>
-            A Legend is Born
+          <div style={{fontSize:40,marginBottom:8}}>{defeat?"🕯️":"🏆"}</div>
+          <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:22,color:defeat?"#ff9f43":"#ffd966",marginBottom:4}}>
+            {defeat?"The Campaign Ends":"A Legend is Born"}
           </div>
-          <div style={{fontSize:13,color:"#888"}}>{townName} has conquered the Platinum League</div>
+          <div style={{fontSize:13,color:"#888"}}>{defeat
+            ? (defeatReason==="bankruptcy"?`${townName} has fallen into ruin`:`${townName} has abandoned the campaign`)
+            : `${townName} has conquered the Platinum League`}</div>
         </div>
 
         <div style={{padding:"0 24px 24px"}}>
@@ -3841,11 +4128,15 @@ function WeeklySummary({summary, onDismiss, townColor}){
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <div>
               <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:18,color:won?"#a8ff78":"#ff7878"}}>
-                {won?"⚔️ VICTORY":"💀 DEFEAT"}
-                {isMiracle&&<span style={{fontSize:11,color:"#ffd966",marginLeft:8,fontFamily:"'Lato',sans-serif",fontWeight:700}}>✨ MIRACLE!</span>}
-                {!isMiracle&&isUpset&&<span style={{fontSize:11,color:"#ffd966",marginLeft:8,fontFamily:"'Lato',sans-serif",fontWeight:700}}>⚡ UPSET!</span>}
-                {isShock&&<span style={{fontSize:11,color:"#ff9f43",marginLeft:8,fontFamily:"'Lato',sans-serif",fontWeight:700}}>😱 SHOCK LOSS</span>}
-                {isDominant&&<span style={{fontSize:11,color:"#78c8ff",marginLeft:8,fontFamily:"'Lato',sans-serif",fontWeight:700}}>💪 DOMINANT</span>}
+                {isMiracle?"✨ AGAINST ALL ODDS":isUpset?"⚡ UPSET VICTORY":isDominant?"⚔️ A ROUT":isShock?"😱 STUNNED":won?"⚔️ VICTORY":"💀 DEFEAT"}
+              </div>
+              <div style={{fontSize:10,color:won?"#a8ff78":"#ff9f43",marginTop:1,fontStyle:"italic"}}>
+                {isMiracle?"They'll sing about this one. Nobody gave you a chance.":
+                 isUpset?"The bookmakers of the realm are in mourning.":
+                 isDominant?"They came, they saw, they were escorted out.":
+                 isShock?"You were meant to win this. The silence in camp says everyone knows it.":
+                 won?"The banners fly a little higher tonight.":
+                 "Lick the wounds, learn the lesson."}
               </div>
               <div style={{fontSize:11,color:"#888",marginTop:2}}>vs {enemy} <span style={{color:diffStarCol}}>{diffStars}</span> · Week {week}</div>
             </div>
@@ -4105,6 +4396,14 @@ function RandomEventModal({event, heroes, onAccept, onDecline, onViewHero}){
                     <span>{h.role} · Lv {h.level}</span>
                     <span style={{color:fc}}>{fl} fatigue</span>
                     <span style={{color:confidence.color,fontWeight:700}}>{confidence.icon} {confidence.label}</span>
+                    {eventTraitMods(h, event).map(({trait,mod})=>(
+                      <span key={trait} style={{color:mod>0?"#a8ff78":"#ff9f43",fontWeight:700}}>
+                        {mod>0?"▲":"▼"} {trait}
+                      </span>
+                    ))}
+                    {h.traits?.includes("Greedy")&&event.reward?.goldRange&&(
+                      <span style={{color:"#ff9f43"}}>💰 will take a cut</span>
+                    )}
                   </div>
                 </div>
                 {onViewHero&&(
@@ -4537,8 +4836,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         <div style={{fontWeight:700,color:"#ffd966",marginBottom:3}}>📜 Contract Forecast</div>
         <div>Current salary: <b style={{color:"#f0e6d3"}}>{hero.salary}g/wk</b></div>
         <div>Estimated renewal demand: <b style={{color:"#ff9f43"}}>{demand.salary}g/wk</b> · {demand.years}s</div>
-        {hero.traits?.includes("Greedy")&&<div style={{color:"#ff7878",marginTop:2}}>⚠️ Greedy trait: +30% demand</div>}
-        {hero.traits?.includes("Loyal")&&<div style={{color:"#a8ff78",marginTop:2}}>✓ Loyal trait: –20% demand</div>}
+        {hero.traits?.includes("Greedy")&&<div style={{color:"#ff7878",marginTop:2}}>⚠️ Greedy trait: +20% demand</div>}
+        {hero.traits?.includes("Loyal")&&<div style={{color:"#a8ff78",marginTop:2}}>✓ Loyal trait: –12% demand</div>}
         {hero.traits?.includes("Stubborn")&&<div style={{color:"#ffd966",marginTop:2}}>⚠️ Stubborn: won't negotiate down</div>}
         {}
         {(hero.stats["Negotiation"]||0)>30&&(()=>{
@@ -4570,7 +4869,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         {[["Race",`${RACE_ICONS[hero.race]} ${hero.race}`],["Role",`${ROLE_ICONS[hero.role]} ${hero.role}`],
           ["Stage",`${agePhaseLabel(phase)} ${Math.round(hero.stageProgress||0)}%`],["Level",`⭐ ${hero.level}`],
           ["Salary",`${hero.salary}g/wk`],["Value",`${hero.value.toLocaleString()}g`],
-          ["Morale",`${hero.morale}%`],["Status",hero.injured?`🩸 ${hero.injuryWeeks}wks`:"✅ Fit"],
+          ["Morale",`${hero.morale}%`],["Status",hero.injured?`🩸 ${hero.injury?.name||"Injured"} · ${hero.injuryWeeks}w`:"✅ Fit"],
         ].map(([k,v])=>(
           <div key={k} style={{background:"rgba(255,255,255,0.03)",borderRadius:6,padding:"5px 8px"}}>
             <div style={{fontSize:9,color:"#888",marginBottom:1}}>{k}</div>
@@ -4578,6 +4877,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           </div>
         ))}
       </div>
+      {(hero.injured&&hero.injury?.from)||hero.injuryHistory?.length?(
+        <div style={{marginBottom:10,padding:"6px 10px",borderRadius:7,background:"rgba(201,87,87,0.06)",border:"1px solid rgba(201,87,87,0.15)",fontSize:9,color:"#999",lineHeight:1.6}}>
+          {hero.injured&&hero.injury?.from&&<div style={{color:"#c95757"}}>🩸 {hero.injury.name} — sustained against {hero.injury.from} (Wk {hero.injury.week})</div>}
+          {hero.injuryHistory?.slice(0,3).map((inj,i)=>(
+            <div key={i}>🩹 {inj.name}{inj.from?` — vs ${inj.from}`:""}{inj.week?` (Wk ${inj.week})`:""}</div>
+          ))}
+        </div>
+      ):null}
 
       {/* Form & Reputation — bid drivers */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10}}>
@@ -5438,6 +5745,15 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                 <span style={{fontSize:9,fontWeight:700,color:analysis.raceSynergy.color}}>×{analysis.raceSynergy.ratingMult}</span>
               </div>
               <div style={{fontSize:9,color:"#888",marginTop:2,lineHeight:1.4}}>{analysis.raceSynergy.desc}</div>
+              {analysis.raceSynergy.laneMults&&(
+                <div style={{display:"flex",gap:6,marginTop:5}}>
+                  {POS_KEYS.map(p=>{
+                    const lm=analysis.raceSynergy.laneMults[p];
+                    const lmCol=lm>1.0?"#a8ff78":lm<1.0?"#ff9f43":"#888";
+                    return <span key={p} style={{fontSize:8,fontWeight:700,color:lmCol,background:"rgba(255,255,255,0.04)",padding:"2px 6px",borderRadius:5}}>{POSITIONS[p].icon} ×{lm.toFixed(2)}</span>;
+                  })}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -5795,7 +6111,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
 
 // ─── DOMINION TAB ─────────────────────────────────────────────────────────────
 
-function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPosition,tierEnemyTowns,townName,townColor,formRating,leagueTable,playerRecord,matchLog,hallOfFame}){
+function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPosition,tierEnemyTowns,townName,townColor,formRating,leagueTable,playerRecord,matchLog,hallOfFame,chronicleEntries}){
 
   const currentTier = TIERS[playerTier] || TIERS.iron;
   const playerPlayed = (playerRecord?.wins||0) + (playerRecord?.losses||0);
@@ -5844,6 +6160,35 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           <div style={{display:"flex",justifyContent:"space-between",fontSize:9,color:"#888",marginTop:3}}>
             <span>Season start</span><span>Season end — promotion/relegation decided</span>
           </div>
+          {/* Run-in pressure — the table becomes a story in the closing weeks */}
+          {(()=>{
+            const weeksLeft = SEASON_LENGTH()-seasonWeek;
+            if(weeksLeft>12||playerPlayed===0) return null;
+            const pWins = playerRecord?.wins||0;
+            let msg=null, col="#ffd966";
+            if(playerPos<=2){
+              const chaser = allTowns.find((t,i)=>i>=2&&!t.isPlayer);
+              const cushion = chaser ? pWins-chaser.wins : 0;
+              msg = isPlatinum&&playerPos===1
+                ? `You hold the throne. ${chaser?`${chaser.name} sits ${cushion} win${cushion===1?"":"s"} back`:""} — ${weeksLeft} week${weeksLeft===1?"":"s"} to hold on.`
+                : `Holding a promotion place${chaser?` — ${chaser.name} is ${cushion} win${cushion===1?"":"s"} behind`:""} with ${weeksLeft} to play.`;
+              col="#a8ff78";
+            } else if(playerPos>=7){
+              const safe = allTowns[5];
+              const gap = safe ? safe.wins-pWins : 0;
+              msg = `Relegation zone — ${gap} win${gap===1?"":"s"} from safety with ${weeksLeft} to play. Every match matters now.`;
+              col="#ff7878";
+            } else {
+              const second = allTowns[1];
+              const gap = second ? second.wins-pWins : 0;
+              if(gap<=weeksLeft) msg = `${gap} win${gap===1?"":"s"} off ${isPlatinum?"the title":"promotion"} with ${weeksLeft} to play — the run-in starts now.`;
+            }
+            return msg ? (
+              <div style={{marginTop:8,padding:"6px 10px",borderRadius:7,background:`${col}10`,border:`1px solid ${col}30`,fontSize:10,fontWeight:700,color:col}}>
+                🏁 {msg}
+              </div>
+            ) : null;
+          })()}
         </div>
 
         {/* Zone key */}
@@ -5875,7 +6220,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           const isYou=t.isPlayer;
           const played=t.wins+t.losses;
           const winPctStr=played>0?`${Math.round(t.winPct*100)}%`:"—";
-          const tribute=weeklyRankIncome(playerTier);
+          const tribute=weeklyRankIncome(playerTier, pos);
           return(
             <div key={t.name} style={{
               display:"grid",gridTemplateColumns:"36px 1fr 32px 32px 48px 56px",gap:4,
@@ -5898,7 +6243,10 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
                   </span>
                   {isYou&&<span style={{fontSize:8,color:townColor,background:`${townColor}18`,padding:"1px 5px",borderRadius:6,flexShrink:0}}>YOU</span>}
                 </div>
-                {!isYou&&<div style={{fontSize:9,color:"#888"}}>Power ~{Math.round(leagueTable?.[t.name]?.power||t.power||0)}</div>}
+                {!isYou&&<div style={{fontSize:9,color:"#888",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                  {t.manager?`${t.manager.name} · `:""}Power ~{Math.round(leagueTable?.[t.name]?.power||t.power||0)}
+                  {(t.h2h?.wins||t.h2h?.losses)?<span style={{color:(t.h2h.wins>=t.h2h.losses)?"#a8ff78":"#ff9f43"}}> · {t.h2h.wins}–{t.h2h.losses} vs you</span>:null}
+                </div>}
               </div>
               <div style={{textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#a8ff78"}}>{t.wins}</div>
               <div style={{textAlign:"center",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:13,color:"#ff7878"}}>{t.losses}</div>
@@ -5942,6 +6290,19 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
                 <span style={{fontSize:10,color:r.homeWon?"#a8ff78":"#555",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.home}</span>
                 <span style={{fontSize:9,color:"#999"}}>vs</span>
                 <span style={{fontSize:10,color:r.homeWon?"#555":"#a8ff78",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",textAlign:"right"}}>{r.away}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Season chronicle — the stories worth retelling */}
+        {(chronicleEntries||[]).length>0&&(
+          <div style={{marginBottom:14}}>
+            <div style={{fontFamily:"'Cinzel',serif",fontSize:10,color:"#ffd966",marginBottom:8,fontWeight:700,letterSpacing:1}}>📜 THE CHRONICLE</div>
+            {(chronicleEntries||[]).slice(0,10).map((e,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"flex-start",gap:6,padding:"5px 8px",borderRadius:6,marginBottom:3,background:"rgba(255,215,0,0.03)",border:"1px solid rgba(255,215,0,0.08)"}}>
+                <span style={{fontSize:8,color:"#888",minWidth:34,marginTop:1}}>S{e.season}·W{e.week}</span>
+                <span style={{fontSize:10,color:"#c9bf9e",lineHeight:1.4}}>{e.text}</span>
               </div>
             ))}
           </div>
@@ -6108,6 +6469,14 @@ function saveGame(state) {
       emissaryFiredThisSeason: state.emissaryFiredThisSeason,
       hintDismissed: state.hintDismissed,
       bankruptcyWeeks: state.bankruptcyWeeks,
+      lastWeekFinances: state.lastWeekFinances,
+      seasonFinances: state.seasonFinances,
+      pendingEventReturns: state.pendingEventReturns,
+      wanderingMasterLastSeason: state.wanderingMasterLastSeason,
+      pendingChallenge: state.pendingChallenge,
+      nextEventWeek: state.nextEventWeek,
+      scoutingFog: state.scoutingFog,
+      chronicleEntries: state.chronicleEntries,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(blob));
   } catch(e) {
@@ -6442,7 +6811,7 @@ function GuideTab(){
 
       <Section id="battle" icon="🗡️" title="How Battles Work">
         <p style={{margin:"0 0 8px"}}>Every battle is decided across <b style={{color:"#f0e6d3"}}>3 phases</b> — Vanguard, Skirmisher, and Arbiter. Win 2 of 3 phases to win the battle. Each phase compares your heroes' combined score in that lane against the enemy's power share for that position.</p>
-        <p style={{margin:"0 0 8px"}}>Win chance per phase is <b style={{color:"#f0e6d3"}}>capped at 77% and floored at 27%</b> — even a dominant squad can lose a phase, and an underdog can always steal one.</p>
+        <p style={{margin:"0 0 8px"}}>Win chance per phase is <b style={{color:"#f0e6d3"}}>capped at 85% and floored at 15%</b> — even a dominant squad can lose a phase, and an underdog can always steal one.</p>
         <p style={{margin:"0 0 8px"}}>Some opponents have a <b style={{color:"#ff9f43"}}>Specialisation</b> — a tactical style that boosts their power unless your formation counters it. The Battle tab shows what spec they're running and whether you're countering it.</p>
         <p style={{margin:0}}>After a battle the <b style={{color:"#78c8ff"}}>debrief</b> shows exactly which phase you won or lost and why. Use it to identify your weak lane.</p>
       </Section>
@@ -6464,7 +6833,7 @@ function GuideTab(){
       <Section id="economy" icon="💰" title="Hero Economy — Sign, Develop, Sell">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Level 0 Prospects</b> are free to sign. Develop them through battles to raise their level, Form, and Reputation — then sell at Peak for a significant profit. This is your primary income cycle.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#ffd966"}}>Potential</b> is hidden until a hero has played 8–10 battles. The Hidden stats tab shows a progress bar. Build the <b style={{color:"#78c8ff"}}>Observatory</b> (Gold tier) to see the potential bucket (Low/Med/High/Elite) before you even sign a market hero.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) grows with battle appearances and decays on the bench. Form 9 adds a +17% premium to rival offers. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much rival scouts bid.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#a8ff78"}}>Form</b> (1–10) tracks results: heroes whose lane wins its phase run hot; heroes in losing lanes go cold. On the bench, Form drifts back toward 5 — rust dulls a sharp edge, rest steadies a shaken one. Form 9 adds a +17% premium to rival offers. <b style={{color:"#78c8ff"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much rival scouts bid.</p>
         <p style={{margin:0}}>The <b style={{color:"#ffd966"}}>Career Arc</b> panel in each hero's detail shows exactly where they are: Prospect → Rising → Peak → Fading → Veteran. Sell at Peak. Once Fading, bids drop to 60% of value.</p>
       </Section>
 
@@ -6589,9 +6958,27 @@ export default function App(){
   const [heroes,setHeroes] = useState(()=> migrateLevels(migrateBards(saved?.heroes ?? generateStartingSquad())));
   const [buildings,setBuildings]     = useState(()=> saved?.buildings ?? BUILDINGS.map(b=>({...b,built:false})));
   const [formation,setFormation]     = useState(()=>{
-    if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, saved.heroes);
+    if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, heroes);
     return {Vanguard:[null,null],Skirmisher:[null,null],Arbiter:[null,null]};
   });
+  // Formation slots hold hero object snapshots; heroes are replaced every week
+  // (fatigue, injuries, XP, stat decay). Without this re-sync, combat and the
+  // Battle tab read week-1 stats forever until a manual re-assign or reload.
+  useEffect(()=>{
+    setFormation(f=>{
+      let changed=false;
+      const nf={};
+      POS_KEYS.forEach(p=>{
+        nf[p]=(f[p]||[null,null]).map(slot=>{
+          if(!slot) return null;
+          const live=heroes.find(h=>h.id===slot.id)||null;
+          if(live!==slot) changed=true;
+          return live;
+        });
+      });
+      return changed?nf:f;
+    });
+  },[heroes]);
   const [detailHero,setDetailHero]   = useState(null);
   const [prevStats,setPrevStats]     = useState(null);
   const [tab,setTab]                 = useState("Squad");
@@ -6632,13 +7019,18 @@ export default function App(){
   const [playerTier,setPlayerTier]       = useState(saved?.playerTier ?? "iron");
   const [tierPosition,setTierPosition]   = useState(saved?.tierPosition ?? 8); // 1=top, 8=bottom
   const [tierEnemyTowns,setTierEnemyTowns] = useState(()=>{
-    if(saved?.tierEnemyTowns) return saved.tierEnemyTowns.map(rehydrateTownAbilities);
+    // Backfill managers/grudge records onto towns from older saves
+    if(saved?.tierEnemyTowns) return saved.tierEnemyTowns.map(rehydrateTownAbilities).map(t=>({
+      ...t, manager: t.manager||pickManager(), h2h: t.h2h||{wins:0,losses:0},
+    }));
     return generateTierTowns("iron");
   });
   const [leagueTable,setLeagueTable]     = useState(()=>{
     if(saved?.leagueTable) return saved.leagueTable;
+    // Must be built from the SAME towns as tierEnemyTowns — a second
+    // generateTierTowns roll here used to seed the table with phantom towns
     const t={};
-    generateTierTowns("iron").forEach(e=>{ t[e.name]={wins:0,losses:0,power:e.power}; });
+    tierEnemyTowns.forEach(e=>{ t[e.name]={wins:0,losses:0,power:e.power}; });
     return t;
   });
   const [activeSimulation,setActiveSimulation] = useState(null);
@@ -6651,6 +7043,8 @@ export default function App(){
   const [matchLog,setMatchLog]                 = useState(()=>(saved?.matchLog??[]).filter(r=>r&&r.home&&r.away));
   const [activeEvent,setActiveEvent]           = useState(saved?.activeEvent ?? null);
   const [showHiddenStats,setShowHiddenStats]   = useState(saved?.showHiddenStats ?? false);
+  const [scoutingFog,setScoutingFog]           = useState(saved?.scoutingFog ?? true); // hide enemy details until scouted
+  const [chronicleEntries,setChronicleEntries] = useState(saved?.chronicleEntries ?? []); // season memory — the stories worth retelling
   const [squadLeaderId,setSquadLeaderId]       = useState(saved?.squadLeaderId ?? null);
   const [raceSynergyUsage,setRaceSynergyUsage] = useState(saved?.raceSynergyUsage ?? {}); // {raceSynergyId: count}
   const [ngPlus]                               = useState(()=>loadNGPlus()); // read-only during run
@@ -6671,6 +7065,9 @@ export default function App(){
   const [newOfferBids,setNewOfferBids]         = useState([]); // freshly-arrived bids for the pop-up modal
 
   const addLog=(text,type="info")=>setLog(l=>[{week,text,type},...l.slice(0,79)]);
+  // Season chronicle — only the stories worth retelling (upsets, grudges,
+  // injuries with names attached, promotions). Rendered in Dominion.
+  const addChronicle=(text)=>setChronicleEntries(prev=>[{week:week+1,season,text},...prev].slice(0,40));
 
   // Generate first scheduled opponent on mount (only if no save)
   useEffect(()=>{
@@ -6723,13 +7120,13 @@ export default function App(){
                 scheduledOpponent,negotiationQueue,
                 townName,townColor,
                 listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
-                leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,
+                leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,
                 signDiscount,gameSpeed,squadLeaderId,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -6872,7 +7269,14 @@ export default function App(){
       if(hasBazaar&&Math.random()<0.5) return[...next,generateHero(Date.now()+1,true,isPremium,isElite&&Math.random()<0.3,null,null,playerTier)];
       return next;
     });
-    addLog(`Signed ${h.name} for ${discountedValue.toLocaleString()}g!`,"success");
+    const signLine = discountedValue===0
+      ? `✍️ ${h.name} signs for nothing but a bunk and a chance. A gamble on raw clay.`
+      : h.marketTier==="elite"
+      ? `✍️ The realm empties its vaults — ${h.name} signs for ${discountedValue.toLocaleString()}g. Now deliver.`
+      : h.marketTier==="premium"
+      ? `✍️ ${h.name} signs for ${discountedValue.toLocaleString()}g. Pedigree costs.`
+      : `✍️ Signed ${h.name} for ${discountedValue.toLocaleString()}g!`;
+    addLog(signLine,"success");
     // Complete sign_hero objective
   };
 
@@ -7065,11 +7469,20 @@ export default function App(){
     const roll = Math.random();
     let outcome, notifications=[], heroUpdates={};
 
+    // Greedy heroes skim 15% of any event gold — a private cut, invoiced to no one
+    const greedySkim = (gold) => {
+      if(gold > 0 && hero.traits?.includes("Greedy")) {
+        notifications.push(`skimmed ${Math.round(gold*0.15).toLocaleString()}g off the top (Greedy)`);
+        return Math.round(gold * 0.85);
+      }
+      return gold;
+    };
+
     if(roll < success) {
       outcome = "success";
       // Gold reward
       if(eventDef.reward.goldRange) {
-        const gold = rand(...eventDef.reward.goldRange);
+        const gold = greedySkim(rand(...eventDef.reward.goldRange));
         heroUpdates._goldGain = gold;
       }
       // XP reward
@@ -7126,7 +7539,7 @@ export default function App(){
       outcome = "partial";
       // Half gold only
       if(eventDef.reward.goldRange) {
-        const gold = Math.round(rand(...eventDef.reward.goldRange) * 0.5);
+        const gold = greedySkim(Math.round(rand(...eventDef.reward.goldRange) * 0.5));
         heroUpdates._goldGain = gold;
       }
 
@@ -7335,12 +7748,16 @@ export default function App(){
         const newFatigue = Math.min(100, (h.fatigue||0) + fatigueGain + abilityFatigueBonus);
 
         // Extra injury risk when critically fatigued
+        const newlyInjured = !h.injured && result.injuries.includes(h.id);
         let injured=h.injured||result.injuries.includes(h.id);
         let injuryWeeks=injured?(result.injuries.includes(h.id)?rand(1,4):Math.max(0,h.injuryWeeks-1)):0;
         if(buildings.find(b=>b.id==="infirmary"&&b.built)&&injuryWeeks>0)injuryWeeks=Math.max(1,injuryWeeks-1);
+        const healedNow = h.injured && injuryWeeks===0;
         if(injuryWeeks===0)injured=false;
         let xpGain=result.heroXP;
         if(h.morale>=80)xpGain=Math.round(xpGain*1.1);
+        // Cursed heroes learn from suffering — the curse takes, but it also teaches
+        if(h.traits?.includes("Cursed"))xpGain=Math.round(xpGain*1.15);
         // Squad Leader XP bonus — applies when leader is in formation
         if(leaderInFormation){
           const lb=calcLeaderBonuses(leader);
@@ -7385,10 +7802,18 @@ export default function App(){
           ? {...newStats, Form: Math.max(1, (newStats.Form||5) - rand(1,2))}
           : newStats;
 
-        // Form grows with play — scouts notice heroes in form
+        // Form tracks RESULTS, not attendance — your lane won, you run hot;
+        // your lane lost, you go cold. Streaks emerge naturally.
         // Reputation grows with appearances — the market learns who you are
-        const formGain = (Math.random() * 0.5) + 0.3; // 0.3–0.8 per raid
-        const newForm = Math.min(10, (cursedStats.Form||5) + formGain);
+        const heroLane = POS_KEYS.find(p=>(formation[p]||[]).some(x=>x?.id===h.id));
+        const laneWon = heroLane ? !!result.phaseRolls?.[heroLane] : result.won;
+        // Personal exchange record sharpens the swing: the hero who carried a
+        // losing lane cools less; the passenger in a winning lane heats less
+        const personalBeats = (result.laneBattle?.[heroLane]?.beats||[]).filter(b=>b.actor===h.id);
+        const personalNet = personalBeats.reduce((a,b)=>a+(b.won?1:-1),0);
+        const formGain = (laneWon ? (Math.random()*0.4)+0.4 : -((Math.random()*0.5)+0.1))
+          + Math.max(-0.2, Math.min(0.2, personalNet*0.1));
+        const newForm = Math.min(10, Math.max(1, (cursedStats.Form||5) + formGain));
         // Injury knocks Form — coming back rusty
         const postInjuryForm = (injured && result.injuries.includes(h.id))
           ? Math.max(1, newForm - 1.0)
@@ -7402,7 +7827,15 @@ export default function App(){
         const revealThreshold = 8 + Math.floor(Math.random()*3); // 8-10 weeks
         const potentialRevealed = h.potentialRevealed || newWeeksInFormation >= revealThreshold;
 
-        return{...h,xp:newXP,level:newLv,value:updatedValue,stats:grownStats,morale:Math.min(100,Math.max(0,h.morale+totalMoraleSwing)),injured,injuryWeeks,weeksUnplayed:0,fatigue:newFatigue,mentorBonus:newMentorBonus,weeksInSquad:(h.weeksInSquad||0)+1,weeksInFormation:newWeeksInFormation,potentialRevealed};
+        let out={...h,xp:newXP,level:newLv,value:updatedValue,stats:grownStats,morale:Math.min(100,Math.max(0,h.morale+totalMoraleSwing)),injured,injuryWeeks,weeksUnplayed:0,fatigue:newFatigue,mentorBonus:newMentorBonus,weeksInSquad:(h.weeksInSquad||0)+1,weeksInFormation:newWeeksInFormation,potentialRevealed};
+        if(newlyInjured){
+          const injName = pick(INJURY_NAMES_BY_POS[heroPos]||INJURY_NAMES_ALL);
+          out.injury = { name:injName, from:raidEnemy.name, week:week+1 };
+          addLog(`🩸 ${h.name} — ${injName.toLowerCase()}, courtesy of ${raidEnemy.name}. Out ~${injuryWeeks}w.`,"danger");
+          addChronicle(`🩸 ${h.name} — ${injName.toLowerCase()}, vs ${raidEnemy.name}.`);
+        }
+        if(healedNow) out = applyHealScar(out, addLog);
+        return out;
       } else {
         // Bench: recover fatigue — Recovery Lodge speeds this up
         const hasLodge=buildings.find(b=>b.id==="lodge"&&b.built);
@@ -7460,10 +7893,14 @@ export default function App(){
           if(newMentorBonus.weeksLeft===0){addLog(`🎖️ ${h.name}'s mentorship from ${newMentorBonus.mentorName} has ended.`,"info");newMentorBonus=null;}
         }
 
-        // Form decays on bench — injured heroes decay faster (rust + physical setback)
-        // Reputation decays slowly on bench — out of sight, out of mind
-        const formDecay = h.injured ? 0.40 : 0.15;
-        const benchForm = Math.max(1, (h.stats.Form||5) - formDecay);
+        // Bench Form drifts toward neutral 5 — rust dulls a sharp edge, but rest
+        // steadies a shaken one. (Decaying to 1 punished the very rotation the
+        // fatigue system demands.) Injured heroes still lose form outright.
+        const currentForm = h.stats.Form||5;
+        const benchForm = h.injured ? Math.max(1, currentForm - 0.40)
+          : currentForm > 5 ? Math.max(5, currentForm - 0.20)
+          : currentForm < 5 ? Math.min(5, currentForm + 0.20)
+          : currentForm;
         const benchRep  = Math.max(0, (h.stats.Reputation||0) - 0.1);
         const benchStats = h.traits?.includes("Cursed") && Math.random()<0.4
           ? {...h.stats, Form: Math.max(1, h.stats.Form - rand(1,2)), Reputation: benchRep}
@@ -7566,7 +8003,17 @@ export default function App(){
       return Math.random() < chance;
     });
     walkouts.forEach(h=>{
-      addLog(`🤬 ${h.name} walked out! The squad is rattled.`,"danger");
+      const walkLine = h.traits?.includes("Hot-headed")
+        ? `🤬 ${h.name} kicked the barracks door off its hinges on the way out. The squad is rattled.`
+        : h.traits?.includes("Greedy")
+        ? `🤬 ${h.name} walked out, leaving only a note about wages. The squad is rattled.`
+        : pick([
+            `🤬 ${h.name} walked out! The squad is rattled.`,
+            `🤬 ${h.name} packed in the night and was gone by dawn. The squad is rattled.`,
+            `🤬 ${h.name} left their colours folded on the bunk. The squad is rattled.`,
+          ]);
+      addLog(walkLine,"danger");
+      addChronicle(`🚪 ${h.name} walked out on the realm.`);
       updatedHeroes=applySquadMoraleEvent(updatedHeroes.filter(x=>x.id!==h.id),h,formation,"walkout");
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===h.id?null:x);});return nf;});
       if(squadLeaderId===h.id) setSquadLeaderId(null);
@@ -7575,7 +8022,9 @@ export default function App(){
     updatedHeroes=updatedHeroes.map(h=>{
       if(!h.injured||raidedIds.has(h.id))return h;
       const wks=Math.max(0,h.injuryWeeks-1);
-      return{...h,injuryWeeks:wks,injured:wks>0};
+      let nh={...h,injuryWeeks:wks,injured:wks>0};
+      if(wks===0) nh=applyHealScar(nh, addLog);
+      return nh;
     });
 
     const newRetirees=[];
@@ -7618,15 +8067,31 @@ export default function App(){
     const wages=aged.filter(h=>!h.retired).reduce((a,h)=>a+h.salary,0);
     const goldAfterWages = gold - wages;
     setGold(g=>g-wages); // allow negative — debt is visible
-    addLog(`💸 Weekly wages: ${wages.toLocaleString()}g`,"warning");
+    const wageLine = pick([
+      `💸 Wages paid: ${wages.toLocaleString()}g. The steward counts twice; heroes count once.`,
+      `💸 Payday — ${wages.toLocaleString()}g lighter. Nobody thanked you.`,
+      `💸 Weekly wages: ${wages.toLocaleString()}g`,
+      `💸 The wage ledger closes at ${wages.toLocaleString()}g. Swords stay sharp, purses don't.`,
+      `💸 ${wages.toLocaleString()}g in wages. Loyalty, invoiced weekly.`,
+    ]);
+    addLog(wageLine,"warning");
 
-    // Bankruptcy grace period — if gold can't cover wages, start/advance counter
-    const tributeAmount=weeklyRankIncome(playerTier);
+    // Bankruptcy grace period — if gold can't cover wages, start/advance counter.
+    // Tribute pays by live table position — holding 1st is worth +280g/wk.
+    const liveTierPosition = calcTierPosition(playerRecord.wins, playerRecord.wins/(Math.max(1,playerRecord.wins+playerRecord.losses)), leagueTable, tierEnemyTowns);
+    const tributeAmount=weeklyRankIncome(playerTier, liveTierPosition);
     setGold(g=>g+tributeAmount);
-    addLog(`${TIERS[playerTier]?.icon||'👑'} ${TIERS[playerTier]?.name||'Iron'} tribute: +${tributeAmount.toLocaleString()}g/wk`,"success");
+    const tierIcon = TIERS[playerTier]?.icon||'👑', tierName = TIERS[playerTier]?.name||'Iron';
+    const tributeLine = pick([
+      `${tierIcon} ${tierName} tribute: +${tributeAmount.toLocaleString()}g/wk`,
+      `${tierIcon} The ${tierName} League pays its dues: +${tributeAmount.toLocaleString()}g.`,
+      `${tierIcon} Tribute carts arrive from the ${tierName} League: +${tributeAmount.toLocaleString()}g.`,
+      `${tierIcon} +${tributeAmount.toLocaleString()}g tribute — rank has its privileges.`,
+    ]);
+    addLog(tributeLine,"success");
 
     // Check bankruptcy after tribute (give tribute a chance to help)
-    const goldAfterAll = Math.max(0, goldAfterWages) + tributeAmount;
+    const goldAfterAll = goldAfterWages + tributeAmount;
     if(goldAfterAll <= 0){
       const newBankruptcyWeeks = bankruptcyWeeks + 1;
       setBankruptcyWeeks(newBankruptcyWeeks);
@@ -7644,11 +8109,12 @@ export default function App(){
         const newlyEarned = checkAchievements(achievementData);
         const existingBoons = ngPlus?.earnedBoons ?? [];
         const allBoons = [...existingBoons, ...newlyEarned];
-        setLegacyCeremony({ season, wins:playerWins, losses:playerLosses,
+        const pWins = playerRecord.wins, pLosses = playerRecord.losses;
+        setLegacyCeremony({ season, wins:pWins, losses:pLosses,
           tier: playerTier, defeat:true, defeatReason:"bankruptcy",
           newlyEarned, allBoons,
-          chronicle:{ totalRaids:trophies.reduce((a,t)=>(t.wins||0)+(t.losses||0),0)+playerWins+playerLosses,
-            totalWins:trophies.reduce((a,t)=>a+(t.wins||0),0)+playerWins,
+          chronicle:{ totalRaids:trophies.reduce((a,t)=>a+(t.wins||0)+(t.losses||0),0)+pWins+pLosses,
+            totalWins:trophies.reduce((a,t)=>a+(t.wins||0),0)+pWins,
             totalSeasons:season, builtCount:buildings.filter(b=>b.built).length,
             totalWeeks:week },
         });
@@ -7671,9 +8137,14 @@ export default function App(){
 
 
 
+    // Fold this week's result into the record BEFORE season end so the final
+    // battle counts toward standings (and doesn't leak into next season)
+    const finalRecord = isLegendary ? playerRecord
+      : { wins: playerRecord.wins + (result.won?1:0), losses: playerRecord.losses + (result.won?0:1) };
     const newSeasonWeek=seasonWeek+1;
-    if(newSeasonWeek>=SEASON_LENGTH()){
-      endSeason();
+    const seasonEnding = newSeasonWeek>=SEASON_LENGTH();
+    if(seasonEnding){
+      endSeason(finalRecord);
     } else {
       setSeasonWeek(newSeasonWeek);
     }
@@ -7719,9 +8190,10 @@ export default function App(){
       }
     }
 
-    // Track player W/L record — legendary raids are exhibition matches, no leaderboard impact
-    if(!isLegendary){
-      setPlayerRecord(r=>({wins:r.wins+(result.won?1:0),losses:r.losses+(result.won?0:1)}));
+    // Track player W/L record — legendary raids are exhibition matches, no leaderboard impact.
+    // Skip when the season just ended: endSeason consumed finalRecord and reset to 0-0.
+    if(!isLegendary && !seasonEnding){
+      setPlayerRecord(finalRecord);
     }
 
     // ── HALL OF FAME: update records ──────────────────────────────────────────
@@ -7796,6 +8268,31 @@ export default function App(){
         setMatchLog(ml=>[playerMatch,...results.map(r=>({...r,week:week+1})),...ml.slice(0,19)]);
         return updated;
       });
+      // The Grudge Book: the rival remembers this result across seasons
+      const rivalTown = tierEnemyTowns.find(t=>t.name===raidEnemy.name);
+      const grudgeDiff = rivalTown ? (rivalTown.h2h?.losses||0)-(rivalTown.h2h?.wins||0) : 0;
+      if(result.won && grudgeDiff>=2){
+        addLog(`⚔️ The grudge is settled — ${raidEnemy.name} finally falls${rivalTown?.manager?`. ${rivalTown.manager.name} will remember this`:""}.`,"success");
+        addChronicle(`⚔️ The grudge settled — ${raidEnemy.name} finally beaten after ${grudgeDiff} more losses than wins.`);
+      } else if(!result.won && grudgeDiff>=2 && rivalTown?.manager){
+        addLog(`💢 ${rivalTown.manager.name} of ${raidEnemy.name} has your number — that's ${grudgeDiff+1} more defeats than wins.`,"warning");
+      }
+      // Match report — the lane series persists after the modal closes
+      if(result.laneBattle){
+        const rep = POS_KEYS.map(p=>{
+          const lb=result.laneBattle[p];
+          return lb?`${POSITIONS[p].icon} ${lb.wins}–${lb.losses}`:null;
+        }).filter(Boolean).join(" · ");
+        addLog(`📜 Match report vs ${raidEnemy.name}: ${rep}`,"info");
+      }
+      // Chronicle: only results worth retelling
+      const wc = result.winChance ?? 0.5;
+      if(result.won && wc < 0.15)      addChronicle(`✨ Against all odds — beat ${raidEnemy.name} at ${Math.round(wc*100)}%.`);
+      else if(result.won && wc < 0.30) addChronicle(`⚡ Upset — ${raidEnemy.name} toppled at ${Math.round(wc*100)}%.`);
+      else if(!result.won && wc > 0.75) addChronicle(`😱 Shock — fell to ${raidEnemy.name} as ${Math.round(wc*100)}% favourites.`);
+      setTierEnemyTowns(ts=>ts.map(t=>t.name===raidEnemy.name
+        ? {...t, h2h:{ wins:(t.h2h?.wins||0)+(result.won?1:0), losses:(t.h2h?.losses||0)+(result.won?0:1) }}
+        : t));
     }
 
     // Generate offers every ~4 weeks
@@ -7858,9 +8355,9 @@ export default function App(){
   };
 
   // ── SEASON END — tiered promotion/relegation ──────────────────────────────
-  const endSeason=()=>{
-    const playerWins = playerRecord.wins;
-    const playerLosses = playerRecord.losses;
+  const endSeason=(finalRecord=playerRecord)=>{
+    const playerWins = finalRecord.wins;
+    const playerLosses = finalRecord.losses;
     const playerPlayed = playerWins + playerLosses;
     const playerWinPct = playerPlayed > 0 ? playerWins / playerPlayed : 0;
 
@@ -7898,7 +8395,7 @@ export default function App(){
       const newlyEarned = checkAchievements(achievementData);
       const existingBoons = ngPlus?.earnedBoons ?? [];
       const allBoons = [...existingBoons, ...newlyEarned];
-      const totalRaids = trophies.reduce((a,t)=>(t.wins||0)+(t.losses||0),0)+playerWins+playerLosses;
+      const totalRaids = trophies.reduce((a,t)=>a+(t.wins||0)+(t.losses||0),0)+playerWins+playerLosses;
       const chronicle = { totalRaids, totalWins:trophies.reduce((a,t)=>a+(t.wins||0),0)+playerWins,
         totalSeasons:season, builtCount:buildings.filter(b=>b.built).length,
         totalWeeks:week, starPlayer:hallOfFame.starPlayer??null,
@@ -7960,6 +8457,9 @@ export default function App(){
                         movement==="relegated_floor"?`⚠️ Finished bottom of Iron — no lower to go.`:
                         `✅ Held position in ${TIERS[playerTier].name} (${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'})`;
     addLog(`🏆 Season ${season} ended! ${movementMsg} — ${playerWins}W/${playerLosses}L`,"success");
+    addChronicle(movement==="promoted"?`🎉 Season ${season}: PROMOTED to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
+      :movement==="relegated"?`📉 Season ${season}: relegated to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
+      :`🏁 Season ${season}: finished ${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'} in ${TIERS[playerTier].name} (${playerWins}W/${playerLosses}L).`);
 
     // ── END-OF-SEASON SUMMARY ────────────────────────────────────────────
     // Skip when the legacy ceremony is taking over (Platinum champion).
@@ -8087,7 +8587,7 @@ export default function App(){
   const STAT_ROWS = [
     ["Gold",          gold.toLocaleString()+"g",                                                         gold<0?"#c95757":"#c9a86a"],
     ["Tier",          `${currentTier.icon} ${currentTier.name}, ${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`, "#d4c9a8"],
-    ["Income",        `+${weeklyRankIncome(playerTier).toLocaleString()}g`,    "#a8c97a"],
+    ["Income",        `+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g`,    "#a8c97a"],
     ["Wages",         `${wages.toLocaleString()}g`,                                                 "#bda478"],
     ["Week",          `${seasonWeek}`,                                                              "#d4c9a8"],
     ["Season",        `${season}`,                                                                  "#d4c9a8"],
@@ -8203,7 +8703,7 @@ export default function App(){
       <div className="rm-topbar">
         <span className="rm-topbar-title" style={{color:townColor}}>{townName}</span>
         <div className="rm-topbar-chips">
-          {[["Gold",gold.toLocaleString()+"g","#ffd966"],[`${currentTier.icon} ${currentTier.name}`,`${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`,currentTier.color],["Tribute",`+${weeklyRankIncome(playerTier).toLocaleString()}g`,"#a8ff78"],["Wages",wages+"g","#ff9f43"],["Week",seasonWeek,"#f0e6d3"]].map(([l,v,c])=>(
+          {[["Gold",gold.toLocaleString()+"g","#ffd966"],[`${currentTier.icon} ${currentTier.name}`,`${currentTierPosition}${['st','nd','rd'][currentTierPosition-1]||'th'}`,currentTier.color],["Tribute",`+${weeklyRankIncome(playerTier, currentTierPosition).toLocaleString()}g`,"#a8ff78"],["Wages",wages+"g","#ff9f43"],["Week",seasonWeek,"#f0e6d3"]].map(([l,v,c])=>(
             <div key={l} className="rm-topbar-chip">
               <div className="rm-topbar-chip-label">{l}</div>
               <div className="rm-topbar-chip-value" style={{color:c}}>{v}</div>
@@ -8487,7 +8987,7 @@ export default function App(){
         {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
 
         {/* DOMINION */}
-        {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame}/>}
+        {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier, currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame} chronicleEntries={chronicleEntries}/>}
 
         {/* BATTLE */}
         {tab==="Battle"&&(
@@ -8541,13 +9041,7 @@ export default function App(){
                   // Specialisation check for this position
                   const spec=scheduledOpponent?.specialisation;
                   const specPen=spec?calcSpecPenalty(spec,formation):null;
-                  const posWarning=specPen&&(
-                    (spec.id==="heavy_vanguard"&&pos==="Vanguard")||
-                    (spec.id==="swift_flankers"&&pos==="Skirmisher")||
-                    (spec.id==="arcane_command"&&pos==="Arbiter")||
-                    (spec.id==="berserker_rush")||
-                    (spec.id==="iron_defence")
-                  );
+                  const posWarning=specPen&&spec.counter===pos;
                   return(
                     <div key={pos} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${posWarning?"rgba(255,159,67,0.4)":pd.color+"33"}`,background:posWarning?"rgba(255,159,67,0.04)":"rgba(255,255,255,0.02)"}}>
                       {/* Position header */}
@@ -8644,7 +9138,7 @@ export default function App(){
                     <div style={{fontSize:10,color:"#a8ff78",fontWeight:700}}>{activeEvent.rewardDesc}</div>
                   </div>
                   <div style={{fontSize:10,color:"#888",marginBottom:8}}>{activeEvent.desc}</div>
-                  <div style={{fontSize:10,color:"#999"}}>Requires: {activeEvent.requires.map(r=>`${r.stat} ≥ ${r.min}`).join(" + ")} · {activeEvent.heroesNeeded} hero{activeEvent.heroesNeeded>1?"es":""}</div>
+                  <div style={{fontSize:10,color:"#999"}}>Tests: {(activeEvent.stats||[]).join(" + ")} · {activeEvent.heroesNeeded} hero{activeEvent.heroesNeeded>1?"es":""}</div>
                   <div style={{marginTop:8,padding:"6px 10px",borderRadius:6,background:"rgba(255,215,0,0.1)",border:"1px solid rgba(255,215,0,0.2)",fontSize:10,color:"#ffd966",textAlign:"center",fontWeight:700}}>
                     ↑ The event modal opened automatically — check above this screen
                   </div>
@@ -8671,10 +9165,6 @@ export default function App(){
                       <div style={{fontSize:9,color:"#888"}}>Win reward</div>
                       <div style={{fontSize:13,fontWeight:700,color:"#ffd966"}}>{legendaryChallenger.goldReward?.toLocaleString()}g</div>
                     </div>
-                    <div style={{flex:1,padding:"6px 8px",borderRadius:6,background:"rgba(167,139,250,0.06)",border:"1px solid rgba(167,139,250,0.15)",textAlign:"center"}}>
-                      <div style={{fontSize:9,color:"#888"}}>Renown</div>
-                      <div style={{fontSize:13,fontWeight:700,color:"#a78bfa"}}>+{legendaryChallenger.renownReward}</div>
-                    </div>
                     <div style={{flex:1,padding:"6px 8px",borderRadius:6,background:"rgba(255,100,100,0.06)",border:"1px solid rgba(255,100,100,0.15)",textAlign:"center"}}>
                       <div style={{fontSize:9,color:"#888"}}>Rank impact</div>
                       <div style={{fontSize:11,fontWeight:700,color:"#a8ff78"}}>Exhibition</div>
@@ -8685,6 +9175,12 @@ export default function App(){
 
               {scheduledOpponent?(()=>{
                 const opp=scheduledOpponent;
+                // Scouting fog: until a scout reports, you know the rumor mill's
+                // power band, the manager, and the stars — not the numbers.
+                const fogged = scoutingFog && !opp.scouted;
+                const fogBand = opp.powerBand ?? [Math.max(10,opp.power-12), opp.power+12];
+                const hasObservatory = buildings.find(b=>b.id==="scouts"&&b.built);
+                const scoutCost = hasObservatory ? 0 : 30*(TIERS[playerTier]?.difficulty||1)+20;
                 const spec=opp.specialisation;
                 const pen=calcSpecPenalty(spec,formation);
                 const penCol=pen?"#ff9f43":"#a8ff78";
@@ -8693,15 +9189,15 @@ export default function App(){
                   : Math.round(opp.power);
                 const posShare = adjPower/3;
                 const k=2.0;
-                const PCAP=0.77, PFLOOR=0.15;
+                const PCAP=0.85, PFLOOR=0.15;
                 const posChances={};
                 const posScoresPreview={};
-                const previewSynergyMult = Math.min(1.5, Math.max(0.3, formAnalysis.mult));
                 POS_KEYS.forEach(pos=>{
                   const posHeroes=(formation[pos]||[]).filter(Boolean);
                   const ps = calcPositionScore(posHeroes, pos);
                   posScoresPreview[pos] = ps;
-                  const effectiveScore = ps.score * previewSynergyMult;
+                  const previewLaneMult = formAnalysis.laneMults?.[pos] ?? Math.min(1.5, Math.max(0.3, formAnalysis.mult));
+                  const effectiveScore = ps.score * previewLaneMult;
                   const ratio=effectiveScore>0?posShare/effectiveScore:999;
                   const raw=1/(1+Math.pow(ratio,k));
                   const posHeroesHere=(formation[pos]||[]).filter(Boolean);
@@ -8721,14 +9217,35 @@ export default function App(){
                         <div style={{flex:1}}>
                           <div style={{fontFamily:"'Cinzel',serif",fontWeight:900,fontSize:16,color:"#f0e6d3"}}>{opp.name}</div>
                           <div style={{fontSize:10,color:oppStarCol}}>{renderStars(oppStars)}
-                            <span style={{color:"#888",marginLeft:6}}>Power {opp.power}</span>
+                            <span style={{color:"#888",marginLeft:6}}>{fogged?`Power ~${fogBand[0]}–${fogBand[1]}`:`Power ${opp.power}`}</span>
                           </div>
                         </div>
                         <div style={{textAlign:"right"}}>
-                          <div style={{fontSize:22,fontWeight:900,color:wcCol}}>{Math.round(overallWC*100)}%</div>
+                          <div style={{fontSize:22,fontWeight:900,color:fogged?"#888":wcCol}}>{fogged?"?":`${Math.round(overallWC*100)}%`}</div>
                           <div style={{fontSize:9,color:"#999"}}>overall win</div>
                         </div>
                       </div>
+
+                      {/* Rival manager + grudge book */}
+                      {opp.manager&&(()=>{
+                        const h2h=opp.h2h||{wins:0,losses:0};
+                        const played=h2h.wins+h2h.losses;
+                        const isGrudge=h2h.losses-h2h.wins>=2;
+                        const taunt=managerTaunt(opp.manager,h2h);
+                        return(
+                          <div style={{padding:"8px 10px",borderRadius:8,background:isGrudge?"rgba(255,100,100,0.06)":"rgba(255,255,255,0.03)",border:`1px solid ${isGrudge?"rgba(255,100,100,0.25)":"rgba(255,255,255,0.07)"}`,marginBottom:10}}>
+                            <div style={{display:"flex",alignItems:"center",gap:6}}>
+                              <span style={{fontSize:10,fontWeight:700,color:"#f0e6d3"}}>{opp.manager.name}</span>
+                              <span style={{fontSize:9,color:"#888",fontStyle:"italic"}}>{opp.manager.title}</span>
+                              {isGrudge&&<span style={{fontSize:8,fontWeight:700,color:"#ff7878",background:"rgba(255,100,100,0.12)",padding:"1px 6px",borderRadius:5}}>GRUDGE MATCH</span>}
+                              <span style={{marginLeft:"auto",fontSize:9,color:played>0?(h2h.wins>=h2h.losses?"#a8ff78":"#ff9f43"):"#888"}}>
+                                {played>0?`H2H ${h2h.wins}W–${h2h.losses}L`:"first meeting"}
+                              </span>
+                            </div>
+                            {taunt&&<div style={{fontSize:9,color:"#999",fontStyle:"italic",marginTop:3}}>“{taunt}”</div>}
+                          </div>
+                        );
+                      })()}
 
                       {/* Per-phase win chances + position power */}
                       <div style={{display:"flex",gap:5,marginBottom:10}}>
@@ -8743,10 +9260,10 @@ export default function App(){
                           const hasPairing = ps.pairingMult > 1.0;
                           const hasBonus = ps.pairingMult > 1.0;
                           return(
-                            <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:7,background:"rgba(255,255,255,0.03)",border:`1px solid ${col}33`,textAlign:"center"}}>
-                              <div style={{fontSize:10}}>{icon}{hasBonus?" ✦":hasPairing?" ✗":""}</div>
+                            <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:7,background:"rgba(255,255,255,0.03)",border:`1px solid ${fogged?"rgba(255,255,255,0.1)":col+"33"}`,textAlign:"center"}}>
+                              <div style={{fontSize:10}}>{icon}{!fogged&&(hasBonus?" ✦":hasPairing?" ✗":"")}</div>
                               <div style={{fontSize:9,color:"#999"}}>{label}</div>
-                              <div style={{fontSize:12,fontWeight:700,color:col}}>{Math.round(p*100)}%</div>
+                              <div style={{fontSize:12,fontWeight:700,color:fogged?"#888":col}}>{fogged?"?":`${Math.round(p*100)}%`}</div>
                               {ps.primaryHero&&<div style={{fontSize:7,color:"#a8ff78",marginTop:2}}>▲ {ps.primaryHero.name.split(" ")[0]}</div>}
                               {ps.supportHero&&<div style={{fontSize:7,color:"#888",marginTop:0}}>▼ {ps.supportHero.name.split(" ")[0]}</div>}
                             </div>
@@ -8755,8 +9272,30 @@ export default function App(){
                       </div>
                       <div style={{fontSize:9,color:"#888",textAlign:"center",marginBottom:10}}>Win 2 of 3 phases to win the battle</div>
 
+                      {/* Scouting fog — the unknown, and the way to know it */}
+                      {fogged&&(
+                        <div style={{padding:"10px 12px",borderRadius:8,background:"rgba(120,200,255,0.05)",border:"1px dashed rgba(120,200,255,0.25)",marginBottom:8}}>
+                          <div style={{fontSize:10,fontWeight:700,color:"#78c8ff",marginBottom:3}}>🕵️ Doctrine unknown</div>
+                          <div style={{fontSize:9,color:"#888",lineHeight:1.5,marginBottom:8}}>
+                            Their formation style and battle abilities are hidden. A scout report reveals exact power, win odds, specialisation and abilities.
+                          </div>
+                          <button onClick={()=>{
+                              if(scoutCost>0){ if(gold<scoutCost) return; setGold(g=>g-scoutCost); }
+                              setScheduledOpponent(o=>o?{...o,scouted:true}:o);
+                              addLog(`🔭 Scout report on ${opp.name}${scoutCost>0?` (−${scoutCost}g)`:" — the Observatory sees all"}.`,"info");
+                            }}
+                            disabled={scoutCost>0&&gold<scoutCost}
+                            style={{width:"100%",padding:"8px 0",borderRadius:7,border:"1px solid rgba(120,200,255,0.35)",
+                              cursor:(scoutCost>0&&gold<scoutCost)?"not-allowed":"pointer",
+                              background:(scoutCost>0&&gold<scoutCost)?"rgba(255,255,255,0.03)":"rgba(120,200,255,0.12)",
+                              color:(scoutCost>0&&gold<scoutCost)?"#555":"#78c8ff",fontFamily:"'Cinzel',serif",fontWeight:700,fontSize:11}}>
+                            {scoutCost===0?"🔭 Observatory Report — Free":`🔭 Send Scout — ${scoutCost}g`}
+                          </button>
+                        </div>
+                      )}
+
                       {/* Specialisation */}
-                      {spec&&(()=>{
+                      {!fogged&&spec&&(()=>{
                         const penCol=pen?"#ff9f43":"#a8ff78";
                         return(
                           <div style={{padding:"8px 10px",background:"rgba(255,255,255,0.04)",borderRadius:7,border:`1px solid ${penCol}33`,marginBottom:8}}>
@@ -8778,7 +9317,7 @@ export default function App(){
                       })()}
 
                       {/* Enemy abilities */}
-                      {(opp.abilities||[]).length>0&&(
+                      {!fogged&&(opp.abilities||[]).length>0&&(
                         <div style={{marginBottom:8}}>
                           {(opp.abilities||[]).map(ability=>{
                             const tierId = opp.tierId||playerTier;
@@ -8843,17 +9382,19 @@ export default function App(){
                           <div style={{fontSize:11,color:"#a78bfa",marginBottom:4}}>📊 Match Preview</div>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <div style={{fontSize:11,color:"#999"}}>
-                              {pen
+                              {fogged
+                                ? <span>Enemy power <b style={{color:"#888"}}>~{fogBand[0]}–{fogBand[1]}</b><span style={{fontSize:9,color:"#888"}}> (unscouted)</span></span>
+                                : pen
                                 ? <span>Enemy power <b style={{color:"#ff9f43"}}>{adjPow}</b><span style={{fontSize:9,color:"#888"}}> (base {opp.power} +{Math.round(pen.penalty*100)}% spec)</span></span>
                                 : <span>Enemy power <b style={{color:penCol}}>{opp.power}</b></span>
                               }
                             </div>
-                            <div style={{fontSize:15,fontWeight:700,color:wcAdjCol}}>{Math.round(overallWC*100)}% win</div>
+                            <div style={{fontSize:15,fontWeight:700,color:fogged?"#888":wcAdjCol}}>{fogged?"? win":`${Math.round(overallWC*100)}% win`}</div>
                           </div>
                           {formAnalysis.positive.length>0&&<div style={{fontSize:10,color:"#a8ff78",marginTop:2}}>✓ {formAnalysis.positive.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.negative.length>0&&<div style={{fontSize:10,color:"#ff7878",marginTop:2}}>⚠️ {formAnalysis.negative.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.raceSynergy&&<div style={{fontSize:10,marginTop:2}}><span style={{color:formAnalysis.raceSynergy.color}}>{formAnalysis.raceSynergy.icon} {formAnalysis.raceSynergy.name}</span><span style={{color:"#999"}}> ×{formAnalysis.raceSynergy.ratingMult}</span></div>}
-                          <div style={{fontSize:10,color:"#888",marginTop:2}}>Wages due: {wages}g · Tribute: +{weeklyRankIncome(playerTier)}g</div>
+                          <div style={{fontSize:10,color:"#888",marginTop:2}}>Wages due: {wages}g · Tribute: +{weeklyRankIncome(playerTier, currentTierPosition)}g</div>
                         </div>
                       );
                     })()}
@@ -9382,11 +9923,12 @@ export default function App(){
                   const newlyEarned = checkAchievements(achievementData);
                   const existingBoons = ngPlus?.earnedBoons ?? [];
                   const allBoons = [...existingBoons, ...newlyEarned];
-                  setLegacyCeremony({ season, wins:playerWins, losses:playerLosses,
+                  const pWins = playerRecord.wins, pLosses = playerRecord.losses;
+                  setLegacyCeremony({ season, wins:pWins, losses:pLosses,
                     tier:playerTier, defeat:true, defeatReason:"abandon",
                     newlyEarned, allBoons,
-                    chronicle:{ totalRaids:trophies.reduce((a,t)=>(t.wins||0)+(t.losses||0),0)+playerWins+playerLosses,
-                      totalWins:trophies.reduce((a,t)=>a+(t.wins||0),0)+playerWins,
+                    chronicle:{ totalRaids:trophies.reduce((a,t)=>a+(t.wins||0)+(t.losses||0),0)+pWins+pLosses,
+                      totalWins:trophies.reduce((a,t)=>a+(t.wins||0),0)+pWins,
                       totalSeasons:season, builtCount:buildings.filter(b=>b.built).length,
                       totalWeeks:week },
                   });
@@ -9488,6 +10030,26 @@ export default function App(){
                         background:showHiddenStats?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.05)",
                         color:showHiddenStats?"#78c8ff":"#888",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",whiteSpace:"nowrap"}}>
                       {showHiddenStats?"Hide Stats":"Reveal Stats"}
+                    </button>
+                  </div>
+                </div>
+                <div style={{marginTop:8,padding:"10px 12px",borderRadius:8,background:scoutingFog?"rgba(120,200,255,0.06)":"rgba(255,255,255,0.03)",border:`1px solid ${scoutingFog?"rgba(120,200,255,0.2)":"rgba(255,255,255,0.07)"}`,transition:"all 0.2s"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:11,fontWeight:700,color:scoutingFog?"#78c8ff":"#888",marginBottom:3}}>
+                        {scoutingFog?"🕵️ Fog of War":"🗺️ Open Intelligence"}
+                      </div>
+                      <div style={{fontSize:10,color:"#999",lineHeight:1.5}}>
+                        {scoutingFog
+                          ?"Opponent power, odds and abilities hidden until you send a scout. The Observatory makes reports free."
+                          :"All opponent details visible before every battle."}
+                      </div>
+                    </div>
+                    <button onClick={()=>setScoutingFog(v=>!v)}
+                      style={{flexShrink:0,padding:"7px 14px",borderRadius:6,border:`1px solid ${scoutingFog?"rgba(120,200,255,0.3)":"rgba(255,255,255,0.12)"}`,cursor:"pointer",
+                        background:scoutingFog?"rgba(120,200,255,0.12)":"rgba(255,255,255,0.05)",
+                        color:scoutingFog?"#78c8ff":"#888",fontSize:10,fontWeight:700,fontFamily:"'Cinzel',serif",whiteSpace:"nowrap"}}>
+                      {scoutingFog?"Disable Fog":"Enable Fog"}
                     </button>
                   </div>
                 </div>
