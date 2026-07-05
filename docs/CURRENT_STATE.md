@@ -93,6 +93,20 @@ injuries, contracts, aging, market, league sim, events) → repeat.
 - **Scouting fog** (toggleable): opponent power shown as a rumor band, odds
   hidden until a paid scout report; Observatory makes reports free.
 
+## Buildings
+
+11 buildings across the five tiers, but only a capped number are buildable per
+tier (`TIER_BUILD_SLOTS` = Iron 1 / Bronze 1 / Silver 2 / Gold 1 / Platinum 1 =
+6 of 11), so each tier is an either/or. Demolishing frees a slot but refunds no
+gold; rebuilding pays full price. Effects: Barracks +20% battle XP · Tavern +3
+morale/wk · Infirmary −30% injury chance + heal 1 wk faster · Recovery Lodge
+bench fatigue recovery +60% · Training Grounds bench +20% battle XP · Talent
+Network market refresh every 3 wks · Trading Post listed heroes 120% value &
++50% bids · Grand Bazaar premium market · Observatory potential buckets + free
+scouting · Elite Sanctum elite market · Hall of Legends retired-hero morale (cap
++20/wk). Building definitions are refreshed from code on load (`migrateBuildings`)
+and pre-cap saves are grandfathered (nothing demolished).
+
 ## Events
 
 Fire every 4–8 weeks from season 2. Every event is **correspondence from a

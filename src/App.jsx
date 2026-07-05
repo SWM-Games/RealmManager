@@ -7165,7 +7165,7 @@ function GuideTab(){
       <Section id="buildings" icon="" title="Buildings">
         {[
           ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
-          ["Bronze",  [["Infirmary","Injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
+          ["Bronze",  [["Infirmary","Heroes suffer 30% fewer injuries; injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
           ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["Gold",    [["Grand Bazaar","Unlocks premium heroes in the market."],["Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["Platinum",[["Elite Sanctum","Unlocks elite heroes in the market."],["Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
