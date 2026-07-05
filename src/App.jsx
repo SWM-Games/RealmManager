@@ -2277,7 +2277,7 @@ const BUILDINGS = [
   { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
   { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Injuries heal 1 week faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
   { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
   { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
@@ -9906,6 +9906,16 @@ export default function App(){
               <div style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></div>
             </div>
 
+            <div style={{fontSize:10,color:"#6E6350",marginBottom:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+              Build slots per tier:{" "}
+              {TIER_ORDER.filter(t=>TIER_ORDER.indexOf(t)<=tierIdx).map((t,i)=>(
+                <span key={t}>
+                  {i>0&&" · "}
+                  <b style={{color:"#8A6D3B"}}>{TIERS[t]?.name||t}</b> {builtInTier(buildings,t)}/{TIER_BUILD_SLOTS[t]}
+                </span>
+              ))}
+            </div>
+
             <div className="rm-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:9}}>
               {buildings.map(b=>{
                 const bTierIdx = TIER_ORDER.indexOf(b.tierRequired||"iron");
@@ -9953,7 +9963,7 @@ export default function App(){
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#6E6350",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
-                    {!b.built&&(
+                    {!b.built&&!buildingCapReached(buildings,b.tierRequired)&&(
                       <button onClick={()=>buildBuilding(b)} disabled={!canAfford}
                         style={{width:"100%",padding:"6px 0",borderRadius:3,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
@@ -9961,6 +9971,35 @@ export default function App(){
                           color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
                         {canAfford?`Build for ${b.cost.toLocaleString()}g`:"Need More Gold"}
                       </button>
+                    )}
+                    {!b.built&&buildingCapReached(buildings,b.tierRequired)&&(
+                      <div style={{width:"100%",padding:"6px 0",borderRadius:3,textAlign:"center",
+                        background:"rgba(60,52,38,0.045)",border:"1px dashed rgba(60,52,38,0.2)",
+                        color:"#8A7F68",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        Slot full — demolish to swap
+                      </div>
+                    )}
+                    {b.built&&confirmDemolishId!==b.id&&(
+                      <button onClick={()=>setConfirmDemolishId(b.id)}
+                        style={{width:"100%",padding:"5px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.35)",
+                          cursor:"pointer",background:"transparent",color:"#7E2D26",
+                          fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        Demolish
+                      </button>
+                    )}
+                    {b.built&&confirmDemolishId===b.id&&(
+                      <div style={{display:"flex",gap:6}}>
+                        <button onClick={()=>{demolishBuilding(b);setConfirmDemolishId(null);}}
+                          style={{flex:1,padding:"5px 0",borderRadius:3,border:"none",cursor:"pointer",
+                            background:"#7E2D26",color:"#F0E8D5",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                          Confirm — no refund
+                        </button>
+                        <button onClick={()=>setConfirmDemolishId(null)}
+                          style={{flex:1,padding:"5px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",
+                            background:"rgba(60,52,38,0.054)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                          Cancel
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
