@@ -8,6 +8,7 @@ import {
   applyHealScar, calcMatchScore, generateTierTowns, generateScheduledOpponent,
   managerTaunt, generateRivalRoster, rivalAskingPrice, ENEMY_ABILITIES, checkAbility,
   TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
+  TIER_BUILD_SLOTS, builtInTier, buildingCapReached,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -365,5 +366,37 @@ describe("calcFormationRating", () => {
     expect(raw).toBeGreaterThan(0);
     // No race synergy in a random formation most of the time → laneMults 1.0
     if (!analysis.raceSynergy) expect(effective).toBe(raw);
+  });
+});
+
+// ── building tier caps ──────────────────────────────────────────────────────
+describe("building tier caps", () => {
+  it("caps builds per tier and grandfathers over-cap saves", () => {
+    const oneIron = [
+      { id: "barracks", tierRequired: "iron", built: true },
+      { id: "tavern", tierRequired: "iron", built: false },
+    ];
+    expect(builtInTier(oneIron, "iron")).toBe(1);
+    expect(buildingCapReached(oneIron, "iron")).toBe(true); // iron slots = 1
+
+    const emptyIron = [{ id: "barracks", tierRequired: "iron", built: false }];
+    expect(buildingCapReached(emptyIron, "iron")).toBe(false);
+
+    const silver = [
+      { id: "trainyard", tierRequired: "silver", built: true },
+      { id: "network", tierRequired: "silver", built: false },
+      { id: "trading", tierRequired: "silver", built: false },
+    ];
+    expect(buildingCapReached(silver, "silver")).toBe(false); // 1 < 2
+    silver[1].built = true;
+    expect(buildingCapReached(silver, "silver")).toBe(true); // 2 >= 2
+
+    // grandfathered: 2 built in a 1-slot tier still reports full (can't add more)
+    const grandfathered = [
+      { id: "barracks", tierRequired: "iron", built: true },
+      { id: "tavern", tierRequired: "iron", built: true },
+    ];
+    expect(buildingCapReached(grandfathered, "iron")).toBe(true);
+    expect(TIER_BUILD_SLOTS.silver).toBe(2);
   });
 });

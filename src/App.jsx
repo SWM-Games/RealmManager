@@ -2291,6 +2291,18 @@ const BUILDINGS = [
   { id:"legends",   name:"Hall of Legends",   icon:"", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
+// Per-tier build slots — you may construct only this many buildings per tier,
+// which forces an either/or. Grandfathered saves may already exceed these; the
+// cap only prevents building MORE (see buildingCapReached), never demolishes.
+export const TIER_BUILD_SLOTS = { iron: 1, bronze: 1, silver: 2, gold: 1, platinum: 1 };
+
+export function builtInTier(buildings, tier) {
+  return (buildings || []).filter(b => b.tierRequired === tier && b.built).length;
+}
+export function buildingCapReached(buildings, tier) {
+  return builtInTier(buildings, tier) >= (TIER_BUILD_SLOTS[tier] ?? 99);
+}
+
 const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
 
 const TRAIT_EFFECTS = {
