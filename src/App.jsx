@@ -9058,7 +9058,9 @@ export default function App(){
       <div className="rm-sidebar">
         <div className="rm-sidebar-logo">
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <div style={{width:22,height:22,border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",color:"#8A6D3B",fontSize:11}}></div>
+            <div style={{width:22,height:22,border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <Glyph id="nav_battle" size={13} color="#8A6D3B"/>
+            </div>
             <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#8A6D3B",letterSpacing:2.5}}>REALM MANAGER</div>
           </div>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:400,fontSize:22,color:townColor||"#3A3427",letterSpacing:0.5,lineHeight:1.1}}>{townName}</div>
