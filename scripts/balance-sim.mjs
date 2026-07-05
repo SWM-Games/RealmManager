@@ -231,7 +231,11 @@ function runCampaign(NSEASONS, opts) {
   let gold = 2500, week = 0, tierIdx = 0, seasonWins = 0, seasonLosses = 0;
   let debtWeeks = 0, maxDebtStreak = 0, bankruptAt = null;
   const built = new Set();
-  const BUILD_ORDER = [["barracks", 1200, 0], ["tavern", 1000, 0], ["infirmary", 1000, 1], ["lodge", 1100, 1], ["network", 1400, 2], ["trainyard", 1200, 2], ["trading", 1600, 2], ["bazaar", 1800, 3], ["scouts", 2800, 3], ["sanctum", 2200, 4], ["legends", 2000, 4]];
+  // [id, cost, tierIdx] — ordered so the strongest modeled pick per tier comes
+  // first; the slot caps below stop the AI buying a tier's weaker buildings.
+  const BUILD_ORDER = [["barracks",1200,0],["tavern",1000,0],["lodge",1100,1],["infirmary",1000,1],["trainyard",1200,2],["network",1400,2],["trading",1600,2],["bazaar",1800,3],["scouts",2800,3],["sanctum",2200,4],["legends",2000,4]];
+  const TIER_SLOTS = [1,1,2,1,1];          // iron, bronze, silver, gold, platinum
+  const builtPerTier = [0,0,0,0,0];
   let towns = [];
   const promoteWeeks = [];
 
@@ -305,6 +309,7 @@ function runCampaign(NSEASONS, opts) {
         const f = h.fatigue || 0;
         const ff = f < 40 ? (won ? 0 : 0.015) : f < 70 ? ((f - 40) / 30) * 0.08 : f < 88 ? 0.08 + ((f - 70) / 18) * 0.12 : 0.20 + ((f - 88) / 12) * 0.15;
         let ch = Math.min(0.60, ff * (won ? 1 : 2)) + (!won ? specInjuryBonus : 0);
+        if (built.has("infirmary")) ch *= 0.70; // Infirmary: -30% injury chance
         if (Math.random() < ch) { h.injured = true; h.injuryWeeks = rand(1, 4); if (built.has("infirmary")) h.injuryWeeks = Math.max(1, h.injuryWeeks - 1); injCount++; }
       }
 
@@ -375,9 +380,11 @@ function runCampaign(NSEASONS, opts) {
         heroes = heroes.filter((h) => !h.retired);
       }
 
-      // buildings
+      // buildings — respect per-tier slot caps (build the priority pick first)
       for (const [bid, cost, reqTier] of BUILD_ORDER) {
-        if (!built.has(bid) && tierIdx >= reqTier && gold > cost + 1500) { built.add(bid); gold -= cost; break; }
+        if (built.has(bid)) continue;
+        if (builtPerTier[reqTier] >= TIER_SLOTS[reqTier]) continue;
+        if (tierIdx >= reqTier && gold > cost + 1500) { built.add(bid); builtPerTier[reqTier]++; gold -= cost; break; }
       }
       // hiring: refresh every 6 weeks (3 w/ network), sign best upgrade
       const interval = built.has("network") ? 3 : 6;

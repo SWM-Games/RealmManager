@@ -9,15 +9,14 @@ abilities (probe + regression guard) · Form & attributes-in-combat · injuries
 scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
 save/load fields · art direction & legibility · Squad Leader system ·
-Wandering Master / The Challenge / Emissary.
+Wandering Master / The Challenge / Emissary · buildings (per-tier caps +
+Infirmary).
 
 ## Not yet reviewed — in priority order
 
-1. **Buildings as a system** — are all 11 worth building? Any strictly
-   dominant/dead picks? Build-order strategy depth.
-2. **Guide tab full accuracy pass** — individual numbers were synced as they
+1. **Guide tab full accuracy pass** — individual numbers were synced as they
    changed, but nobody has read all eight sections against the current game.
-3. **Retirement / mentorship flow** — never reviewed end to end.
+2. **Retirement / mentorship flow** — never reviewed end to end.
 
 ## Resolved
 
@@ -35,6 +34,15 @@ Wandering Master / The Challenge / Emissary.
   legendary-challenger banner, and the Wandering Master modal, and wired
   `declineChallenge` to read its −8 penalty from the def instead of a magic
   number.
+- **Buildings as a system (reviewed + reworked)** — all 11 were wired and
+  useful, but permanent one-time buys with no late-game opportunity cost. Added
+  a per-tier build cap (1/1/2/1/1 = 6 of 11) with demolish-and-rebuild (no
+  refund), buffed the weakest pick — Infirmary (−30% injury chance, keeps faster
+  healing) — so Bronze is a real 1-of-2, reworked the now-impossible "Full House"
+  achievement to "fill every build slot", and added a load migration so building
+  definition edits reach existing saves (grandfathering over-cap saves). Sim
+  re-run: platinum-endgame win back in band; the gold-tier grind and a higher
+  gold plateau are the accepted cost of fewer buildings.
 
 ## Design ideas parked (speced, not started)
 

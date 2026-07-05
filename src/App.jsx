@@ -1365,9 +1365,9 @@ const ACHIEVEMENTS = [
   {
     id:       "full_house",
     name:     "Full House",
-    desc:     "Construct all 11 buildings in one run",
+    desc:     "Fill every build slot in one run",
     icon:     "",
-    check:    (data)=>data.buildings.every(b=>b.built),
+    check:    (data)=>TIER_ORDER.every(t=>buildingCapReached(data.buildings, t)),
     boon: {
       id:     "full_house",
       name:   "Pre-Built Barracks",
@@ -2272,12 +2272,12 @@ export function calcRaceSynergy(formation) {
   return matches.reduce((best,s)=>s.winBonus>best.winBonus?s:best, matches[0]);
 }
 
-const BUILDINGS = [
+export const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
   { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
   { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Injuries heal 1 week faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
   { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
   { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
@@ -2290,6 +2290,26 @@ const BUILDINGS = [
   { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
   { id:"legends",   name:"Hall of Legends",   icon:"", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
+
+// Per-tier build slots — you may construct only this many buildings per tier,
+// which forces an either/or. Grandfathered saves may already exceed these; the
+// cap only prevents building MORE (see buildingCapReached), never demolishes.
+export const TIER_BUILD_SLOTS = { iron: 1, bronze: 1, silver: 2, gold: 1, platinum: 1 };
+
+export function builtInTier(buildings, tier) {
+  return (buildings || []).filter(b => b.tierRequired === tier && b.built).length;
+}
+export function buildingCapReached(buildings, tier) {
+  return builtInTier(buildings, tier) >= (TIER_BUILD_SLOTS[tier] ?? 99);
+}
+
+// Buildings persist in saves as full objects, so static fields (desc, cost,
+// tierRequired…) would otherwise freeze at save time. Rebuild from the current
+// BUILDINGS definitions, carrying over only each building's `built` flag.
+export function migrateBuildings(savedBuildings) {
+  const builtById = new Map((savedBuildings || []).map(b => [b.id, !!b.built]));
+  return BUILDINGS.map(def => ({ ...def, built: builtById.get(def.id) ?? false }));
+}
 
 const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
 
@@ -3446,6 +3466,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
 
   const {effective, analysis} = calcFormationRating(formation);
   const hasBarracks = buildings.find(b=>b.id==="barracks"&&b.built);
+  const hasInfirmary = buildings.find(b=>b.id==="infirmary"&&b.built);
 
   // Specialisation penalty
   const specPenalty = calcSpecPenalty(enemy.specialisation, formation);
@@ -3611,6 +3632,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
     if(h.traits?.includes("Berserker") && !won) chance *= 1.5;
     if(h.traits?.includes("Glass Cannon"))      chance *= 2.0;
     if(h.traits?.includes("Resilient"))         chance *= 0.5;
+    if(hasInfirmary)                            chance *= 0.70; // Infirmary: -30% injury chance
     const injured = Math.random() < chance;
     if(injured) injuryCount++;
     return injured;
@@ -7143,7 +7165,7 @@ function GuideTab(){
       <Section id="buildings" icon="" title="Buildings">
         {[
           ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
-          ["Bronze",  [["Infirmary","Injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
+          ["Bronze",  [["Infirmary","Heroes suffer 30% fewer injuries; injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
           ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["Gold",    [["Grand Bazaar","Unlocks premium heroes in the market."],["Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["Platinum",[["Elite Sanctum","Unlocks elite heroes in the market."],["Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
@@ -7252,7 +7274,8 @@ export default function App(){
     return (h.xp==null||h.xp<correctXP) ? {...h, xp:correctXP} : h;
   });
   const [heroes,setHeroes] = useState(()=> migrateLevels(migrateBards(saved?.heroes ?? generateStartingSquad())));
-  const [buildings,setBuildings]     = useState(()=> saved?.buildings ?? BUILDINGS.map(b=>({...b,built:false})));
+  const [buildings,setBuildings]     = useState(()=> migrateBuildings(saved?.buildings));
+  const [confirmDemolishId,setConfirmDemolishId] = useState(null);
   const [formation,setFormation]     = useState(()=>{
     if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, heroes);
     return {Vanguard:[null,null],Skirmisher:[null,null],Arbiter:[null,null]};
@@ -7639,6 +7662,7 @@ export default function App(){
 
   const buildBuilding=b=>{
     if(gold<b.cost)return;
+    if(buildingCapReached(buildings, b.tierRequired)) return; // tier slot full
     setGold(g=>g-b.cost);
     setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:true}:x));
     addLog(`${b.name} constructed!`,"success");
@@ -7653,6 +7677,11 @@ export default function App(){
       setMarket(m=>[...m,...Array.from({length:2},(_,i)=>generateHero(Date.now()+i,true,true,true,null,null,playerTier))]);
       addLog("Elite Sanctum: elite heroes have arrived seeking a worthy realm!","success");
     }
+  };
+
+  const demolishBuilding=b=>{
+    setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:false}:x));
+    addLog(`${b.name} demolished. The slot is free — the gold is not refunded.`,"warning");
   };
 
   // ── RAID: PHASE 1 — generate simulation and open modal ────────────────────
@@ -9885,6 +9914,16 @@ export default function App(){
               <div style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></div>
             </div>
 
+            <div style={{fontSize:10,color:"#6E6350",marginBottom:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+              Build slots per tier:{" "}
+              {TIER_ORDER.filter(t=>TIER_ORDER.indexOf(t)<=tierIdx).map((t,i)=>(
+                <span key={t}>
+                  {i>0&&" · "}
+                  <b style={{color:"#8A6D3B"}}>{TIERS[t]?.name||t}</b> {builtInTier(buildings,t)}/{TIER_BUILD_SLOTS[t]}
+                </span>
+              ))}
+            </div>
+
             <div className="rm-card-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))",gap:9}}>
               {buildings.map(b=>{
                 const bTierIdx = TIER_ORDER.indexOf(b.tierRequired||"iron");
@@ -9911,7 +9950,6 @@ export default function App(){
                         background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",
                         display:"flex",alignItems:"center",justifyContent:"center",gap:8,
                       }}>
-                        <span style={{fontSize:16}}></span>
                         <span style={{fontSize:10,color:"#6E6350",fontFamily:"'Alegreya Sans',sans-serif",textAlign:"center"}}>
                           Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#4A4335"}}>{bTier?.name||"higher tier"}</b>
                         </span>
@@ -9933,7 +9971,7 @@ export default function App(){
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#6E6350",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
-                    {!b.built&&(
+                    {!b.built&&!buildingCapReached(buildings,b.tierRequired)&&(
                       <button onClick={()=>buildBuilding(b)} disabled={!canAfford}
                         style={{width:"100%",padding:"6px 0",borderRadius:3,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
@@ -9941,6 +9979,35 @@ export default function App(){
                           color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
                         {canAfford?`Build for ${b.cost.toLocaleString()}g`:"Need More Gold"}
                       </button>
+                    )}
+                    {!b.built&&buildingCapReached(buildings,b.tierRequired)&&(
+                      <div style={{width:"100%",padding:"6px 0",borderRadius:3,textAlign:"center",
+                        background:"rgba(60,52,38,0.045)",border:"1px dashed rgba(60,52,38,0.2)",
+                        color:"#8A7F68",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        Slot full — demolish to swap
+                      </div>
+                    )}
+                    {b.built&&confirmDemolishId!==b.id&&(
+                      <button onClick={()=>setConfirmDemolishId(b.id)}
+                        style={{width:"100%",padding:"5px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.35)",
+                          cursor:"pointer",background:"transparent",color:"#7E2D26",
+                          fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        Demolish
+                      </button>
+                    )}
+                    {b.built&&confirmDemolishId===b.id&&(
+                      <div style={{display:"flex",gap:6}}>
+                        <button onClick={()=>{demolishBuilding(b);setConfirmDemolishId(null);}}
+                          style={{flex:1,padding:"5px 0",borderRadius:3,border:"none",cursor:"pointer",
+                            background:"#7E2D26",color:"#F0E8D5",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                          Confirm — no refund
+                        </button>
+                        <button onClick={()=>setConfirmDemolishId(null)}
+                          style={{flex:1,padding:"5px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",
+                            background:"rgba(60,52,38,0.054)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                          Cancel
+                        </button>
+                      </div>
                     )}
                   </div>
                 );
