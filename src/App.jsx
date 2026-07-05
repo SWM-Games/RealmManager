@@ -1365,9 +1365,9 @@ const ACHIEVEMENTS = [
   {
     id:       "full_house",
     name:     "Full House",
-    desc:     "Construct all 11 buildings in one run",
+    desc:     "Fill every build slot in one run",
     icon:     "",
-    check:    (data)=>data.buildings.every(b=>b.built),
+    check:    (data)=>TIER_ORDER.every(t=>buildingCapReached(data.buildings, t)),
     boon: {
       id:     "full_house",
       name:   "Pre-Built Barracks",
