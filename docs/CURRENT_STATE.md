@@ -99,8 +99,12 @@ Warden-Captain Brask / Lady Amaranthe Veil / Magister Hollowquill / an
 unsigned hand). Heroes are chosen by stat match ± trait×theme chemistry
 (Coward −20% in the arena; Greedy skims 15% of event gold, flagged in the
 picker). Returns arrive as dispatches written in the sender's voice with a
-Delivered / In Part / Undone stamp. Specials: Wandering Master, The Challenge,
-the Emissary's legendary exhibitions (still pre-correspondence styling).
+Delivered / In Part / Undone stamp. Specials (mutually exclusive on the weekly
+roll): the **Emissary** (gold/platinum, once/season — an opt-in diff-6
+exhibition, now rendered as a sealed letter matching the rest of the
+correspondence), **The Challenge** (Battle-tab banner — next battle +30% enemy
+power, ×2 rewards, or decline for −8 squad morale), and the **Wandering Master**
+(2-season cooldown — pay 200g to raise one hero's stat past its ceiling).
 
 ## Contracts
 
