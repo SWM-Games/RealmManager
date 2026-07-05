@@ -7150,9 +7150,9 @@ function GuideTab(){
 
       <Section id="heroes" icon="" title="Hero Management">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#9A5B2B"}}>Fatigue</b> builds every battle (+15–25) and recovers on the bench (-25/week). Above 88 fatigue heroes lose effectiveness and risk injury. Rotate your bench regularly — the Recovery Lodge speeds this up.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and decays −0.5/week passively. A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and drifts −0.5/week toward a floor of 40 (it won't passively fall below that). A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons depending on career stage. A warning fires 6 weeks before expiry. You can renew early within 2 seasons of expiry. Releasing a hero at contract end costs no morale penalty — plan your releases around expiry dates.</p>
-        <p style={{margin:0}}><b style={{color:"#8A6D3B"}}>Traits</b> give small bonuses and penalties — combat (+5–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
+        <p style={{margin:0}}><b style={{color:"#8A6D3B"}}>Traits</b> give small bonuses and penalties — combat (+3–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
       </Section>
 
       <Section id="economy" icon="" title="Hero Economy — Sign, Develop, Sell">
@@ -7163,6 +7163,7 @@ function GuideTab(){
       </Section>
 
       <Section id="buildings" icon="" title="Buildings">
+        <p style={{margin:"0 0 8px"}}>Each tier unlocks buildings, but you can only construct a <b style={{color:"#23201A"}}>limited number per tier</b> — <b style={{color:"#8A6D3B"}}>1 Iron · 1 Bronze · 2 Silver · 1 Gold · 1 Platinum</b> (6 of 11). Every tier is an either/or, so pick the buildings that fit your strategy. You can <b style={{color:"#7E2D26"}}>demolish</b> one to free its slot, but the gold is not refunded and rebuilding costs full price.</p>
         {[
           ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
           ["Bronze",  [["Infirmary","Heroes suffer 30% fewer injuries; injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
@@ -7197,7 +7198,7 @@ function GuideTab(){
 
       <Section id="objectives" icon="" title="Objectives & Events">
         <p style={{margin:"0 0 8px"}}>Each season you get <b style={{color:"#3C5A78"}}>3 objectives</b>. Complete them for gameplay buffs — XP boosts, morale bonuses, fatigue reductions. They're visible in the Battle tab before you fight so you can adapt your formation.</p>
-        <p style={{margin:0}}><b style={{color:"#5F4B66"}}>Random events</b> fire every few weeks when a hero has the required stats. Heroes sent away earn gold, XP, and stat bonuses — but miss battles for 2–4 weeks. Events are worth accepting in most cases and provide reliable supplementary income.</p>
+        <p style={{margin:0}}><b style={{color:"#5F4B66"}}>Random events</b> begin in season 2 and arrive every 4–8 weeks — any hero can be sent, no stat requirement to trigger. A hero's stats set the <b style={{color:"#23201A"}}>chance of success</b>, not whether the event appears. Heroes sent away earn gold, XP, and stat bonuses — but miss battles for 2–4 weeks. Events are worth accepting in most cases and provide reliable supplementary income.</p>
       </Section>
 
       <Section id="tips" icon="" title="Tips & Common Mistakes">
@@ -7208,6 +7209,7 @@ function GuideTab(){
           "The phase breakdown in the battle debrief shows your weak lane — that's where to invest next.",
           "Counter the opponent's specialisation in the Battle tab — ignoring it gives them a free power boost.",
           "Sell heroes at Peak. A Fading hero at 60% value is often worth less than a free Prospect you develop.",
+          "You can't build everything — each tier has limited build slots, so commit to the buildings that fit your strategy (demolishing refunds no gold).",
           "Build the Observatory before spending big on market signings — knowing the bucket prevents expensive mistakes.",
           "The Tactics multiplier breakdown shows every bonus active. Use it to understand exactly what's driving your rating.",
           "Squad Leader bonus scales with tenure — a long-serving Fading hero in that role still adds real value.",

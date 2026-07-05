@@ -10,13 +10,11 @@ scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
 save/load fields · art direction & legibility · Squad Leader system ·
 Wandering Master / The Challenge / Emissary · buildings (per-tier caps +
-Infirmary).
+Infirmary) · Guide tab accuracy.
 
 ## Not yet reviewed — in priority order
 
-1. **Guide tab full accuracy pass** — individual numbers were synced as they
-   changed, but nobody has read all eight sections against the current game.
-2. **Retirement / mentorship flow** — never reviewed end to end.
+1. **Retirement / mentorship flow** — never reviewed end to end.
 
 ## Resolved
 
@@ -43,6 +41,15 @@ Infirmary).
   definition edits reach existing saves (grandfathering over-cap saves). Sim
   re-run: platinum-endgame win back in band; the gold-tier grind and a higher
   gold plateau are the accepted cost of fewer buildings.
+- **Guide tab accuracy (reviewed)** — read all eight sections against the live
+  game. Two real inaccuracies fixed: the Buildings section never mentioned the
+  per-tier build cap + demolish (now explained up front), and Objectives &
+  Events wrongly said events "fire when a hero has the required stats" (they're
+  timer-based from season 2 with no stat gate; stats set success odds, not
+  eligibility). Minor: trait combat range +5–7% → +3–7% (Blessed is +3%), the
+  morale-decay floor of 40 called out, and a build-slots tip added. Everything
+  else (phase cap, +10%/+7% placement, fatigue/morale numbers, contract 1–4
+  seasons, Form-9 +17%, Fading 60%) verified accurate.
 
 ## Design ideas parked (speced, not started)
 
