@@ -9,6 +9,7 @@ import {
   managerTaunt, generateRivalRoster, rivalAskingPrice, ENEMY_ABILITIES, checkAbility,
   TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
   TIER_BUILD_SLOTS, builtInTier, buildingCapReached,
+  BUILDINGS, migrateBuildings,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -425,5 +426,37 @@ describe("Infirmary injury reduction", () => {
     // expect ~0.70x; allow a generous band for RNG
     expect(withInf).toBeLessThan(base * 0.85);
     expect(withInf).toBeGreaterThan(base * 0.50);
+  });
+});
+
+describe("migrateBuildings", () => {
+  it("refreshes static fields from BUILDINGS while preserving built flags", () => {
+    // simulate an old save: stale desc + a couple built
+    const oldSave = BUILDINGS.map(b => ({
+      ...b,
+      desc: "STALE OLD DESCRIPTION",
+      built: b.id === "barracks" || b.id === "infirmary",
+    }));
+    const migrated = migrateBuildings(oldSave);
+    // same set of buildings, in BUILDINGS order
+    expect(migrated.map(b => b.id)).toEqual(BUILDINGS.map(b => b.id));
+    // static fields come from current BUILDINGS, not the stale save
+    const infDef = BUILDINGS.find(b => b.id === "infirmary");
+    const infMig = migrated.find(b => b.id === "infirmary");
+    expect(infMig.desc).toBe(infDef.desc);
+    expect(infMig.desc).not.toBe("STALE OLD DESCRIPTION");
+    // built flags preserved
+    expect(infMig.built).toBe(true);
+    expect(migrated.find(b => b.id === "barracks").built).toBe(true);
+    expect(migrated.find(b => b.id === "tavern").built).toBe(false);
+    // missing save -> all unbuilt, full definition set
+    const fresh = migrateBuildings(undefined);
+    expect(fresh.length).toBe(BUILDINGS.length);
+    expect(fresh.every(b => b.built === false)).toBe(true);
+    // a building absent from the save defaults to built:false
+    const partial = [{ id: "barracks", built: true }];
+    const m2 = migrateBuildings(partial);
+    expect(m2.find(b => b.id === "barracks").built).toBe(true);
+    expect(m2.find(b => b.id === "tavern").built).toBe(false);
   });
 });

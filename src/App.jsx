@@ -2272,7 +2272,7 @@ export function calcRaceSynergy(formation) {
   return matches.reduce((best,s)=>s.winBonus>best.winBonus?s:best, matches[0]);
 }
 
-const BUILDINGS = [
+export const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
   { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
   { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
@@ -2301,6 +2301,14 @@ export function builtInTier(buildings, tier) {
 }
 export function buildingCapReached(buildings, tier) {
   return builtInTier(buildings, tier) >= (TIER_BUILD_SLOTS[tier] ?? 99);
+}
+
+// Buildings persist in saves as full objects, so static fields (desc, cost,
+// tierRequired…) would otherwise freeze at save time. Rebuild from the current
+// BUILDINGS definitions, carrying over only each building's `built` flag.
+export function migrateBuildings(savedBuildings) {
+  const builtById = new Map((savedBuildings || []).map(b => [b.id, !!b.built]));
+  return BUILDINGS.map(def => ({ ...def, built: builtById.get(def.id) ?? false }));
 }
 
 const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
@@ -7266,7 +7274,7 @@ export default function App(){
     return (h.xp==null||h.xp<correctXP) ? {...h, xp:correctXP} : h;
   });
   const [heroes,setHeroes] = useState(()=> migrateLevels(migrateBards(saved?.heroes ?? generateStartingSquad())));
-  const [buildings,setBuildings]     = useState(()=> saved?.buildings ?? BUILDINGS.map(b=>({...b,built:false})));
+  const [buildings,setBuildings]     = useState(()=> migrateBuildings(saved?.buildings));
   const [confirmDemolishId,setConfirmDemolishId] = useState(null);
   const [formation,setFormation]     = useState(()=>{
     if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, heroes);
