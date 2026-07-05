@@ -7265,6 +7265,7 @@ export default function App(){
   });
   const [heroes,setHeroes] = useState(()=> migrateLevels(migrateBards(saved?.heroes ?? generateStartingSquad())));
   const [buildings,setBuildings]     = useState(()=> saved?.buildings ?? BUILDINGS.map(b=>({...b,built:false})));
+  const [confirmDemolishId,setConfirmDemolishId] = useState(null);
   const [formation,setFormation]     = useState(()=>{
     if(saved?.formation && saved?.heroes) return deserializeFormation(saved.formation, heroes);
     return {Vanguard:[null,null],Skirmisher:[null,null],Arbiter:[null,null]};
@@ -7651,6 +7652,7 @@ export default function App(){
 
   const buildBuilding=b=>{
     if(gold<b.cost)return;
+    if(buildingCapReached(buildings, b.tierRequired)) return; // tier slot full
     setGold(g=>g-b.cost);
     setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:true}:x));
     addLog(`${b.name} constructed!`,"success");
@@ -7665,6 +7667,11 @@ export default function App(){
       setMarket(m=>[...m,...Array.from({length:2},(_,i)=>generateHero(Date.now()+i,true,true,true,null,null,playerTier))]);
       addLog("Elite Sanctum: elite heroes have arrived seeking a worthy realm!","success");
     }
+  };
+
+  const demolishBuilding=b=>{
+    setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:false}:x));
+    addLog(`${b.name} demolished. The slot is free — the gold is not refunded.`,"warning");
   };
 
   // ── RAID: PHASE 1 — generate simulation and open modal ────────────────────
