@@ -4513,46 +4513,66 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
   // ── EMISSARY EVENT: special render — no hero selection ────────────────────
   if(event.isEmissary){
     const lc=event.challenger;
+    // The emissary arrives under seal — same correspondence treatment as every
+    // other letter in the game. Ink is oxblood; the seal takes the challenger's
+    // initial (dropping a leading "The").
+    const ink="#7E2D26";
+    const seal=(lc.name.replace(/^The\s+/i,"")[0]||"C").toUpperCase();
     return(
-      <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.6)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)"}}>
-        <div style={{width:"min(500px,92vw)",background:"#E9E1CE",border:"1px solid rgba(126,45,38,0.55)",borderRadius:3,overflow:"hidden",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
+      <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.6)",zIndex:250,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(10px)",padding:"16px"}}>
+        <div style={{width:"min(500px,92vw)",maxHeight:"90vh",overflowY:"auto",background:"#EFE7D3",border:`1px solid ${ink}8c`,borderRadius:3,boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
 
-          {/* Dramatic header */}
-          <div style={{padding:"24px 24px 16px",textAlign:"center",background:"linear-gradient(180deg,rgba(143,42,30,0.15),transparent)"}}>
-            <div style={{fontSize:42,marginBottom:8}}>{lc.icon}</div>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:20,color:"#7E2D26",marginBottom:4}}>A Legendary Challenge</div>
-            <div style={{fontSize:13,color:"#6E6350"}}>An emissary has arrived</div>
+          {/* The letter — an emissary arrives under seal */}
+          <div style={{padding:"14px 20px 12px",borderBottom:`2px solid ${ink}`,background:`${ink}0c`,position:"relative"}}>
+            <div style={{position:"absolute",top:12,right:16,width:38,height:38,borderRadius:"50%",
+              background:ink,color:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",
+              fontFamily:"'IM Fell English SC',serif",fontSize:19,fontWeight:700,transform:"rotate(-8deg)",
+              boxShadow:`0 0 0 2.5px ${ink}55, 0 1px 3px rgba(30,24,14,0.35)`,opacity:0.92}}>
+              {seal}
+            </div>
+            <div style={{fontSize:9,letterSpacing:2,color:"#6E6350",textTransform:"uppercase",marginBottom:2}}>
+              By emissary · to the Steward of {townName||"the Realm"}
+            </div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:ink,paddingRight:48}}>A Legendary Challenge</div>
           </div>
 
-          <div style={{padding:"0 24px 24px"}}>
-            {/* Challenger card */}
-            <div style={{padding:"14px 16px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.375)",marginBottom:16}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:17,color:"#23201A",marginBottom:4}}>{lc.name}</div>
-              <div style={{fontSize:11,color:"#6E6350",fontStyle:"italic",marginBottom:10}}>"{lc.flavour}"</div>
-              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-                {[
-                  ["Power",lc.power,"#7E2D26"],
-                  ["Reward",`${lc.goldReward?.toLocaleString()||"?"}g`,"#8A6D3B"],
-                ].map(([label,val,col])=>(
-                  <div key={label} style={{textAlign:"center",padding:"8px 4px",borderRadius:3,background:"rgba(30,24,14,0.087)"}}>
-                    <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
-                    <div style={{fontSize:13,fontWeight:700,color:col}}>{val}</div>
-                  </div>
-                ))}
-              </div>
+          <div style={{padding:"16px 20px 20px"}}>
+            <div style={{fontSize:12,color:"#4A4335",lineHeight:1.7,marginBottom:14}}>
+              Steward — my liege <b style={{color:"#23201A"}}>{lc.name}</b> has marked your ascent, and would test it in person.
             </div>
 
-            <div style={{fontSize:11,color:"#6E6350",marginBottom:14,lineHeight:1.6,textAlign:"center"}}>
-              This is an <b style={{color:"#23201A"}}>exhibition match</b> — no rank penalty if you lose.<br/>
-              Win and claim legendary gold and renown. Lose with your honour intact.
+            {/* the challenger's own words */}
+            <div style={{padding:"12px 14px",borderRadius:3,background:`${ink}12`,borderLeft:`3px solid ${ink}`,marginBottom:14}}>
+              <div style={{fontSize:12,color:"#4A4335",fontStyle:"italic",lineHeight:1.6}}>"{lc.flavour}"</div>
+            </div>
+
+            {/* terms */}
+            <div style={{display:"flex",gap:8,marginBottom:14}}>
+              {[
+                ["Their Power",lc.power,ink],
+                ["Purse on Victory",`${lc.goldReward?.toLocaleString()||"?"}g`,"#8A6D3B"],
+              ].map(([label,val,col])=>(
+                <div key={label} style={{flex:1,textAlign:"center",padding:"8px 4px",borderRadius:3,background:"rgba(30,24,14,0.06)",border:"1px solid rgba(60,52,38,0.12)"}}>
+                  <div style={{fontSize:9,color:"#6E6350",marginBottom:2,letterSpacing:0.5}}>{label}</div>
+                  <div style={{fontSize:14,fontWeight:700,color:col}}>{val}</div>
+                </div>
+              ))}
             </div>
 
             {/* Specialisation warning if set */}
             {lc.specialisation&&(
-              <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.225)",marginBottom:14,fontSize:10,color:"#6E6350"}}>
-                {lc.specialisation.icon} They fight with <b style={{color:"#9A5B2B"}}>{lc.specialisation.label}</b> — prepare your counter accordingly.
+              <div style={{padding:"8px 12px",borderRadius:3,background:`${ink}0f`,border:`1px solid ${ink}3a`,marginBottom:14,fontSize:10,color:"#6E6350"}}>
+                They give battle in the <b style={{color:"#9A5B2B"}}>{lc.specialisation.label}</b> style — prepare your counter accordingly.
               </div>
             )}
+
+            <div style={{fontSize:11,color:"#6E6350",lineHeight:1.6,marginBottom:16}}>
+              This is an <b style={{color:"#23201A"}}>exhibition</b> — your rank is safe whatever the outcome. Win for legendary gold and renown; lose with your honour intact.
+            </div>
+
+            <div style={{fontSize:11,color:"#6E6350",fontStyle:"italic",textAlign:"right",marginBottom:16}}>
+              — borne on behalf of {lc.name}
+            </div>
 
             <div style={{display:"flex",gap:10}}>
               <button onClick={onDecline}
@@ -4560,7 +4580,7 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
                 Decline with Honour
               </button>
               <button onClick={()=>onAccept(event,[])}
-                style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#8F2A1E",color:"#F5EEDC",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
+                style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:ink,color:"#F5EEDC",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
                 Accept the Challenge
               </button>
             </div>
@@ -4727,12 +4747,9 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
 
         {/* Header */}
         <div style={{padding:"20px 22px 14px",borderBottom:"1px solid rgba(60,52,38,0.108)",background:"rgba(30,24,14,0.105)"}}>
-          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-            <span style={{fontSize:28}}>{event.icon}</span>
-            <div>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#5F4B66"}}>{event.title}</div>
-              <div style={{fontSize:10,color:"#6E6350"}}>Cost: {event.cost}g · Choose a hero to receive training</div>
-            </div>
+          <div style={{marginBottom:6}}>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#5F4B66"}}>{event.title}</div>
+            <div style={{fontSize:10,color:"#6E6350"}}>Cost: {event.cost}g · Choose a hero to receive training</div>
           </div>
           <div style={{fontSize:11,color:"#4A4335",fontStyle:"italic",lineHeight:1.6}}>"{event.flavour}"</div>
         </div>
@@ -7976,9 +7993,10 @@ export default function App(){
   };
 
   const declineChallenge = () => {
-    setHeroes(hs => hs.map(h => ({...h, morale: Math.max(10, (h.morale||70) - 8)})));
+    const penalty = SPECIAL_EVENTS.find(e=>e.id==="the_challenge")?.declinePenalty?.morale ?? -8;
+    setHeroes(hs => hs.map(h => ({...h, morale: Math.max(10, (h.morale||70) + penalty)})));
     setPendingChallenge(null);
-    addLog(`The challenge was declined. The squad's spirit wavers. (−8 morale to all)`, "warning");
+    addLog(`The challenge was declined. The squad's spirit wavers. (${penalty} morale to all)`, "warning");
   };
 
   const declineEvent=()=>{
@@ -9383,7 +9401,6 @@ export default function App(){
               <div style={{gridColumn:"1/-1",marginBottom:4,padding:"14px 16px",borderRadius:3,
                 background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.525)",
                 display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-                <span style={{fontSize:24}}></span>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13,color:"#9A5B2B",marginBottom:2}}>
                     A Formal Challenge
@@ -9545,12 +9562,9 @@ export default function App(){
               {/* Legendary challenger banner */}
               {legendaryChallenger&&(
                 <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(143,42,30,0.105)",border:"1px solid rgba(126,45,38,0.525)",marginBottom:10}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                    <span style={{fontSize:26}}>{legendaryChallenger.icon}</span>
-                    <div style={{flex:1}}>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#7E2D26"}}>{legendaryChallenger.name}</div>
-                      <div style={{fontSize:10,color:"#6E6350"}}>Power {legendaryChallenger.power} · {"★".repeat(6)} · Legendary</div>
-                    </div>
+                  <div style={{marginBottom:6}}>
+                    <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#7E2D26"}}>{legendaryChallenger.name}</div>
+                    <div style={{fontSize:10,color:"#6E6350"}}>Power {legendaryChallenger.power} · {"★".repeat(6)} · Legendary</div>
                   </div>
                   <div style={{fontSize:10,color:"#6E6350",fontStyle:"italic",marginBottom:8}}>"{legendaryChallenger.flavour}"</div>
                   <div style={{display:"flex",gap:8}}>

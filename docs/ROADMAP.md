@@ -13,14 +13,11 @@ game-speed vestige (removed — see below).
 
 ## Not yet reviewed — in priority order
 
-1. **Wandering Master / The Challenge / Emissary** — mechanics unreviewed;
-   modals still predate the correspondence style (the Emissary is literally an
-   emissary — it should be a letter with a seal).
-2. **Buildings as a system** — are all 11 worth building? Any strictly
+1. **Buildings as a system** — are all 11 worth building? Any strictly
    dominant/dead picks? Build-order strategy depth.
-3. **Guide tab full accuracy pass** — individual numbers were synced as they
+2. **Guide tab full accuracy pass** — individual numbers were synced as they
    changed, but nobody has read all eight sections against the current game.
-4. **Retirement / mentorship flow** — never reviewed end to end.
+3. **Retirement / mentorship flow** — never reviewed end to end.
 
 ## Resolved
 
@@ -30,6 +27,14 @@ game-speed vestige (removed — see below).
   the `speed` state + `setSpeed` in SetupScreen, and the `gameSpeed` save field.
   `SEASON_LENGTH()` is now a plain `const SEASON_LENGTH = 42`. Old saves still
   load (the stale `gameSpeed` field is simply ignored).
+- **Wandering Master / The Challenge / Emissary (reviewed)** — mechanics are
+  sound. The Emissary modal was the only real gap: it predated the
+  correspondence style (a banned `linear-gradient` header + a dead 42px icon
+  slot). Rebuilt as a sealed letter matching every other dispatch. Also cleared
+  the empty post-emoji-sweep icon spans in the Challenge banner, the
+  legendary-challenger banner, and the Wandering Master modal, and wired
+  `declineChallenge` to read its −8 penalty from the def instead of a magic
+  number.
 
 ## Design ideas parked (speced, not started)
 
