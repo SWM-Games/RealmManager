@@ -1,0 +1,128 @@
+# Realm Manager — Current State
+
+*A systems reference. Accurate as of the full-audit-overhaul branch (2026-07).*
+
+Realm Manager is a Football-Manager-style fantasy squad sim: run a realm's
+mercenary company through a five-tier league (Iron → Bronze → Silver → Gold →
+Platinum), one battle per week, 42-week seasons, top-2 promote / bottom-2
+relegate. Win condition: finish 1st in Platinum. NG+ "Legacy Boons" persist
+across runs. The entire game lives in `src/App.jsx`.
+
+## The weekly loop
+
+Set formation (Tactics) → optionally scout the opponent → fight (Battle) →
+weekly resolution (`applyRaidResult`: gold, XP, fatigue, morale, Form,
+injuries, contracts, aging, market, league sim, events) → repeat.
+
+## Combat
+
+- **Three lanes** (Vanguard / Skirmisher / Arbiter), two heroes each. Lane
+  score = position-weighted stat sum × role fit × form × morale × fatigue ×
+  career stage, primary×1.25 + support×0.75, × role/race pairing, × per-lane
+  race-synergy multiplier (`laneMults` — asymmetric by design: a Dwarf wall is
+  ×1.32 Vanguard / ×0.92 Skirmisher).
+- **Phase chance** = sigmoid(lane score vs enemy power/3), capped [0.15, 0.85].
+- **Exchange engine**: each lane resolves as a first-to-3 series (max 5). The
+  per-exchange probability is binomial-inverted from the phase chance, so the
+  series win rate EXACTLY equals the phase chance (test-enforced). Stats dress
+  the exchanges — Accuracy→crits, Leadership→rallies, Coward→falters — and
+  injuries attach to the exchange where they happened. Win 2 of 3 lanes.
+- **Replay**: animated dispatch column (beat feed, momentum bar, manager taunt
+  interjection, tap-to-skip) ending in a rubber-stamp verdict. A one-line match
+  report persists in the log (`VAN 3–2 · SKI 2–3 · ARB 1–3`).
+- **Specialisations** (35% of opponents, biased by manager archetype): enemy
+  power +8–16% unless the counter lane holds ≥80% of your average lane score.
+- **Enemy abilities** (bronze+, 1–2 per town): stat checks against lane/squad
+  averages with empirically tuned thresholds (pass ≈ p65 of a tier-calibrated
+  squad; soft ≈ p30). Effects: fatigue, morale, injury/gold/XP multipliers.
+
+## Heroes
+
+- 7 races, 6 roles, 18 stats (combat / mental / social / hidden). Potential is
+  hidden until ~8–10 fielded weeks (Observatory reveals market buckets).
+- **Growth**: level-ups close the gap to Potential (`gapPerLevel`); the final
+  level (15) closes it exactly. Magic Resist grows like everything else.
+- **Form (1–10)**: results-driven — your lane won → +0.4–0.8; lost → −0.05–0.35
+  (asymmetric to prevent death spirals), sharpened by personal exchange record.
+  Bench drifts toward neutral 5. Multiplies combat 0.6–1.0 and transfer bids.
+- **Injuries**: fatigue-driven with a small floor on losses; carry a name and
+  an origin ("Cracked ribs — vs Coalwatch, Wk 12"); healing has a 15% scar
+  chance (permanent stat dent, or rarely Resilient/Iron Will earned).
+- **Career**: prospect→rising→peak→fading→veteran over 504 weeks, stat decay in
+  decline, retirement with mentorship handoff.
+- **Traits** (18): combat multipliers, fatigue/morale modifiers, contract
+  behaviors (Stubborn blocks counters, Hot-headed walks on rejection), and
+  event chemistry (see Events). Cursed = −5% power but +15% XP.
+
+## The league world
+
+- **7 rival towns per tier**, each with power, a **named manager** (6
+  archetypes with spec-signature biases and record-aware taunts), a persistent
+  **head-to-head grudge book**, and 1–2 abilities.
+- League table simulated weekly: your opponent inherits the inverse of your
+  result; other towns pair off with power-weighted outcomes.
+- **Tribute** = tier base (105/160/260/400/560) + live position bonus
+  (280/200/140/80/40/0/0/0). Win gold = rand(300,700)+difficulty×100; losses
+  pay a small purse (rand(60,130)+difficulty×30) — the anti-death-spiral valve.
+- Season end: top-2 promote, bottom-2 relegate, AI towns rotate, rosters and
+  squad reports expire.
+
+## Markets
+
+- **Free agents**: 12, refresh every 6 weeks (3 with Talent Network); prices
+  include the level term (no flip arbitrage); premium/elite gated by buildings.
+- **Rival rosters (FM-style poaching)**: every town keeps six notables (two per
+  lane) generated on first scout and calibrated so their lanes sum to the
+  town's power. Squad reports cost 40×difficulty+40 (halved by Observatory).
+  Asking price = value × archetype multiplier (Gambler 1.15 … Schemer 1.5)
+  + grudge surcharge + talisman premium (+0.5). Buying drops the seller's
+  power ~8%; one sale per town per season.
+- **Selling**: rival bids arrive every ~4 weeks (form/reputation/listing
+  drive frequency and price; Trading Post boosts both).
+- **Scouting fog** (toggleable): opponent power shown as a rumor band, odds
+  hidden until a paid scout report; Observatory makes reports free.
+
+## Events
+
+Fire every 4–8 weeks from season 2. Every event is **correspondence from a
+named sender** — five themes, five voices, five wax seals (Mad Herod Vance /
+Warden-Captain Brask / Lady Amaranthe Veil / Magister Hollowquill / an
+unsigned hand). Heroes are chosen by stat match ± trait×theme chemistry
+(Coward −20% in the arena; Greedy skims 15% of event gold, flagged in the
+picker). Returns arrive as dispatches written in the sender's voice with a
+Delivered / In Part / Undone stamp. Specials: Wandering Master, The Challenge,
+the Emissary's legendary exhibitions (still pre-correspondence styling).
+
+## Contracts
+
+calcDemand scales with combat/mental averages, level, career phase, morale and
+Negotiation. Expiry → negotiation queue → modal (live hero data): Accept /
+Counter (hidden for Stubborn) / Reject (Hot-headed walks instantly) / **Decide
+Later** (−6 morale, dispute clock ticks). Three disputed weeks → −15 morale/wk;
+morale <20 with expired contract → walkout risk. Early renewal available within
+two seasons of expiry and opens talks immediately.
+
+## Economy guardrails (sim-verified)
+
+Week 1 ≈ 50% win chance; season 1 challenging (40–49%); late game 60–75%;
+bankruptcy (~3 weeks at ≤0 gold = campaign over) is a ~1% tail; gold plateaus
+at 80–95k as platinum wages catch up; platinum title around season 7–9.
+
+## Art direction — "printed matter"
+
+Parchment + six printer's inks, IM Fell English SC (display ≥14px only) +
+Alegreya Sans, 37 engraved stroke glyphs (`Glyph` / `GLYPH_PATHS`) instead of
+emoji, letterpress panels (≤3px corners, no gradients/glows), rubber-stamp
+verdicts (`.rm-stamp`), dashed promotion/relegation rules in the standings,
+gazette-style Chronicle. Legacy dark-era saves self-heal their town color.
+
+## Testing & tooling
+
+- `src/engine.test.jsx` — 29 tests: exchange-series calibration (statistical),
+  ability-threshold counterability (regression guard), growth-to-Potential,
+  spec counters, tribute gradient, scars, trait chemistry, rival roster
+  calibration and pricing.
+- `scripts/balance-sim.mjs` — the balance harness; keep it in sync with
+  formula changes and re-run.
+- CI (`.github/workflows/ci.yml`) on every PR; Vercel builds and previews
+  every push; `dist/` untracked.

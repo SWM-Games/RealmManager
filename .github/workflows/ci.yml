@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Test (engine suite)
+        run: npm test
+      - name: Build
+        run: npm run build
+      # Lint is informational for now — the codebase carries ~90 pre-existing
+      # style errors (unused vars, react-hooks purity). Make this blocking
+      # once those are cleaned up.
+      - name: Lint (non-blocking)
+        run: npx eslint src
+        continue-on-error: true

@@ -1,0 +1,369 @@
+// Engine tests — the pure combat/economy core of Realm Manager.
+// Run with `npm test`. The statistical tests use large N and generous
+// tolerances so they are deterministic in practice.
+import { describe, it, expect } from "vitest";
+import {
+  generateHero, buildRaidSimulation, calcFormationRating, calcPositionScore,
+  calcSpecPenalty, growHeroStats, calcTierPosition, weeklyRankIncome,
+  applyHealScar, calcMatchScore, generateTierTowns, generateScheduledOpponent,
+  managerTaunt, generateRivalRoster, rivalAskingPrice, ENEMY_ABILITIES, checkAbility,
+  TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
+} from "./App.jsx";
+
+// ── fixtures ────────────────────────────────────────────────────────────────
+function makeFormation(tierId = "iron") {
+  const roles = { Vanguard: ["Warrior", "Paladin"], Skirmisher: ["Ranger", "Rogue"], Arbiter: ["Mage", "Cleric"] };
+  const f = {};
+  let id = 1;
+  POS_KEYS.forEach((pos) => {
+    f[pos] = roles[pos].map((role) => generateHero(id++, false, false, false, role, null, tierId));
+  });
+  return f;
+}
+function makeEnemy(power, overrides = {}) {
+  return { name: "Testholm", power, difficulty: 1, tierId: "iron", abilities: [], specialisation: null, ...overrides };
+}
+const noBuildings = [];
+
+// ── exchange engine calibration ─────────────────────────────────────────────
+describe("exchange engine", () => {
+  it("series outcome matches per-lane phase chance (calibration is exact)", () => {
+    // One fixed formation vs one fixed enemy; phase chances are deterministic
+    // given scores, so observed lane win rates must converge to them.
+    const formation = makeFormation();
+    const enemy = makeEnemy(90);
+    const N = 8000;
+    const laneWins = { Vanguard: 0, Skirmisher: 0, Arbiter: 0 };
+    let chances = null;
+    for (let i = 0; i < N; i++) {
+      const sim = buildRaidSimulation(formation, enemy, noBuildings, 1);
+      chances = sim.phaseWinChances;
+      POS_KEYS.forEach((p) => { if (sim.phaseRolls[p]) laneWins[p]++; });
+    }
+    POS_KEYS.forEach((p) => {
+      const observed = laneWins[p] / N;
+      // 8000 trials → 3σ ≈ 1.7pp; allow 2.5pp
+      expect(Math.abs(observed - chances[p])).toBeLessThan(0.025);
+    });
+  });
+
+  it("lane series scores are consistent with the lane verdict", () => {
+    const formation = makeFormation();
+    const enemy = makeEnemy(90);
+    for (let i = 0; i < 200; i++) {
+      const sim = buildRaidSimulation(formation, enemy, noBuildings, 1);
+      POS_KEYS.forEach((p) => {
+        const lb = sim.laneBattle[p];
+        expect(lb.wins + lb.losses).toBeLessThanOrEqual(5);
+        expect(Math.max(lb.wins, lb.losses)).toBe(3); // first to 3 clinches
+        expect(lb.wins === 3).toBe(sim.phaseRolls[p]);
+        lb.beats.forEach((b) => {
+          expect(typeof b.text).toBe("string");
+          expect(b.text.length).toBeGreaterThan(0);
+        });
+      });
+    }
+  });
+
+  it("battle is won iff 2+ lanes are won, and winChance is within [0,1]", () => {
+    const formation = makeFormation();
+    const enemy = makeEnemy(90);
+    for (let i = 0; i < 200; i++) {
+      const sim = buildRaidSimulation(formation, enemy, noBuildings, 1);
+      const lanesWon = POS_KEYS.filter((p) => sim.phaseRolls[p]).length;
+      expect(sim.won).toBe(lanesWon >= 2);
+      expect(sim.winChance).toBeGreaterThan(0);
+      expect(sim.winChance).toBeLessThan(1);
+    }
+  });
+
+  it("phase chances respect the cap and floor", () => {
+    const formation = makeFormation();
+    const weakEnemy = makeEnemy(10);
+    const monsterEnemy = makeEnemy(2000, { difficulty: 5 });
+    const simEasy = buildRaidSimulation(formation, weakEnemy, noBuildings, 1);
+    const simHard = buildRaidSimulation(formation, monsterEnemy, noBuildings, 1);
+    POS_KEYS.forEach((p) => {
+      expect(simEasy.phaseWinChances[p]).toBeLessThanOrEqual(0.85);
+      expect(simHard.phaseWinChances[p]).toBeGreaterThanOrEqual(0.15);
+    });
+  });
+});
+
+// ── growth ──────────────────────────────────────────────────────────────────
+describe("growHeroStats", () => {
+  it("gets within a few points of Potential by MAX_LEVEL (pre-audit bug left ~30-point gaps)", () => {
+    for (let trial = 0; trial < 30; trial++) {
+      let hero = generateHero(1, false, false, false, "Warrior", null, "platinum");
+      const pot = hero.stats.Potential;
+      for (let lv = hero.level + 1; lv <= MAX_LEVEL; lv++) {
+        hero = { ...hero, stats: growHeroStats(hero, lv, noBuildings), level: lv };
+      }
+      // The final level closes any remaining gap — Potential is exact at 15
+      ["Strength", "Magic Resist", "Tactics", "Charisma"].forEach((s) => {
+        expect(hero.stats[s]).toBe(pot);
+      });
+    }
+  });
+
+  it("never exceeds Potential", () => {
+    let hero = generateHero(1, false, false, false, null, null, "iron");
+    const pot = hero.stats.Potential;
+    for (let lv = hero.level + 1; lv <= MAX_LEVEL; lv++) {
+      hero = { ...hero, stats: growHeroStats(hero, lv, noBuildings), level: lv };
+      ["Strength", "Agility", "Magic Resist"].forEach((s) => {
+        expect(hero.stats[s]).toBeLessThanOrEqual(pot);
+      });
+    }
+  });
+});
+
+// ── specialisations ─────────────────────────────────────────────────────────
+describe("calcSpecPenalty", () => {
+  const spec = { counter: "Arbiter", penalty: 0.14, injuryBonus: 0, reason: "test" };
+
+  it("fires when the counter lane is empty", () => {
+    const f = makeFormation();
+    f.Arbiter = [null, null];
+    expect(calcSpecPenalty(spec, f)).not.toBeNull();
+  });
+
+  it("does not fire when the counter lane pulls its weight", () => {
+    const f = makeFormation();
+    // Arbiter staffed with proper Mage+Cleric — comparable to other lanes
+    const pen = calcSpecPenalty(spec, f);
+    // With a balanced formation the counter lane is ≥80% of avg almost always;
+    // assert on the actual computed relation rather than assuming
+    const laneScore = (pos) => calcPositionScore((f[pos] || []).filter(Boolean), pos).score;
+    const avg = POS_KEYS.reduce((a, p) => a + laneScore(p), 0) / POS_KEYS.length;
+    if (laneScore("Arbiter") >= avg * 0.8) expect(pen).toBeNull();
+    else expect(pen).not.toBeNull();
+  });
+
+  it("returns null for no spec", () => {
+    expect(calcSpecPenalty(null, makeFormation())).toBeNull();
+  });
+});
+
+// ── economy ─────────────────────────────────────────────────────────────────
+describe("weeklyRankIncome", () => {
+  it("pays the position gradient on top of tier base", () => {
+    expect(weeklyRankIncome("iron", 1)).toBe(TIERS.iron.tributeBase + TIER_POSITION_BONUS[0]);
+    expect(weeklyRankIncome("iron", 8)).toBe(TIERS.iron.tributeBase);
+    expect(weeklyRankIncome("platinum", 1)).toBe(TIERS.platinum.tributeBase + 280);
+  });
+  it("defaults to bottom-rank income when position is missing", () => {
+    expect(weeklyRankIncome("iron", undefined)).toBe(TIERS.iron.tributeBase);
+  });
+  it("income strictly increases with rank within a tier", () => {
+    for (let pos = 1; pos < 5; pos++) {
+      expect(weeklyRankIncome("gold", pos)).toBeGreaterThan(weeklyRankIncome("gold", pos + 1));
+    }
+  });
+});
+
+describe("calcTierPosition", () => {
+  it("counts only towns with strictly more wins (player wins ties)", () => {
+    const table = { A: { wins: 5 }, B: { wins: 3 }, C: { wins: 3 } };
+    expect(calcTierPosition(3, 0.5, table, [])).toBe(2);
+    expect(calcTierPosition(6, 0.9, table, [])).toBe(1);
+    expect(calcTierPosition(0, 0, table, [])).toBe(4);
+  });
+  it("handles an empty table", () => {
+    expect(calcTierPosition(0, 0, {}, [])).toBe(4);
+  });
+});
+
+// ── injuries & scars ────────────────────────────────────────────────────────
+describe("applyHealScar", () => {
+  const injured = () => ({
+    name: "Test Hero", traits: [], morale: 70,
+    stats: { Strength: 40, Agility: 40, Endurance: 40, Accuracy: 40, Defense: 40, "Magic Power": 40, "Magic Resist": 40, Potential: 60 },
+    injury: { name: "Cracked ribs", from: "Testholm", week: 3 },
+    injuryHistory: [],
+  });
+
+  it("clears the injury and archives it in history", () => {
+    const healed = applyHealScar(injured(), () => {});
+    expect(healed.injury).toBeNull();
+    expect(healed.injuryHistory[0].name).toBe("Cracked ribs");
+  });
+
+  it("caps history at 3 entries", () => {
+    const h = injured();
+    h.injuryHistory = [{ name: "a" }, { name: "b" }, { name: "c" }];
+    const healed = applyHealScar(h, () => {});
+    expect(healed.injuryHistory.length).toBe(3);
+    expect(healed.injuryHistory[0].name).toBe("Cracked ribs");
+  });
+
+  it("scars at roughly the design rate and never raises stats", () => {
+    let scars = 0;
+    for (let i = 0; i < 2000; i++) {
+      const before = injured();
+      const healed = applyHealScar(before, () => {});
+      const statDropped = Object.keys(before.stats).some((s) => healed.stats[s] < before.stats[s]);
+      const traitGained = healed.traits.length > before.traits.length;
+      if (statDropped || traitGained) scars++;
+      Object.keys(before.stats).forEach((s) => {
+        expect(healed.stats[s]).toBeLessThanOrEqual(before.stats[s]);
+      });
+    }
+    const rate = scars / 2000;
+    expect(rate).toBeGreaterThan(0.10); // target 15%
+    expect(rate).toBeLessThan(0.20);
+  });
+});
+
+// ── events ──────────────────────────────────────────────────────────────────
+describe("calcMatchScore trait chemistry", () => {
+  const hero = (traits) => ({
+    traits,
+    stats: { Strength: 50, Endurance: 50, Agility: 50, Accuracy: 50 },
+  });
+  const arenaEvent = { theme: "arena", stats: ["Strength", "Endurance"] };
+
+  it("a Coward scores worse than a Brave hero on the same arena event", () => {
+    const brave = calcMatchScore(hero(["Brave"]), arenaEvent);
+    const coward = calcMatchScore(hero(["Coward"]), arenaEvent);
+    const neutral = calcMatchScore(hero([]), arenaEvent);
+    expect(brave).toBeGreaterThan(neutral);
+    expect(coward).toBeLessThan(neutral);
+  });
+
+  it("never returns a non-positive score", () => {
+    const cursedCoward = hero(["Coward"]);
+    cursedCoward.stats = { Strength: 1, Endurance: 1 };
+    expect(calcMatchScore(cursedCoward, arenaEvent)).toBeGreaterThan(0);
+  });
+});
+
+// ── league & rivals ─────────────────────────────────────────────────────────
+describe("towns and rivals", () => {
+  it("every generated town has a manager and a grudge book", () => {
+    const towns = generateTierTowns("iron");
+    expect(towns.length).toBe(7);
+    towns.forEach((t) => {
+      expect(t.manager?.name).toBeTruthy();
+      expect(t.h2h).toEqual({ wins: 0, losses: 0 });
+    });
+  });
+
+  it("scheduled opponents carry fog state and a truthful power band", () => {
+    const towns = generateTierTowns("bronze");
+    for (let i = 0; i < 50; i++) {
+      const opp = generateScheduledOpponent(1, {}, towns, "bronze");
+      expect(opp.scouted).toBe(false);
+      expect(opp.powerBand[0]).toBeLessThanOrEqual(opp.power);
+      expect(opp.powerBand[1]).toBeGreaterThanOrEqual(opp.power);
+    }
+  });
+
+  it("manager taunts track the head-to-head record", () => {
+    const manager = { name: "Serra Vayne", archetype: "schemer", title: "the Schemer" };
+    const ahead = managerTaunt(manager, { wins: 0, losses: 3 });
+    const behind = managerTaunt(manager, { wins: 3, losses: 0 });
+    const even = managerTaunt(manager, { wins: 1, losses: 1 });
+    expect(ahead).not.toBe(behind);
+    expect(even).not.toBe(ahead);
+  });
+});
+
+// ── enemy abilities ─────────────────────────────────────────────────────────
+// Regression guard for the auto-fail bug: thresholds must stay COUNTERABLE.
+// A tier-calibrated squad should mitigate sometimes and get punished sometimes;
+// if any ability becomes automatic in either direction, this fails.
+describe("enemy ability thresholds", () => {
+  it("every ability is winnable and losable by a tier-appropriate squad", () => {
+    const N = 150;
+    for (const tier of ["bronze", "gold", "platinum"]) {
+      for (const ability of ENEMY_ABILITIES) {
+        let pass = 0, hard = 0;
+        for (let i = 0; i < N; i++) {
+          const [town] = generateTierTowns(tier);
+          const roster = generateRivalRoster(town, tier);
+          const formation = { Vanguard: roster.slice(0, 2), Skirmisher: roster.slice(2, 4), Arbiter: roster.slice(4, 6) };
+          const outcome = checkAbility(ability, formation, tier);
+          if (outcome === "pass") pass++;
+          if (outcome === "hard") hard++;
+        }
+        const passRate = pass / N, hardRate = hard / N;
+        // generic squads: neither auto-mitigate nor auto-suffer
+        expect(passRate, `${ability.id}@${tier} pass rate`).toBeLessThan(0.90);
+        expect(hardRate, `${ability.id}@${tier} hard rate`).toBeLessThan(0.75);
+        expect(passRate + (N - pass - hard) / N, `${ability.id}@${tier} mitigation reachable`).toBeGreaterThan(0.20);
+      }
+    }
+  });
+});
+
+// ── rival rosters & poaching ────────────────────────────────────────────────
+describe("generateRivalRoster", () => {
+  it("produces six lane-covering notables calibrated to the town's power", () => {
+    for (let trial = 0; trial < 20; trial++) {
+      const [town] = generateTierTowns("silver");
+      const roster = generateRivalRoster(town, "silver");
+      expect(roster.length).toBe(6);
+      // two heroes per lane, ideal roles
+      expect(roster.filter((h) => ["Warrior", "Paladin"].includes(h.role)).length).toBe(2);
+      expect(roster.filter((h) => ["Ranger", "Rogue"].includes(h.role)).length).toBe(2);
+      expect(roster.filter((h) => ["Mage", "Cleric"].includes(h.role)).length).toBe(2);
+      // lanes sum near the power the player has been fighting
+      const formation = {
+        Vanguard: roster.slice(0, 2), Skirmisher: roster.slice(2, 4), Arbiter: roster.slice(4, 6),
+      };
+      const total = POS_KEYS.reduce((a, p) => a + calcPositionScore(formation[p], p).score, 0);
+      expect(total).toBeGreaterThan(town.power * 0.55);
+      expect(total).toBeLessThan(town.power * 1.75);
+      // stats stay legal and Potential covers them
+      roster.forEach((h) => {
+        expect(h.stats.Potential).toBeLessThanOrEqual(99);
+        expect(h.stats.Strength).toBeLessThanOrEqual(h.stats.Potential);
+        expect(h.value).toBeGreaterThan(0);
+      });
+    }
+  });
+});
+
+describe("rivalAskingPrice", () => {
+  const town = (arch, h2h = { wins: 0, losses: 0 }) => ({
+    manager: { name: "T", archetype: arch, title: "t" }, h2h, power: 100,
+  });
+  const hero = () => {
+    const h = generateHero(1, false, false, false, "Warrior", null, "bronze");
+    return h;
+  };
+
+  it("always demands a premium over base value", () => {
+    for (let i = 0; i < 30; i++) {
+      const h = hero();
+      expect(rivalAskingPrice(town("butcher"), h)).toBeGreaterThan(h.value);
+    }
+  });
+  it("gamblers sell cheaper than schemers", () => {
+    const h = hero();
+    expect(rivalAskingPrice(town("gambler"), h)).toBeLessThan(rivalAskingPrice(town("schemer"), h));
+  });
+  it("beating a rival raises their asking price (nobody sells cheap to their tormentor)", () => {
+    const h = hero();
+    const neutral = rivalAskingPrice(town("butcher", { wins: 0, losses: 0 }), h);
+    const tormented = rivalAskingPrice(town("butcher", { wins: 4, losses: 0 }), h);
+    expect(tormented).toBeGreaterThan(neutral);
+  });
+  it("the talisman costs dearly", () => {
+    const h = hero();
+    expect(rivalAskingPrice(town("butcher"), h, true))
+      .toBeGreaterThan(rivalAskingPrice(town("butcher"), h, false));
+  });
+});
+
+// ── formation rating ────────────────────────────────────────────────────────
+describe("calcFormationRating", () => {
+  it("applies per-lane synergy multipliers to the effective rating", () => {
+    const f = makeFormation();
+    const { raw, effective, analysis } = calcFormationRating(f);
+    expect(raw).toBeGreaterThan(0);
+    // No race synergy in a random formation most of the time → laneMults 1.0
+    if (!analysis.raceSynergy) expect(effective).toBe(raw);
+  });
+});
