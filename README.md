@@ -37,10 +37,17 @@ exercised by browser smoke tests, not unit tests.
 
 ## Deployment
 
-Pushes to `main` build and deploy to GitHub Pages via
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
-
-**One-time setup**: repo Settings → Pages → Source → **GitHub Actions**.
+**Vercel** builds and deploys from source on every push to `main`, with a
+preview deployment per pull request. GitHub Actions
+([`ci.yml`](.github/workflows/ci.yml)) runs the test suite and a production
+build on every PR.
 
 `dist/` is not committed; the build uses relative asset paths (`base: './'`)
 so it works at any mount point.
+
+## Documentation
+
+- [`CLAUDE.md`](CLAUDE.md) — working rules for AI-assisted sessions
+- [`docs/CURRENT_STATE.md`](docs/CURRENT_STATE.md) — systems reference
+- [`docs/BUILD_HISTORY.md`](docs/BUILD_HISTORY.md) — the 2026-07 overhaul story
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — review ledger and next candidates
