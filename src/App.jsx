@@ -4077,6 +4077,8 @@ const GLYPH_PATHS = {
   bld_scouts:    "M3 17l10-7 3 4.5L6 21zM13 10l3 4.5M18.5 4v4M16.5 6h4",
   bld_sanctum:   "M7 4h10l4 5-9 11L3 9zM3 9h18M7 4l5 5 5-5M12 20L7 9M12 20l5-11",
   bld_legends:   "M5 4h14M5 20h14M8 4v16M12 4v16M16 4v16M4 4h16",
+  // status — squad leader's coronet
+  leader:        "M5 17L7 9 9.5 12 12 7 14.5 12 17 9 19 17M5 17h14",
 };
 
 function Glyph({ id, size = 16, color = "#23201A", style }) {
@@ -4855,7 +4857,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}></span>}
-            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
+            {isLeader&&<span title="Squad Leader" style={{marginLeft:4,display:"inline-flex"}}><Glyph id="leader" size={11} color="#8A6D3B"/></span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
           </div>
           <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
@@ -4887,7 +4889,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
             {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
-            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
+            {isLeader&&<span title="Squad Leader" style={{marginLeft:5,display:"inline-flex"}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
             {hero.fodder&&<span style={{fontSize:9,color:"#77653F",marginLeft:5}}></span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}} title="Open to offers"></span>}
@@ -5315,7 +5317,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             background:isLeader?"rgba(138,109,59,0.105)":"rgba(60,52,38,0.054)",
             border:`1px solid ${isLeader?"rgba(138,109,59,0.45)":"rgba(60,52,38,0.126)"}`}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{fontSize:14}}></span>
+              <Glyph id="leader" size={16} color={isLeader?"#8A6D3B":"#8A7F68"}/>
               <div style={{flex:1}}>
                 <div style={{fontSize:11,fontWeight:700,color:isLeader?"#8A6D3B":"#6E6350",fontFamily:"'Alegreya Sans',sans-serif"}}>
                   {isLeader?"Squad Leader":"Squad Leader Candidate"}

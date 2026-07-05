@@ -53,6 +53,15 @@ injuries, contracts, aging, market, league sim, events) → repeat.
 - **Traits** (18): combat multipliers, fatigue/morale modifiers, contract
   behaviors (Stubborn blocks counters, Hot-headed walks on rejection), and
   event chemistry (see Events). Cursed = −5% power but +15% XP.
+- **Squad Leader**: one hero can be appointed leader (`squadLeaderId`, persisted
+  + auto-cleared on release/sale/retirement). Bonuses apply *only when the leader
+  is in the fielded formation*. Score = 50% career progress + 50% tenure
+  (`weeksInSquad`/400), so the strongest leaders are long-serving Fading/Veteran
+  heroes — deliberate: it gives aging heroes a non-combat role. Multiplier 1.0→
+  1.75 drives +4–7 morale/wk to raiders, ×1.04–1.07 XP, and 25–44% less morale
+  loss on defeat. Surfaced by a coronet glyph on hero cards, the detail panel,
+  and a "Leader" stat-bar pill. NB: it's a set-and-forget appointment; the only
+  live decision is whether to field a declining hero for the bonus.
 
 ## The league world
 

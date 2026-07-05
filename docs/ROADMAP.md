@@ -8,25 +8,22 @@ abilities (probe + regression guard) · Form & attributes-in-combat · injuries
 & scars · events (content + correspondence presentation) · buying / selling /
 scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
-save/load fields · art direction & legibility.
+save/load fields · art direction & legibility · Squad Leader system.
 
 ## Not yet reviewed — in priority order
 
-1. **Squad Leader system** — `calcLeaderScore` / `calcLeaderBonuses` have never
-   been examined. Unknown whether the numbers matter, the choice is
-   interesting, or the game ever teaches the player it exists.
-2. **Game-speed vestige** — `GAME_SPEEDS` contains exactly one speed, yet full
+1. **Game-speed vestige** — `GAME_SPEEDS` contains exactly one speed, yet full
    multi-speed plumbing survives (module-level `ACTIVE_SPEED`, xp/age/rank
    multipliers, a dead `setSpeed` in SetupScreen, speed persisted in saves).
    Either finish the feature or delete the plumbing.
-3. **Wandering Master / The Challenge / Emissary** — mechanics unreviewed;
+2. **Wandering Master / The Challenge / Emissary** — mechanics unreviewed;
    modals still predate the correspondence style (the Emissary is literally an
    emissary — it should be a letter with a seal).
-4. **Buildings as a system** — are all 11 worth building? Any strictly
+3. **Buildings as a system** — are all 11 worth building? Any strictly
    dominant/dead picks? Build-order strategy depth.
-5. **Guide tab full accuracy pass** — individual numbers were synced as they
+4. **Guide tab full accuracy pass** — individual numbers were synced as they
    changed, but nobody has read all eight sections against the current game.
-6. **Retirement / mentorship flow** — never reviewed end to end.
+5. **Retirement / mentorship flow** — never reviewed end to end.
 
 ## Design ideas parked (speced, not started)
 
