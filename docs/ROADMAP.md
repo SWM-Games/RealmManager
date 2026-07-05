@@ -8,22 +8,28 @@ abilities (probe + regression guard) · Form & attributes-in-combat · injuries
 & scars · events (content + correspondence presentation) · buying / selling /
 scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
-save/load fields · art direction & legibility · Squad Leader system.
+save/load fields · art direction & legibility · Squad Leader system ·
+game-speed vestige (removed — see below).
 
 ## Not yet reviewed — in priority order
 
-1. **Game-speed vestige** — `GAME_SPEEDS` contains exactly one speed, yet full
-   multi-speed plumbing survives (module-level `ACTIVE_SPEED`, xp/age/rank
-   multipliers, a dead `setSpeed` in SetupScreen, speed persisted in saves).
-   Either finish the feature or delete the plumbing.
-2. **Wandering Master / The Challenge / Emissary** — mechanics unreviewed;
+1. **Wandering Master / The Challenge / Emissary** — mechanics unreviewed;
    modals still predate the correspondence style (the Emissary is literally an
    emissary — it should be a letter with a seal).
-3. **Buildings as a system** — are all 11 worth building? Any strictly
+2. **Buildings as a system** — are all 11 worth building? Any strictly
    dominant/dead picks? Build-order strategy depth.
-4. **Guide tab full accuracy pass** — individual numbers were synced as they
+3. **Guide tab full accuracy pass** — individual numbers were synced as they
    changed, but nobody has read all eight sections against the current game.
-5. **Retirement / mentorship flow** — never reviewed end to end.
+4. **Retirement / mentorship flow** — never reviewed end to end.
+
+## Resolved
+
+- **Game-speed vestige (removed)** — a quicker game mode was once concepted
+  but abandoned; the rebalancing cost outweighed the benefit. All plumbing is
+  gone: `GAME_SPEEDS`, module-level `ACTIVE_SPEED`, the xp/age/rank multipliers,
+  the `speed` state + `setSpeed` in SetupScreen, and the `gameSpeed` save field.
+  `SEASON_LENGTH()` is now a plain `const SEASON_LENGTH = 42`. Old saves still
+  load (the stale `gameSpeed` field is simply ignored).
 
 ## Design ideas parked (speced, not started)
 
