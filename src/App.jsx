@@ -80,13 +80,13 @@ const RESPONSIVE_CSS = `
      pa-sub: IM Fell English SC 10/500 +2 letter uppercase muted */
   .pa-h1 { font-family:'IM Fell English SC',serif; font-weight:700; font-size:30px; color:var(--pa-parchment); letter-spacing:1px; line-height:1; margin:0; }
   .pa-rule { width:60px; height:1px; background:var(--pa-gold); margin:14px 0 10px; }
-  .pa-sub { font-family:'IM Fell English SC',serif; font-weight:500; font-size:10px; letter-spacing:2px; color:var(--pa-muted); text-transform:uppercase; }
-  .pa-kicker { font-family:'IM Fell English SC',serif; font-weight:700; font-size:9px; letter-spacing:2px; color:var(--pa-muted-deep); text-transform:uppercase; line-height:1; }
+  .pa-sub { font-family: 'Alegreya Sans', sans-serif; font-weight:500; font-size:10px; letter-spacing:2px; color:var(--pa-muted); text-transform:uppercase; }
+  .pa-kicker { font-family: 'Alegreya Sans', sans-serif; font-weight:700; font-size:9px; letter-spacing:2px; color:var(--pa-muted-deep); text-transform:uppercase; line-height:1; }
   .pa-num { font-family:'Alegreya Sans',sans-serif; font-variant-numeric:tabular-nums; line-height:1; }
 
   /* Filter pills — used in Squad position filter */
   .pa-pill {
-    font-family:'IM Fell English SC',serif; font-weight:600; font-size:10px; letter-spacing:1.5px;
+    font-family: 'Alegreya Sans', sans-serif; font-weight:600; font-size:10px; letter-spacing:1.5px;
     text-transform:uppercase; padding:7px 14px; border-radius:0; cursor:pointer;
     border:1px solid rgba(138,109,59,0.33); background:transparent; color:var(--pa-muted);
     transition:border-color 0.15s, color 0.15s; display:inline-flex; align-items:center; gap:7px;
@@ -100,7 +100,7 @@ const RESPONSIVE_CSS = `
     margin-bottom:24px; padding:14px 18px; background:transparent;
     border-left:2px solid var(--pa-gold);
     display:flex; gap:24px; flex-wrap:wrap;
-    font-family:'IM Fell English SC',serif; font-weight:600; font-size:10px;
+    font-family: 'Alegreya Sans', sans-serif; font-weight:600; font-size:10px;
     letter-spacing:1.5px; text-transform:uppercase; color:var(--pa-gold-soft);
   }
   .pa-alert .num { font-family:'Alegreya Sans',sans-serif; color:var(--pa-gold); font-weight:700; font-size:13px; letter-spacing:0; margin-right:4px; text-transform:none; }
@@ -174,7 +174,7 @@ const RESPONSIVE_CSS = `
   }
   .rm-stat-row:first-child { border-top: none; }
   .rm-stat-label {
-    font-family: 'IM Fell English SC', serif; font-size: 10px;
+    font-family: 'Alegreya Sans', sans-serif; font-size: 10px;
     letter-spacing: 1.5px; color: #77653F; text-transform: uppercase;
     flex: 1; font-weight: 600;
   }
@@ -186,13 +186,13 @@ const RESPONSIVE_CSS = `
     padding: 14px 10px; display: flex; flex-direction: column; gap: 1px; flex: 1;
   }
   .rm-nav-kicker {
-    font-family: 'IM Fell English SC', serif; font-size: 9px; color: #77653F;
+    font-family: 'Alegreya Sans', sans-serif; font-size: 9px; color: #77653F;
     letter-spacing: 2.5px; padding: 0 10px 8px; text-transform: uppercase; font-weight: 700;
   }
   .rm-nav-item {
     display: flex; align-items: center; gap: 12px;
     padding: 11px 12px; border: none; border-left: 2px solid transparent;
-    cursor: pointer; font-family: 'IM Fell English SC', serif; font-size: 12px;
+    cursor: pointer; font-family: 'Alegreya Sans', sans-serif; font-size: 12px;
     background: transparent; color: #77653F;
     transition: background 0.15s, color 0.15s;
     text-align: left; width: 100%; position: relative;
@@ -398,7 +398,7 @@ function InjectCSS() {
 // ─── CORE DATA ────────────────────────────────────────────────────────────────
 
 const ROLES = ["Warrior","Ranger","Mage","Rogue","Cleric","Paladin"];
-const ROLE_ICONS = { Warrior:"⚔️",Ranger:"🏹",Mage:"🔮",Rogue:"🗡️",Cleric:"✨",Paladin:"🛡️" };
+const ROLE_ICONS = { Warrior:"",Ranger:"",Mage:"",Rogue:"",Cleric:"",Paladin:"" };
 
 // ─── VISUAL CONFIG ────────────────────────────────────────────────────────────
 // Single source of truth for visual identifiers.
@@ -409,103 +409,103 @@ const ROLE_ICONS = { Warrior:"⚔️",Ranger:"🏹",Mage:"🔮",Rogue:"🗡️",
 const VISUAL_CONFIG = {
   // Hero portraits — raster sprites (PNG), 1 per race
   races: {
-    Human:      { key:"human",      emoji:"👤" },
-    Elf:        { key:"elf",        emoji:"🧝" },
-    Dwarf:      { key:"dwarf",      emoji:"⛏️"  },
-    "Half-Orc": { key:"half_orc",   emoji:"💪" },
-    Gnome:      { key:"gnome",      emoji:"🔧" },
-    Tiefling:   { key:"tiefling",   emoji:"😈" },
-    Dragonborn: { key:"dragonborn", emoji:"🐉" },
+    Human:      { key:"human",      emoji:"" },
+    Elf:        { key:"elf",        emoji:"" },
+    Dwarf:      { key:"dwarf",      emoji:""  },
+    "Half-Orc": { key:"half_orc",   emoji:"" },
+    Gnome:      { key:"gnome",      emoji:"" },
+    Tiefling:   { key:"tiefling",   emoji:"" },
+    Dragonborn: { key:"dragonborn", emoji:"" },
   },
   // Role symbols — SVG icons
   roles: {
-    Warrior: { key:"warrior", emoji:"⚔️" },
-    Ranger:  { key:"ranger",  emoji:"🏹" },
-    Mage:    { key:"mage",    emoji:"🔮" },
-    Rogue:   { key:"rogue",   emoji:"🗡️" },
-    Cleric:  { key:"cleric",  emoji:"✨" },
-    Paladin: { key:"paladin", emoji:"🛡️" },
+    Warrior: { key:"warrior", emoji:"" },
+    Ranger:  { key:"ranger",  emoji:"" },
+    Mage:    { key:"mage",    emoji:"" },
+    Rogue:   { key:"rogue",   emoji:"" },
+    Cleric:  { key:"cleric",  emoji:"" },
+    Paladin: { key:"paladin", emoji:"" },
   },
   // Formation positions — SVG icons
   positions: {
-    Vanguard:   { key:"vanguard",   emoji:"🗡️" },
-    Skirmisher: { key:"skirmisher", emoji:"🏹" },
-    Arbiter:    { key:"arbiter",    emoji:"✨" },
+    Vanguard:   { key:"vanguard",   emoji:"" },
+    Skirmisher: { key:"skirmisher", emoji:"" },
+    Arbiter:    { key:"arbiter",    emoji:"" },
   },
   // League tier badges — SVG icons
   tiers: {
-    iron:     { key:"tier_iron",     emoji:"⚙️"  },
-    bronze:   { key:"tier_bronze",   emoji:"🥉" },
-    silver:   { key:"tier_silver",   emoji:"🥈" },
-    gold:     { key:"tier_gold",     emoji:"🥇" },
-    platinum: { key:"tier_platinum", emoji:"💎" },
+    iron:     { key:"tier_iron",     emoji:""  },
+    bronze:   { key:"tier_bronze",   emoji:"" },
+    silver:   { key:"tier_silver",   emoji:"" },
+    gold:     { key:"tier_gold",     emoji:"" },
+    platinum: { key:"tier_platinum", emoji:"" },
   },
   // Town buildings — SVG icons
   buildings: {
-    barracks:  { key:"barracks",  emoji:"🏰" },
-    tavern:    { key:"tavern",    emoji:"🍺" },
-    infirmary: { key:"infirmary", emoji:"⚕️"  },
-    lodge:     { key:"lodge",     emoji:"🛖" },
-    trainyard: { key:"trainyard", emoji:"🎯" },
-    network:   { key:"network",   emoji:"🔭" },
-    trading:   { key:"trading",   emoji:"💰" },
-    bazaar:    { key:"bazaar",    emoji:"🏪" },
-    scouts:    { key:"scouts",    emoji:"🌠" },
-    sanctum:   { key:"sanctum",   emoji:"💎" },
-    legends:   { key:"legends",   emoji:"🏛️" },
+    barracks:  { key:"barracks",  emoji:"" },
+    tavern:    { key:"tavern",    emoji:"" },
+    infirmary: { key:"infirmary", emoji:""  },
+    lodge:     { key:"lodge",     emoji:"" },
+    trainyard: { key:"trainyard", emoji:"" },
+    network:   { key:"network",   emoji:"" },
+    trading:   { key:"trading",   emoji:"" },
+    bazaar:    { key:"bazaar",    emoji:"" },
+    scouts:    { key:"scouts",    emoji:"" },
+    sanctum:   { key:"sanctum",   emoji:"" },
+    legends:   { key:"legends",   emoji:"" },
   },
   // Hero traits — SVG icons
   traits: {
-    Berserker:    { key:"berserker",    emoji:"🔴" },
-    Tactician:    { key:"tactician",    emoji:"🔵" },
-    Swift:        { key:"swift",        emoji:"🟢" },
-    Resilient:    { key:"resilient",    emoji:"🟢" },
-    "Glass Cannon":{ key:"glass_cannon",emoji:"🟠" },
-    Blessed:      { key:"blessed",      emoji:"🟡" },
-    Cursed:       { key:"cursed",       emoji:"🟣" },
-    Brave:        { key:"brave",        emoji:"🟢" },
-    "Iron Will":  { key:"iron_will",    emoji:"🔵" },
-    "Eagle Eye":  { key:"eagle_eye",    emoji:"🟡" },
-    Calm:         { key:"calm",         emoji:"🔵" },
-    "Night Vision":{ key:"night_vision",emoji:"🟣" },
-    Loyal:        { key:"loyal",        emoji:"🟢" },
-    Greedy:       { key:"greedy",       emoji:"🟠" },
-    "Hot-headed": { key:"hot_headed",   emoji:"🔴" },
-    Stubborn:     { key:"stubborn",     emoji:"🟡" },
-    Coward:       { key:"coward",       emoji:"⚫" },
-    Inspiring:    { key:"inspiring",    emoji:"🟡" },
+    Berserker:    { key:"berserker",    emoji:"" },
+    Tactician:    { key:"tactician",    emoji:"" },
+    Swift:        { key:"swift",        emoji:"" },
+    Resilient:    { key:"resilient",    emoji:"" },
+    "Glass Cannon":{ key:"glass_cannon",emoji:"" },
+    Blessed:      { key:"blessed",      emoji:"" },
+    Cursed:       { key:"cursed",       emoji:"" },
+    Brave:        { key:"brave",        emoji:"" },
+    "Iron Will":  { key:"iron_will",    emoji:"" },
+    "Eagle Eye":  { key:"eagle_eye",    emoji:"" },
+    Calm:         { key:"calm",         emoji:"" },
+    "Night Vision":{ key:"night_vision",emoji:"" },
+    Loyal:        { key:"loyal",        emoji:"" },
+    Greedy:       { key:"greedy",       emoji:"" },
+    "Hot-headed": { key:"hot_headed",   emoji:"" },
+    Stubborn:     { key:"stubborn",     emoji:"" },
+    Coward:       { key:"coward",       emoji:"" },
+    Inspiring:    { key:"inspiring",    emoji:"" },
   },
   // Race synergies — SVG icons (abstract concepts, not characters)
   synergies: {
-    mono_elf:               { key:"syn_mono_elf",               emoji:"🌿" },
-    mono_dwarf:             { key:"syn_mono_dwarf",             emoji:"⛏️"  },
-    mono_human:             { key:"syn_mono_human",             emoji:"👑" },
-    mono_halforc:           { key:"syn_mono_halforc",           emoji:"💢" },
-    mono_tiefling:          { key:"syn_mono_tiefling",          emoji:"🔥" },
-    mono_gnome:             { key:"syn_mono_gnome",             emoji:"⚙️"  },
-    mono_dragonborn:        { key:"syn_mono_dragonborn",        emoji:"🐉" },
-    rainbow:                { key:"syn_rainbow",                emoji:"🌈" },
-    pact_elf_tiefling:      { key:"syn_pact_elf_tiefling",      emoji:"🌑" },
-    pact_dwarf_halforc:     { key:"syn_pact_dwarf_halforc",     emoji:"⚒️"  },
-    pact_gnome_tiefling:    { key:"syn_pact_gnome_tiefling",    emoji:"🔮" },
-    pact_human_elf:         { key:"syn_pact_human_elf",         emoji:"🤝" },
-    pact_dragonborn_halforc:{ key:"syn_pact_dragonborn_halforc",emoji:"🐉" },
-    pact_human_dwarf:       { key:"syn_pact_human_dwarf",       emoji:"⚖️"  },
+    mono_elf:               { key:"syn_mono_elf",               emoji:"" },
+    mono_dwarf:             { key:"syn_mono_dwarf",             emoji:""  },
+    mono_human:             { key:"syn_mono_human",             emoji:"" },
+    mono_halforc:           { key:"syn_mono_halforc",           emoji:"" },
+    mono_tiefling:          { key:"syn_mono_tiefling",          emoji:"" },
+    mono_gnome:             { key:"syn_mono_gnome",             emoji:""  },
+    mono_dragonborn:        { key:"syn_mono_dragonborn",        emoji:"" },
+    rainbow:                { key:"syn_rainbow",                emoji:"" },
+    pact_elf_tiefling:      { key:"syn_pact_elf_tiefling",      emoji:"" },
+    pact_dwarf_halforc:     { key:"syn_pact_dwarf_halforc",     emoji:""  },
+    pact_gnome_tiefling:    { key:"syn_pact_gnome_tiefling",    emoji:"" },
+    pact_human_elf:         { key:"syn_pact_human_elf",         emoji:"" },
+    pact_dragonborn_halforc:{ key:"syn_pact_dragonborn_halforc",emoji:"" },
+    pact_human_dwarf:       { key:"syn_pact_human_dwarf",       emoji:""  },
   },
   // Navigation tabs — SVG icons
   nav: {
-    Squad:    { key:"nav_squad",    emoji:"⚔️" },
-    Tactics:  { key:"nav_tactics",  emoji:"🎯" },
-    Battle:   { key:"nav_battle",   emoji:"⚔️" },
-    Dominion: { key:"nav_dominion", emoji:"⚜️" },
-    Town:     { key:"nav_town",     emoji:"🏰" },
-    Hire:     { key:"nav_hire",     emoji:"🤝" },
-    Ledger:   { key:"nav_ledger",   emoji:"📒" },
-    Guide:    { key:"nav_guide",    emoji:"📖" },
+    Squad:    { key:"nav_squad",    emoji:"" },
+    Tactics:  { key:"nav_tactics",  emoji:"" },
+    Battle:   { key:"nav_battle",   emoji:"" },
+    Dominion: { key:"nav_dominion", emoji:"" },
+    Town:     { key:"nav_town",     emoji:"" },
+    Hire:     { key:"nav_hire",     emoji:"" },
+    Ledger:   { key:"nav_ledger",   emoji:"" },
+    Guide:    { key:"nav_guide",    emoji:"" },
   },
 };
 
-const RACE_ICONS = { Human:"👤",Elf:"🧝",Dwarf:"⛏️","Half-Orc":"💪",Gnome:"🔧",Tiefling:"😈",Dragonborn:"🐉" };
+const RACE_ICONS = { Human:"",Elf:"",Dwarf:"","Half-Orc":"",Gnome:"",Tiefling:"",Dragonborn:"" };
 
 // ── LIFE STAGE SYSTEM ─────────────────────────────────────────────────────
 // Heroes progress through 5 stages over a 12-season (504-week) career.
@@ -515,11 +515,11 @@ const RACE_ICONS = { Human:"👤",Elf:"🧝",Dwarf:"⛏️","Half-Orc":"💪",Gn
 const STAGE_ORDER = ["prospect","rising","peak","fading","veteran"];
 
 const STAGE_DEFS = {
-  prospect: { id:"prospect", label:"Prospect", icon:"🌱", color:"#5F4B66", weeks:84,  progressPerWeek:100/84  },
-  rising:   { id:"rising",   label:"Rising",   icon:"📈", color:"#3C5A78", weeks:84,  progressPerWeek:100/84  },
-  peak:     { id:"peak",     label:"Peak",      icon:"⚡", color:"#40614F", weeks:126, progressPerWeek:100/126 },
-  fading:   { id:"fading",   label:"Fading",    icon:"📉", color:"#8A6D3B", weeks:126, progressPerWeek:100/126 },
-  veteran:  { id:"veteran",  label:"Veteran",   icon:"🕯️", color:"#9A5B2B", weeks:84,  progressPerWeek:100/84  },
+  prospect: { id:"prospect", label:"Prospect", icon:"", color:"#5F4B66", weeks:84,  progressPerWeek:100/84  },
+  rising:   { id:"rising",   label:"Rising",   icon:"", color:"#3C5A78", weeks:84,  progressPerWeek:100/84  },
+  peak:     { id:"peak",     label:"Peak",      icon:"", color:"#40614F", weeks:126, progressPerWeek:100/126 },
+  fading:   { id:"fading",   label:"Fading",    icon:"", color:"#8A6D3B", weeks:126, progressPerWeek:100/126 },
+  veteran:  { id:"veteran",  label:"Veteran",   icon:"", color:"#9A5B2B", weeks:84,  progressPerWeek:100/84  },
 };
 
 const TOTAL_CAREER_WEEKS = Object.values(STAGE_DEFS).reduce((a,s)=>a+s.weeks,0); // 504
@@ -565,7 +565,7 @@ function randomCareerWeekInWindow(minStage, minPct, maxStage, maxPct) {
 function agePhase(hero) {
   return hero.stage || "peak";
 }
-function agePhaseLabel(p){ return {prospect:"🌱 Prospect",rising:"📈 Rising",peak:"⚡ Peak",fading:"📉 Fading",veteran:"🕯️ Veteran"}[p]||p; }
+function agePhaseLabel(p){ return {prospect:"Prospect",rising:"Rising",peak:"Peak",fading:"Fading",veteran:"Veteran"}[p]||p; }
 function agePhaseColor(p){ return {prospect:"#5F4B66",rising:"#3C5A78",peak:"#40614F",fading:"#8A6D3B",veteran:"#9A5B2B"}[p]||"#6E6350"; }
 
 // Recalculate a hero's market value based on current stats and level.
@@ -626,18 +626,18 @@ export const MAX_LEVEL = 15;
 
 
 function moraleLabel(m){
-  if(m>=80) return {label:"😄 High",       color:"#40614F"};
-  if(m>=60) return {label:"😐 Stable",     color:"#3C5A78"};
-  if(m>=40) return {label:"😟 Low",        color:"#8A6D3B"};
-  if(m>=20) return {label:"😠 Very Low",   color:"#9A5B2B"};
-  return           {label:"🤬 Critical",   color:"#8F2A1E"};
+  if(m>=80) return {label:"High",       color:"#40614F"};
+  if(m>=60) return {label:"Stable",     color:"#3C5A78"};
+  if(m>=40) return {label:"Low",        color:"#8A6D3B"};
+  if(m>=20) return {label:"Very Low",   color:"#9A5B2B"};
+  return           {label:"Critical",   color:"#8F2A1E"};
 }
 
 function potentialBucket(potential) {
-  if(potential >= 83) return { label:"Elite",  color:"#8A6D3B", icon:"⭐" };
-  if(potential >= 66) return { label:"High",   color:"#40614F", icon:"🔼" };
-  if(potential >= 41) return { label:"Medium", color:"#3C5A78", icon:"➡️" };
-  return                     { label:"Low",    color:"#9A5B2B", icon:"🔽" };
+  if(potential >= 83) return { label:"Elite",  color:"#8A6D3B", icon:"" };
+  if(potential >= 66) return { label:"High",   color:"#40614F", icon:"" };
+  if(potential >= 41) return { label:"Medium", color:"#3C5A78", icon:"" };
+  return                     { label:"Low",    color:"#9A5B2B", icon:"" };
 }
 
 // ─── CONTRACT DEMAND ENGINE ──────────────────────────────────────────────────
@@ -753,7 +753,7 @@ const RANDOM_EVENTS = [
     id:"ironblood_bout",
     theme:"arena",
     title:"The Ironblood Bout",
-    icon:"⚔️",
+    icon:"",
     flavour:"The underground circuit asks no questions. It pays in blood and gold.",
     stats:["Strength","Endurance"],
     heroesNeeded:1,
@@ -766,7 +766,7 @@ const RANDOM_EVENTS = [
     id:"grand_colosseum",
     theme:"arena",
     title:"The Grand Colosseum",
-    icon:"🏟️",
+    icon:"",
     flavour:"The crown's arena. To fight here is to be remembered.",
     stats:["Strength","Agility","Composure"],
     heroesNeeded:1,
@@ -779,7 +779,7 @@ const RANDOM_EVENTS = [
     id:"gauntlet_of_blades",
     theme:"arena",
     title:"The Gauntlet of Blades",
-    icon:"🗡️",
+    icon:"",
     flavour:"The Gauntlet doesn't care who you are. It only cares whether you can still stand at the end.",
     stats:["Agility","Defense"],
     heroesNeeded:2,
@@ -792,7 +792,7 @@ const RANDOM_EVENTS = [
     id:"beast_pits",
     theme:"arena",
     title:"The Beast Pits",
-    icon:"🐺",
+    icon:"",
     flavour:"Something old and hungry lives beneath the arena. They want to see if you're faster.",
     stats:["Agility","Determination"],
     heroesNeeded:1,
@@ -805,7 +805,7 @@ const RANDOM_EVENTS = [
     id:"champions_invitation",
     theme:"arena",
     title:"The Champion's Invitation",
-    icon:"🎖️",
+    icon:"",
     flavour:"A reigning champion has named your warrior specifically. Refusing is its own kind of cowardice.",
     stats:["Strength","Intimidation"],
     heroesNeeded:1,
@@ -820,7 +820,7 @@ const RANDOM_EVENTS = [
     id:"unmapped_passes",
     theme:"wilds",
     title:"The Unmapped Passes",
-    icon:"🏔️",
+    icon:"",
     flavour:"The cartographers will pay well. The mountains will take what they're owed.",
     stats:["Endurance","Determination"],
     heroesNeeded:2,
@@ -833,7 +833,7 @@ const RANDOM_EVENTS = [
     id:"hunters_wage",
     theme:"wilds",
     title:"The Hunter's Wage",
-    icon:"🏹",
+    icon:"",
     flavour:"Something is hunting the trade roads. The villages pooled what little they have.",
     stats:["Accuracy","Agility"],
     heroesNeeded:1,
@@ -846,7 +846,7 @@ const RANDOM_EVENTS = [
     id:"frozen_expedition",
     theme:"wilds",
     title:"The Frozen Expedition",
-    icon:"❄️",
+    icon:"",
     flavour:"No one maps the northern wastes willingly. The pay reflects that.",
     stats:["Endurance","Adaptability"],
     heroesNeeded:2,
@@ -859,7 +859,7 @@ const RANDOM_EVENTS = [
     id:"dragons_shadow",
     theme:"wilds",
     title:"The Dragon's Shadow",
-    icon:"🐲",
+    icon:"",
     flavour:"Scholars need escort into the deep mountains. The shadows up there move wrong.",
     stats:["Magic Resist","Determination"],
     heroesNeeded:1,
@@ -872,7 +872,7 @@ const RANDOM_EVENTS = [
     id:"cursed_ruin",
     theme:"wilds",
     title:"The Cursed Ruin",
-    icon:"🏛️",
+    icon:"",
     flavour:"Treasure hunters found something they couldn't bring back alone. Or wouldn't.",
     stats:["Determination","Adaptability"],
     heroesNeeded:1,
@@ -887,7 +887,7 @@ const RANDOM_EVENTS = [
     id:"high_council_seat",
     theme:"courts",
     title:"The High Council Seat",
-    icon:"👑",
+    icon:"",
     flavour:"A seat at the council is worth more than a battlefield. The right voice can move armies.",
     stats:["Leadership","Charisma"],
     heroesNeeded:1,
@@ -900,7 +900,7 @@ const RANDOM_EVENTS = [
     id:"trade_dispute",
     theme:"courts",
     title:"The Trade Dispute",
-    icon:"⚖️",
+    icon:"",
     flavour:"Two merchant houses stand at the edge of open conflict. One clever arbitrator could end it.",
     stats:["Negotiation","Charisma"],
     heroesNeeded:1,
@@ -913,7 +913,7 @@ const RANDOM_EVENTS = [
     id:"hostage_negotiation",
     theme:"courts",
     title:"The Hostage Negotiation",
-    icon:"📜",
+    icon:"",
     flavour:"A noble's heir has been taken. The family wants them back quietly. No soldiers.",
     stats:["Negotiation","Composure"],
     heroesNeeded:1,
@@ -926,7 +926,7 @@ const RANDOM_EVENTS = [
     id:"warlords_banquet",
     theme:"courts",
     title:"The Warlord's Banquet",
-    icon:"🍖",
+    icon:"",
     flavour:"Powerful men invite you to their table for one reason — to decide if you're a threat or an opportunity.",
     stats:["Intimidation","Composure"],
     heroesNeeded:1,
@@ -939,7 +939,7 @@ const RANDOM_EVENTS = [
     id:"royal_address",
     theme:"courts",
     title:"The Royal Address",
-    icon:"🏰",
+    icon:"",
     flavour:"The crown requires a representative of exceptional bearing to tour the outer provinces.",
     stats:["Charisma","Leadership","Reputation"],
     heroesNeeded:1,
@@ -954,7 +954,7 @@ const RANDOM_EVENTS = [
     id:"arcane_guild_trial",
     theme:"arcane",
     title:"The Arcane Guild Trial",
-    icon:"🔮",
+    icon:"",
     flavour:"The Guild admits only those who can demonstrate true mastery. The test is not gentle.",
     stats:["Magic Power","Magic Resist"],
     heroesNeeded:1,
@@ -967,7 +967,7 @@ const RANDOM_EVENTS = [
     id:"plague_ward",
     theme:"arcane",
     title:"The Plague Ward",
-    icon:"⚕️",
+    icon:"",
     flavour:"The illness is spreading. A healer of real power is the only hope these people have.",
     stats:["Magic Resist","Composure"],
     heroesNeeded:1,
@@ -980,7 +980,7 @@ const RANDOM_EVENTS = [
     id:"oracles_chamber",
     theme:"arcane",
     title:"The Oracle's Chamber",
-    icon:"🌙",
+    icon:"",
     flavour:"The Oracle grants audience rarely, and only to those whose minds are clear enough to receive what she offers.",
     stats:["Composure","Determination"],
     heroesNeeded:1,
@@ -993,7 +993,7 @@ const RANDOM_EVENTS = [
     id:"draconic_archive",
     theme:"arcane",
     title:"The Draconic Archive",
-    icon:"📚",
+    icon:"",
     flavour:"The scholars need protection. The archive needs cataloguing. Neither task is safe.",
     stats:["Magic Resist","Tactics"],
     heroesNeeded:2,
@@ -1006,7 +1006,7 @@ const RANDOM_EVENTS = [
     id:"sealed_circle",
     theme:"arcane",
     title:"The Sealed Circle",
-    icon:"⭕",
+    icon:"",
     flavour:"Something was contained here long ago. The seal is weakening. Someone with real power needs to reinforce it.",
     stats:["Magic Power","Magic Resist"],
     heroesNeeded:2,
@@ -1021,7 +1021,7 @@ const RANDOM_EVENTS = [
     id:"shadow_vault",
     theme:"shadows",
     title:"The Shadow Vault",
-    icon:"🗝️",
+    icon:"",
     flavour:"The map showed a sealed chamber. The guild wants what's inside. You want a cut.",
     stats:["Agility","Determination"],
     heroesNeeded:1,
@@ -1034,7 +1034,7 @@ const RANDOM_EVENTS = [
     id:"marked_target",
     theme:"shadows",
     title:"The Marked Target",
-    icon:"🎯",
+    icon:"",
     flavour:"Someone important has made powerful enemies. Your hero has been given a name and a purse.",
     stats:["Determination","Adaptability"],
     heroesNeeded:1,
@@ -1047,7 +1047,7 @@ const RANDOM_EVENTS = [
     id:"spys_gambit",
     theme:"shadows",
     title:"The Spy's Gambit",
-    icon:"👁️",
+    icon:"",
     flavour:"The crown's shadow network needs someone who can disappear into a foreign court and return with answers.",
     stats:["Charisma","Reputation"],
     heroesNeeded:1,
@@ -1060,7 +1060,7 @@ const RANDOM_EVENTS = [
     id:"cult_unmasking",
     theme:"shadows",
     title:"The Cult Unmasking",
-    icon:"🌑",
+    icon:"",
     flavour:"They're hiding in plain sight. Finding them requires patience and nerve. Two minds are safer than one.",
     stats:["Adaptability","Composure"],
     heroesNeeded:2,
@@ -1073,7 +1073,7 @@ const RANDOM_EVENTS = [
     id:"underworld_exchange",
     theme:"shadows",
     title:"The Underworld Exchange",
-    icon:"💰",
+    icon:"",
     flavour:"An anonymous client. An anonymous package. Anonymous gold. Ask no questions.",
     stats:["Negotiation","Agility"],
     heroesNeeded:1,
@@ -1209,7 +1209,7 @@ const SPECIAL_EVENTS = [
   {
     id:"wandering_master",
     title:"The Wandering Master",
-    icon:"🧙",
+    icon:"",
     flavour:"A legendary figure has arrived at your gates. For a modest fee, they offer to impart something that cannot be taught through ordinary training.",
     cost:200,
     type:"wandering_master",
@@ -1220,7 +1220,7 @@ const SPECIAL_EVENTS = [
   {
     id:"the_challenge",
     title:"The Challenge",
-    icon:"⚔️",
+    icon:"",
     flavour:"A rival lord has issued a formal challenge. The purse is generous. The opponent will not be.",
     type:"challenge",
     opponentPowerMult:1.30,
@@ -1291,9 +1291,9 @@ export function calcMatchScore(hero, eventDef) {
 }
 
 function getEventConfidence(matchScore) {
-  if(matchScore >= 1.15) return { label:"Strong",   color:"#40614F", icon:"🟢" };
-  if(matchScore >= 0.75) return { label:"Possible",  color:"#8A6D3B", icon:"🟡" };
-  return                        { label:"Longshot",  color:"#7E2D26", icon:"🔴" };
+  if(matchScore >= 1.15) return { label:"Strong",   color:"#40614F", icon:"" };
+  if(matchScore >= 0.75) return { label:"Possible",  color:"#8A6D3B", icon:"" };
+  return                        { label:"Longshot",  color:"#7E2D26", icon:"" };
 }
 
 // Fluid success probability — hidden from player, drives outcome roll
@@ -1351,13 +1351,13 @@ const ACHIEVEMENTS = [
     id:       "iron_dynasty",
     name:     "Iron Dynasty",
     desc:     "Reach Rank #1 in Platinum — conquer the realm",
-    icon:     "🏆",
+    icon:     "",
     check:    ()=>true, // always awarded on Legacy Ceremony
     boon: {
       id:     "iron_dynasty",
       name:   "Conqueror's Coffers",
       desc:   "Begin the run with +1,000g — a generous war chest.",
-      icon:   "💰",
+      icon:   "",
       apply:  (state)=>({...state, gold: (state.gold||4000)+1000 }),
     },
   },
@@ -1365,13 +1365,13 @@ const ACHIEVEMENTS = [
     id:       "undefeated",
     name:     "Undefeated Season",
     desc:     "Win a full season with zero losses",
-    icon:     "🛡️",
+    icon:     "",
     check:    (data)=>data.trophies.some(t=>t.losses===0),
     boon: {
       id:     "undefeated",
       name:   "Battle-Hardened Squad",
       desc:   "All starting heroes begin with +10 morale.",
-      icon:   "⚔️",
+      icon:   "",
       apply:  (state)=>({...state, heroes: state.heroes.map(h=>({...h,morale:Math.min(100,h.morale+10)}))}),
     },
   },
@@ -1379,13 +1379,13 @@ const ACHIEVEMENTS = [
     id:       "full_house",
     name:     "Full House",
     desc:     "Construct all 11 buildings in one run",
-    icon:     "🏰",
+    icon:     "",
     check:    (data)=>data.buildings.every(b=>b.built),
     boon: {
       id:     "full_house",
       name:   "Pre-Built Barracks",
       desc:   "Start the run with the Barracks already constructed.",
-      icon:   "🏗️",
+      icon:   "",
       apply:  (state)=>({...state, buildings: state.buildings.map(b=>b.id==="barracks"?{...b,built:true}:b)}),
     },
   },
@@ -1393,13 +1393,13 @@ const ACHIEVEMENTS = [
     id:       "legend_retires",
     name:     "Legend Retires",
     desc:     "Have a hero reach Level 13 and retire in the same run",
-    icon:     "🌟",
+    icon:     "",
     check:    (data)=>data.retiredMax13,
     boon: {
       id:     "legend_retires",
       name:   "Veteran Recruit",
       desc:   "One starting hero begins at Level 3 with boosted stats.",
-      icon:   "⭐",
+      icon:   "",
       apply:  (state)=>{
         const idx = state.heroes.findIndex(h=>h.level<3);
         if(idx===-1) return state;
@@ -1414,13 +1414,13 @@ const ACHIEVEMENTS = [
     id:       "first_promotion",
     name:     "On the Rise",
     desc:     "Earn your first promotion out of Iron tier",
-    icon:     "📈",
+    icon:     "",
     check:    (data)=>data.everPromoted,
     boon: {
       id:     "first_promotion",
       name:   "Seasoned Scout",
       desc:   "The starting market includes one guaranteed Peak-stage hero — battle-ready from day one.",
-      icon:   "🔭",
+      icon:   "",
       apply:  (state)=>{
         // Replace one market hero with a Peak-stage hero
         if(!state.market||state.market.length===0) return state;
@@ -1440,13 +1440,13 @@ const ACHIEVEMENTS = [
     id:       "golden_vault",
     name:     "Golden Vault",
     desc:     "Accumulate 100,000g at any point in a run",
-    icon:     "🏦",
+    icon:     "",
     check:    (data)=>data.peakGold>=100000,
     boon: {
       id:     "golden_vault",
       name:   "Long-Term Deals",
       desc:   "All starting heroes have double contract length — fewer renewals to manage early.",
-      icon:   "📜",
+      icon:   "",
       apply:  (state)=>({...state, heroes: state.heroes.map(h=>({...h, contractWeeksLeft:(h.contractWeeksLeft||24)*2}))}),
     },
   },
@@ -1454,13 +1454,13 @@ const ACHIEVEMENTS = [
     id:       "ability_scout",
     name:     "Ability Scout",
     desc:     "Successfully mitigate 100 enemy abilities in a run",
-    icon:     "🛡️",
+    icon:     "",
     check:    (data)=>(data.abilitiesMitigated||0)>=100,
     boon: {
       id:     "ability_scout",
       name:   "Battle-Sharp",
       desc:   "All starting heroes begin with Form 8/10 — already in good shape.",
-      icon:   "⚡",
+      icon:   "",
       apply:  (state)=>({...state, heroes: state.heroes.map(h=>({...h, stats:{...h.stats, Form:Math.max(h.stats.Form||5, 8)}}))}),
     },
   },
@@ -1468,13 +1468,13 @@ const ACHIEVEMENTS = [
     id:       "transfer_king",
     name:     "Banner Broker",
     desc:     "Send 15 heroes to serve rival banners in a single run",
-    icon:     "🔄",
+    icon:     "",
     check:    (data)=>(data.heroesSold||0)>=15,
     boon: {
       id:     "transfer_king",
       name:   "Well-Rounded Roster",
       desc:   "Starting squad has guaranteed role coverage — one Warrior, one Ranger, one Mage, one Cleric, one Rogue, one Paladin.",
-      icon:   "🎯",
+      icon:   "",
       apply:  (state)=>{
         const roles = ["Warrior","Ranger","Mage","Cleric","Rogue","Paladin"];
         const newHeroes = state.heroes.map((h,i)=>i<roles.length?{...h,role:roles[i]}:h);
@@ -1486,13 +1486,13 @@ const ACHIEVEMENTS = [
     id:       "synergy_master",
     name:     "Synergy Master",
     desc:     "Win battles with 3 different race synergies active in one run",
-    icon:     "✨",
+    icon:     "",
     check:    (data)=>Object.keys(data.raceSynergyUsage||{}).length>=3,
     boon: {
       id:     "synergy_master",
       name:   "United Bloodline",
       desc:   "Choose your starting squad's race — all 8 starting heroes share the same race.",
-      icon:   "🧬",
+      icon:   "",
       apply:  (state)=>{
         // Pick the most common race in the starting squad and unify to it
         const raceCounts = {};
@@ -1697,9 +1697,9 @@ function fatigueLabel(f) {
 }
 
 export const POSITIONS = {
-  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"🗡️", color:"#7E2D26", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel." },
-  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"🏹", color:"#8A6D3B", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
-  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"✨", color:"#3C5A78", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
+  Vanguard:   { label:"Vanguard",   subtitle:"Frontline breakers",  icon:"", color:"#7E2D26", slots:2, ideal:["Warrior","Paladin"],        penalty:["Mage","Cleric"],   primaryStats:["Strength","Endurance","Defense","Intimidation"],               desc:"Heavy melee. Warriors & Paladins excel." },
+  Skirmisher: { label:"Skirmisher", subtitle:"Flankers & ambushers", icon:"", color:"#8A6D3B", slots:2, ideal:["Ranger","Rogue"],             penalty:["Paladin","Cleric"], primaryStats:["Agility","Accuracy","Determination","Adaptability"],           desc:"Fast flankers. Rangers & Rogues excel here." },
+  Arbiter:    { label:"Arbiter",    subtitle:"Command & support",    icon:"", color:"#3C5A78", slots:2, ideal:["Mage","Cleric"],           penalty:["Warrior"],         primaryStats:["Magic Power","Magic Resist","Tactics","Leadership","Composure"], desc:"Rear command. Mages & Clerics dominate here." },
 };
 export const POS_KEYS = Object.keys(POSITIONS);
 
@@ -1862,12 +1862,12 @@ export function applyHealScar(hero, addLog) {
     const scarTrait = ["Resilient","Iron Will"].find(t=>!traits.includes(t));
     if(scarTrait && traits.length < 3 && Math.random() < 0.35) {
       out = { ...out, traits: [...traits, scarTrait] };
-      addLog?.(`💪 ${hero.name} returns from the ${injName.toLowerCase()} harder than before — gained ${scarTrait}.`,"success");
+      addLog?.(`${hero.name} returns from the ${injName.toLowerCase()} harder than before — gained ${scarTrait}.`,"success");
     } else {
       const stat = pick(PHYSICAL_STATS);
       const loss = rand(1,2);
       out = { ...out, stats: { ...out.stats, [stat]: Math.max(10, (out.stats[stat]||10) - loss) } };
-      addLog?.(`🩹 ${hero.name}'s ${injName.toLowerCase()} never fully healed — permanent −${loss} ${stat}.`,"warning");
+      addLog?.(`${hero.name}'s ${injName.toLowerCase()} never fully healed — permanent −${loss} ${stat}.`,"warning");
     }
   }
   return out;
@@ -1982,11 +1982,11 @@ export function calcFormationRating(formation){
 export const TIERS = {
   // tributeBase values are sim-calibrated (scripts/balance-sim.mjs) together
   // with the loss purse and position bonus — retune there before changing here
-  iron:     { id:"iron",     name:"Iron",     icon:"⚙️",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
-  bronze:   { id:"bronze",   name:"Bronze",   icon:"🥉",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:160, xpRange:[26,40] },
-  silver:   { id:"silver",   name:"Silver",   icon:"🥈",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:260, xpRange:[32,48] },
-  gold:     { id:"gold",     name:"Gold",     icon:"🥇",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:400, xpRange:[36,70] },
-  platinum: { id:"platinum", name:"Platinum", icon:"💎",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:560, xpRange:[45,85] },
+  iron:     { id:"iron",     name:"Iron",     icon:"",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
+  bronze:   { id:"bronze",   name:"Bronze",   icon:"",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:160, xpRange:[26,40] },
+  silver:   { id:"silver",   name:"Silver",   icon:"",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:260, xpRange:[32,48] },
+  gold:     { id:"gold",     name:"Gold",     icon:"",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:400, xpRange:[36,70] },
+  platinum: { id:"platinum", name:"Platinum", icon:"",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:560, xpRange:[45,85] },
 };
 export const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
 
@@ -2138,7 +2138,7 @@ export const RACE_SYNERGIES = [
   // ── MONO-RACE: all 6 raiding heroes of same race ───────────────────────────
   {
     id:"mono_elf",    type:"mono",   race:"Elf",
-    name:"The Long Watch",   icon:"🌿", color:"#40614F",
+    name:"The Long Watch",   icon:"", color:"#40614F",
     ratingMult:1.11, winBonus:0.05,
     laneMults:{Vanguard:0.94, Skirmisher:1.30, Arbiter:1.10},
     desc:"6 Elves — precision and speed at their peak. Dominant Skirmishers but fragile Vanguard.",
@@ -2147,7 +2147,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_dwarf",  type:"mono",   race:"Dwarf",
-    name:"Deep-Wall Doctrine", icon:"⛏️", color:"#8A6D3B",
+    name:"Deep-Wall Doctrine", icon:"", color:"#8A6D3B",
     ratingMult:1.11, winBonus:0.05,
     laneMults:{Vanguard:1.32, Skirmisher:0.92, Arbiter:1.10},
     desc:"6 Dwarves — unbreakable iron wall. Vanguard is near-impenetrable, Skirmishers suffer.",
@@ -2156,7 +2156,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_human",  type:"mono",   race:"Human",
-    name:"The Mortal Wager", icon:"🛡️", color:"#3C5A78",
+    name:"The Mortal Wager", icon:"", color:"#3C5A78",
     ratingMult:1.11, winBonus:0.04,
     laneMults:{Vanguard:1.11, Skirmisher:1.11, Arbiter:1.11},
     desc:"6 Humans — adaptable and resilient. No soft spots, steady across all positions.",
@@ -2165,7 +2165,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_halforc",type:"mono",   race:"Half-Orc",
-    name:"The Red Tide",     icon:"💢", color:"#7E2D26",
+    name:"The Red Tide",     icon:"", color:"#7E2D26",
     ratingMult:1.11, winBonus:0.06,
     laneMults:{Vanguard:1.35, Skirmisher:1.12, Arbiter:0.90},
     desc:"6 Half-Orcs — terrifying raw aggression. Shatters frontlines but has no subtlety.",
@@ -2174,7 +2174,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_tiefling",type:"mono",  race:"Tiefling",
-    name:"Infernal Pact",    icon:"😈", color:"#5F4B66",
+    name:"Infernal Pact",    icon:"", color:"#5F4B66",
     ratingMult:1.11, winBonus:0.05,
     laneMults:{Vanguard:0.92, Skirmisher:1.08, Arbiter:1.32},
     desc:"6 Tieflings — dark power and guile. Arbiters are supercharged, physical roles thin.",
@@ -2183,7 +2183,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_gnome",  type:"mono",   race:"Gnome",
-    name:"Cog-Court Logic",  icon:"⚙️", color:"#3E6B74",
+    name:"Cog-Court Logic",  icon:"", color:"#3E6B74",
     ratingMult:1.11, winBonus:0.04,
     laneMults:{Vanguard:0.85, Skirmisher:1.05, Arbiter:1.35},
     desc:"6 Gnomes — brilliant command and magic. Vanguard is paper-thin.",
@@ -2192,7 +2192,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"mono_dragonborn",type:"mono",race:"Dragonborn",
-    name:"The Old Fire",     icon:"🐉", color:"#fb923c",
+    name:"The Old Fire",     icon:"", color:"#fb923c",
     ratingMult:1.11, winBonus:0.06,
     laneMults:{Vanguard:1.20, Skirmisher:1.12, Arbiter:1.05},
     desc:"6 Dragonborn — overwhelming presence and raw power across the board.",
@@ -2203,7 +2203,7 @@ export const RACE_SYNERGIES = [
   // ── FULL RAINBOW: all 6 raiding heroes of different races ──────────────────
   {
     id:"rainbow",     type:"rainbow",
-    name:"Band of Nations",  icon:"🌈", color:"#23201A",
+    name:"Band of Nations",  icon:"", color:"#23201A",
     ratingMult:1.08, winBonus:0.04,
     laneMults:{Vanguard:1.08, Skirmisher:1.08, Arbiter:1.08},
     desc:"All 6 heroes from different races — diverse strengths cover every weakness.",
@@ -2218,7 +2218,7 @@ export const RACE_SYNERGIES = [
   // ── DUO PACTS: 3+ of two specific races ────────────────────────────────────
   {
     id:"pact_elf_tiefling",  type:"duo",
-    name:"Shadow Pact",      icon:"🌑", color:"#5F4B66",
+    name:"Shadow Pact",      icon:"", color:"#5F4B66",
     ratingMult:1.05, winBonus:0.03,
     laneMults:{Vanguard:0.95, Skirmisher:1.15, Arbiter:1.12},
     desc:"3+ Elves & 3+ Tieflings — dark and swift. Skirmishers and Arbiters reach peak form.",
@@ -2227,7 +2227,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"pact_dwarf_halforc", type:"duo",
-    name:"Iron Warbond",     icon:"⚒️", color:"#8A6D3B",
+    name:"Iron Warbond",     icon:"", color:"#8A6D3B",
     ratingMult:1.05, winBonus:0.03,
     laneMults:{Vanguard:1.22, Skirmisher:0.98, Arbiter:0.95},
     desc:"3+ Dwarves & 3+ Half-Orcs — unstoppable Vanguard. The two toughest frontline races.",
@@ -2236,7 +2236,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"pact_gnome_tiefling",type:"duo",
-    name:"Arcane Covenant",  icon:"🔮", color:"#5F4B66",
+    name:"Arcane Covenant",  icon:"", color:"#5F4B66",
     ratingMult:1.05, winBonus:0.03,
     laneMults:{Vanguard:0.92, Skirmisher:1.00, Arbiter:1.25},
     desc:"3+ Gnomes & 3+ Tieflings — devastating magical command. Arbiter rating skyrockets.",
@@ -2245,7 +2245,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"pact_human_elf",     type:"duo",
-    name:"Elder Alliance",   icon:"🤝", color:"#40614F",
+    name:"Elder Alliance",   icon:"", color:"#40614F",
     ratingMult:1.05, winBonus:0.02,
     laneMults:{Vanguard:1.05, Skirmisher:1.08, Arbiter:1.03},
     desc:"3+ Humans & 3+ Elves — balanced and reliable. No weaknesses, strong across all positions.",
@@ -2254,7 +2254,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"pact_dragonborn_halforc",type:"duo",
-    name:"Warbeast Pact",    icon:"🐉", color:"#fb923c",
+    name:"Warbeast Pact",    icon:"", color:"#fb923c",
     ratingMult:1.05, winBonus:0.03,
     laneMults:{Vanguard:1.18, Skirmisher:1.08, Arbiter:0.90},
     desc:"3+ Dragonborn & 3+ Half-Orcs — terrifying physical dominance front-to-back.",
@@ -2263,7 +2263,7 @@ export const RACE_SYNERGIES = [
   },
   {
     id:"pact_human_dwarf",   type:"duo",
-    name:"Order's Vow",      icon:"⚖️", color:"#3C5A78",
+    name:"Order's Vow",      icon:"", color:"#3C5A78",
     ratingMult:1.05, winBonus:0.02,
     laneMults:{Vanguard:1.15, Skirmisher:1.00, Arbiter:1.02},
     desc:"3+ Humans & 3+ Dwarves — disciplined and dependable. Excellent Vanguard and morale.",
@@ -2287,21 +2287,21 @@ export function calcRaceSynergy(formation) {
 
 const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
-  { id:"barracks",  name:"Barracks",         icon:"🏰", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
-  { id:"tavern",    name:"Tavern",            icon:"🍺", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
+  { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
+  { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"⚕️",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Injuries heal 1 week faster." },
-  { id:"lodge",     name:"Recovery Lodge",    icon:"🛖", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Injuries heal 1 week faster." },
+  { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"🎯", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
-  { id:"network",   name:"Talent Network",    icon:"🔭", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"💰", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
+  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
+  { id:"network",   name:"Talent Network",    icon:"", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
+  { id:"trading",   name:"Trading Post",      icon:"", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
-  { id:"bazaar",    name:"Grand Bazaar",      icon:"🏪", cost:1800, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
-  { id:"scouts",    name:"Observatory",     icon:"🌠", cost:2800, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
+  { id:"bazaar",    name:"Grand Bazaar",      icon:"", cost:1800, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
+  { id:"scouts",    name:"Observatory",     icon:"", cost:2800, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
   // ── PLATINUM ─────────────────────────────────────────────────────────────────
-  { id:"sanctum",   name:"Elite Sanctum",     icon:"💎", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
-  { id:"legends",   name:"Hall of Legends",   icon:"🏛️", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
+  { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
+  { id:"legends",   name:"Hall of Legends",   icon:"", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
 const TRAITS = ["Berserker","Tactician","Swift","Resilient","Cursed","Blessed","Coward","Brave","Greedy","Loyal","Hot-headed","Calm","Inspiring","Stubborn","Night Vision","Eagle Eye","Iron Will","Glass Cannon"];
@@ -2423,6 +2423,13 @@ function rollPotential(premium=false, elite=false, tierId="iron"){
 
 // Contract weeks per year
 const DEFAULT_TOWN_COLOR = "#8A6D3B";
+// Saves from the dark-theme era carry neon town colors that vanish on
+// parchment — map each legacy hex to its ink successor on load.
+const LEGACY_TOWN_COLORS = {
+  "#ffd966":"#8A6D3B", "#a8ff78":"#40614F", "#78c8ff":"#3C5A78", "#ff7878":"#7E2D26",
+  "#c084fc":"#5F4B66", "#ff9f43":"#9A5B2B", "#c0c0c0":"#7D7A70", "#ff6eb4":"#8F4A63",
+};
+const migrateTownColor = (c) => LEGACY_TOWN_COLORS[(c||"").toLowerCase()] || c || DEFAULT_TOWN_COLOR;
 const DEFAULT_TOWN_NAME  = "Your Realm";
 const TOWN_COLORS = [
   { label:"Gold",    value:"#8A6D3B" },
@@ -2718,7 +2725,7 @@ function generateEnemy(name,difficulty){
 const LEGENDARY_CHALLENGERS = [
   {
     name:"The Obsidian Throne",
-    icon:"🖤",
+    icon:"",
     power:460,
     difficulty:6,
     flavour:"Ancient, merciless, and undefeated in living memory.",
@@ -2728,7 +2735,7 @@ const LEGENDARY_CHALLENGERS = [
   },
   {
     name:"The Eternal Court",
-    icon:"👁️",
+    icon:"",
     power:430,
     difficulty:6,
     flavour:"They have watched every battle you've fought. They know your tactics.",
@@ -2738,7 +2745,7 @@ const LEGENDARY_CHALLENGERS = [
   },
   {
     name:"The Ashen Legion",
-    icon:"🔥",
+    icon:"",
     power:490,
     difficulty:6,
     flavour:"Forged in conquest, hardened by a thousand campaigns.",
@@ -2754,7 +2761,7 @@ const EMISSARY_EVENT = {
   id:          "legendary_emissary",
   isEmissary:  true,               // special flag — no hero selection needed
   title:       "A Legendary Challenge",
-  icon:        "⚔️",
+  icon:        "",
   heroesNeeded:0,
   requires:    [],
 };
@@ -2771,7 +2778,7 @@ const EMISSARY_EVENT = {
 
 export const ENEMY_ABILITIES = [
   {
-    id:'crushing_assault',   name:'Crushing Assault',         icon:'⚒️',
+    id:'crushing_assault',   name:'Crushing Assault',         icon:'',
     stat:'Defense',          scope:'vanguard',
     desc:'Their frontline hits with bone-shattering force.',
     softDesc: (t)=>`Vanguard heroes: +20% injury chance on defeat.`,
@@ -2781,7 +2788,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'war_of_attrition',   name:'War of Attrition',         icon:'⏳',
+    id:'war_of_attrition',   name:'War of Attrition',         icon:'',
     stat:'Endurance',        scope:'squad',
     desc:'A grinding fight that drains every hero.',
     softDesc: (t)=>`All heroes in formation: +10 fatigue.`,
@@ -2791,7 +2798,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'flanking_blitz',     name:'Flanking Blitz',           icon:'💨',
+    id:'flanking_blitz',     name:'Flanking Blitz',           icon:'',
     stat:'Agility',          scope:'skirmisher',
     desc:'Lightning flankers overwhelm slow Skirmishers.',
     softDesc: (t)=>`Skirmisher heroes: +12 fatigue.`,
@@ -2801,7 +2808,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'sniper_fire',        name:'Sniper Fire',              icon:'🎯',
+    id:'sniper_fire',        name:'Sniper Fire',              icon:'',
     stat:'Accuracy',         scope:'skirmisher',
     desc:'Their marksmen pick off your flankers with cold precision.',
     softDesc: (t)=>`Skirmisher heroes: +25% injury chance.`,
@@ -2811,7 +2818,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'brute_force',        name:'Brute Force',              icon:'💪',
+    id:'brute_force',        name:'Brute Force',              icon:'',
     stat:'Strength',         scope:'vanguard',
     desc:'Overwhelming aggression that steamrolls weak fronts.',
     softDesc: (t)=>`Gold reward −20%.`,
@@ -2821,7 +2828,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'arcane_suppression', name:'Arcane Suppression',       icon:'🔮',
+    id:'arcane_suppression', name:'Arcane Suppression',       icon:'',
     stat:'Magic Resist',     scope:'arbiter',
     desc:'Their mages suppress your command and control.',
     softDesc: (t)=>`Arbiter heroes: −10 morale, +8 fatigue.`,
@@ -2831,7 +2838,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'dark_ritual',        name:'Dark Ritual',              icon:'🌑',
+    id:'dark_ritual',        name:'Dark Ritual',              icon:'',
     stat:'Magic Power',      scope:'arbiter',
     desc:'A dark ritual empowers their forces.',
     softDesc: (t)=>`All heroes: −8 morale.`,
@@ -2841,7 +2848,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'psychological_warfare', name:'Psychological Warfare', icon:'🧠',
+    id:'psychological_warfare', name:'Psychological Warfare', icon:'',
     stat:'Composure',        scope:'squad',
     desc:'Mind games rattle your heroes before the fight.',
     softDesc: (t)=>`All heroes: −10 morale.`,
@@ -2851,7 +2858,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'disrupt_command',    name:'Disrupt Chain of Command', icon:'📜',
+    id:'disrupt_command',    name:'Disrupt Chain of Command', icon:'',
     stat:'Leadership',       scope:'squad',
     desc:'They target your leaders — coordination crumbles.',
     softDesc: (t)=>`All heroes: −25% XP this battle.`,
@@ -2861,7 +2868,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'iron_will_test',     name:'Iron Will Test',           icon:'⚖️',
+    id:'iron_will_test',     name:'Iron Will Test',           icon:'',
     stat:'Determination',    scope:'squad',
     desc:'A brutal encounter that shatters those lacking conviction.',
     softDesc: (t)=>`Raiding heroes: −8 morale on defeat.`,
@@ -2871,7 +2878,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'guerrilla_tactics',  name:'Guerrilla Tactics',        icon:'🌿',
+    id:'guerrilla_tactics',  name:'Guerrilla Tactics',        icon:'',
     stat:'Adaptability',     scope:'squad',
     desc:'Unpredictable tactics confuse rigid formations.',
     softDesc: (t)=>`+15% injury chance across all heroes.`,
@@ -2881,7 +2888,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'terror_tactics',     name:'Terror Tactics',           icon:'😱',
+    id:'terror_tactics',     name:'Terror Tactics',           icon:'',
     stat:'Intimidation',     scope:'squad',
     desc:'Their fearsome reputation breaks the weak-willed.',
     softDesc: (t)=>`All heroes: −12 morale.`,
@@ -2891,7 +2898,7 @@ export const ENEMY_ABILITIES = [
     thresholds: { bronze:{pass:23,soft:18}, silver:{pass:30,soft:24}, gold:{pass:40,soft:32}, platinum:{pass:50,soft:40} },
   },
   {
-    id:'tactical_trap',      name:'Tactical Trap',            icon:'🪤',
+    id:'tactical_trap',      name:'Tactical Trap',            icon:'',
     stat:'Tactics',          scope:'squad',
     desc:'A clever battlefield trap — only awareness avoids it.',
     softDesc: (t)=>`All heroes: +10 fatigue.`,
@@ -3000,9 +3007,9 @@ function ageHero(hero, buildings) {
       });
       if(Math.random() < 0.4) newStats.Form = Math.max(1, newStats.Form - 1);
       if(decayed > 0) declineNote = pick([
-        `📉 ${hero.name} is slowing — the younger ones are faster to the wall now, and they know it.`,
-        `📉 ${hero.name} takes longer to warm up these days. The edge is dulling.`,
-        `📉 Time is collecting its debts from ${hero.name}.`,
+        `${hero.name} is slowing — the younger ones are faster to the wall now, and they know it.`,
+        `${hero.name} takes longer to warm up these days. The edge is dulling.`,
+        `Time is collecting its debts from ${hero.name}.`,
       ]);
     }
   }
@@ -3018,14 +3025,14 @@ function ageHero(hero, buildings) {
       });
       newStats.Form = Math.max(1, newStats.Form - rand(0,1));
       newMorale = Math.max(30, newMorale - rand(2,6));
-      declineNote = `🕯️ ${hero.name} is fighting against time...`;
+      declineNote = `${hero.name} is fighting against time...`;
     }
     // Retire only at natural end of veteran stage
     if(finalProgress >= 100) retired = true;
   }
 
   if(declineNote) events.push({text:declineNote, type:hero.stage==="veteran"?"danger":"warning", heroId:hero.id});
-  if(retired) events.push({text:`🎖️ ${hero.name} has retired. A legend leaves the field.`, type:"danger", heroId:hero.id, retired:true});
+  if(retired) events.push({text:`${hero.name} has retired. A legend leaves the field.`, type:"danger", heroId:hero.id, retired:true});
 
   return { hero:{...hero, stage:newStage, stageProgress:finalProgress, stats:newStats, morale:newMorale, retired}, events };
 }
@@ -3036,11 +3043,11 @@ function ageHero(hero, buildings) {
 // Returns: { phases, finalResult, weakLinks }
 
 const PHASE_DEFS = [
-  { id:"approach",  label:"Approach",        icon:"🌑", pos:null,          duration:5500 },
-  { id:"vanguard",  label:"Vanguard Clash",   icon:"🗡️", pos:"Vanguard",    duration:7000 },
-  { id:"skirmish",  label:"Skirmisher Strike",icon:"🏹", pos:"Skirmisher",  duration:7000 },
-  { id:"arbiter",   label:"Arbiter Command",  icon:"✨", pos:"Arbiter",     duration:6500 },
-  { id:"resolution",label:"Resolution",       icon:"⚔️", pos:null,          duration:5000 },
+  { id:"approach",  label:"Approach",        icon:"", pos:null,          duration:5500 },
+  { id:"vanguard",  label:"Vanguard Clash",   icon:"", pos:"Vanguard",    duration:7000 },
+  { id:"skirmish",  label:"Skirmisher Strike",icon:"", pos:"Skirmisher",  duration:7000 },
+  { id:"arbiter",   label:"Arbiter Command",  icon:"", pos:"Arbiter",     duration:6500 },
+  { id:"resolution",label:"Resolution",       icon:"", pos:null,          duration:5000 },
 ];
 
 // Event templates per phase — filled with real hero names/stats
@@ -3125,7 +3132,7 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
 
     // Race synergy flavour
     if(analysis.raceSynergy) {
-      good(`${analysis.raceSynergy.icon} ${analysis.raceSynergy.name}: ${analysis.raceSynergy.flavour}`);
+      good(`${analysis.raceSynergy.name}: ${analysis.raceSynergy.flavour}`);
     }
   }
 
@@ -3383,18 +3390,18 @@ function buildPhaseEvents(phaseId, phasePos, formation, enemy, analysis, won, ph
 
     if(won){
       const victoryLines = [
-        `🏆 ${enemy.name} is overcome! The battle is a triumph.`,
-        `🏆 Victory against ${enemy.name}. The realm grows stronger.`,
-        `🏆 ${enemy.name} falls. Another chapter written.`,
-        `🏆 The battle is yours. ${enemy.name} couldn't match you today.`,
+        `${enemy.name} is overcome! The battle is a triumph.`,
+        `Victory against ${enemy.name}. The realm grows stronger.`,
+        `${enemy.name} falls. Another chapter written.`,
+        `The battle is yours. ${enemy.name} couldn't match you today.`,
       ];
       good(pickLine(victoryLines));
     } else {
       const defeatLines = [
-        `💀 ${enemy.name} repels your forces. A costly defeat.`,
-        `💀 Defeat. ${enemy.name} proved too strong today.`,
-        `💀 The battle is lost. ${enemy.name} holds their ground.`,
-        `💀 Sent home empty-handed. ${enemy.name} wins this one.`,
+        `${enemy.name} repels your forces. A costly defeat.`,
+        `Defeat. ${enemy.name} proved too strong today.`,
+        `The battle is lost. ${enemy.name} holds their ground.`,
+        `Sent home empty-handed. ${enemy.name} wins this one.`,
       ];
       bad(pickLine(defeatLines));
     }
@@ -3679,20 +3686,20 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
   const topWeakLink = weakLinks.length > 0 ? weakLinks[0] : null;
 
   const summaryEvents = [];
-  if(analysis.raceSynergy&&won) summaryEvents.push(`${analysis.raceSynergy.icon} ${analysis.raceSynergy.name}: ${analysis.raceSynergy.flavour}`);
-  if(injuries.length) summaryEvents.push(`🩸 ${injuries.length} hero(es) injured.`);
-  if(hasBarracks) summaryEvents.push("🏰 Barracks: +20% XP");
-  if(specPenalty) summaryEvents.push(`⚠️ ${enemy.specialisation.label}: ${specPenalty.reason} (enemy power +${Math.round(specPenalty.penalty*100)}%)`);
-  if(!specPenalty && enemy.specialisation) summaryEvents.push(`✅ Countered ${enemy.specialisation.label} — no power penalty`);
+  if(analysis.raceSynergy&&won) summaryEvents.push(`${analysis.raceSynergy.name}: ${analysis.raceSynergy.flavour}`);
+  if(injuries.length) summaryEvents.push(`${injuries.length} hero(es) injured.`);
+  if(hasBarracks) summaryEvents.push("Barracks: +20% XP");
+  if(specPenalty) summaryEvents.push(`${enemy.specialisation.label}: ${specPenalty.reason} (enemy power +${Math.round(specPenalty.penalty*100)}%)`);
+  if(!specPenalty && enemy.specialisation) summaryEvents.push(`Countered ${enemy.specialisation.label} — no power penalty`);
   abilityResults.forEach(({ability,outcome})=>{
     if(outcome==='pass') return;
     const effects = outcome==='soft' ? ability.softEffect : ability.hardEffect;
     const effectText = outcome==='soft' ? ability.softDesc() : ability.hardDesc();
-    summaryEvents.push(`${ability.icon} ${ability.name}: ${effectText}`);
+    summaryEvents.push(`${ability.name}: ${effectText}`);
   });
-  if(nightVisionHero&&nightBonus>0) summaryEvents.push(`🌑 ${nightVisionHero.name}'s Night Vision shone in the darkness!`);
+  if(nightVisionHero&&nightBonus>0) summaryEvents.push(`${nightVisionHero.name}'s Night Vision shone in the darkness!`);
   if(won) allHeroes.filter(h=>h.traits?.includes("Berserker")&&POS_KEYS.find(p=>(formation[p]||[]).some(x=>x?.id===h.id))==="Vanguard")
-    .forEach(h=>summaryEvents.push(`⚡ ${h.name} went berserk — unstoppable in the vanguard!`));
+    .forEach(h=>summaryEvents.push(`${h.name} went berserk — unstoppable in the vanguard!`));
 
   return {
     phases: phaseResults,
@@ -3709,9 +3716,9 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
 // ─── RAID SIMULATION MODAL ────────────────────────────────────────────────────
 
 const SIM_LANES = [
-  { pos:"Vanguard",   icon:"🗡️", color:"#7E2D26" },
-  { pos:"Skirmisher", icon:"🏹", color:"#8A6D3B" },
-  { pos:"Arbiter",    icon:"✨", color:"#3C5A78" },
+  { pos:"Vanguard",   icon:"", color:"#7E2D26" },
+  { pos:"Skirmisher", icon:"", color:"#8A6D3B" },
+  { pos:"Arbiter",    icon:"", color:"#3C5A78" },
 ];
 
 function RaidSimulationModal({ simulation, enemy, onComplete }) {
@@ -3781,7 +3788,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
         {/* Header */}
         <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(60,52,38,0.09)",display:"flex",alignItems:"center",gap:10,background:"rgba(30,24,14,0.105)"}}>
           <div style={{flex:1}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>⚔️ {enemy.name}</div>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{enemy.name}</div>
             <div style={{fontSize:9,color:"#7A6F58",marginTop:1}}>Enemy Power {enemy.power} · {Math.round(simulation.winChance*100)}% projected</div>
           </div>
           {!done && (
@@ -3810,7 +3817,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                   border:`1px solid ${!ls.started?"rgba(60,52,38,0.09)":(ls.won?"rgba(64,97,79,0.3)":"rgba(126,45,38,0.3)")}`,
                   opacity:!ls.started?0.45:1,transition:"all 0.3s"}}>
                   <PositionIcon position={ls.pos} size={12}/>
-                  <span style={{fontSize:10,fontWeight:700,color:laneCol,fontFamily:"'IM Fell English SC',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  <span style={{fontSize:10,fontWeight:700,color:laneCol,fontFamily:"'Alegreya Sans',sans-serif",flex:1}}>{ls.pos.toUpperCase()}</span>
                   {(ls.finished||done)&&ls.series?(
                     <>
                       <span style={{fontSize:10,color:"#6E6350"}}>{ls.series.wins}–{ls.series.losses}</span>
@@ -3828,7 +3835,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
               <div key={ls.pos} style={{borderRadius:3,border:`1px solid ${ls.color}44`,background:`${ls.color}08`,padding:"10px 12px",transition:"all 0.3s"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
                   <PositionIcon position={ls.pos} size={13}/>
-                  <span style={{fontSize:11,fontWeight:700,color:ls.color,fontFamily:"'IM Fell English SC',serif",flex:1}}>{ls.pos.toUpperCase()}</span>
+                  <span style={{fontSize:11,fontWeight:700,color:ls.color,fontFamily:"'Alegreya Sans',sans-serif",flex:1}}>{ls.pos.toUpperCase()}</span>
                   <span style={{fontSize:11,fontWeight:700,color:"#23201A"}}>{w}–{lct}</span>
                 </div>
 
@@ -3851,7 +3858,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                   </div>
                   <span style={{fontSize:9,color:"#7A6F58"}}>vs</span>
                   <div style={{display:"flex",alignItems:"center",gap:4,padding:"4px 8px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.27)"}}>
-                    <span style={{fontSize:11}}>{enemy.specialisation?.icon||"⚔️"}</span>
+                    <span style={{fontSize:11}}>{enemy.specialisation?.icon||""}</span>
                     <span style={{fontSize:9,color:"#8A5A44"}}>{enemy.name?.split(" ").slice(0,2).join(" ")}</span>
                   </div>
                 </div>
@@ -3920,7 +3927,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
               {simulation.abilityResults?.some(r=>r.outcome!=="pass")&&(
                 <div style={{flex:1,padding:"8px 10px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)",textAlign:"center"}}>
                   <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>Ability</div>
-                  <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B"}}>⚠️ Effect</div>
+                  <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B"}}>Effect</div>
                 </div>
               )}
             </div>
@@ -3928,7 +3935,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
             {/* Injuries */}
             {injuredHeroes.length > 0 && (
               <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
-                <div style={{fontSize:10,fontWeight:700,color:"#7E2D26",marginBottom:3}}>🩸 Injured</div>
+                <div style={{fontSize:10,fontWeight:700,color:"#7E2D26",marginBottom:3}}>Injured</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                   {injuredHeroes.map(h=>(
                     <div key={h.id} style={{fontSize:9,color:"#9A5B2B",padding:"2px 6px",borderRadius:3,background:"rgba(126,45,38,0.15)",border:"1px solid rgba(126,45,38,0.3)"}}>
@@ -3954,8 +3961,8 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
               return(
                 <div key={pos} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 8px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:`1px solid ${phaseWon?"rgba(64,97,79,0.15)":"rgba(126,45,38,0.15)"}`}}>
                   <span style={{fontSize:11}}>{icon}</span>
-                  <span style={{fontSize:10,fontWeight:700,color,flex:1,fontFamily:"'IM Fell English SC',serif"}}>{pos}</span>
-                  {ps?.pairingMult>1&&<span style={{fontSize:9,color:"#8A6D3B"}}>✦</span>}
+                  <span style={{fontSize:10,fontWeight:700,color,flex:1,fontFamily:"'Alegreya Sans',sans-serif"}}>{pos}</span>
+                  {ps?.pairingMult>1&&<span style={{fontSize:9,color:"#8A6D3B"}}></span>}
                   <span style={{fontSize:9,color:"#6E6350"}}>{wc?Math.round(wc*100)+"% win chance":""}</span>
                   <span style={{fontSize:10,fontWeight:700,color:phaseWon?"#40614F":"#7E2D26"}}>{phaseWon?"✓ Won":"✗ Lost"}</span>
                 </div>
@@ -3968,7 +3975,7 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
                 <div style={{fontSize:10,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:6}}>ABILITY EFFECTS</div>
                 {simulation.abilityResults.filter(r=>r.outcome!=="pass").map(({ability,outcome},i)=>(
                   <div key={i} style={{fontSize:9,color:"#9A5B2B",marginBottom:3}}>
-                    {ability.icon} {ability.name} — {outcome==="soft"?ability.softDesc():ability.hardDesc()}
+                    {ability.name} — {outcome==="soft"?ability.softDesc():ability.hardDesc()}
                   </div>
                 ))}
               </div>
@@ -3977,14 +3984,14 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
             {/* Race synergy */}
             {simulation.analysis?.raceSynergy&&(
               <div style={{marginTop:10,fontSize:9,color:simulation.analysis.raceSynergy.color}}>
-                {simulation.analysis.raceSynergy.icon} {simulation.analysis.raceSynergy.name} (×{simulation.analysis.raceSynergy.ratingMult}) active
+                {simulation.analysis.raceSynergy.name} (×{simulation.analysis.raceSynergy.ratingMult}) active
               </div>
             )}
 
             {/* Weak links */}
             {simulation.weakLinks?.length>0&&(
               <div style={{marginTop:10}}>
-                <div style={{fontSize:10,color:"#8A6D3B",fontWeight:700,letterSpacing:1,marginBottom:6}}>⚠️ WEAK LINKS</div>
+                <div style={{fontSize:10,color:"#8A6D3B",fontWeight:700,letterSpacing:1,marginBottom:6}}>WEAK LINKS</div>
                 {simulation.weakLinks.slice(0,3).map((link,i)=>(
                   <div key={i} style={{fontSize:9,color:"#4A4335",marginBottom:3}}>
                     <HeroAvatar race={link.hero.race} size={13}/> {link.hero.name} — {link.issues[0]?.reason}
@@ -3999,10 +4006,10 @@ function RaidSimulationModal({ simulation, enemy, onComplete }) {
         <div style={{padding:"12px 18px",borderTop:"1px solid rgba(60,52,38,0.09)",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(30,24,14,0.07)"}}>
           {done?(
             <>
-              <button onClick={(e)=>{e.stopPropagation();setShowDetails(d=>!d);}} style={{padding:"7px 14px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
+              <button onClick={(e)=>{e.stopPropagation();setShowDetails(d=>!d);}} style={{padding:"7px 14px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
                 {showDetails?"Hide Details":"Show Details"}
               </button>
-              <button onClick={(e)=>{e.stopPropagation();onComplete();}} style={{padding:"9px 24px",borderRadius:3,border:"none",cursor:"pointer",background:`${won?"#40614F":"#9A5B2B"}`,color:"#F0E8D5",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
+              <button onClick={(e)=>{e.stopPropagation();onComplete();}} style={{padding:"9px 24px",borderRadius:3,border:"none",cursor:"pointer",background:`${won?"#40614F":"#9A5B2B"}`,color:"#F0E8D5",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
                 Continue →
               </button>
             </>
@@ -4145,7 +4152,7 @@ function XPBar({xp,level}){
   return(
     <div style={{marginBottom:6}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
-        <span style={{color:"#5F4B66"}}>⭐ Lv {level}{level<MAX_LEVEL?` · ${cur}/${need} XP`:" · MAX (Lv15)"}</span>
+        <span style={{color:"#5F4B66"}}>Lv {level}{level<MAX_LEVEL?` · ${cur}/${need} XP`:" · MAX (Lv15)"}</span>
         <span style={{color:"#6E6350",fontSize:9}}>{xp} XP</span>
       </div>
       <div style={{height:4,background:"#DFD3B8",borderRadius:3,overflow:"hidden"}}>
@@ -4164,8 +4171,8 @@ function ContractBar({hero}){
   return(
     <div style={{marginBottom:6}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
-        <span style={{color:col}}>📜 Contract: {seasonsLeft} season{parseFloat(seasonsLeft)!==1?"s":""} left</span>
-        {hero.negotiationPending&&<span style={{fontSize:9,color:"#9A5B2B",fontWeight:700,animation:"pulse 1s infinite"}}>⚠️ RENEWAL PENDING</span>}
+        <span style={{color:col}}>Contract: {seasonsLeft} season{parseFloat(seasonsLeft)!==1?"s":""} left</span>
+        {hero.negotiationPending&&<span style={{fontSize:9,color:"#9A5B2B",fontWeight:700,animation:"pulse 1s infinite"}}>RENEWAL PENDING</span>}
       </div>
       <div style={{height:4,background:"#DFD3B8",borderRadius:2,overflow:"hidden"}}>
         <div style={{height:"100%",width:`${pct}%`,background:`${col}`,borderRadius:2,transition:"width 0.5s"}}/>
@@ -4259,7 +4266,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
         {/* Header */}
         <div style={{padding:"28px 28px 18px",textAlign:"center",background:"linear-gradient(180deg,rgba(138,109,59,0.12),transparent)"}}>
-          <div style={{fontSize:40,marginBottom:8}}>{defeat?"🕯️":"🏆"}</div>
+          <div style={{fontSize:40,marginBottom:8}}>{defeat?"":""}</div>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:22,color:defeat?"#9A5B2B":"#8A6D3B",marginBottom:4}}>
             {defeat?"The Campaign Ends":"A Legend is Born"}
           </div>
@@ -4295,7 +4302,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
           {/* Final Chronicle */}
           {narrativeParts.length>0&&(
             <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.225)",marginBottom:14}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,fontFamily:"'IM Fell English SC',serif",letterSpacing:0.5}}>📜 THE CHRONICLE OF {townName.toUpperCase()}</div>
+              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0.5}}>THE CHRONICLE OF {townName.toUpperCase()}</div>
               {narrativeParts.map((p,i)=>(
                 <p key={i} style={{margin:"0 0 5px",fontSize:11,color:"#6E6350",lineHeight:1.6}}>{p}</p>
               ))}
@@ -4314,7 +4321,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
           {/* Achievements earned */}
           {newlyEarned.length>0&&(
             <div style={{marginBottom:14}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,letterSpacing:0.5}}>🏅 ACHIEVEMENTS EARNED</div>
+              <div style={{fontSize:10,fontWeight:700,color:"#8A6D3B",marginBottom:8,letterSpacing:0.5}}>ACHIEVEMENTS EARNED</div>
               {newlyEarned.map(id=>{
                 const a=ACHIEVEMENTS.find(x=>x.id===id);
                 if(!a) return null;
@@ -4334,18 +4341,18 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
           {allBoons.length>0&&(
             <div style={{padding:"10px 14px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:16,fontSize:10,color:"#3C5A78"}}>
-              🎖️ <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when starting your next campaign.
+              <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when starting your next campaign.
             </div>
           )}
 
           <div style={{display:"flex",gap:10}}>
             <button onClick={onPlayOn}
-              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12}}>
+              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12}}>
               Continue Playing
             </button>
             <button onClick={()=>onNewLegacy(allBoons)}
-              style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
-              ⚔️ Begin New Campaign
+              style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12}}>
+              Begin New Campaign
             </button>
           </div>
         </div>
@@ -4412,9 +4419,9 @@ function WeeklySummary({summary, onDismiss, townColor}){
               <div style={{fontSize:9,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:6}}>PHASE BREAKDOWN</div>
               <div style={{display:"flex",gap:6}}>
                 {[
-                  {pos:"Vanguard",   icon:"🗡️", label:"VAN"},
-                  {pos:"Skirmisher", icon:"🏹", label:"SKR"},
-                  {pos:"Arbiter",    icon:"✨", label:"ARB"},
+                  {pos:"Vanguard",   icon:"", label:"VAN"},
+                  {pos:"Skirmisher", icon:"", label:"SKR"},
+                  {pos:"Arbiter",    icon:"", label:"ARB"},
                 ].map(({pos,icon,label})=>{
                   const pWon = phaseRolls[pos];
                   const pChance = phaseWinChances[pos];
@@ -4441,8 +4448,8 @@ function WeeklySummary({summary, onDismiss, townColor}){
           {/* Weak Link */}
           {topWeakLink&&(
             <div style={{padding:"9px 10px",borderRadius:3,background:"rgba(126,45,38,0.075)",border:"1px solid rgba(126,45,38,0.27)",marginBottom:8}}>
-              <div style={{fontSize:9,color:"#7E2D26",fontWeight:700,marginBottom:3}}>⚠️ WEAK LINK</div>
-              <div style={{fontSize:11,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{topWeakLink.hero.name}</div>
+              <div style={{fontSize:9,color:"#7E2D26",fontWeight:700,marginBottom:3}}>WEAK LINK</div>
+              <div style={{fontSize:11,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>{topWeakLink.hero.name}</div>
               <div style={{fontSize:9,color:"#6E6350"}}>{topWeakLink.issues[0]?.reason.slice(0,40)}</div>
             </div>
           )}
@@ -4450,12 +4457,12 @@ function WeeklySummary({summary, onDismiss, townColor}){
           {/* Stats grid */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
             {[
-              ["💰 Battle reward",  goldGain>0?`+${goldGain.toLocaleString()}g`:"—",          goldGain>0?"#40614F":"#8A7F68"],
-              ["💸 Wages",        `-${wages.toLocaleString()}g`,                             "#9A5B2B"],
-              ["👑 Tribute",      `+${tribute.toLocaleString()}g`,                          "#8A6D3B"],
-              ["📊 Net gold",     `${netGold>=0?"+":""}${netGold.toLocaleString()}g`,        netCol],
-              ["⭐ XP earned",    `+${heroXP} per raider`,                                  "#3C5A78"],
-              ["📈 Level-ups",    levelUps.length ? levelUps.map(l=>l.name).join(", ") : "—","#5F4B66"],
+              ["Battle reward",  goldGain>0?`+${goldGain.toLocaleString()}g`:"—",          goldGain>0?"#40614F":"#8A7F68"],
+              ["Wages",        `-${wages.toLocaleString()}g`,                             "#9A5B2B"],
+              ["Tribute",      `+${tribute.toLocaleString()}g`,                          "#8A6D3B"],
+              ["Net gold",     `${netGold>=0?"+":""}${netGold.toLocaleString()}g`,        netCol],
+              ["XP earned",    `+${heroXP} per raider`,                                  "#3C5A78"],
+              ["Level-ups",    levelUps.length ? levelUps.map(l=>l.name).join(", ") : "—","#5F4B66"],
             ].map(([label,val,col])=>(
               <div key={label} style={{padding:"8px 10px",background:"rgba(60,52,38,0.045)",borderRadius:3}}>
                 <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
@@ -4469,12 +4476,12 @@ function WeeklySummary({summary, onDismiss, townColor}){
             <div style={{marginBottom:12}}>
               {injuries.length>0&&(
                 <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:5,fontSize:11,color:"#9A5B2B"}}>
-                  🩸 Injured: {injuries.join(", ")}
+                  Injured: {injuries.join(", ")}
                 </div>
               )}
               {exhausted.length>0&&(
                 <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.22)",fontSize:11,color:"#7E2D26"}}>
-                  ⚡ Burned out: {exhausted.join(", ")} — rest them urgently
+                  Burned out: {exhausted.join(", ")} — rest them urgently
                 </div>
               )}
             </div>
@@ -4486,7 +4493,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
               <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>NEXT WEEK</div>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div>
-                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{nextOpp.name}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>{nextOpp.name}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}><span style={{color:starsColor(nextOppStars)}}>{nextDiffStars}</span> · Power {nextOpp.power}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
@@ -4499,7 +4506,7 @@ function WeeklySummary({summary, onDismiss, townColor}){
           <button onClick={onDismiss}
             style={{width:"100%",padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
               background:`${townColor}cc`,
-              color:"#F0E8D5",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
+              color:"#F0E8D5",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
             Continue →
           </button>
         </div>
@@ -4535,8 +4542,8 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
               <div style={{fontSize:11,color:"#6E6350",fontStyle:"italic",marginBottom:10}}>"{lc.flavour}"</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
                 {[
-                  ["⚔️ Power",lc.power,"#7E2D26"],
-                  ["💰 Reward",`${lc.goldReward?.toLocaleString()||"?"}g`,"#8A6D3B"],
+                  ["Power",lc.power,"#7E2D26"],
+                  ["Reward",`${lc.goldReward?.toLocaleString()||"?"}g`,"#8A6D3B"],
                 ].map(([label,val,col])=>(
                   <div key={label} style={{textAlign:"center",padding:"8px 4px",borderRadius:3,background:"rgba(30,24,14,0.087)"}}>
                     <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{label}</div>
@@ -4560,12 +4567,12 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
 
             <div style={{display:"flex",gap:10}}>
               <button onClick={onDecline}
-                style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
+                style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
                 Decline with Honour
               </button>
               <button onClick={()=>onAccept(event,[])}
-                style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#8F2A1E",color:"#F5EEDC",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
-                ⚔️ Accept the Challenge
+                style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#8F2A1E",color:"#F5EEDC",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
+                Accept the Challenge
               </button>
             </div>
           </div>
@@ -4624,13 +4631,13 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
               </div>
               <div style={{textAlign:"right",marginTop:8}}>
                 {th.signoff&&<div style={{fontSize:10,color:"#6E6350",fontStyle:"italic"}}>{th.signoff}</div>}
-                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:th.ink}}>
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,color:th.ink}}>
                   {th.sender}{th.senderTitle?<span style={{fontSize:10,color:"#6E6350"}}> · {th.senderTitle}</span>:null}
                 </div>
               </div>
               {selectionConfidence&&(
                 <div style={{position:"absolute",bottom:12,left:20,padding:"3px 9px",borderRadius:3,background:`${selectionConfidence.color}18`,border:`1px solid ${selectionConfidence.color}44`,fontSize:10,fontWeight:700,color:selectionConfidence.color}}>
-                  {selectionConfidence.icon} {selectionConfidence.label}
+                  {selectionConfidence.label}
                 </div>
               )}
             </div>
@@ -4666,26 +4673,26 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
                   border:`1px solid ${isSelected?"rgba(64,97,79,0.55)":"rgba(60,52,38,0.126)"}`,transition:"all 0.15s"}}>
                 <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
                   <div style={{display:"flex",gap:8,fontSize:10,color:"#6E6350",flexWrap:"wrap",marginTop:2}}>
                     <span>{h.role} · Lv {h.level}</span>
                     <span style={{color:fc}}>{fl} fatigue</span>
-                    <span style={{color:confidence.color,fontWeight:700}}>{confidence.icon} {confidence.label}</span>
+                    <span style={{color:confidence.color,fontWeight:700}}>{confidence.label}</span>
                     {eventTraitMods(h, event).map(({trait,mod})=>(
                       <span key={trait} style={{color:mod>0?"#40614F":"#9A5B2B",fontWeight:700}}>
                         {mod>0?"▲":"▼"} {trait}
                       </span>
                     ))}
                     {h.traits?.includes("Greedy")&&event.reward?.goldRange&&(
-                      <span style={{color:"#9A5B2B"}}>💰 will take a cut</span>
+                      <span style={{color:"#9A5B2B"}}>will take a cut</span>
                     )}
                   </div>
                 </div>
                 {onViewHero&&(
                   <button onClick={(e)=>{e.stopPropagation();onViewHero(h);}}
                     title="Open full hero sheet"
-                    style={{padding:"4px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.12)",color:"#3C5A78",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
-                    👁️ View
+                    style={{padding:"4px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.12)",color:"#3C5A78",cursor:"pointer",fontSize:10,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                    View
                   </button>
                 )}
                 {isSelected&&<div style={{fontSize:14,color:"#40614F",fontWeight:700}}>✓</div>}
@@ -4699,12 +4706,12 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
           <button onClick={()=>canAccept&&onAccept(event,selected)} disabled={!canAccept}
             style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:canAccept?"pointer":"not-allowed",
               background:canAccept?"#40614F":"#E4DAC2",
-              color:canAccept?"#F0E8D5":"#95896F",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
+              color:canAccept?"#F0E8D5":"#95896F",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
             {canAccept?`✓ Send ${selected.map(h=>h.name).join(" & ")}`:`Select ${event.heroesNeeded} hero${event.heroesNeeded>1?"es":""}`}
           </button>
           <button onClick={onDecline}
             style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",
-              background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12}}>
+              background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12}}>
             ✗ Decline
           </button>
         </div>
@@ -4754,7 +4761,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
                   border:`1px solid ${isSel?"rgba(95,75,102,0.55)":"rgba(60,52,38,0.126)"}`}}>
                 <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>{h.role} · Lv {h.level}</div>
                 </div>
                 {isSel&&<div style={{fontSize:14,color:"#5F4B66",fontWeight:700}}>✓</div>}
@@ -4785,19 +4792,19 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
 
         {/* Actions */}
         <div style={{padding:"12px 22px",borderTop:"1px solid rgba(60,52,38,0.09)",background:"rgba(30,24,14,0.07)"}}>
-          {!canAfford&&<div style={{fontSize:10,color:"#7E2D26",marginBottom:8}}>⚠️ Not enough gold ({gold}g / {event.cost}g required)</div>}
+          {!canAfford&&<div style={{fontSize:10,color:"#7E2D26",marginBottom:8}}>Not enough gold ({gold}g / {event.cost}g required)</div>}
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>canAccept&&onAccept(selectedHero, selectedStat)} disabled={!canAccept}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",
                 cursor:canAccept?"pointer":"not-allowed",
                 background:canAccept?"#5F4B66":"#E4DAC2",
-                color:canAccept?"#F5EEDC":"#95896F",fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
+                color:canAccept?"#F5EEDC":"#95896F",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12}}>
               {canAccept?`✓ Pay ${event.cost}g & Train ${selectedHero?.name}`:"Select hero & stat"}
             </button>
             <button onClick={onDecline}
               style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",
                 cursor:"pointer",background:"rgba(60,52,38,0.054)",color:"#6E6350",
-                fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
+                fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
               Decline
             </button>
           </div>
@@ -4845,13 +4852,13 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           <RoleIcon role={hero.role} size={20}/>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
-            {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}>🩸</span>}
-            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}>👑</span>}
-            {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}>🕊️</span>}
+            {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}></span>}
+            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
+            {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
           </div>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
             {hero.race} · {hero.role} · Lv <span style={{fontFamily:"'Alegreya Sans',sans-serif",color:"#8A6D3B",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
           </div>
         </div>
@@ -4878,20 +4885,20 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
-            {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}>🩸</span>}
-            {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}>📜</span>}
-            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}>👑</span>}
-            {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}>✨</span>}
-            {hero.fodder&&<span style={{fontSize:9,color:"#77653F",marginLeft:5}}>⚙️</span>}
-            {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}} title="Open to offers">🕊️</span>}
-            {hasBid&&<span style={{fontSize:9,color:"#4A6B45",marginLeft:5}}>💰</span>}
-            {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#4A6178",marginLeft:5}}>✈️{hero.awayWeeks}w</span>}
+            {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
+            {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
+            {isLeader&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
+            {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
+            {hero.fodder&&<span style={{fontSize:9,color:"#77653F",marginLeft:5}}></span>}
+            {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}} title="Open to offers"></span>}
+            {hasBid&&<span style={{fontSize:9,color:"#4A6B45",marginLeft:5}}></span>}
+            {(hero.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#4A6178",marginLeft:5}}>{hero.awayWeeks}w</span>}
           </div>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",marginTop:2,letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#77653F",marginTop:2,letterSpacing:1,textTransform:"uppercase",fontWeight:600}}>
             {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,letterSpacing:0}}>{hero.level}</span>
           </div>
         </div>
-        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,padding:"3px 8px",borderRadius:3,letterSpacing:1.4,textTransform:"uppercase",color:stageColor,background:`${stageColor}14`,border:`1px solid ${stageColor}44`}}>
+        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,padding:"3px 8px",borderRadius:3,letterSpacing:1.4,textTransform:"uppercase",color:stageColor,background:`${stageColor}14`,border:`1px solid ${stageColor}44`}}>
           {cap(phase)}
         </div>
       </div>
@@ -4899,26 +4906,26 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
       {/* CAREER + XP STRIP */}
       <div style={{padding:"12px 16px",borderBottom:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.04)"}}>
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:9}}>
-          <span style={{width:38,fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Career</span>
+          <span style={{width:38,fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Career</span>
           <div style={{flex:1,height:3,background:"#E4D9BF",borderRadius:1.5,overflow:"hidden"}}>
             <div style={{height:"100%",width:`${Math.round(stagePctRaw*100)}%`,background:stageColor}}/>
           </div>
           <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
-            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:stageColor,letterSpacing:1.2,textTransform:"uppercase"}}>{cap(phase)}</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:stageColor,letterSpacing:1.2,textTransform:"uppercase"}}>{cap(phase)}</span>
             {nextStage && <>
               <span style={{color:"#C9BA98",fontSize:10}}>→</span>
-              <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#9C8F73",letterSpacing:1.2,textTransform:"uppercase"}}>{cap(nextStage)}</span>
+              <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:500,color:"#9C8F73",letterSpacing:1.2,textTransform:"uppercase"}}>{cap(nextStage)}</span>
             </>}
           </span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <span style={{width:38,fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>XP</span>
+          <span style={{width:38,fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>XP</span>
           <div style={{flex:1,height:3,background:"#E4D9BF",borderRadius:1.5,overflow:"hidden"}}>
             <div style={{height:"100%",width:`${Math.round(xpPct*100)}%`,background:"#8A6D3B"}}/>
           </div>
           <span style={{display:"inline-flex",alignItems:"center",gap:5,whiteSpace:"nowrap",justifyContent:"flex-end"}}>
             <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{xpToLevel}</span>
-            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.2,textTransform:"uppercase"}}>To Level</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.2,textTransform:"uppercase"}}>To Level</span>
           </span>
         </div>
       </div>
@@ -4932,7 +4939,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           ["Fatigue", hero.fatigue||0, fatColor],
         ].map(([label,val,color],i)=>(
           <div key={label} style={{padding:"10px 0 12px",textAlign:"center",borderLeft:i>0?"1px solid rgba(138,109,59,0.15)":"none"}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",color:"#77653F",marginBottom:4}}>{label}</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",color:"#77653F",marginBottom:4}}>{label}</div>
             <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:18,color,fontVariantNumeric:"tabular-nums",lineHeight:1}}>{val}</div>
           </div>
         ))}
@@ -4940,8 +4947,8 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
 
       {/* AWAY BANNER */}
       {(hero.awayWeeks||0)>0&&(
-        <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.09)",fontSize:10,color:"#4A6178",fontFamily:"'IM Fell English SC',serif",letterSpacing:1.2,textTransform:"uppercase"}}>
-          ✈️ Away · {hero.awayEvent} · {hero.awayWeeks}w
+        <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.09)",fontSize:10,color:"#4A6178",fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:1.2,textTransform:"uppercase"}}>
+          Away · {hero.awayEvent} · {hero.awayWeeks}w
         </div>
       )}
 
@@ -4951,7 +4958,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           const eff = TRAIT_EFFECTS[t];
           return (
             <span key={t} title={eff?.desc||t}
-              style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(138,109,59,0.12)",color:"#8A6D3B",border:"1px solid rgba(138,109,59,0.375)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
+              style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:600,padding:"3px 9px",borderRadius:2,background:"rgba(138,109,59,0.12)",color:"#8A6D3B",border:"1px solid rgba(138,109,59,0.375)",letterSpacing:1.2,textTransform:"uppercase",cursor:eff?.desc?"help":"default"}}>{t}</span>
           );
         })}
       </div>
@@ -4961,7 +4968,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         const b = potentialBucket(hero.stats.Potential);
         return (
           <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.06)",display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:10}}>
-            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Potential</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Potential</span>
             <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label} <span style={{fontFamily:"'Alegreya Sans',sans-serif",color:"#77653F",fontWeight:500,letterSpacing:0,marginLeft:4}}>({hero.stats.Potential})</span></span>
           </div>
         );
@@ -4970,8 +4977,8 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
         const b = potentialBucket(hero.stats.Potential);
         return (
           <div style={{padding:"6px 14px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(74,97,120,0.08)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#4A6178",textTransform:"uppercase"}}>🌠 Scouted</span>
-            <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label}</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#4A6178",textTransform:"uppercase"}}>Scouted</span>
+            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:b.color,letterSpacing:1.2,textTransform:"uppercase"}}>{b.label}</span>
           </div>
         );
       })()}
@@ -4980,11 +4987,11 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           stay aligned in a stretch grid regardless of trait count). */}
       <div style={{marginTop:"auto",padding:"10px 16px",borderTop:"1px solid rgba(138,109,59,0.15)",background:"rgba(138,109,59,0.045)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",flexDirection:"column",gap:2}}>
-          <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Wage / Week</span>
+          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Wage / Week</span>
           <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:13,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>{hero.salary}g</span>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:2}}>
-          <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Market Value</span>
+          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#77653F",textTransform:"uppercase"}}>Market Value</span>
           <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:600,fontSize:13,color:"#8A6D3B",fontVariantNumeric:"tabular-nums"}}>{hero.value===0?(showBuy?"Unattached":"0g"):`${hero.value.toLocaleString()}g`}</span>
         </div>
       </div>
@@ -5024,14 +5031,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:18,color:"#3A3427",letterSpacing:0.5,lineHeight:1.15,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
-            {isListed&&<span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#8A6D3B",marginLeft:8,background:"rgba(138,109,59,0.15)",padding:"2px 7px",borderRadius:2,border:"1px solid rgba(138,109,59,0.45)",letterSpacing:1.2,textTransform:"uppercase",verticalAlign:"middle"}}>Open to Offers</span>}
+            {isListed&&<span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#8A6D3B",marginLeft:8,background:"rgba(138,109,59,0.15)",padding:"2px 7px",borderRadius:2,border:"1px solid rgba(138,109,59,0.45)",letterSpacing:1.2,textTransform:"uppercase",verticalAlign:"middle"}}>Open to Offers</span>}
           </div>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",marginTop:4,letterSpacing:1.2,textTransform:"uppercase"}}>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#77653F",marginTop:4,letterSpacing:1.2,textTransform:"uppercase"}}>
             {hero.race} · {hero.role} · Lv <span style={{color:"#8A6D3B",fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0,fontWeight:600}}>{hero.level}</span>
           </div>
         </div>
         <button onClick={onClose} className="rm-detail-close" aria-label="Close"
-          style={{background:"transparent",border:"none",color:"#77653F",fontSize:18,cursor:"pointer",padding:6,display:"flex",alignItems:"center",lineHeight:1}}>✕</button>
+          style={{background:"transparent",border:"none",color:"#77653F",fontSize:18,cursor:"pointer",padding:6,display:"flex",alignItems:"center",lineHeight:1}}></button>
       </div>
       <div style={{padding:18,overflowY:"auto",height:"calc(100% - 88px)"}}>
 
@@ -5048,13 +5055,13 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         return(
           <div style={{marginBottom:6}}>
             <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
-              <span style={{color:fColor,fontWeight:600}}>⚡ {fLabel}</span>
+              <span style={{color:fColor,fontWeight:600}}>{fLabel}</span>
               <span style={{color:"#6E6350",fontSize:9}}>{fat}/100 fatigue</span>
             </div>
             <div style={{height:4,background:"#DFD3B8",borderRadius:2,overflow:"hidden"}}>
               <div style={{height:"100%",width:`${pct}%`,background:fColor,borderRadius:2,transition:"width 0.5s"}}/>
             </div>
-            {fat>=FATIGUE_WARN&&<div style={{fontSize:9,color:fColor,marginTop:2}}>⚠️ {fat>=FATIGUE_CRITICAL?"Combat effectiveness severely reduced — rest urgently":"Combat effectiveness reduced — consider resting"}</div>}
+            {fat>=FATIGUE_WARN&&<div style={{fontSize:9,color:fColor,marginTop:2}}>{fat>=FATIGUE_CRITICAL?"Combat effectiveness severely reduced — rest urgently":"Combat effectiveness reduced — consider resting"}</div>}
           </div>
         );
       })()}
@@ -5062,14 +5069,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {/* Away on mission */}
       {(hero.awayWeeks||0)>0&&(
         <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(60,90,120,0.105)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:10,fontSize:10,color:"#3C5A78"}}>
-          ✈️ Away: "{hero.awayEvent}" — returns in {hero.awayWeeks} week{hero.awayWeeks>1?"s":""}
+          Away: "{hero.awayEvent}" — returns in {hero.awayWeeks} week{hero.awayWeeks>1?"s":""}
         </div>
       )}
 
       {/* Mentor bonus */}
       {hero.mentorBonus&&hero.mentorBonus.weeksLeft>0&&(
         <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.375)",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:14}}>🎖️</span>
+          <span style={{fontSize:14}}></span>
           <div style={{flex:1}}>
             <div style={{fontSize:10,fontWeight:700,color:"#9A5B2B"}}>Mentored by {hero.mentorBonus.mentorName}</div>
             <div style={{fontSize:9,color:"#6E6350"}}>+{hero.mentorBonus.xpPerWeek} XP/week · {hero.mentorBonus.weeksLeft} weeks remaining</div>
@@ -5083,12 +5090,12 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         <div style={{marginBottom:10}}>
           {heroBids.map(bid=>(
             <div key={bid.id} style={{padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.09)",border:"1px solid rgba(138,109,59,0.375)",marginBottom:6}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B",marginBottom:3}}>💰 Bid from {bid.town}</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#8A6D3B",marginBottom:3}}>Bid from {bid.town}</div>
               <div style={{fontSize:13,fontWeight:900,color:"#40614F",marginBottom:2}}>{bid.offer.toLocaleString()}g <span style={{fontSize:10,color:"#6E6350",fontWeight:400}}>({bid.freeTransfer?"parting fee":`${bid.pctOfValue}% of market value`})</span></div>
               <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>Interested in: {bid.reason}</div>
               <div style={{display:"flex",gap:6}}>
-                <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
-                <button onClick={()=>onDeclineBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>✗ Decline</button>
+                <button onClick={()=>onAcceptBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>✓ Accept {bid.offer.toLocaleString()}g</button>
+                <button onClick={()=>onDeclineBid(bid)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>✗ Decline</button>
               </div>
             </div>
           ))}
@@ -5108,23 +5115,23 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
 
       {/* Contract forecast */}
       <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)",marginBottom:10,fontSize:10,color:"#6E6350"}}>
-        <div style={{fontWeight:700,color:"#8A6D3B",marginBottom:3}}>📜 Contract Forecast</div>
+        <div style={{fontWeight:700,color:"#8A6D3B",marginBottom:3}}>Contract Forecast</div>
         <div>Current salary: <b style={{color:"#23201A"}}>{hero.salary}g/wk</b></div>
         <div>Estimated renewal demand: <b style={{color:"#9A5B2B"}}>{demand.salary}g/wk</b> · {demand.years}s</div>
-        {hero.traits?.includes("Greedy")&&<div style={{color:"#7E2D26",marginTop:2}}>⚠️ Greedy trait: +20% demand</div>}
+        {hero.traits?.includes("Greedy")&&<div style={{color:"#7E2D26",marginTop:2}}>Greedy trait: +20% demand</div>}
         {hero.traits?.includes("Loyal")&&<div style={{color:"#40614F",marginTop:2}}>✓ Loyal trait: –12% demand</div>}
-        {hero.traits?.includes("Stubborn")&&<div style={{color:"#8A6D3B",marginTop:2}}>⚠️ Stubborn: won't negotiate down</div>}
+        {hero.traits?.includes("Stubborn")&&<div style={{color:"#8A6D3B",marginTop:2}}>Stubborn: won't negotiate down</div>}
         {}
         {(hero.stats["Negotiation"]||0)>30&&(()=>{
           const negStat=hero.stats["Negotiation"]||0;
           const premium=Math.round(Math.min(20,(negStat-20)/79*20));
           const shorterContract = negStat > 40;
-          return <div style={{color:"#9A5B2B",marginTop:2}}>🤝 Negotiation {negStat}: +{premium}% salary demand{shorterContract?" · prefers short contracts":""}</div>;
+          return <div style={{color:"#9A5B2B",marginTop:2}}>Negotiation {negStat}: +{premium}% salary demand{shorterContract?" · prefers short contracts":""}</div>;
         })()}
         {(hero.stats["Reputation"]||0)>30&&(()=>{
           const repStat=hero.stats["Reputation"]||0;
           const bidBonus=Math.round((repStat-20)/79*10);
-          return <div style={{color:"#3C5A78",marginTop:2}}>⭐ Reputation {repStat}: offers up to +{bidBonus}% value</div>;
+          return <div style={{color:"#3C5A78",marginTop:2}}>Reputation {repStat}: offers up to +{bidBonus}% value</div>;
         })()}
       </div>
 
@@ -5134,7 +5141,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           const col=te?.color||"#5F4B66";
           return(
             <div key={t} style={{padding:"5px 9px",borderRadius:3,background:`${col}12`,border:`1px solid ${col}30`,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-              <span style={{fontSize:11,fontWeight:700,color:col,fontFamily:"'IM Fell English SC',serif"}}>{t}</span>
+              <span style={{fontSize:11,fontWeight:700,color:col,fontFamily:"'Alegreya Sans',sans-serif"}}>{t}</span>
               {te?.desc&&<span style={{fontSize:9,color:"#6E6350",textAlign:"right",flex:1}}>{te.desc}</span>}
             </div>
           );
@@ -5142,9 +5149,9 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       </div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:10}}>
         {[["Race",`${RACE_ICONS[hero.race]} ${hero.race}`],["Role",`${ROLE_ICONS[hero.role]} ${hero.role}`],
-          ["Stage",`${agePhaseLabel(phase)} ${Math.round(hero.stageProgress||0)}%`],["Level",`⭐ ${hero.level}`],
+          ["Stage",`${agePhaseLabel(phase)} ${Math.round(hero.stageProgress||0)}%`],["Level",`${hero.level}`],
           ["Salary",`${hero.salary}g/wk`],["Value",`${hero.value.toLocaleString()}g`],
-          ["Morale",`${hero.morale}%`],["Status",hero.injured?`🩸 ${hero.injury?.name||"Injured"} · ${hero.injuryWeeks}w`:"✅ Fit"],
+          ["Morale",`${hero.morale}%`],["Status",hero.injured?`${hero.injury?.name||"Injured"} · ${hero.injuryWeeks}w`:"Fit"],
         ].map(([k,v])=>(
           <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"5px 8px"}}>
             <div style={{fontSize:9,color:"#6E6350",marginBottom:1}}>{k}</div>
@@ -5154,9 +5161,9 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       </div>
       {(hero.injured&&hero.injury?.from)||hero.injuryHistory?.length?(
         <div style={{marginBottom:10,padding:"6px 10px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.225)",fontSize:9,color:"#6E6350",lineHeight:1.6}}>
-          {hero.injured&&hero.injury?.from&&<div style={{color:"#7E2D26"}}>🩸 {hero.injury.name} — sustained against {hero.injury.from} (Wk {hero.injury.week})</div>}
+          {hero.injured&&hero.injury?.from&&<div style={{color:"#7E2D26"}}>{hero.injury.name} — sustained against {hero.injury.from} (Wk {hero.injury.week})</div>}
           {hero.injuryHistory?.slice(0,3).map((inj,i)=>(
-            <div key={i}>🩹 {inj.name}{inj.from?` — vs ${inj.from}`:""}{inj.week?` (Wk ${inj.week})`:""}</div>
+            <div key={i}>{inj.name}{inj.from?` — vs ${inj.from}`:""}{inj.week?` (Wk ${inj.week})`:""}</div>
           ))}
         </div>
       ):null}
@@ -5172,7 +5179,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           const repLabel  = rep>=70?"Renowned":rep>=50?"Well known":rep>=30?"Building reputation":"Unknown";
           return(<>
             <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"7px 8px",border:`1px solid ${formCol}22`}}>
-              <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>📈 Form (offer premium)</div>
+              <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>Form (offer premium)</div>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <div style={{flex:1,height:4,background:"rgba(60,52,38,0.108)",borderRadius:2}}>
                   <div style={{width:`${form*10}%`,height:"100%",background:formCol,borderRadius:2,transition:"width 0.3s"}}/>
@@ -5184,7 +5191,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
               {form<4&&<div style={{fontSize:8,color:"#9A5B2B",marginTop:1}}>−10% bid discount</div>}
             </div>
             <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"7px 8px",border:`1px solid ${repCol}22`}}>
-              <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>👁️ Reputation (scout interest)</div>
+              <div style={{fontSize:9,color:"#6E6350",marginBottom:3}}>Reputation (scout interest)</div>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <div style={{flex:1,height:4,background:"rgba(60,52,38,0.108)",borderRadius:2}}>
                   <div style={{width:`${rep}%`,height:"100%",background:repCol,borderRadius:2,transition:"width 0.3s"}}/>
@@ -5197,7 +5204,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           </>);
         })()}
       </div>
-      {declining&&<div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:10,fontSize:10,color:"#9A5B2B"}}>⚠️ {agePhaseLabel(phase)} — consider moving to Arbiter where mental stats carry.</div>}
+      {declining&&<div style={{padding:"7px 10px",borderRadius:3,background:"rgba(126,45,38,0.105)",border:"1px solid rgba(126,45,38,0.3)",marginBottom:10,fontSize:10,color:"#9A5B2B"}}>{agePhaseLabel(phase)} — consider moving to Arbiter where mental stats carry.</div>}
 
       {/* Career arc guidance — sell window signal */}
       {(()=>{
@@ -5209,11 +5216,11 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         const isApproachingFade = phase==="peak" && (hero.stageProgress||0) > 70;
 
         const arcConfig = {
-          prospect: { col:"#5F4B66", icon:"🌱", title:"Prospect — Developing", advice:"Play regularly to build Form and Reputation. Value grows quickly with levels.", action:null },
-          rising:   { col:"#3C5A78", icon:"📈", title:"Rising — Good Investment Window", advice:"Stats growing fast. Bids are strong. A few more levels and this hero peaks.", action:null },
-          peak:     { col:"#40614F", icon:"⚡", title:"Peak — Prime Selling Window", advice:isApproachingFade?"Late Peak — Fading stage approaching. Sell now for best return.":"Bids are highest and most frequent here. Form 8+ attracts above-market offers.", action:isApproachingFade?"⚠️ Sell window closing — list soon.":"Consider listing if you have a replacement ready." },
-          fading:   { col:"#8A6D3B", icon:"📉", title:"Fading — Hard to Sell", advice:"Bids are rare (30% base chance) at ~60% of value. Stats declining weekly.", action:"Squad Leader role extracts remaining value — let contract expire naturally." },
-          veteran:  { col:"#9A5B2B", icon:"🕯️", title:"Veteran — Effectively Unsellable", advice:"Bids very rare (12% chance) at 38% of value. Retirement approaching.", action:"Keep for Squad Leader bonus and mentorship on retirement." },
+          prospect: { col:"#5F4B66", icon:"", title:"Prospect — Developing", advice:"Play regularly to build Form and Reputation. Value grows quickly with levels.", action:null },
+          rising:   { col:"#3C5A78", icon:"", title:"Rising — Good Investment Window", advice:"Stats growing fast. Bids are strong. A few more levels and this hero peaks.", action:null },
+          peak:     { col:"#40614F", icon:"", title:"Peak — Prime Selling Window", advice:isApproachingFade?"Late Peak — Fading stage approaching. Sell now for best return.":"Bids are highest and most frequent here. Form 8+ attracts above-market offers.", action:isApproachingFade?"Sell window closing — list soon.":"Consider listing if you have a replacement ready." },
+          fading:   { col:"#8A6D3B", icon:"", title:"Fading — Hard to Sell", advice:"Bids are rare (30% base chance) at ~60% of value. Stats declining weekly.", action:"Squad Leader role extracts remaining value — let contract expire naturally." },
+          veteran:  { col:"#9A5B2B", icon:"", title:"Veteran — Effectively Unsellable", advice:"Bids very rare (12% chance) at 38% of value. Retirement approaching.", action:"Keep for Squad Leader bonus and mentorship on retirement." },
         }[phase]||{col:"#6E6350",icon:"?",title:"Unknown",advice:"",action:null};
 
         return(
@@ -5221,7 +5228,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
               <span style={{fontSize:14}}>{arcConfig.icon}</span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11,fontWeight:700,color:arcConfig.col,fontFamily:"'IM Fell English SC',serif"}}>{arcConfig.title}</div>
+                <div style={{fontSize:11,fontWeight:700,color:arcConfig.col,fontFamily:"'Alegreya Sans',sans-serif"}}>{arcConfig.title}</div>
                 <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{seasonsLeft}s until retirement · Bids: {Math.round(bidFreq*100)}% chance · Quality: {bidQual}</div>
               </div>
               <div style={{textAlign:"right"}}>
@@ -5232,7 +5239,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5,marginBottom:arcConfig.action?5:0}}>{arcConfig.advice}</div>
             {arcConfig.action&&(
               <div style={{fontSize:10,fontWeight:700,color:arcConfig.col,padding:"4px 8px",borderRadius:3,background:`${arcConfig.col}14`,marginTop:3}}>
-                💡 {arcConfig.action}
+                {arcConfig.action}
               </div>
             )}
           </div>
@@ -5251,7 +5258,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                 color:isActive?"#3C5A78":isLocked?"#A39781":"#7A6F58",
                 fontWeight:isActive?700:400,
               }}>
-              {isLocked ? "🔒 Hidden" : g}
+              {isLocked ? "Hidden" : g}
             </button>
           );
         })}
@@ -5267,13 +5274,13 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                   const b = potentialBucket(hero.stats.Potential);
                   return(
                     <div style={{display:"flex",alignItems:"center",gap:6}}>
-                      <span style={{fontSize:11,fontWeight:700,color:b.color}}>{b.icon} {b.label}</span>
+                      <span style={{fontSize:11,fontWeight:700,color:b.color}}>{b.label}</span>
                       {showHiddenStats&&<span style={{fontSize:10,color:"#6E6350"}}>({hero.stats.Potential})</span>}
                     </div>
                   );
                 })() : (
                   <div style={{display:"flex",alignItems:"center",gap:6}}>
-                    <span style={{fontSize:10,color:"#6E6350"}}>⏳ Unknown</span>
+                    <span style={{fontSize:10,color:"#6E6350"}}>Unknown</span>
                     <span style={{fontSize:9,color:"#8A7F68"}}>{Math.max(0,8-(hero.weeksInFormation||0))}+ battles to reveal</span>
                   </div>
                 )}
@@ -5308,9 +5315,9 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             background:isLeader?"rgba(138,109,59,0.105)":"rgba(60,52,38,0.054)",
             border:`1px solid ${isLeader?"rgba(138,109,59,0.45)":"rgba(60,52,38,0.126)"}`}}>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
-              <span style={{fontSize:14}}>👑</span>
+              <span style={{fontSize:14}}></span>
               <div style={{flex:1}}>
-                <div style={{fontSize:11,fontWeight:700,color:isLeader?"#8A6D3B":"#6E6350",fontFamily:"'IM Fell English SC',serif"}}>
+                <div style={{fontSize:11,fontWeight:700,color:isLeader?"#8A6D3B":"#6E6350",fontFamily:"'Alegreya Sans',sans-serif"}}>
                   {isLeader?"Squad Leader":"Squad Leader Candidate"}
                 </div>
                 <div style={{fontSize:9,color:"#6E6350"}}>
@@ -5324,9 +5331,9 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             {/* Bonus breakdown */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:4,marginBottom:8}}>
               {[
-                ["⚔️ Morale/wk",`+${lb.moralePerWeek}`,"#40614F"],
-                ["⭐ XP mult",`×${lb.xpMult.toFixed(2)}`,"#3C5A78"],
-                ["🛡️ Defeat",`−${lb.defeatMoralePct}%`,"#8A6D3B"],
+                ["Morale/wk",`+${lb.moralePerWeek}`,"#40614F"],
+                ["XP mult",`×${lb.xpMult.toFixed(2)}`,"#3C5A78"],
+                ["Defeat",`−${lb.defeatMoralePct}%`,"#8A6D3B"],
               ].map(([label,val,c])=>(
                 <div key={label} style={{padding:"4px 6px",borderRadius:3,background:"rgba(30,24,14,0.07)",textAlign:"center"}}>
                   <div style={{fontSize:8,color:"#6E6350"}}>{label}</div>
@@ -5338,8 +5345,8 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             <button onClick={onSetLeader}
               style={{width:"100%",padding:"6px 0",borderRadius:3,border:`1px solid ${isLeader?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.264)"}`,
                 cursor:"pointer",background:isLeader?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",
-                color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
-              {isLeader?"👑 Remove as Squad Leader":"👑 Appoint as Squad Leader"}
+                color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+              {isLeader?"Remove as Squad Leader":"Appoint as Squad Leader"}
             </button>
           </div>
         );
@@ -5349,14 +5356,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {isOwned&&(
       <div style={{marginTop:10,display:"flex",gap:6,flexWrap:"wrap"}}>
         {onToggleListed&&(
-          <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:`1px solid ${isListed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.33)"}`,background:isListed?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",color:isListed?"#8A6D3B":"#6E6350",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
-            {isListed?"🕊️ Close to Offers":"🕊️ Open to Offers"}
+          <button onClick={()=>onToggleListed(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:`1px solid ${isListed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.33)"}`,background:isListed?"rgba(138,109,59,0.15)":"rgba(60,52,38,0.072)",color:isListed?"#8A6D3B":"#6E6350",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+            {isListed?"Close to Offers":"Open to Offers"}
           </button>
         )}
         {/* Early renewal — available within 2 seasons of expiry, not already pending */}
         {onEarlyRenew && !hero.negotiationPending && (hero.contractWeeksLeft||0) > 0 && (hero.contractWeeksLeft||0) <= WEEKS_PER_CONTRACT_YEAR*2 && (
-          <button onClick={()=>onEarlyRenew(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.105)",color:"#3C5A78",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
-            📋 Renew Early
+          <button onClick={()=>onEarlyRenew(hero)} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.45)",background:"rgba(60,90,120,0.105)",color:"#3C5A78",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+            Renew Early
           </button>
         )}
         <button onClick={()=>{
@@ -5375,7 +5382,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
             ?`Release ${hero.name}? They'll barely be missed.`
             :`Release ${hero.name}?\n\nSquad morale penalty: −${penalty} to all heroes${penalty>=25?" (devastating)":penalty>=15?" (significant)":""}\n\nThis is a last resort. Consider selling them instead.`;
           if(window.confirm(msg)) onRelease(hero);
-        }} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",background:"rgba(126,45,38,0.12)",color:"#7E2D26",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>🚪 Release</button>
+        }} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",background:"rgba(126,45,38,0.12)",color:"#7E2D26",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>Release</button>
       </div>
       )}
       </div>{/* end scroll wrapper */}
@@ -5399,7 +5406,7 @@ function NegotiationModal({pending, heroes, gold, onAccept, onCounter, onReject,
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.56)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
       <div className="rm-neg-modal" style={{background:"#DFD3B8",border:"1px solid rgba(154,91,43,0.525)",borderRadius:3,padding:28,maxWidth:500,width:"92%",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
-        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>📜 Contract Negotiation</div>
+        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Contract Negotiation</div>
         <div style={{fontSize:11,color:"#6E6350",marginBottom:18}}>{hero.name} is seeking a new contract.</div>
 
         <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
@@ -5428,29 +5435,29 @@ function NegotiationModal({pending, heroes, gold, onAccept, onCounter, onReject,
           </div>
         </div>
 
-        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>⚠️ Greedy: demands are inflated. They won't accept anything far below this.</div>}
+        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>Greedy: demands are inflated. They won't accept anything far below this.</div>}
         {hero.traits?.includes("Loyal")&&<div style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>✓ Loyal: will accept a reasonable counter-offer without walking out.</div>}
-        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>⚠️ Hot-headed: reject this and they leave immediately — no second chance.</div>}
+        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>Hot-headed: reject this and they leave immediately — no second chance.</div>}
         {}
 
         <div className="rm-neg-buttons" style={{display:"flex",gap:8}}>
-          <button onClick={()=>onAccept(hero,demand)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
+          <button onClick={()=>onAccept(hero,demand)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
             ✓ Accept<br/><span style={{fontSize:9,fontWeight:400}}>{demand.salary}g/wk · {demand.years}s</span>
           </button>
           {!hero.traits?.includes("Stubborn")&&(
-            <button onClick={()=>onCounter(hero,{salary:counterSalary,years:counterYears})} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(154,91,43,0.55)",cursor:"pointer",background:"rgba(154,91,43,0.15)",color:"#9A5B2B",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
+            <button onClick={()=>onCounter(hero,{salary:counterSalary,years:counterYears})} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(154,91,43,0.55)",cursor:"pointer",background:"rgba(154,91,43,0.15)",color:"#9A5B2B",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
               ↔ Counter<br/><span style={{fontSize:9,fontWeight:400}}>{counterSalary}g/wk · {counterYears}yr</span>
             </button>
           )}
-          <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontWeight:700,fontSize:12,fontFamily:"'IM Fell English SC',serif"}}>
+          <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
             ✗ Reject<br/><span style={{fontSize:9,fontWeight:400}}>–10 morale</span>
           </button>
         </div>
         {onDelay&&(
           <button onClick={()=>onDelay(hero)}
             style={{width:"100%",marginTop:8,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",
-              background:"rgba(60,52,38,0.045)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
-            ⏳ Decide Later — they'll stew on it (−6 morale{(hero.negotiationIgnoredWeeks||0)>=1?", patience wearing thin":""})
+              background:"rgba(60,52,38,0.045)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+            Decide Later — they'll stew on it (−6 morale{(hero.negotiationIgnoredWeeks||0)>=1?", patience wearing thin":""})
           </button>
         )}
       </div>
@@ -5472,7 +5479,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
       <div onClick={e=>e.stopPropagation()}
         style={{background:"#EFE7D3",border:"1px solid rgba(64,97,79,0.525)",borderRadius:3,width:"min(620px,96vw)",maxHeight:"85vh",display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
         <div style={{padding:"14px 18px",borderBottom:"1px solid rgba(60,52,38,0.108)",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-          <span style={{fontSize:22}}>📨</span>
+          <span style={{fontSize:22}}></span>
           <div style={{flex:1}}>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#40614F"}}>
               {bids.length===1?"A Rival Offer Arrives":`${bids.length} Offers from Rival Realms`}
@@ -5493,18 +5500,18 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
                   background:bid.freeTransfer?"rgba(95,75,102,0.075)":aboveValue?"rgba(64,97,79,0.075)":"rgba(60,52,38,0.045)"}}>
                 {aboveValue&&(
                   <div style={{padding:"4px 12px",fontSize:10,color:"#40614F",fontWeight:700,background:"rgba(64,97,79,0.15)",borderBottom:"1px solid rgba(64,97,79,0.3)"}}>
-                    🔥 Above Market Value
+                    Above Market Value
                   </div>
                 )}
                 {bid.freeTransfer&&(
                   <div style={{padding:"4px 12px",fontSize:10,color:"#5F4B66",fontWeight:700,background:"rgba(95,75,102,0.15)",borderBottom:"1px solid rgba(95,75,102,0.3)"}}>
-                    🕊️ Honourable Release — take the parting fee and skip the morale hit of a release
+                    Honourable Release — take the parting fee and skip the morale hit of a release
                   </div>
                 )}
                 <div style={{padding:"10px 12px",display:"flex",alignItems:"center",gap:10}}>
                   <HeroAvatar race={hero.race} size={20}/>
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{hero.name}</div>
+                    <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{hero.name}</div>
                     <div style={{fontSize:9,color:"#6E6350"}}>{hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                     <div style={{fontSize:9,color:"#6E6350",fontStyle:"italic",marginTop:2}}>"{bid.town} — {bid.reason}"</div>
                   </div>
@@ -5515,15 +5522,15 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
                 </div>
                 <div style={{padding:"0 12px 10px",display:"flex",gap:6}}>
                   <button onClick={()=>onAccept(bid)}
-                    style={{flex:2,padding:"8px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:900,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
+                    style={{flex:2,padding:"8px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:900,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
                     ✓ Accept {bid.offer.toLocaleString()}g
                   </button>
                   <button onClick={()=>onViewHero&&onViewHero(hero)}
-                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.375)",cursor:"pointer",background:"rgba(60,90,120,0.09)",color:"#3C5A78",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
-                    👁️ View
+                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.375)",cursor:"pointer",background:"rgba(60,90,120,0.09)",color:"#3C5A78",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                    View
                   </button>
                   <button onClick={()=>onDecline(bid)}
-                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
+                    style={{flex:1,padding:"8px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
                     ✗ Decline
                   </button>
                 </div>
@@ -5533,7 +5540,7 @@ function NewOffersModal({ bids, heroes, onAccept, onDecline, onViewHero, onDismi
         </div>
         <div style={{padding:"10px 16px",borderTop:"1px solid rgba(60,52,38,0.09)",flexShrink:0}}>
           <button onClick={onDismiss}
-            style={{width:"100%",padding:"9px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#4A4335",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
+            style={{width:"100%",padding:"9px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#4A4335",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
             Decide later (offers stay in the Hire tab for 2 weeks)
           </button>
         </div>
@@ -5560,18 +5567,18 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
   const netGold     = totalIncome - totalSpend;
   const posLabel    = `${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'}`;
   const movementConfig = {
-    promoted:         {icon:"🎉", label:`Promoted to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#40614F"},
-    relegated:        {icon:"📉", label:`Relegated to ${newTierMeta.icon} ${newTierMeta.name}`, color:"#9A5B2B"},
-    relegated_floor:  {icon:"⚠️",  label:"Held at the Iron floor", color:"#9A5B2B"},
-    safe:             {icon:"🛡️",  label:`Held position in ${tierMeta.icon} ${tierMeta.name}`, color:"#3C5A78"},
-  }[movement] || {icon:"🏁", label:"Season complete", color:"#6E6350"};
+    promoted:         {icon:"", label:`Promoted to ${newTierMeta.name}`, color:"#40614F"},
+    relegated:        {icon:"", label:`Relegated to ${newTierMeta.name}`, color:"#9A5B2B"},
+    relegated_floor:  {icon:"",  label:"Held at the Iron floor", color:"#9A5B2B"},
+    safe:             {icon:"",  label:`Held position in ${tierMeta.name}`, color:"#3C5A78"},
+  }[movement] || {icon:"", label:"Season complete", color:"#6E6350"};
 
   const ledgerRows = [
-    ["👑 Tribute",          finances.tribute||0,       "#3C5A78"],
-    ["⚔️ Battle winnings",   finances.raidGold||0,      (finances.raidGold||0)>=0?"#40614F":"#7E2D26"],
-    (finances.eventGold||0) ? ["✨ Events",            finances.eventGold,        "#5F4B66"] : null,
-    ["💸 Wages",            -(finances.wages||0),      "#9A5B2B"],
-    (finances.signingCosts||0) ? ["🤝 Signings",       -(finances.signingCosts||0),"#7E2D26"] : null,
+    ["Tribute",          finances.tribute||0,       "#3C5A78"],
+    ["Battle winnings",   finances.raidGold||0,      (finances.raidGold||0)>=0?"#40614F":"#7E2D26"],
+    (finances.eventGold||0) ? ["Events",            finances.eventGold,        "#5F4B66"] : null,
+    ["Wages",            -(finances.wages||0),      "#9A5B2B"],
+    (finances.signingCosts||0) ? ["Signings",       -(finances.signingCosts||0),"#7E2D26"] : null,
   ].filter(Boolean);
 
   const col = townColor || "#8A6D3B";
@@ -5581,12 +5588,12 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
       <div style={{width:"min(640px,96vw)",maxHeight:"90vh",background:"#EFE7D3",border:`1px solid ${col}44`,borderRadius:3,overflow:"hidden",display:"flex",flexDirection:"column",boxShadow:`0 0 60px ${col}14`}}>
         {/* Header */}
         <div style={{padding:"18px 22px",textAlign:"center",background:"linear-gradient(180deg,rgba(60,52,38,0.054),transparent)",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#6E6350",letterSpacing:2,marginBottom:4}}>SEASON {season} · {tierMeta.icon} {tierMeta.name.toUpperCase()}</div>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:col,lineHeight:1,marginBottom:6}}>
             {wins}W · {losses}L · Finished {posLabel}
           </div>
-          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'IM Fell English SC',serif"}}>
-            {movementConfig.icon} {movementConfig.label}
+          <div style={{fontSize:13,fontWeight:700,color:movementConfig.color,fontFamily:"'Alegreya Sans',sans-serif"}}>
+            {movementConfig.label}
           </div>
         </div>
 
@@ -5594,10 +5601,10 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
           {/* Hero progression */}
           {(levelUps.length > 0 || newSignings.length > 0 || departures.length > 0) && (
             <div style={{marginBottom:16}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>HERO PROGRESSION</div>
               {levelUps.length > 0 && (
                 <div style={{marginBottom:8}}>
-                  <div style={{fontSize:10,color:"#40614F",fontWeight:700,marginBottom:4}}>⭐ Level-ups · {levelUps.length}</div>
+                  <div style={{fontSize:10,color:"#40614F",fontWeight:700,marginBottom:4}}>Level-ups · {levelUps.length}</div>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
                     {levelUps.map((h,i) => (
                       <div key={i} style={{padding:"4px 8px",borderRadius:3,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)",fontSize:11,color:"#23201A"}}>
@@ -5609,13 +5616,13 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
               )}
               {newSignings.length > 0 && (
                 <div style={{marginBottom:8}}>
-                  <div style={{fontSize:10,color:"#3C5A78",fontWeight:700,marginBottom:4}}>🤝 Signed this season · {newSignings.length}</div>
+                  <div style={{fontSize:10,color:"#3C5A78",fontWeight:700,marginBottom:4}}>Signed this season · {newSignings.length}</div>
                   <div style={{fontSize:11,color:"#4A4335",lineHeight:1.5}}>{newSignings.map(h=>h.name).join(" · ")}</div>
                 </div>
               )}
               {departures.length > 0 && (
                 <div>
-                  <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700,marginBottom:4}}>👋 Departed · {departures.length}</div>
+                  <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700,marginBottom:4}}>Departed · {departures.length}</div>
                   <div style={{fontSize:11,color:"#4A4335",lineHeight:1.5}}>{departures.map(h=>h.name).join(" · ")}</div>
                 </div>
               )}
@@ -5625,7 +5632,7 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
           {/* Buildings */}
           {buildingsBuilt.length > 0 && (
             <div style={{marginBottom:16}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>TOWN UPGRADES</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:4}}>
                 {buildingsBuilt.map(id => {
                   const b = BUILDINGS.find(x => x.id === id);
@@ -5643,7 +5650,7 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
 
           {/* Ledger */}
           <div style={{marginBottom:10}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,color:"#6E6350",fontWeight:700,letterSpacing:1,marginBottom:8}}>LEDGER</div>
             <div style={{padding:"10px 12px",background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",borderRadius:3}}>
               {ledgerRows.map(([label,val,c],i) => (
                 <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11,borderBottom:"1px solid rgba(60,52,38,0.072)"}}>
@@ -5652,7 +5659,7 @@ function SeasonSummaryModal({ summary, onDismiss, townColor }) {
                 </div>
               ))}
               <div style={{display:"flex",justifyContent:"space-between",paddingTop:6,marginTop:2}}>
-                <span style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Season net</span>
+                <span style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>Season net</span>
                 <span style={{fontSize:14,fontWeight:900,color:netGold>=0?"#40614F":"#7E2D26",fontFamily:"'IM Fell English SC',serif"}}>
                   {netGold>=0?"+":""}{netGold.toLocaleString()}g
                 </span>
@@ -5720,7 +5727,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
         {/* Header */}
         <div style={{padding:"20px 24px 14px",textAlign:"center",borderBottom:"1px solid rgba(60,52,38,0.108)"}}>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:3}}>🎖️ Retirement Ceremony</div>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:3}}>Retirement Ceremony</div>
           {retirees.length>1&&<div style={{fontSize:10,color:"#6E6350"}}>{step+1} of {retirees.length}</div>}
         </div>
 
@@ -5778,7 +5785,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
                 </div>
                 <HeroAvatar race={h.race} size={18}/>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{h.name}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{h.name}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>{h.role} · Lv {h.level} · {pos?pos:"bench"}{isSamePos&&<span style={{color:"#40614F",marginLeft:4}}>★ Same position</span>}</div>
                 </div>
                 <div style={{textAlign:"right",flexShrink:0}}>
@@ -5798,9 +5805,9 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
               cursor:(retiree.id in mentees)?"pointer":"not-allowed",
               background:(retiree.id in mentees)?"#9A5B2B":"#E4DAC2",
               color:(retiree.id in mentees)?"#F0E8D5":"#95896F",
-              fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13}}>
+              fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13}}>
             {isLast
-              ? (chosenMenteeId ? `✦ Farewell — ${heroes.find(h=>h.id===chosenMenteeId)?.name} will carry the torch` : "✦ Farewell, Hero")
+              ? (chosenMenteeId ? `Farewell — ${heroes.find(h=>h.id===chosenMenteeId)?.name} will carry the torch` : "Farewell, Hero")
               : "Next Retiree →"}
           </button>
         </div>
@@ -5888,7 +5895,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <button className="pa-secondary" onClick={benchInjured}
                 title="Move injured heroes to the bench so they can recover"
                 style={{borderColor:"rgba(126,45,38,0.55)",color:"#7E2D26"}}>
-                🩸 Bench Injured ({injuredInFormation})
+                Bench Injured ({injuredInFormation})
               </button>
             )}
             <button className="pa-secondary" onClick={clearAll}>Clear All</button>
@@ -5916,7 +5923,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     border:p?"1px solid rgba(138,109,59,0.375)":"1px dashed rgba(138,109,59,0.3)",
                     background:p?"rgba(138,109,59,0.06)":"transparent"}}>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
                         Preset {idx+1}
                       </div>
                       <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:p?"#77653F":"#C9BA98",fontVariantNumeric:"tabular-nums"}}>
@@ -5925,13 +5932,13 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     </div>
                     {p&&(
                       <button onClick={()=>onLoadPreset(idx)} title="Load this preset"
-                        style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#8A6D3B",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.55)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>↻ Load</button>
+                        style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#8A6D3B",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.55)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>↻ Load</button>
                     )}
                     <button onClick={()=>onSavePreset(idx)} title="Save current formation to this slot"
-                      style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.3)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
+                      style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.3)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
                     {p&&(
                       <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
-                        style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>✕</button>
+                        style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}></button>
                     )}
                   </div>
                 );
@@ -5966,7 +5973,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             if(heroes2.length===2 && lanePairing>1.0){
               const sortedRoles=heroes2.map(h=>h.role).sort().join();
               const pp=POSITION_PAIRINGS.find(p=>p.pos===pos&&[...p.roles].sort().join()===sortedRoles);
-              if(pp) mults.push({label:`${[...pp.roles].sort().join(" + ")} pairing`,icon:"🤝",mult:pp.mult,col:"#4A6B45"});
+              if(pp) mults.push({label:`${[...pp.roles].sort().join(" + ")} pairing`,icon:"",mult:pp.mult,col:"#4A6B45"});
             }
           });
           const trueBase = Math.round(truePreBonus);
@@ -6025,7 +6032,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             <div style={{padding:"7px 10px",borderRadius:3,background:`${analysis.raceSynergy.color}10`,border:`1px solid ${analysis.raceSynergy.color}33`}}>
               <div style={{display:"flex",alignItems:"center",gap:6}}>
                 <span style={{fontSize:11}}>{analysis.raceSynergy.icon}</span>
-                <span style={{fontSize:11,fontWeight:700,color:analysis.raceSynergy.color,fontFamily:"'IM Fell English SC',serif",flex:1}}>{analysis.raceSynergy.name}</span>
+                <span style={{fontSize:11,fontWeight:700,color:analysis.raceSynergy.color,fontFamily:"'Alegreya Sans',sans-serif",flex:1}}>{analysis.raceSynergy.name}</span>
                 <span style={{fontSize:9,fontWeight:700,color:analysis.raceSynergy.color}}>×{analysis.raceSynergy.ratingMult}</span>
               </div>
               <div style={{fontSize:9,color:"#6E6350",marginTop:2,lineHeight:1.4}}>{analysis.raceSynergy.desc}</div>
@@ -6034,7 +6041,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   {POS_KEYS.map(p=>{
                     const lm=analysis.raceSynergy.laneMults[p];
                     const lmCol=lm>1.0?"#40614F":lm<1.0?"#9A5B2B":"#6E6350";
-                    return <span key={p} style={{fontSize:8,fontWeight:700,color:lmCol,background:"rgba(60,52,38,0.072)",padding:"2px 6px",borderRadius:3}}>{POSITIONS[p].icon} ×{lm.toFixed(2)}</span>;
+                    return <span key={p} style={{fontSize:8,fontWeight:700,color:lmCol,background:"rgba(60,52,38,0.072)",padding:"2px 6px",borderRadius:3,display:"inline-flex",alignItems:"center",gap:3}}><PositionIcon position={p} size={9}/> ×{lm.toFixed(2)}</span>;
                   })}
                 </div>
               )}
@@ -6066,8 +6073,8 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <PositionIcon position={pos} size={26}/>
                 </div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</div>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontStyle:"italic"}}>{pd.subtitle}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2,fontStyle:"italic"}}>{pd.subtitle}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div className="pa-kicker">Lane PWR</div>
@@ -6085,7 +6092,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     return(
                       <button key={slotIdx} onClick={()=>setPickerOpen({pos,slotIdx})}
                         style={{height:78,borderRadius:0,border:`1px dashed ${isPickerTarget?pd.color:pd.color+"55"}`,display:"flex",alignItems:"center",justifyContent:"center",gap:8,
-                          fontFamily:"'IM Fell English SC',serif",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:isPickerTarget?pd.color:"#77653F",
+                          fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,letterSpacing:2,textTransform:"uppercase",color:isPickerTarget?pd.color:"#77653F",
                           background:isPickerTarget?`${pd.color}0a`:"rgba(138,109,59,0.04)",cursor:"pointer",transition:"all 0.15s"}}>
                         <span style={{fontSize:14}}>+</span> Assign Hero
                       </button>
@@ -6108,11 +6115,11 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         <RoleIcon role={h.role} size={28}/>
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
                           <span style={{overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</span>
-                          {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:3,letterSpacing:0.5,whiteSpace:"nowrap"}}>🩸 Injured {h.injuryWeeks}w</span>}
+                          {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:3,letterSpacing:0.5,whiteSpace:"nowrap"}}>Injured {h.injuryWeeks}w</span>}
                         </div>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
                           {h.race} · {h.role} · <span style={{color:stageColor}}>{agePhase(h).charAt(0).toUpperCase()+agePhase(h).slice(1)}</span>
                         </div>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,fontWeight:600,color:"#77653F",marginTop:4,fontVariantNumeric:"tabular-nums"}}>
@@ -6120,17 +6127,17 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
                           LV <span style={{color:"#3A3427"}}>{h.level}</span>
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
-                          <span style={{color:fatCol}} title="Fatigue">⚡ {fat}</span>
+                          <span style={{color:fatCol}} title="Fatigue">{fat}</span>
                         </div>
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
-                          {fit==="ideal"?"✓ Ideal":fit==="penalty"?"✕ Penalty":"— Neutral"}
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,color:fitColor,letterSpacing:1.5,textTransform:"uppercase"}}>
+                          {fit==="ideal"?"✓ Ideal":fit==="penalty"?"Penalty":"— Neutral"}
                         </div>
                         {h.injured&&(
                           <button onClick={e=>{e.stopPropagation();remove(pos,slotIdx);}}
                             title="Move to bench so the hero can recover"
-                            style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:700,letterSpacing:1.2,padding:"3px 7px",background:"transparent",border:"1px solid rgba(126,45,38,0.55)",color:"#7E2D26",borderRadius:3,cursor:"pointer",textTransform:"uppercase"}}>
+                            style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:700,letterSpacing:1.2,padding:"3px 7px",background:"transparent",border:"1px solid rgba(126,45,38,0.55)",color:"#7E2D26",borderRadius:3,cursor:"pointer",textTransform:"uppercase"}}>
                             Bench
                           </button>
                         )}
@@ -6142,16 +6149,16 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               {/* Lane footer — pairing badge or ideal-roles hint */}
               <div style={{padding:"8px 16px",borderTop:"1px solid rgba(138,109,59,0.15)",display:"flex",alignItems:"center",gap:10}}>
                 {rolePairing?(<>
-                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:"#4A6B45",letterSpacing:1.5,textTransform:"uppercase"}}>
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#4A6B45",letterSpacing:1.5,textTransform:"uppercase"}}>
                     ◈ {[...rolePairing.roles].sort().join(" + ")} Pairing
                   </span>
                   <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#4A6B45",fontVariantNumeric:"tabular-nums"}}>×{rolePairing.mult.toFixed(2)}</span>
                 </>):(
-                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span></span>
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span></span>
                 )}
                 <span style={{flex:1}}/>
                 {rolePairing&&(
-                  <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · {pd.ideal.join(", ")}</span>
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>Ideal · {pd.ideal.join(", ")}</span>
                 )}
               </div>
             </div>
@@ -6182,16 +6189,16 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         <RoleIcon role={h.role} size={22}/>
                       </div>
                       <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:8,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</div>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:8,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
                           {h.race} · {h.role} · LV <span style={{fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0,fontWeight:600,color:"#77653F"}}>{h.level}</span>
-                          {h.injured&&<span style={{color:"#7E2D26",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>🩸 {h.injuryWeeks}w</span>}
-                          {(h.awayWeeks||0)>0&&<span style={{color:"#4A6178",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>✈️ {h.awayWeeks}w</span>}
+                          {h.injured&&<span style={{color:"#7E2D26",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>{h.injuryWeeks}w</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{color:"#4A6178",marginLeft:6,fontFamily:"'Alegreya Sans',sans-serif",letterSpacing:0}}>{h.awayWeeks}w</span>}
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
                         <div className="pa-kicker">Best</div>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
                       </div>
                     </div>
                   );
@@ -6248,7 +6255,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <div className="pa-kicker" style={{marginBottom:12}}>Race Composition</div>
                   {raceList.map(([race,n])=>(
                     <div key={race} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid rgba(138,109,59,0.12)"}}>
-                      <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:500,color:"#3A3427",letterSpacing:0.5}}>{race}</span>
+                      <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:500,color:"#3A3427",letterSpacing:0.5}}>{race}</span>
                       <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:600,color:"#77653F",fontVariantNumeric:"tabular-nums"}}>×{n}</span>
                     </div>
                   ))}
@@ -6262,7 +6269,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   {allMults.map((m,i)=>(
                     <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 0",borderBottom:"1px solid rgba(138,109,59,0.12)"}}>
                       <span style={{color:"#8A6D3B",fontSize:11,width:12,textAlign:"center",lineHeight:1}}>◈</span>
-                      <span style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#77653F",letterSpacing:1,textTransform:"uppercase",flex:1}}>{m.label}</span>
+                      <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#77653F",letterSpacing:1,textTransform:"uppercase",flex:1}}>{m.label}</span>
                       <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:m.positive?"#4A6B45":"#7E2D26",fontVariantNumeric:"tabular-nums"}}>×{m.mult.toFixed(2)}</span>
                     </div>
                   ))}
@@ -6278,12 +6285,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                     <div key={pos} style={{marginBottom:14}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
                         <PositionIcon position={pos} size={14}/>
-                        <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</span>
+                        <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10,color:pd.color,letterSpacing:1.5,textTransform:"uppercase"}}>{pd.label}</span>
                       </div>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase",marginBottom:3}}>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase",marginBottom:3}}>
                         Ideal · <span style={{color:"#77653F"}}>{pd.ideal.join(", ")}</span>
                       </div>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1,textTransform:"uppercase"}}>
                         Stats · <span style={{color:"#77653F"}}>{(pd.primaryStats||[]).slice(0,3).join(", ")}</span>
                       </div>
                     </div>
@@ -6312,7 +6319,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                   <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:pd.color}}>{pd.label} — Slot {pickerOpen.slotIdx+1}</div>
                   <div style={{fontSize:10,color:"#6E6350"}}>{pd.subtitle} · Ideal: {pd.ideal.filter(x=>ROLES.includes(x)).join(", ")}</div>
                 </div>
-                <button onClick={()=>setPickerOpen(null)} style={{background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#4A4335",fontSize:12,cursor:"pointer",borderRadius:3,padding:"5px 12px"}}>✕ Close</button>
+                <button onClick={()=>setPickerOpen(null)} style={{background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#4A4335",fontSize:12,cursor:"pointer",borderRadius:3,padding:"5px 12px"}}>Close</button>
               </div>
 
               {/* Sort controls + clear option */}
@@ -6326,7 +6333,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                 {currentHero&&(
                   <button onClick={()=>remove(pickerOpen.pos,pickerOpen.slotIdx)}
                     style={{marginLeft:"auto",fontSize:10,padding:"3px 10px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26"}}>
-                    ✕ Remove {currentHero.name}
+                    Remove {currentHero.name}
                   </button>
                 )}
               </div>
@@ -6353,12 +6360,12 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                       <HeroAvatar race={h.race} size={20}/>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                          <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</span>
-                          {h.injured&&<span style={{fontSize:9,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 5px",borderRadius:3}}>🩸 Injured {h.injuryWeeks}wk</span>}
+                          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</span>
+                          {h.injured&&<span style={{fontSize:9,color:"#7E2D26",background:"rgba(126,45,38,0.18)",padding:"1px 5px",borderRadius:3}}>Injured {h.injuryWeeks}wk</span>}
                           {isCurrentlyHere&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:3}}>Current</span>}
                           {movedFrom&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.12)",padding:"1px 5px",borderRadius:3}}>Moves from {movedFrom}</span>}
-                          {(h.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:3}}>✈️ Away {h.awayWeeks}w</span>}
-                          {(h.fatigue||0)>=FATIGUE_WARN&&<span style={{fontSize:9,color:fatigueLabel(h.fatigue).color,background:"rgba(126,45,38,0.12)",padding:"1px 5px",borderRadius:3}}>⚡ {fatigueLabel(h.fatigue).label}</span>}
+                          {(h.awayWeeks||0)>0&&<span style={{fontSize:9,color:"#3C5A78",background:"rgba(60,90,120,0.18)",padding:"1px 5px",borderRadius:3}}>Away {h.awayWeeks}w</span>}
+                          {(h.fatigue||0)>=FATIGUE_WARN&&<span style={{fontSize:9,color:fatigueLabel(h.fatigue).color,background:"rgba(126,45,38,0.12)",padding:"1px 5px",borderRadius:3}}>{fatigueLabel(h.fatigue).label}</span>}
                         </div>
                         <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
                           <span style={{fontSize:10,color:"#6E6350"}}><RoleIcon role={h.role}/> {h.role}</span>
@@ -6374,7 +6381,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                             </span>
                           ))}
                           <span style={{fontSize:9,color:"#6E6350"}}>Morale {h.morale}%</span>
-                          <span style={{fontSize:9,color:fatigueLabel(h.fatigue||0).color}}>⚡ Fatigue {h.fatigue||0}</span>
+                          <span style={{fontSize:9,color:fatigueLabel(h.fatigue||0).color}}>Fatigue {h.fatigue||0}</span>
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
@@ -6469,7 +6476,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
             }
             return msg ? (
               <div style={{marginTop:8,padding:"6px 10px",borderRadius:3,background:`${col}10`,border:`1px solid ${col}30`,fontSize:10,fontWeight:700,color:col}}>
-                🏁 {msg}
+                {msg}
               </div>
             ) : null;
           })()}
@@ -6477,9 +6484,9 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
 
         {/* Zone key */}
         <div style={{display:"flex",gap:8,marginBottom:8,flexWrap:"wrap"}}>
-          {[["#40614F", isPlatinum?"🏆 1st — Win condition":"🔼 Top 2 — Promote"],
+          {[["#40614F", isPlatinum?"1st — Win condition":"Top 2 — Promote"],
             ["#6E6350","3rd–6th — Safe"],
-            ["#7E2D26","🔽 7th–8th — Relegate"+(isIron?" (floor)":"")]
+            ["#7E2D26","7th–8th — Relegate"+(isIron?" (floor)":"")]
           ].map(([c,l])=>(
             <span key={l} style={{fontSize:9,color:c,display:"flex",alignItems:"center",gap:4}}>
               <span style={{width:8,height:8,borderRadius:2,background:c,display:"inline-block",flexShrink:0}}/>
@@ -6514,14 +6521,14 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               borderRadius:3,
             }}>
               <div style={{textAlign:"center"}}>
-                <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12,
+                <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12,
                   color:isPromo?"#40614F":isRele?"#7E2D26":"#6E6350"}}>
                   {pos}
                 </span>
               </div>
               <div style={{minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:5}}>
-                  <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,
                     color:isYou?townColor:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                     {t.name}
                   </span>
@@ -6532,8 +6539,8 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
                   {(t.h2h?.wins||t.h2h?.losses)?<span style={{color:(t.h2h.wins>=t.h2h.losses)?"#40614F":"#9A5B2B"}}> · {t.h2h.wins}–{t.h2h.losses} vs you</span>:null}
                 </div>}
               </div>
-              <div style={{textAlign:"center",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#40614F"}}>{t.wins}</div>
-              <div style={{textAlign:"center",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:"#7E2D26"}}>{t.losses}</div>
+              <div style={{textAlign:"center",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#40614F"}}>{t.wins}</div>
+              <div style={{textAlign:"center",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#7E2D26"}}>{t.losses}</div>
               <div style={{textAlign:"center",fontSize:11,fontWeight:700,color:t.winPct>=0.6?"#40614F":t.winPct>=0.4?"#8A6D3B":"#9A5B2B"}}>{winPctStr}</div>
               <div style={{textAlign:"center",fontSize:10,fontWeight:700,color:"#40614F"}}>{tribute}g</div>
             </div>
@@ -6552,7 +6559,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
       <div className="rm-dominion-right">
         {/* Tribute */}
         <div style={{marginBottom:14,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:`1px solid ${currentTier.color}33`}}>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:13,color:currentTier.color,marginBottom:10}}>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:currentTier.color,marginBottom:10}}>
             <TierIcon tier={playerTier} size={13}/> Tribute Income
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:8}}>
@@ -6574,7 +6581,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Recent match results */}
         {matchLog&&matchLog.length>0&&(
           <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>RECENT RESULTS</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>RECENT RESULTS</div>
             {matchLog.slice(0,8).map((r,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 8px",borderRadius:3,marginBottom:3,background:"rgba(60,52,38,0.036)"}}>
                 <span style={{fontSize:9,color:"#6E6350",minWidth:28}}>Wk{r.week}</span>
@@ -6589,7 +6596,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Season chronicle — the stories worth retelling */}
         {(chronicleEntries||[]).length>0&&(
           <div style={{marginBottom:14}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#8A6D3B",marginBottom:8,fontWeight:700,letterSpacing:1}}>📜 THE CHRONICLE</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#8A6D3B",marginBottom:8,fontWeight:700,letterSpacing:1}}>THE CHRONICLE</div>
             {(chronicleEntries||[]).slice(0,10).map((e,i)=>(
               <div key={i} style={{display:"flex",alignItems:"flex-start",gap:6,padding:"5px 8px",borderRadius:3,marginBottom:3,background:"rgba(138,109,59,0.05)",border:"1px solid rgba(138,109,59,0.12)"}}>
                 <span style={{fontSize:8,color:"#6E6350",minWidth:34,marginTop:1}}>S{e.season}·W{e.week}</span>
@@ -6602,11 +6609,11 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Past season trophies */}
         {trophies.length>0&&(
           <div style={{marginTop:4}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>SEASON TROPHIES</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>SEASON TROPHIES</div>
             {trophies.map((t,i)=>(
               <div key={i} style={{padding:"8px 12px",borderRadius:3,marginBottom:5,background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.18)"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>Season {t.season}</span>
+                  <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>Season {t.season}</span>
                   <span style={{fontSize:12,fontWeight:700,color:t.rank===1?"#8A6D3B":t.rank<=3?"#3C5A78":"#6E6350"}}>#{t.rank} of {t.totalTowns}</span>
                 </div>
                 {t.wins!=null&&<div style={{fontSize:10,color:"#6E6350",marginTop:2}}>{t.wins}W / {t.losses}L · {t.tier}</div>}
@@ -6618,7 +6625,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
         {/* Hall of Fame */}
         {hallOfFame&&Object.keys(hallOfFame).length>0&&(
           <div style={{marginTop:16}}>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>🏛️ HALL OF FAME</div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:10,color:"#6E6350",marginBottom:8,fontWeight:700,letterSpacing:1}}>HALL OF FAME</div>
 
             {/* Star Player */}
             {hallOfFame.starPlayer&&(
@@ -6626,7 +6633,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <HeroAvatar race={hallOfFame.starPlayer.race} size={18}/>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:11,fontWeight:700,color:"#5F4B66",fontFamily:"'IM Fell English SC',serif"}}>🌟 Star Player</div>
+                    <div style={{fontSize:11,fontWeight:700,color:"#5F4B66",fontFamily:"'Alegreya Sans',sans-serif"}}>Star Player</div>
                     <div style={{fontSize:12,fontWeight:700,color:"#23201A"}}>{hallOfFame.starPlayer.name}</div>
                     <div style={{fontSize:9,color:"#6E6350"}}>{hallOfFame.starPlayer.race} {hallOfFame.starPlayer.role} · Lv {hallOfFame.starPlayer.level} · {hallOfFame.starPlayer.pos}</div>
                     {hallOfFame.starPlayer.traits?.length>0&&<div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{hallOfFame.starPlayer.traits.join(", ")}</div>}
@@ -6643,29 +6650,29 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}}>
               {hallOfFame.bestSeason&&(
                 <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(64,97,79,0.075)",border:"1px solid rgba(64,97,79,0.225)"}}>
-                  <div style={{fontSize:9,color:"#40614F",fontWeight:700,marginBottom:2}}>📈 Best Season</div>
+                  <div style={{fontSize:9,color:"#40614F",fontWeight:700,marginBottom:2}}>Best Season</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.bestSeason.wins}W</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>S{hallOfFame.bestSeason.season} · {hallOfFame.bestSeason.losses}L</div>
                 </div>
               )}
               {hallOfFame.longestStreak&&(
                 <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.225)"}}>
-                  <div style={{fontSize:9,color:"#3C5A78",fontWeight:700,marginBottom:2}}>🔥 Longest Streak</div>
+                  <div style={{fontSize:9,color:"#3C5A78",fontWeight:700,marginBottom:2}}>Longest Streak</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.longestStreak.count}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>consecutive wins · S{hallOfFame.longestStreak.season}</div>
                 </div>
               )}
               {hallOfFame.biggestUpset&&(
                 <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(154,91,43,0.075)",border:"1px solid rgba(154,91,43,0.225)"}}>
-                  <div style={{fontSize:9,color:"#9A5B2B",fontWeight:700,marginBottom:2}}>⚡ Biggest Upset</div>
+                  <div style={{fontSize:9,color:"#9A5B2B",fontWeight:700,marginBottom:2}}>Biggest Upset</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{Math.round(hallOfFame.biggestUpset.winChance*100)}%</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>vs {hallOfFame.biggestUpset.enemy} · S{hallOfFame.biggestUpset.season}</div>
                 </div>
               )}
               {hallOfFame.longestStreak&&(
                 <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.225)"}}>
-                  <div style={{fontSize:9,color:"#8A6D3B",fontWeight:700,marginBottom:2}}>⚜️ Highest Tier</div>
-                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B",fontFamily:"'IM Fell English SC',serif"}}>
+                  <div style={{fontSize:9,color:"#8A6D3B",fontWeight:700,marginBottom:2}}>Highest Tier</div>
+                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B",fontFamily:"'Alegreya Sans',sans-serif"}}>
                     {(()=>{const highestTier=trophies.reduce((best,t)=>{const ti=TIER_ORDER.indexOf(t.tier||"iron");return ti>TIER_ORDER.indexOf(best)? (t.tier||"iron"):best;},"iron");return `${TIERS[highestTier]?.icon} ${TIERS[highestTier]?.name}`;})()}
                   </div>
                   <div style={{fontSize:9,color:"#6E6350"}}>best tier reached</div>
@@ -6673,7 +6680,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               )}
               {(hallOfFame.buildingsBuilt||0)>0&&(
                 <div style={{padding:"8px 10px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.144)"}}>
-                  <div style={{fontSize:9,color:"#6E6350",fontWeight:700,marginBottom:2}}>🏰 Builder</div>
+                  <div style={{fontSize:9,color:"#6E6350",fontWeight:700,marginBottom:2}}>Builder</div>
                   <div style={{fontSize:14,fontWeight:900,color:"#23201A"}}>{hallOfFame.buildingsBuilt}</div>
                   <div style={{fontSize:9,color:"#6E6350"}}>of {BUILDINGS.length} buildings constructed</div>
                 </div>
@@ -6834,7 +6841,7 @@ function SetupScreen({ onComplete }) {
         <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet"/>
         <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3}}>
           <div style={{textAlign:"center",marginBottom:24}}>
-            <div style={{fontSize:28,marginBottom:6}}>🏅</div>
+            <div style={{fontSize:28,marginBottom:6}}></div>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Legacy Boons</div>
             <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate this run. Each can be used once. You can choose none for a clean start.</div>
           </div>
@@ -6856,7 +6863,7 @@ function SetupScreen({ onComplete }) {
                   </div>
                   <span style={{fontSize:22,flexShrink:0}}>{a.boon.icon}</span>
                   <div style={{flex:1}}>
-                    <div style={{fontSize:12,fontWeight:700,color:isSelected?"#8A6D3B":"#23201A",fontFamily:"'IM Fell English SC',serif"}}>
+                    <div style={{fontSize:12,fontWeight:700,color:isSelected?"#8A6D3B":"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>
                       {a.boon.name}
                       {count>1&&<span style={{fontSize:9,color:"#9A5B2B",marginLeft:6}}>×{count}</span>}
                     </div>
@@ -6870,14 +6877,14 @@ function SetupScreen({ onComplete }) {
 
           <div style={{display:"flex",gap:10}}>
             <button onClick={()=>onComplete(name.trim(), color, speed, [])}
-              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
+              style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
               No Boons
             </button>
             <button onClick={()=>onComplete(name.trim(), color, speed, [...selectedBoons])}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
                 background:selectedBoons.size>0?"#9A5B2B":"rgba(60,52,38,0.108)",
                 color:selectedBoons.size>0?"#F0E8D5":"#8A7F68",
-                fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:12}}>
+                fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12}}>
               {selectedBoons.size>0 ? `Begin with ${selectedBoons.size} Boon${selectedBoons.size>1?"s":""}` : "Begin without Boons"}
             </button>
           </div>
@@ -6904,7 +6911,7 @@ function SetupScreen({ onComplete }) {
         {/* Logo */}
         <div style={{textAlign:"center",marginBottom:10}}>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,background:"#8A6D3B",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginBottom:4}}>
-            ⚔️ REALM MANAGER
+            REALM MANAGER
           </div>
           <div style={{fontSize:10,color:"#6E6350",letterSpacing:2,marginBottom:12}}>FANTASY SQUAD SIMULATOR</div>
           <div style={{fontSize:12,color:"#6E6350",lineHeight:1.6,maxWidth:340,margin:"0 auto 16px"}}>
@@ -6913,13 +6920,13 @@ function SetupScreen({ onComplete }) {
           {/* Three pillars */}
           <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:4}}>
             {[
-              {icon:"⚔️", label:"Battle", sub:"Win fights, earn gold"},
-              {icon:"🧑", label:"Manage", sub:"Sign, rest, rotate"},
-              {icon:"🏆", label:"Conquer", sub:"Reach Rank #1"},
+              {icon:"", label:"Battle", sub:"Win fights, earn gold"},
+              {icon:"", label:"Manage", sub:"Sign, rest, rotate"},
+              {icon:"", label:"Conquer", sub:"Reach Rank #1"},
             ].map(({icon,label,sub})=>(
               <div key={label} style={{flex:1,padding:"8px 6px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:"1px solid rgba(60,52,38,0.108)",textAlign:"center"}}>
                 <div style={{fontSize:16,marginBottom:3}}>{icon}</div>
-                <div style={{fontSize:10,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>{label}</div>
+                <div style={{fontSize:10,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>{label}</div>
                 <div style={{fontSize:8,color:"#6E6350",marginTop:1}}>{sub}</div>
               </div>
             ))}
@@ -6932,7 +6939,7 @@ function SetupScreen({ onComplete }) {
         {/* NG+ returning champion notice */}
         {ng?.wins>0&&(
           <div style={{marginBottom:20,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.12)",border:"1px solid rgba(154,91,43,0.45)"}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>⚡ New Legacy — Run #{ng.wins+1}</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>New Legacy — Run #{ng.wins+1}</div>
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
               You've conquered the realm {ng.wins} time{ng.wins>1?"s":""}. Your unlocked game options are available below.
             </div>
@@ -7021,7 +7028,7 @@ function AbandonButton({onAbandon}){
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{setConfirming(false);onAbandon();}}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
           Yes, abandon run
         </button>
         <button onClick={()=>setConfirming(false)}
@@ -7033,7 +7040,7 @@ function AbandonButton({onAbandon}){
   );
   return(
     <button onClick={()=>setConfirming(true)}
-      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'IM Fell English SC',serif"}}>
+      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
       Abandon Run
     </button>
   );
@@ -7043,7 +7050,7 @@ function NewGameButton(){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
-      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>⚠️ This will erase everything:</div>
+      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>This will erase everything:</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
         • Current run progress and gold<br/>
         • All earned achievements and boons<br/>
@@ -7052,7 +7059,7 @@ function NewGameButton(){
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{clearSave();clearNGPlus();window.location.reload();}}
-          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
+          style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
           Yes, start New Realm
         </button>
         <button onClick={()=>setConfirming(false)}
@@ -7064,7 +7071,7 @@ function NewGameButton(){
   );
   return(
     <button onClick={()=>setConfirming(true)}
-      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'IM Fell English SC',serif"}}>
+      style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
       New Realm
     </button>
   );
@@ -7080,7 +7087,7 @@ function GuideTab(){
           background:openSection===id?"rgba(60,52,38,0.09)":"rgba(60,52,38,0.036)",
           border:"none",cursor:"pointer",textAlign:"left"}}>
         <span style={{fontSize:16}}>{icon}</span>
-        <span style={{flex:1,fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{title}</span>
+        <span style={{flex:1,fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{title}</span>
         <span style={{fontSize:12,color:"#6E6350"}}>{openSection===id?"▼":"▶"}</span>
       </button>
       {openSection===id&&(
@@ -7092,15 +7099,15 @@ function GuideTab(){
   );
   return(
     <div style={{maxWidth:640}}>
-      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#3C5A78",marginBottom:14}}>📖 How to Play</div>
+      <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#3C5A78",marginBottom:14}}>How to Play</div>
 
-      <Section id="loop" icon="⚔️" title="The Core Loop">
+      <Section id="loop" icon="" title="The Core Loop">
         <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#23201A"}}>set your formation</b>, <b style={{color:"#23201A"}}>fight a battle</b>, and manage the aftermath. Winning earns gold and XP. Use gold to sign heroes, build your town, and grow your squad.</p>
         <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#23201A"}}>{SEASON_LENGTH()} weeks</b>. At the end of each season the <b style={{color:"#40614F"}}>top 2 teams promote</b> to the next tier and the <b style={{color:"#7E2D26"}}>bottom 2 relegate</b>. The 5 tiers are Iron → Bronze → Silver → Gold → Platinum.</p>
         <p style={{margin:0}}>You win by <b style={{color:"#8A6D3B"}}>finishing 1st in the Platinum League</b>. Each promotion unlocks new buildings and stronger heroes.</p>
       </Section>
 
-      <Section id="battle" icon="🗡️" title="How Battles Work">
+      <Section id="battle" icon="" title="How Battles Work">
         <p style={{margin:"0 0 8px"}}>Every battle is decided across <b style={{color:"#23201A"}}>3 phases</b> — Vanguard, Skirmisher, and Arbiter. Win 2 of 3 phases to win the battle. Each phase compares your heroes' combined score in that lane against the enemy's power share for that position.</p>
         <p style={{margin:"0 0 8px"}}>Win chance per phase is <b style={{color:"#23201A"}}>capped at 85% and floored at 15%</b> — even a dominant squad can lose a phase, and an underdog can always steal one.</p>
         <p style={{margin:"0 0 8px"}}>Every battle pays: winners take the full purse, and <b style={{color:"#8A6D3B"}}>even defeats collect a small appearance fee</b> — a cold streak hurts, but it never starves you outright.</p>
@@ -7108,34 +7115,34 @@ function GuideTab(){
         <p style={{margin:0}}>After a battle the <b style={{color:"#3C5A78"}}>debrief</b> shows exactly which phase you won or lost and why. Use it to identify your weak lane.</p>
       </Section>
 
-      <Section id="formation" icon="🎯" title="Formation & Positions">
+      <Section id="formation" icon="" title="Formation & Positions">
         <p style={{margin:"0 0 8px"}}>Three positions, 2 slots each. <b style={{color:"#7E2D26"}}>Vanguard</b> — frontline brawlers (Warriors, Paladins). <b style={{color:"#8A6D3B"}}>Skirmisher</b> — flankers and ambushers (Rangers, Rogues). <b style={{color:"#3C5A78"}}>Arbiter</b> — rear command (Mages, Clerics).</p>
         <p style={{margin:"0 0 8px"}}>Placing the <b style={{color:"#40614F"}}>ideal role</b> in the right position gives +10% to that hero's combat score. Pairing two ideal roles together (e.g. Warrior + Paladin in Vanguard) gives a further +7% pairing bonus. These are shown in the Tactics tab multiplier breakdown.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Race synergies</b> are separate — they apply to your whole formation rating when you have 3+ of compatible races, or 6 of the same race. Check the Race Composition panel in Tactics.</p>
         <p style={{margin:0}}>The Tactics tab shows <b style={{color:"#3C5A78"}}>Base → Effective</b> rating with a full multiplier breakdown. Click "Breakdown" to see exactly what's boosting or hurting your rating.</p>
       </Section>
 
-      <Section id="heroes" icon="🧑" title="Hero Management">
+      <Section id="heroes" icon="" title="Hero Management">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#9A5B2B"}}>Fatigue</b> builds every battle (+15–25) and recovers on the bench (-25/week). Above 88 fatigue heroes lose effectiveness and risk injury. Rotate your bench regularly — the Recovery Lodge speeds this up.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and decays −0.5/week passively. A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons depending on career stage. A warning fires 6 weeks before expiry. You can renew early within 2 seasons of expiry. Releasing a hero at contract end costs no morale penalty — plan your releases around expiry dates.</p>
         <p style={{margin:0}}><b style={{color:"#8A6D3B"}}>Traits</b> give small bonuses and penalties — combat (+5–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
       </Section>
 
-      <Section id="economy" icon="💰" title="Hero Economy — Sign, Develop, Sell">
+      <Section id="economy" icon="" title="Hero Economy — Sign, Develop, Sell">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#40614F"}}>Level 0 Prospects</b> are free to sign. Develop them through battles to raise their level, Form, and Reputation — then sell at Peak for a significant profit. This is your primary income cycle.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#8A6D3B"}}>Potential</b> is hidden until a hero has played 8–10 battles. The Hidden stats tab shows a progress bar. Build the <b style={{color:"#3C5A78"}}>Observatory</b> (Gold tier) to see the potential bucket (Low/Med/High/Elite) before you even sign a market hero.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#40614F"}}>Form</b> (1–10) tracks results: heroes whose lane wins its phase run hot; heroes in losing lanes go cold. On the bench, Form drifts back toward 5 — rust dulls a sharp edge, rest steadies a shaken one. Form 9 adds a +17% premium to rival offers. <b style={{color:"#3C5A78"}}>Reputation</b> grows with every battle and never decays — it increases how often and how much rival scouts bid.</p>
         <p style={{margin:0}}>The <b style={{color:"#8A6D3B"}}>Career Arc</b> panel in each hero's detail shows exactly where they are: Prospect → Rising → Peak → Fading → Veteran. Sell at Peak. Once Fading, bids drop to 60% of value.</p>
       </Section>
 
-      <Section id="buildings" icon="🏰" title="Buildings">
+      <Section id="buildings" icon="" title="Buildings">
         {[
-          ["⚙️ Iron",    [["🏰 Barracks","Heroes earn +20% XP per battle."],["🍺 Tavern","All heroes +3 morale each week."]]],
-          ["🥉 Bronze",  [["⚕️ Infirmary","Injuries heal 1 week faster."],["🛖 Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
-          ["🥈 Silver",  [["🎯 Training Grounds","Bench heroes earn 20% of that week's battle XP."],["🔭 Talent Network","Market refreshes every 3 weeks instead of 6."],["💰 Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
-          ["🥇 Gold",    [["🏪 Grand Bazaar","Unlocks premium heroes in the market."],["🌠 Observatory","Shows potential bucket for all market heroes before signing."]]],
-          ["💎 Platinum",[["💎 Elite Sanctum","Unlocks elite heroes in the market."],["🏛️ Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
+          ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
+          ["Bronze",  [["Infirmary","Injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
+          ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
+          ["Gold",    [["Grand Bazaar","Unlocks premium heroes in the market."],["Observatory","Shows potential bucket for all market heroes before signing."]]],
+          ["Platinum",[["Elite Sanctum","Unlocks elite heroes in the market."],["Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
         ].map(([tier,buildings])=>(
           <div key={tier} style={{marginBottom:8}}>
             <div style={{fontSize:10,color:"#8A6D3B",fontWeight:700,marginBottom:3}}>{tier}</div>
@@ -7148,7 +7155,7 @@ function GuideTab(){
         ))}
       </Section>
 
-      <Section id="synergies" icon="✨" title="Race Synergies & Duo Pacts">
+      <Section id="synergies" icon="" title="Race Synergies & Duo Pacts">
         <p style={{margin:"0 0 8px"}}>Race synergies boost your whole formation rating — they stack on top of role placement bonuses. Only one synergy can be active at a time (the best one).</p>
         {[
           ["Mono-Race","6 heroes of the same race. The strongest synergies — each race has a unique bonus and trade-off (e.g. 6 Dwarves = near-impenetrable Vanguard but weak Skirmishers)."],
@@ -7162,12 +7169,12 @@ function GuideTab(){
         <p style={{margin:"8px 0 0",color:"#6E6350"}}>Role pairings are separate from race synergies and apply at the position level. Both can be active simultaneously.</p>
       </Section>
 
-      <Section id="objectives" icon="📋" title="Objectives & Events">
+      <Section id="objectives" icon="" title="Objectives & Events">
         <p style={{margin:"0 0 8px"}}>Each season you get <b style={{color:"#3C5A78"}}>3 objectives</b>. Complete them for gameplay buffs — XP boosts, morale bonuses, fatigue reductions. They're visible in the Battle tab before you fight so you can adapt your formation.</p>
         <p style={{margin:0}}><b style={{color:"#5F4B66"}}>Random events</b> fire every few weeks when a hero has the required stats. Heroes sent away earn gold, XP, and stat bonuses — but miss battles for 2–4 weeks. Events are worth accepting in most cases and provide reliable supplementary income.</p>
       </Section>
 
-      <Section id="tips" icon="💡" title="Tips & Common Mistakes">
+      <Section id="tips" icon="" title="Tips & Common Mistakes">
         {[
           "Don't field heroes above 88 fatigue — they lose 40% effectiveness. Rotate before big matches.",
           "Release heroes at contract end, not mid-contract — no morale hit and no penalty.",
@@ -7180,7 +7187,7 @@ function GuideTab(){
           "Squad Leader bonus scales with tenure — a long-serving Fading hero in that role still adds real value.",
           "Check the Squad composition panel at the top of the Squad tab to spot race synergy opportunities.",
         ].map((tip,i)=>(
-          <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(60,90,120,0.3)"}}>💡 {tip}</p>
+          <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(60,90,120,0.3)"}}>{tip}</p>
         ))}
       </Section>
     </div>
@@ -7194,7 +7201,7 @@ export default function App(){
   const saved = useMemo(() => loadGame(), []);
 
   const [townName,setTownName]       = useState(saved?.townName ?? "");
-  const [townColor,setTownColor]     = useState(saved?.townColor ?? DEFAULT_TOWN_COLOR);
+  const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
   const [gameSpeed,setGameSpeed]     = useState(()=>{
     const s = saved?.gameSpeed ?? "standard";
@@ -7280,7 +7287,7 @@ export default function App(){
     const entries = [{week:0,text:"Your realm awaits. Keep your heroes happy and their contracts fresh.",type:"info"}];
     const starHero = (saved?.heroes ?? generateStartingSquad()).find(h=>h.foundling);
     if(starHero){
-      entries.unshift({week:0,text:`🌟 ${starHero.name} has joined your ranks — scouts whisper of extraordinary potential.`,type:"success"});
+      entries.unshift({week:0,text:`${starHero.name} has joined your ranks — scouts whisper of extraordinary potential.`,type:"success"});
     }
     return entries;
   });
@@ -7430,7 +7437,7 @@ export default function App(){
       morale:Math.min(100,h.morale+20),
     }));
     setNegotiationQueue(q=>q.slice(1));
-    addLog(`✅ Signed ${hero.name}: ${demand.salary}g/wk for ${demand.years} season${demand.years>1?"s":""}.`,"success");
+    addLog(`Signed ${hero.name}: ${demand.salary}g/wk for ${demand.years} season${demand.years>1?"s":""}.`,"success");
   };
 
   const handleCounter=(hero,counter)=>{
@@ -7445,14 +7452,14 @@ export default function App(){
         morale:Math.min(100,h.morale+10),
       }));
       setNegotiationQueue(q=>q.slice(1));
-      addLog(`🤝 ${hero.name} accepted the counter-offer: ${counter.salary}g/wk for ${counter.years} season${counter.years>1?"s":""}.`,"success");
+      addLog(`${hero.name} accepted the counter-offer: ${counter.salary}g/wk for ${counter.years} season${counter.years>1?"s":""}.`,"success");
     } else {
       setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
         ...h, morale:Math.max(10,h.morale-15),
         negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
       }));
       setNegotiationQueue(q=>q.slice(1));
-      addLog(`😠 ${hero.name} rejected the counter-offer. Morale taking a hit.`,"warning");
+      addLog(`${hero.name} rejected the counter-offer. Morale taking a hit.`,"warning");
     }
   };
 
@@ -7462,14 +7469,14 @@ export default function App(){
       // Immediate walkout
       setHeroes(hs=>hs.filter(h=>h.id!==hero.id));
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(h=>h&&h.id===hero.id?null:h);});return nf;});
-      addLog(`🤬 ${hero.name} (Hot-headed) walked out immediately after contract rejection!`,"danger");
+      addLog(`${hero.name} (Hot-headed) walked out immediately after contract rejection!`,"danger");
       if(squadLeaderId===hero.id) setSquadLeaderId(null);
     } else {
       setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
         ...h, morale:Math.max(10,h.morale-18),
         negotiationPending:true, negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
       }));
-      addLog(`😤 ${hero.name} rejected. Very unhappy. Contract dispute ongoing.`,"danger");
+      addLog(`${hero.name} rejected. Very unhappy. Contract dispute ongoing.`,"danger");
     }
     setNegotiationQueue(q=>q.slice(1));
   };
@@ -7482,7 +7489,7 @@ export default function App(){
     // Queue immediately — the talks the player just asked for should open now,
     // not after the next battle's weekly tick
     setNegotiationQueue(q=>q.find(x=>x.id===hero.id)?q:[...q,{...hero, negotiationPending:true, negotiationIgnoredWeeks:0}]);
-    addLog(`📋 ${hero.name} called in for early contract talks.`,"info");
+    addLog(`${hero.name} called in for early contract talks.`,"info");
   };
 
   const handleDelay=(hero)=>{
@@ -7492,7 +7499,7 @@ export default function App(){
       negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
     }));
     setNegotiationQueue(q=>q.slice(1));
-    addLog(`⏳ ${hero.name}'s contract talks postponed. They noticed.`,"info");
+    addLog(`${hero.name}'s contract talks postponed. They noticed.`,"info");
   };
 
   const releaseHero=h=>{
@@ -7506,7 +7513,7 @@ export default function App(){
       setNegotiationQueue(q=>q.filter(x=>x.id!==h.id));
       if(squadLeaderId===h.id) setSquadLeaderId(null);
       setDetailHero(null);
-      addLog(`🤝 ${h.name} departed at contract end. Mutual parting — no morale impact.`,"info");
+      addLog(`${h.name} departed at contract end. Mutual parting — no morale impact.`,"info");
       return;
     }
 
@@ -7535,21 +7542,21 @@ export default function App(){
     setDetailHero(null);
 
     if(h.fodder){
-      addLog(`🚪 ${h.name} was let go. The squad barely noticed.`,"info");
+      addLog(`${h.name} was let go. The squad barely noticed.`,"info");
     } else {
-      addLog(`🚪 ${h.name} (Lv ${h.level}, ${h.weeksInSquad||0} weeks) was released. Squad morale −${totalPenalty}.`,"danger");
-      if(totalPenalty>=25) addLog(`💔 The squad is devastated. This will take weeks to recover.`,"danger");
-      else if(totalPenalty>=15) addLog(`😟 The squad is shaken. Morale will take time to recover.`,"warning");
+      addLog(`${h.name} (Lv ${h.level}, ${h.weeksInSquad||0} weeks) was released. Squad morale −${totalPenalty}.`,"danger");
+      if(totalPenalty>=25) addLog(`The squad is devastated. This will take weeks to recover.`,"danger");
+      else if(totalPenalty>=15) addLog(`The squad is shaken. Morale will take time to recover.`,"warning");
       if(posName){
         const samePos=affected.filter(r=>(formation[posName]||[]).some(x=>x&&x.id===r.id));
-        if(samePos.length>0) addLog(`💔 ${samePos.map(x=>x.name).join(", ")} are hit hardest — same position, lost a teammate.`,"warning");
+        if(samePos.length>0) addLog(`${samePos.map(x=>x.name).join(", ")} are hit hardest — same position, lost a teammate.`,"warning");
       }
     }
   };
 
   const buyHero=h=>{
     if(heroes.filter(x=>!x.retired).length>=ROSTER_CAP){
-      addLog(`⚠️ Roster full (${ROSTER_CAP} heroes). Release or sell a hero first.`,"warning");
+      addLog(`Roster full (${ROSTER_CAP} heroes). Release or sell a hero first.`,"warning");
       return;
     }
     const discountedValue=signDiscount>0?Math.round(h.value*(1-signDiscount)):h.value;
@@ -7565,7 +7572,7 @@ export default function App(){
     setGold(g=>g-discountedValue);
     setSeasonFinances(prev=>({...prev, signingCosts:prev.signingCosts+discountedValue}));
     if(signDiscount>0){
-      addLog(`🏷️ Objective discount applied: ${Math.round(signDiscount*100)}% off!`,"success");
+      addLog(`Objective discount applied: ${Math.round(signDiscount*100)}% off!`,"success");
       setSignDiscount(0);
     }
     setHeroes(hs=>[...hs,nh]);
@@ -7575,12 +7582,12 @@ export default function App(){
       return next;
     });
     const signLine = discountedValue===0
-      ? `✍️ ${h.name} signs for nothing but a bunk and a chance. A gamble on raw clay.`
+      ? `${h.name} signs for nothing but a bunk and a chance. A gamble on raw clay.`
       : h.marketTier==="elite"
-      ? `✍️ The realm empties its vaults — ${h.name} signs for ${discountedValue.toLocaleString()}g. Now deliver.`
+      ? `The realm empties its vaults — ${h.name} signs for ${discountedValue.toLocaleString()}g. Now deliver.`
       : h.marketTier==="premium"
-      ? `✍️ ${h.name} signs for ${discountedValue.toLocaleString()}g. Pedigree costs.`
-      : `✍️ Signed ${h.name} for ${discountedValue.toLocaleString()}g!`;
+      ? `${h.name} signs for ${discountedValue.toLocaleString()}g. Pedigree costs.`
+      : `Signed ${h.name} for ${discountedValue.toLocaleString()}g!`;
     addLog(signLine,"success");
     // Complete sign_hero objective
   };
@@ -7591,12 +7598,12 @@ export default function App(){
     if(!town||town.squadScouted) return;
     const hasObservatory=buildings.find(b=>b.id==="scouts"&&b.built);
     const cost=Math.round((40*(TIERS[playerTier]?.difficulty||1)+40)*(hasObservatory?0.5:1));
-    if(gold<cost){ addLog(`⚠️ A squad report on ${townName} costs ${cost}g — the coffers can't cover it.`,"warning"); return; }
+    if(gold<cost){ addLog(`A squad report on ${townName} costs ${cost}g — the coffers can't cover it.`,"warning"); return; }
     setGold(g=>g-cost);
     setTierEnemyTowns(ts=>ts.map(t=>t.name===townName
       ? {...t, squadScouted:true, roster:(t.roster&&t.roster.length)?t.roster:generateRivalRoster(t, playerTier)}
       : t));
-    addLog(`🔭 Squad report on ${townName} (−${cost}g) — six notables identified${hasObservatory?" (Observatory rate)":""}.`,"info");
+    addLog(`Squad report on ${townName} (−${cost}g) — six notables identified${hasObservatory?" (Observatory rate)":""}.`,"info");
   };
 
   const buyRivalHero=(townName, heroId)=>{
@@ -7604,11 +7611,11 @@ export default function App(){
     const hero=town?.roster?.find(h=>h.id===heroId);
     if(!town||!hero) return;
     if((town.soldThisSeason||0)>=1){
-      addLog(`💢 ${town.manager?.name||townName} refuses — no realm sells twice in a season.`,"warning");
+      addLog(`${town.manager?.name||townName} refuses — no realm sells twice in a season.`,"warning");
       return;
     }
     if(heroes.filter(x=>!x.retired).length>=ROSTER_CAP){
-      addLog(`⚠️ Roster full (${ROSTER_CAP} heroes). Release or sell a hero first.`,"warning");
+      addLog(`Roster full (${ROSTER_CAP} heroes). Release or sell a hero first.`,"warning");
       return;
     }
     const scores=town.roster.map(h=>Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))));
@@ -7629,25 +7636,25 @@ export default function App(){
       ? {...t, roster:t.roster.filter(h=>h.id!==heroId), soldThisSeason:(t.soldThisSeason||0)+1, power:newPower}
       : t));
     setLeagueTable(prev=>prev[townName]?{...prev,[townName]:{...prev[townName],power:newPower}}:prev);
-    addLog(`🪙 Poached ${hero.name} from ${townName} for ${price.toLocaleString()}g${town.manager?` — ${town.manager.name} will not forget this`:""}.`,"success");
-    addChronicle(`🪙 ${hero.name} bought out of ${townName} for ${price.toLocaleString()}g${isTalisman?" — their talisman, taken":""}.`);
+    addLog(`Poached ${hero.name} from ${townName} for ${price.toLocaleString()}g${town.manager?` — ${town.manager.name} will not forget this`:""}.`,"success");
+    addChronicle(`${hero.name} bought out of ${townName} for ${price.toLocaleString()}g${isTalisman?" — their talisman, taken":""}.`);
   };
 
   const buildBuilding=b=>{
     if(gold<b.cost)return;
     setGold(g=>g-b.cost);
     setBuildings(bs=>bs.map(x=>x.id===b.id?{...x,built:true}:x));
-    addLog(`🏗️ ${b.name} constructed!`,"success");
+    addLog(`${b.name} constructed!`,"success");
     setHallOfFame(prev=>({...prev, buildingsBuilt:(prev.buildingsBuilt||0)+1}));
     // Bazaar: spawn premium (not elite) heroes — elite reserved for Elite Sanctum
     if(b.id==="bazaar"){
       setMarket(m=>[...m,...Array.from({length:3},(_,i)=>generateHero(Date.now()+i,true,true,false,null,null,playerTier))]);
-      addLog("🏪 Grand Bazaar: premium heroes arrived!","success");
+      addLog("Grand Bazaar: premium heroes arrived!","success");
     }
     // Elite Sanctum: spawn elite heroes immediately + flag market for future elite spawns
     if(b.id==="sanctum"){
       setMarket(m=>[...m,...Array.from({length:2},(_,i)=>generateHero(Date.now()+i,true,true,true,null,null,playerTier))]);
-      addLog("💎 Elite Sanctum: elite heroes have arrived seeking a worthy realm!","success");
+      addLog("Elite Sanctum: elite heroes have arrived seeking a worthy realm!","success");
     }
   };
 
@@ -7671,7 +7678,7 @@ export default function App(){
       next[idx]=snap;
       return next;
     });
-    addLog(`💾 Saved current formation to Preset ${idx+1}.`,"info");
+    addLog(`Saved current formation to Preset ${idx+1}.`,"info");
   };
   const loadPreset=(idx)=>{
     const p=formationPresets[idx];
@@ -7784,14 +7791,14 @@ export default function App(){
     setTransferBids(prev=>prev.filter(b=>b.heroId!==h.id));
     setDetailHero(null);
     setHallOfFame(prev=>({...prev, heroesSold:(prev.heroesSold||0)+1}));
-    addLog(`💰 ${h.name} took service with ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
+    addLog(`${h.name} took service with ${bid.town} for ${bid.offer.toLocaleString()}g!`,"success");
     addLog(`The squad wishes them well. Minor morale dip — better than a walkout.`,"info");
     // Complete sell_hero objective
   };
 
   const declineBid=(bid)=>{
     setTransferBids(prev=>prev.filter(b=>b.id!==bid.id));
-    addLog(`❌ Declined ${bid.town}'s offer for ${bid.heroName}.`,"info");
+    addLog(`Declined ${bid.town}'s offer for ${bid.heroName}.`,"info");
   };
 
   // ── EVENT OUTCOME RESOLUTION ──────────────────────────────────────────────
@@ -7945,7 +7952,7 @@ export default function App(){
     if(event.isEmissary){
       setLegendaryChallenger(event.challenger);
       setActiveEvent(null);
-      addLog(`⚔️ Challenge accepted! ${event.challenger.name} will face you next battle.`,"success");
+      addLog(`Challenge accepted! ${event.challenger.name} will face you next battle.`,"success");
       return;
     }
     const awayWeeks = event.awayWeeks[0];
@@ -7961,7 +7968,7 @@ export default function App(){
       };
     }));
     const names = selectedHeroes.map(h=>h.name).join(" & ");
-    addLog(`✨ ${names} departed for "${event.title}" — away ${awayWeeks} week${awayWeeks>1?"s":""}.`,"success");
+    addLog(`${names} departed for "${event.title}" — away ${awayWeeks} week${awayWeeks>1?"s":""}.`,"success");
     setActiveEvent(null);
     setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(h=>h&&sentIds.has(h.id)?null:h);});return nf;});
   };
@@ -7978,24 +7985,24 @@ export default function App(){
       const actual = newVal - currentVal;
       return {...h, stats: {...h.stats, [stat]: newVal}, value: calcHeroValue({...h, stats:{...h.stats,[stat]:newVal}})};
     }));
-    addLog(`🧙 ${hero.name} trained with the Wandering Master. +${boostAmount} ${stat}!`, "success");
+    addLog(`${hero.name} trained with the Wandering Master. +${boostAmount} ${stat}!`, "success");
     setWanderingMasterLastSeason(season);
     setActiveWanderingMaster(null);
   };
 
   const declineWanderingMaster = () => {
-    addLog(`🧙 The Wandering Master departs. Another time.`, "info");
+    addLog(`The Wandering Master departs. Another time.`, "info");
     setActiveWanderingMaster(null);
   };
 
   const declineChallenge = () => {
     setHeroes(hs => hs.map(h => ({...h, morale: Math.max(10, (h.morale||70) - 8)})));
     setPendingChallenge(null);
-    addLog(`😔 The challenge was declined. The squad's spirit wavers. (−8 morale to all)`, "warning");
+    addLog(`The challenge was declined. The squad's spirit wavers. (−8 morale to all)`, "warning");
   };
 
   const declineEvent=()=>{
-    addLog(`❌ Declined: "${activeEvent?.title}"`, "info");
+    addLog(`Declined: "${activeEvent?.title}"`, "info");
     setActiveEvent(null);
   };
 
@@ -8008,7 +8015,7 @@ export default function App(){
     const opponent = legendaryChallenger || scheduledOpponent;
     if(!opponent){addLog("No opponent scheduled this week!","danger");return;}
     const placed=POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
-    if(placed.length<3){addLog("⚠️ Assign at least 3 heroes in Tactics first!","danger");return;}
+    if(placed.length<3){addLog("Assign at least 3 heroes in Tactics first!","danger");return;}
 
     // Apply challenge modifier if active
     let battleOpponent = opponent;
@@ -8016,7 +8023,7 @@ export default function App(){
       const boostedPower = Math.round((opponent.power||100) * pendingChallenge.opponentPowerMult);
       battleOpponent = {...opponent, power:boostedPower, _challengeRewardMult:pendingChallenge.rewardMult};
       setPendingChallenge(null);
-      addLog(`⚔️ The Challenge is active — opponent ${Math.round((pendingChallenge.opponentPowerMult-1)*100)}% stronger, rewards doubled!`,"warning");
+      addLog(`The Challenge is active — opponent ${Math.round((pendingChallenge.opponentPowerMult-1)*100)}% stronger, rewards doubled!`,"warning");
     }
 
     const sim=buildRaidSimulation(formation,battleOpponent,buildings,TIERS[playerTier]?.difficulty??1,ngPlus);
@@ -8025,7 +8032,7 @@ export default function App(){
     setPendingRaidEnemy(battleOpponent);
     } catch(err) {
       console.error("startBattle error:", err);
-      addLog(`⚠️ Battle error: ${err?.message||"unknown"}. Try reassigning heroes in Tactics.`,"danger");
+      addLog(`Battle error: ${err?.message||"unknown"}. Try reassigning heroes in Tactics.`,"danger");
     }
   };
 
@@ -8048,10 +8055,10 @@ export default function App(){
       if(result.won){
         const lc=raidEnemy;
         setGold(g=>g+(lc.goldReward||3000));
-        addLog(`🏆 LEGENDARY VICTORY! You defeated ${lc.name}! +${(lc.goldReward||3000).toLocaleString()}g`,"success");
+        addLog(`LEGENDARY VICTORY! You defeated ${lc.name}! +${(lc.goldReward||3000).toLocaleString()}g`,"success");
         setHallOfFame(prev=>({...prev, legendaryWins:(prev.legendaryWins||0)+1, lastLegendaryVictory:{name:lc.name,season,week:week+1}}));
       } else {
-        addLog(`💀 Defeat against ${raidEnemy.name}. A legendary loss — but no rank penalty. Learn and return stronger.`,"warning");
+        addLog(`Defeat against ${raidEnemy.name}. A legendary loss — but no rank penalty. Learn and return stronger.`,"warning");
       }
       // Legendary raids don't affect the leaderboard rank or normal schedule
       result.events.forEach(e=>addLog(e,result.won?"success":"danger"));
@@ -8062,7 +8069,7 @@ export default function App(){
       // Apply challenge reward multiplier if active
       const rewardMult = raidEnemy._challengeRewardMult || 1;
       const finalGoldSwing = Math.round(result.goldSwing * rewardMult);
-      if(rewardMult > 1 && result.won) addLog(`🎖️ Challenge victory! Rewards ×${rewardMult} — +${finalGoldSwing.toLocaleString()}g`,"success");
+      if(rewardMult > 1 && result.won) addLog(`Challenge victory! Rewards ×${rewardMult} — +${finalGoldSwing.toLocaleString()}g`,"success");
       setGold(g=>Math.max(0,g+finalGoldSwing));
       result.goldSwing = finalGoldSwing;
       result.events.forEach(e=>addLog(e,result.won?"success":"danger"));
@@ -8129,7 +8136,7 @@ export default function App(){
         if(newMentorBonus&&newMentorBonus.weeksLeft>0){
           xpGain+=newMentorBonus.xpPerWeek;
           newMentorBonus={...newMentorBonus,weeksLeft:newMentorBonus.weeksLeft-1};
-          if(newMentorBonus.weeksLeft===0){addLog(`🎖️ ${h.name}'s mentorship from ${newMentorBonus.mentorName} has ended.`,"info");newMentorBonus=null;}
+          if(newMentorBonus.weeksLeft===0){addLog(`${h.name}'s mentorship from ${newMentorBonus.mentorName} has ended.`,"info");newMentorBonus=null;}
         }
         const newXP=h.xp+xpGain, oldLv=h.level, newLv=Math.min(MAX_LEVEL,levelFromXp(newXP));
         let newStats=h.stats;
@@ -8195,8 +8202,8 @@ export default function App(){
         if(newlyInjured){
           const injName = pick(INJURY_NAMES_BY_POS[heroPos]||INJURY_NAMES_ALL);
           out.injury = { name:injName, from:raidEnemy.name, week:week+1 };
-          addLog(`🩸 ${h.name} — ${injName.toLowerCase()}, courtesy of ${raidEnemy.name}. Out ~${injuryWeeks}w.`,"danger");
-          addChronicle(`🩸 ${h.name} — ${injName.toLowerCase()}, vs ${raidEnemy.name}.`);
+          addLog(`${h.name} — ${injName.toLowerCase()}, courtesy of ${raidEnemy.name}. Out ~${injuryWeeks}w.`,"danger");
+          addChronicle(`${h.name} — ${injName.toLowerCase()}, vs ${raidEnemy.name}.`);
         }
         if(healedNow) out = applyHealScar(out, addLog);
         return out;
@@ -8232,7 +8239,7 @@ export default function App(){
               setPendingEventReturns(prev=>[...prev, {
                 id: `${h.id}_${Date.now()}`,
                 heroName: h.name,
-                heroIcon: RACE_ICONS[h.race]||"⚔️",
+                heroIcon: RACE_ICONS[h.race]||"",
                 eventTitle: pendingEvent.title,
                 eventTheme: pendingEvent.theme,
                 outcome: resolution.outcome,
@@ -8244,7 +8251,7 @@ export default function App(){
               }]);
               pendingEvent = null;
             } else {
-              addLog(`🏠 ${h.name} returned from "${h.awayEvent}".`,"success");
+              addLog(`${h.name} returned from "${h.awayEvent}".`,"success");
             }
           }
         }
@@ -8255,7 +8262,7 @@ export default function App(){
         if(newMentorBonus&&newMentorBonus.weeksLeft>0){
           mentorXP=newMentorBonus.xpPerWeek;
           newMentorBonus={...newMentorBonus,weeksLeft:newMentorBonus.weeksLeft-1};
-          if(newMentorBonus.weeksLeft===0){addLog(`🎖️ ${h.name}'s mentorship from ${newMentorBonus.mentorName} has ended.`,"info");newMentorBonus=null;}
+          if(newMentorBonus.weeksLeft===0){addLog(`${h.name}'s mentorship from ${newMentorBonus.mentorName} has ended.`,"info");newMentorBonus=null;}
         }
 
         // Bench Form drifts toward neutral 5 — rust dulls a sharp edge, but rest
@@ -8292,7 +8299,7 @@ export default function App(){
 
     if(buildings.find(b=>b.id==="tavern"&&b.built)){
       updatedHeroes=updatedHeroes.map(h=>({...h,morale:Math.min(100,h.morale+3)}));
-      addLog("🍺 Tavern: +3 morale to all heroes","info");
+      addLog("Tavern: +3 morale to all heroes","info");
     }
 
     // Hall of Legends — retired heroes contribute morale based on level at retirement
@@ -8303,7 +8310,7 @@ export default function App(){
         const legendBonus = Math.min(20, retirees.reduce((sum,h)=>sum+(1+Math.floor((h.level||0)/3)),0));
         if(legendBonus>0){
           updatedHeroes=updatedHeroes.map(h=>h.retired?h:{...h,morale:Math.min(100,h.morale+legendBonus)});
-          addLog(`🏛️ Hall of Legends: +${legendBonus} morale from ${retirees.length} retired hero${retirees.length>1?"es":""}`, "info");
+          addLog(`Hall of Legends: +${legendBonus} morale from ${retirees.length} retired hero${retirees.length>1?"es":""}`, "info");
         }
       }
     }
@@ -8315,7 +8322,7 @@ export default function App(){
         if(!raidedIds.has(h.id)) return h;
         return {...h, morale:Math.min(100,h.morale+lb.moralePerWeek)};
       });
-      addLog(`👑 ${leader.name} (Squad Leader): +${lb.moralePerWeek} morale to all raiders`,"info");
+      addLog(`${leader.name} (Squad Leader): +${lb.moralePerWeek} morale to all raiders`,"info");
     }
     if(buildings.find(b=>b.id==="trainyard"&&b.built)){
       const benchXP = Math.max(1, Math.round(result.heroXP * 0.20));
@@ -8326,7 +8333,7 @@ export default function App(){
         if(newLv>h.level)newStats=growHeroStats({...h},newLv,buildings);
         return{...h,xp:newXP,level:newLv,stats:newStats};
       });
-      addLog(`🎯 Training Grounds: bench heroes earned ${benchXP} XP`,"info");
+      addLog(`Training Grounds: bench heroes earned ${benchXP} XP`,"info");
     }
 
     // Market refresh — full rotation every 6 weeks (3 with Talent Network)
@@ -8342,15 +8349,15 @@ export default function App(){
         const isElit = isElite   && Math.random()<0.20;
         return generateHero(Date.now()+i+7700, true, isPrem, isElit, null, null, playerTier);
       }));
-      addLog(`🏪 The mercenary pool has refreshed — ${hasNetwork?"Talent Network":"new faces"} arrive.`,"info");
+      addLog(`The mercenary pool has refreshed — ${hasNetwork?"Talent Network":"new faces"} arrive.`,"info");
     }
 
     updatedHeroes=updatedHeroes.map(h=>{
       const wLeft=Math.max(0,(h.contractWeeksLeft||0)-1);
       let negotiationPending=h.negotiationPending, negotiationIgnoredWeeks=h.negotiationIgnoredWeeks||0;
-      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`📜 ${h.name}'s contract has expired! Renewal required.`,"warning");}
-      if(wLeft===1&&!negotiationPending){addLog(`⚠️ ${h.name}'s contract expires next week — prepare for renewal.`,"warning");}
-      if(wLeft===6&&!negotiationPending){addLog(`⏰ ${h.name}'s contract expires in 6 weeks.`,"info");}
+      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`${h.name}'s contract has expired! Renewal required.`,"warning");}
+      if(wLeft===1&&!negotiationPending){addLog(`${h.name}'s contract expires next week — prepare for renewal.`,"warning");}
+      if(wLeft===6&&!negotiationPending){addLog(`${h.name}'s contract expires in 6 weeks.`,"info");}
       // Dispute clock: only ticks on weeks the hero was ALREADY waiting when
       // this one began (testing the flag we just set double-counted week one)
       if(h.negotiationPending&&wLeft===0){negotiationIgnoredWeeks++;if(negotiationIgnoredWeeks>=3){return{...h,contractWeeksLeft:0,negotiationPending,negotiationIgnoredWeeks,morale:Math.max(0,h.morale-15)};}}
@@ -8371,16 +8378,16 @@ export default function App(){
     });
     walkouts.forEach(h=>{
       const walkLine = h.traits?.includes("Hot-headed")
-        ? `🤬 ${h.name} kicked the barracks door off its hinges on the way out. The squad is rattled.`
+        ? `${h.name} kicked the barracks door off its hinges on the way out. The squad is rattled.`
         : h.traits?.includes("Greedy")
-        ? `🤬 ${h.name} walked out, leaving only a note about wages. The squad is rattled.`
+        ? `${h.name} walked out, leaving only a note about wages. The squad is rattled.`
         : pick([
-            `🤬 ${h.name} walked out! The squad is rattled.`,
-            `🤬 ${h.name} packed in the night and was gone by dawn. The squad is rattled.`,
-            `🤬 ${h.name} left their colours folded on the bunk. The squad is rattled.`,
+            `${h.name} walked out! The squad is rattled.`,
+            `${h.name} packed in the night and was gone by dawn. The squad is rattled.`,
+            `${h.name} left their colours folded on the bunk. The squad is rattled.`,
           ]);
       addLog(walkLine,"danger");
-      addChronicle(`🚪 ${h.name} walked out on the realm.`);
+      addChronicle(`${h.name} walked out on the realm.`);
       updatedHeroes=applySquadMoraleEvent(updatedHeroes.filter(x=>x.id!==h.id),h,formation,"walkout");
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===h.id?null:x);});return nf;});
       setNegotiationQueue(q=>q.filter(x=>x.id!==h.id)); // no ghost negotiations
@@ -8415,14 +8422,14 @@ export default function App(){
       let retirementAged=aged.filter(h=>!h.retired);
       newRetirees.forEach(r=>{
         retirementAged=applySquadMoraleEvent(retirementAged,r,formation,"retire");
-        addLog(`🎖️ The squad celebrates ${r.name}'s retirement. Morale lifted!`,"success");
+        addLog(`The squad celebrates ${r.name}'s retirement. Morale lifted!`,"success");
       });
       aged.splice(0,aged.length,...aged.map(h=>retirementAged.find(x=>x.id===h.id)||h));
       setRetirees(newRetirees);
       if(newRetirees.some(r=>r.id===squadLeaderId)) setSquadLeaderId(null);
     }
 
-    if(newLevelUps.length){setLevelUps(newLevelUps);newLevelUps.forEach(e=>addLog(`⭐ ${e.name} → Level ${e.newLv}! (${e.gained} stats grew)`,"success"));if(Object.keys(snapshots).length)setPrevStats(snapshots);}
+    if(newLevelUps.length){setLevelUps(newLevelUps);newLevelUps.forEach(e=>addLog(`${e.name} → Level ${e.newLv}! (${e.gained} stats grew)`,"success"));if(Object.keys(snapshots).length)setPrevStats(snapshots);}
     else setLevelUps([]);
 
     // ── CHECK & COMPLETE RAID-TIME OBJECTIVES ─────────────────────────────
@@ -8439,11 +8446,11 @@ export default function App(){
     const goldAfterWages = gold - wages;
     setGold(g=>g-wages); // allow negative — debt is visible
     const wageLine = pick([
-      `💸 Wages paid: ${wages.toLocaleString()}g. The steward counts twice; heroes count once.`,
-      `💸 Payday — ${wages.toLocaleString()}g lighter. Nobody thanked you.`,
-      `💸 Weekly wages: ${wages.toLocaleString()}g`,
-      `💸 The wage ledger closes at ${wages.toLocaleString()}g. Swords stay sharp, purses don't.`,
-      `💸 ${wages.toLocaleString()}g in wages. Loyalty, invoiced weekly.`,
+      `Wages paid: ${wages.toLocaleString()}g. The steward counts twice; heroes count once.`,
+      `Payday — ${wages.toLocaleString()}g lighter. Nobody thanked you.`,
+      `Weekly wages: ${wages.toLocaleString()}g`,
+      `The wage ledger closes at ${wages.toLocaleString()}g. Swords stay sharp, purses don't.`,
+      `${wages.toLocaleString()}g in wages. Loyalty, invoiced weekly.`,
     ]);
     addLog(wageLine,"warning");
 
@@ -8452,12 +8459,12 @@ export default function App(){
     const liveTierPosition = calcTierPosition(playerRecord.wins, playerRecord.wins/(Math.max(1,playerRecord.wins+playerRecord.losses)), leagueTable, tierEnemyTowns);
     const tributeAmount=weeklyRankIncome(playerTier, liveTierPosition);
     setGold(g=>g+tributeAmount);
-    const tierIcon = TIERS[playerTier]?.icon||'👑', tierName = TIERS[playerTier]?.name||'Iron';
+    const tierIcon = TIERS[playerTier]?.icon||'', tierName = TIERS[playerTier]?.name||'Iron';
     const tributeLine = pick([
-      `${tierIcon} ${tierName} tribute: +${tributeAmount.toLocaleString()}g/wk`,
+      `${tierName} tribute: +${tributeAmount.toLocaleString()}g/wk`,
       `${tierIcon} The ${tierName} League pays its dues: +${tributeAmount.toLocaleString()}g.`,
       `${tierIcon} Tribute carts arrive from the ${tierName} League: +${tributeAmount.toLocaleString()}g.`,
-      `${tierIcon} +${tributeAmount.toLocaleString()}g tribute — rank has its privileges.`,
+      `+${tributeAmount.toLocaleString()}g tribute — rank has its privileges.`,
     ]);
     addLog(tributeLine,"success");
 
@@ -8491,16 +8498,16 @@ export default function App(){
             totalSeasons:season, builtCount:buildings.filter(b=>b.built).length,
             totalWeeks:week },
         });
-        addLog("💀 The realm has fallen into ruin. The campaign is over.","danger");
+        addLog("The realm has fallen into ruin. The campaign is over.","danger");
       } else {
         const weeksLeft = 3 - newBankruptcyWeeks;
-        const urgency = weeksLeft === 2 ? "⚠️" : "🚨";
+        const urgency = weeksLeft === 2 ? "" : "";
         addLog(`${urgency} The realm's coffers are empty! ${weeksLeft} week${weeksLeft>1?"s":""} until the campaign ends. Sell heroes, win battles, or generate income.`, "danger");
       }
     } else if(bankruptcyWeeks > 0){
       // Recovered — reset counter
       setBankruptcyWeeks(0);
-      addLog("✅ Finances stabilised — bankruptcy warning lifted.","success");
+      addLog("Finances stabilised — bankruptcy warning lifted.","success");
     }
 
     // Record this week's finances for the Ledger tab
@@ -8544,23 +8551,23 @@ export default function App(){
         };
         setActiveEvent(emissaryEvent);
         setEmissaryFiredThisSeason(true);
-        addLog(`⚔️ Legendary challenge received from ${fullChallenger.name}! Check the Battle tab.`,"success");
+        addLog(`Legendary challenge received from ${fullChallenger.name}! Check the Battle tab.`,"success");
       }
       else if(!pendingChallenge && Math.random()<0.20){
         const challenge = SPECIAL_EVENTS.find(e=>e.id==="the_challenge");
         setPendingChallenge({ opponentPowerMult: challenge.opponentPowerMult, rewardMult: challenge.rewardMult });
-        addLog(`⚔️ "${challenge.title}" — a formal challenge arrives. Check the Battle tab.`,"info");
+        addLog(`"${challenge.title}" — a formal challenge arrives. Check the Battle tab.`,"info");
       }
       else if((season - wanderingMasterLastSeason) >= 2 && Math.random()<0.15){
         setActiveWanderingMaster(SPECIAL_EVENTS.find(e=>e.id==="wandering_master"));
-        addLog(`🧙 A wandering master has arrived at your gates! Check the Squad tab.`,"info");
+        addLog(`A wandering master has arrived at your gates! Check the Squad tab.`,"info");
       }
       else if(!pendingChallenge){
         const availableHeroes=heroes.filter(h=>!h.retired&&!(h.awayWeeks>0)&&!h.injured);
         const ev=generateRandomEvent(availableHeroes,week+1);
         if(ev){
           setActiveEvent(ev);
-          addLog(`📣 "${ev.title}" — check the Battle tab!`,"info");
+          addLog(`"${ev.title}" — check the Battle tab!`,"info");
         }
       }
     }
@@ -8647,24 +8654,24 @@ export default function App(){
       const rivalTown = tierEnemyTowns.find(t=>t.name===raidEnemy.name);
       const grudgeDiff = rivalTown ? (rivalTown.h2h?.losses||0)-(rivalTown.h2h?.wins||0) : 0;
       if(result.won && grudgeDiff>=2){
-        addLog(`⚔️ The grudge is settled — ${raidEnemy.name} finally falls${rivalTown?.manager?`. ${rivalTown.manager.name} will remember this`:""}.`,"success");
-        addChronicle(`⚔️ The grudge settled — ${raidEnemy.name} finally beaten after ${grudgeDiff} more losses than wins.`);
+        addLog(`The grudge is settled — ${raidEnemy.name} finally falls${rivalTown?.manager?`. ${rivalTown.manager.name} will remember this`:""}.`,"success");
+        addChronicle(`The grudge settled — ${raidEnemy.name} finally beaten after ${grudgeDiff} more losses than wins.`);
       } else if(!result.won && grudgeDiff>=2 && rivalTown?.manager){
-        addLog(`💢 ${rivalTown.manager.name} of ${raidEnemy.name} has your number — that's ${grudgeDiff+1} more defeats than wins.`,"warning");
+        addLog(`${rivalTown.manager.name} of ${raidEnemy.name} has your number — that's ${grudgeDiff+1} more defeats than wins.`,"warning");
       }
       // Match report — the lane series persists after the modal closes
       if(result.laneBattle){
         const rep = POS_KEYS.map(p=>{
           const lb=result.laneBattle[p];
-          return lb?`${POSITIONS[p].icon} ${lb.wins}–${lb.losses}`:null;
+          return lb?`${p.slice(0,3).toUpperCase()} ${lb.wins}–${lb.losses}`:null;
         }).filter(Boolean).join(" · ");
-        addLog(`📜 Match report vs ${raidEnemy.name}: ${rep}`,"info");
+        addLog(`Match report vs ${raidEnemy.name}: ${rep}`,"info");
       }
       // Chronicle: only results worth retelling
       const wc = result.winChance ?? 0.5;
-      if(result.won && wc < 0.15)      addChronicle(`✨ Against all odds — beat ${raidEnemy.name} at ${Math.round(wc*100)}%.`);
-      else if(result.won && wc < 0.30) addChronicle(`⚡ Upset — ${raidEnemy.name} toppled at ${Math.round(wc*100)}%.`);
-      else if(!result.won && wc > 0.75) addChronicle(`😱 Shock — fell to ${raidEnemy.name} as ${Math.round(wc*100)}% favourites.`);
+      if(result.won && wc < 0.15)      addChronicle(`Against all odds — beat ${raidEnemy.name} at ${Math.round(wc*100)}%.`);
+      else if(result.won && wc < 0.30) addChronicle(`Upset — ${raidEnemy.name} toppled at ${Math.round(wc*100)}%.`);
+      else if(!result.won && wc > 0.75) addChronicle(`Shock — fell to ${raidEnemy.name} as ${Math.round(wc*100)}% favourites.`);
       setTierEnemyTowns(ts=>ts.map(t=>t.name===raidEnemy.name
         ? {...t, h2h:{ wins:(t.h2h?.wins||0)+(result.won?1:0), losses:(t.h2h?.losses||0)+(result.won?0:1) }}
         : t));
@@ -8684,7 +8691,7 @@ export default function App(){
         if(dedupedNew.length){
           // Pop the modal with the freshly-arrived bids
           setNewOfferBids(dedupedNew);
-          addLog(`📨 ${dedupedNew.length} offer${dedupedNew.length>1?"s":""} received!`,"success");
+          addLog(`${dedupedNew.length} offer${dedupedNew.length>1?"s":""} received!`,"success");
         }
       }
     }
@@ -8722,7 +8729,7 @@ export default function App(){
     });
     } catch(err) {
       console.error("applyRaidResult error:", err);
-      addLog(`⚠️ Error applying results: ${err.message}. Check console.`, "danger");
+      addLog(`Error applying results: ${err.message}. Check console.`, "danger");
       // Recovery guarantee: whatever failed mid-function, leave a playable state —
       // week advances, no stuck modal, and next week has a fresh opponent.
       setWeek(w=>w+1);
@@ -8834,14 +8841,14 @@ export default function App(){
     });
 
     // ── MOVEMENT LOG ─────────────────────────────────────────────────────
-    const movementMsg = movement==="promoted"?`🎉 PROMOTED to ${TIERS[newTierId].name}!`:
-                        movement==="relegated"?`📉 Relegated to ${TIERS[newTierId].name}.`:
-                        movement==="relegated_floor"?`⚠️ Finished bottom of Iron — no lower to go.`:
-                        `✅ Held position in ${TIERS[playerTier].name} (${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'})`;
-    addLog(`🏆 Season ${season} ended! ${movementMsg} — ${playerWins}W/${playerLosses}L`,"success");
-    addChronicle(movement==="promoted"?`🎉 Season ${season}: PROMOTED to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
-      :movement==="relegated"?`📉 Season ${season}: relegated to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
-      :`🏁 Season ${season}: finished ${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'} in ${TIERS[playerTier].name} (${playerWins}W/${playerLosses}L).`);
+    const movementMsg = movement==="promoted"?`PROMOTED to ${TIERS[newTierId].name}!`:
+                        movement==="relegated"?`Relegated to ${TIERS[newTierId].name}.`:
+                        movement==="relegated_floor"?`Finished bottom of Iron — no lower to go.`:
+                        `Held position in ${TIERS[playerTier].name} (${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'})`;
+    addLog(`Season ${season} ended! ${movementMsg} — ${playerWins}W/${playerLosses}L`,"success");
+    addChronicle(movement==="promoted"?`Season ${season}: PROMOTED to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
+      :movement==="relegated"?`Season ${season}: relegated to ${TIERS[newTierId].name} (${playerWins}W/${playerLosses}L).`
+      :`Season ${season}: finished ${finalPosition}${['st','nd','rd'][finalPosition-1]||'th'} in ${TIERS[playerTier].name} (${playerWins}W/${playerLosses}L).`);
 
     // ── END-OF-SEASON SUMMARY ────────────────────────────────────────────
     // Skip when the legacy ceremony is taking over (Platinum champion).
@@ -8874,10 +8881,10 @@ export default function App(){
     // ── PROMOTION BONUS ───────────────────────────────────────────────────
     if(movement==="promoted"){
       setGold(g=>g+500);
-      addLog(`💰 Promotion bonus: +500g to ease the transition.`,"success");
+      addLog(`Promotion bonus: +500g to ease the transition.`,"success");
       // Promotion excitement — all heroes get a morale lift going into the new tier
       setHeroes(hs=>hs.map(h=>h.retired?h:{...h, morale:Math.max(h.morale, 75)}));
-      addLog(`🎉 The squad's spirits are high — everyone starts the new tier with at least 75 morale.`,"success");
+      addLog(`The squad's spirits are high — everyone starts the new tier with at least 75 morale.`,"success");
     }
 
     setCurrentStreak(0);
@@ -8903,7 +8910,7 @@ export default function App(){
         const isElit = isNewElite   && Math.random() < 0.20;
         return generateHero(Date.now()+i, true, isPrem, isElit, null, null, newTierId);
       }));
-      addLog(`🏪 The mercenary pool has refreshed with ${TIERS[newTierId].name}-tier talent.`,"info");
+      addLog(`The mercenary pool has refreshed with ${TIERS[newTierId].name}-tier talent.`,"info");
     }
 
     // Generate first opponent for new season
@@ -8954,14 +8961,14 @@ export default function App(){
   const currentTier = TIERS[playerTier] || TIERS.iron;
   const currentTierPosition = calcTierPosition(playerRecord.wins, playerRecord.wins/(Math.max(1,playerRecord.wins+playerRecord.losses)), leagueTable, tierEnemyTowns);
   const NAV_ITEMS = [
-    { id:"Squad",    icon:"⚔️", label:"Squad",    badge: unhappyCount>0||contractAlerts>0||contractWarnings>0||pendingEventReturns.length>0 },
-    { id:"Tactics",  icon:"🎯", label:"Tactics",  badge: false },
-    { id:"Battle",   icon:"⚔️", label:"Battle",   badge: !!activeEvent },
-    { id:"Dominion", icon:"⚜️", label:"Dominion", badge: false },
-    { id:"Town",     icon:"🏰", label:"Town",     badge: false },
-    { id:"Hire",     icon:"🤝", label:"Hire",     badge: transferBids.length>0 },
-    { id:"Ledger",    icon:"📒", label:"Ledger",   badge: false },
-    { id:"Guide",    icon:"📖", label:"Guide",    badge: false },
+    { id:"Squad",    icon:"", label:"Squad",    badge: unhappyCount>0||contractAlerts>0||contractWarnings>0||pendingEventReturns.length>0 },
+    { id:"Tactics",  icon:"", label:"Tactics",  badge: false },
+    { id:"Battle",   icon:"", label:"Battle",   badge: !!activeEvent },
+    { id:"Dominion", icon:"", label:"Dominion", badge: false },
+    { id:"Town",     icon:"", label:"Town",     badge: false },
+    { id:"Hire",     icon:"", label:"Hire",     badge: transferBids.length>0 },
+    { id:"Ledger",    icon:"", label:"Ledger",   badge: false },
+    { id:"Guide",    icon:"", label:"Guide",    badge: false },
   ];
   const IS={background:"rgba(138,109,59,0.06)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:4,color:"#3A3427",padding:"6px 10px",fontSize:11,outline:"none",fontFamily:"'Alegreya Sans',sans-serif"};
   // Parchment Codex sidebar palette: gold accent for currency,
@@ -9002,7 +9009,7 @@ export default function App(){
               if(!retiredId) return h;
               const retiree=retirees.find(r=>r.id===retiredId);
               if(!retiree) return h;
-              addLog(`🎖️ ${h.name} will be mentored by ${retiree.name} — +10 XP/week for a season.`,"success");
+              addLog(`${h.name} will be mentored by ${retiree.name} — +10 XP/week for a season.`,"success");
               return {...h, mentorBonus:{mentorName:retiree.name,xpPerWeek:10,weeksLeft:SEASON_LENGTH()}};
             }));
           }
@@ -9051,11 +9058,11 @@ export default function App(){
       <div className="rm-sidebar">
         <div className="rm-sidebar-logo">
           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-            <div style={{width:22,height:22,border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",color:"#8A6D3B",fontSize:11}}>⚔</div>
-            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#8A6D3B",letterSpacing:2.5}}>REALM MANAGER</div>
+            <div style={{width:22,height:22,border:"1px solid rgba(138,109,59,0.55)",display:"flex",alignItems:"center",justifyContent:"center",color:"#8A6D3B",fontSize:11}}></div>
+            <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#8A6D3B",letterSpacing:2.5}}>REALM MANAGER</div>
           </div>
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:400,fontSize:22,color:townColor||"#3A3427",letterSpacing:0.5,lineHeight:1.1}}>{townName}</div>
-          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:400,fontSize:9,color:"#77653F",letterSpacing:2,marginTop:4,fontStyle:"italic"}}>Season {season} · Week {seasonWeek}</div>
+          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:400,fontSize:9,color:"#77653F",letterSpacing:2,marginTop:4,fontStyle:"italic"}}>Season {season} · Week {seasonWeek}</div>
         </div>
         <div className="rm-sidebar-stats">
           {STAT_ROWS.map(([l,v,c])=>(
@@ -9066,7 +9073,7 @@ export default function App(){
           ))}
         </div>
 
-        {signDiscount>0&&<div style={{padding:"8px 20px",fontFamily:"'IM Fell English SC',serif",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:"#8A6D3B",borderBottom:"1px solid rgba(138,109,59,0.15)"}}>Next signing · {Math.round(signDiscount*100)}% off</div>}
+        {signDiscount>0&&<div style={{padding:"8px 20px",fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,letterSpacing:1.5,textTransform:"uppercase",color:"#8A6D3B",borderBottom:"1px solid rgba(138,109,59,0.15)"}}>Next signing · {Math.round(signDiscount*100)}% off</div>}
 
         <nav className="rm-sidebar-nav">
           <div className="rm-nav-kicker">Council</div>
@@ -9105,9 +9112,9 @@ export default function App(){
             background:bankruptcyWeeks>=2?"rgba(126,45,38,0.15)":"rgba(154,91,43,0.12)",
             border:`1px solid ${bankruptcyWeeks>=2?"rgba(126,45,38,0.55)":"rgba(154,91,43,0.45)"}`,
             display:"flex",alignItems:"center",gap:10}}>
-            <span style={{fontSize:18}}>{bankruptcyWeeks>=2?"🚨":"⚠️"}</span>
+            <span style={{fontSize:18}}>{bankruptcyWeeks>=2?"":""}</span>
             <div style={{flex:1}}>
-              <div style={{fontSize:11,fontWeight:700,color:bankruptcyWeeks>=2?"#7E2D26":"#9A5B2B",fontFamily:"'IM Fell English SC',serif"}}>
+              <div style={{fontSize:11,fontWeight:700,color:bankruptcyWeeks>=2?"#7E2D26":"#9A5B2B",fontFamily:"'Alegreya Sans',sans-serif"}}>
                 {bankruptcyWeeks>=2?"FINAL WARNING — ":"BANKRUPTCY WARNING — "}
                 {3-bankruptcyWeeks} week{3-bankruptcyWeeks>1?"s":""} remaining
               </div>
@@ -9147,8 +9154,8 @@ export default function App(){
                 <button onClick={()=>setHintDismissed(true)}
                   style={{position:"absolute",top:8,right:10,background:"none",border:"none",
                     cursor:"pointer",color:"#6E6350",fontSize:16,lineHeight:1}}>×</button>
-                <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#3C5A78",marginBottom:10}}>
-                  ⚔️ Welcome to Realm Manager
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#3C5A78",marginBottom:10}}>
+                  Welcome to Realm Manager
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   {[
@@ -9179,7 +9186,7 @@ export default function App(){
                 <div style={{marginTop:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <button onClick={()=>{setTab("Guide");setHintDismissed(true);}}
                     style={{background:"none",border:"none",cursor:"pointer",color:"#3C5A78",fontSize:10,padding:0,textDecoration:"underline"}}>
-                    📖 Full How to Play guide
+                    Full How to Play guide
                   </button>
                   <span style={{fontSize:9,color:"#6E6350"}}>Dismiss with ×</span>
                 </div>
@@ -9198,9 +9205,9 @@ export default function App(){
               <div style={{marginBottom:10,padding:"12px 14px",borderRadius:3,
                 background:"rgba(95,75,102,0.105)",border:"1px solid rgba(95,75,102,0.525)",
                 display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:22}}>🧙</span>
+                <span style={{fontSize:22}}></span>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#5F4B66"}}>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#5F4B66"}}>
                     The Wandering Master has arrived
                   </div>
                   <div style={{fontSize:10,color:"#4A4335",marginTop:2}}>
@@ -9210,7 +9217,7 @@ export default function App(){
                 <button onClick={()=>setActiveWanderingMaster(SPECIAL_EVENTS.find(e=>e.id==="wandering_master"))}
                   style={{padding:"7px 12px",borderRadius:3,border:"none",cursor:"pointer",
                     background:"rgba(95,75,102,0.3)",color:"#5F4B66",
-                    fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
+                    fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
                   Meet them →
                 </button>
               </div>
@@ -9232,12 +9239,12 @@ export default function App(){
                     {th&&(
                       <div style={{width:26,height:26,borderRadius:"50%",background:th.ink,color:"#E9E1CE",
                         display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
-                        fontFamily:"'IM Fell English SC',serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
+                        fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
                         {th.seal}
                       </div>
                     )}
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#23201A"}}>
                         {ret.heroName} has returned
                       </div>
                       <div style={{fontSize:10,color:"#6E6350"}}>
@@ -9279,7 +9286,7 @@ export default function App(){
                   {ret.pendingStatChoice&&(
                     <div style={{marginTop:8}}>
                       <div style={{fontSize:10,color:"#5F4B66",fontWeight:700,marginBottom:5}}>
-                        🔮 Choose a stat to boost:
+                        Choose a stat to boost:
                       </div>
                       <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                         {["Strength","Agility","Endurance","Defense","Magic Power","Accuracy",
@@ -9295,7 +9302,7 @@ export default function App(){
                             setHeroes(hs=>hs.map(h=>h.id===ret.heroId
                               ? {...h, stats:{...h.stats,[s]:newVal}}
                               : h));
-                            addLog(`🔮 Oracle's gift: ${ret.heroName} +${actual} ${s}!`,"success");
+                            addLog(`Oracle's gift: ${ret.heroName} +${actual} ${s}!`,"success");
                             setPendingEventReturns(prev=>prev.map(r=>r.id===ret.id?{...r,pendingStatChoice:false,notifications:[...r.notifications,`+${actual} ${s}`]}:r));
                           }}
                             style={{padding:"3px 8px",borderRadius:3,border:"1px solid rgba(95,75,102,0.45)",
@@ -9318,7 +9325,7 @@ export default function App(){
                 <div style={{marginBottom:12,borderRadius:3,overflow:"hidden",border:`1px solid ${rs.color}33`}}>
                   <div style={{padding:"8px 12px",background:`${rs.color}0a`,borderBottom:`1px solid ${rs.color}22`,display:"flex",alignItems:"center",gap:8}}>
                     <span style={{fontSize:14}}>{rs.icon}</span>
-                    <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:rs.color}}>{rs.name}</div>
+                    <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:rs.color}}>{rs.name}</div>
                     <div style={{fontSize:9,color:"#40614F",marginLeft:"auto"}}>✓ Active · ×{rs.ratingMult}</div>
                   </div>
                 </div>
@@ -9394,30 +9401,30 @@ export default function App(){
               <div style={{gridColumn:"1/-1",marginBottom:4,padding:"14px 16px",borderRadius:3,
                 background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.525)",
                 display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
-                <span style={{fontSize:24}}>⚔️</span>
+                <span style={{fontSize:24}}></span>
                 <div style={{flex:1}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:13,color:"#9A5B2B",marginBottom:2}}>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:13,color:"#9A5B2B",marginBottom:2}}>
                     A Formal Challenge
                   </div>
                   <div style={{fontSize:11,color:"#4A4335",lineHeight:1.5}}>
                     A rival lord demands satisfaction. Accept and face a stronger opponent — but the gold and XP on offer are double. Decline and your squad's nerve will be tested.
                   </div>
                   <div style={{display:"flex",gap:8,marginTop:6,flexWrap:"wrap",fontSize:10}}>
-                    <span style={{color:"#7E2D26"}}>⚠️ Opponent +{Math.round((pendingChallenge.opponentPowerMult-1)*100)}% stronger</span>
-                    <span style={{color:"#40614F"}}>💰 Rewards ×{pendingChallenge.rewardMult}</span>
+                    <span style={{color:"#7E2D26"}}>Opponent +{Math.round((pendingChallenge.opponentPowerMult-1)*100)}% stronger</span>
+                    <span style={{color:"#40614F"}}>Rewards ×{pendingChallenge.rewardMult}</span>
                   </div>
                 </div>
                 <div style={{display:"flex",flexDirection:"column",gap:6}}>
                   <button onClick={startBattle}
                     style={{padding:"8px 16px",borderRadius:3,border:"none",cursor:"pointer",
                       background:"#9A5B2B",color:"#F0E8D5",
-                      fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:11,whiteSpace:"nowrap"}}>
-                    ⚔️ Accept
+                      fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:11,whiteSpace:"nowrap"}}>
+                    Accept
                   </button>
                   <button onClick={declineChallenge}
                     style={{padding:"8px 16px",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",
                       cursor:"pointer",background:"rgba(60,52,38,0.054)",color:"#6E6350",
-                      fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,whiteSpace:"nowrap"}}>
+                      fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,whiteSpace:"nowrap"}}>
                     Decline
                   </button>
                 </div>
@@ -9426,8 +9433,8 @@ export default function App(){
 
             {/* LEFT: Visual formation preview */}
             <div>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:"#5F4B66",marginBottom:10,fontWeight:700}}>Your Formation</div>
-              {placed===0&&<div style={{padding:12,background:"rgba(126,45,38,0.105)",borderRadius:3,border:"1px solid rgba(126,45,38,0.3)",fontSize:12,color:"#7E2D26",marginBottom:10}}>⚠️ No heroes assigned. Set formation in <strong>Tactics</strong> first.</div>}
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,color:"#5F4B66",marginBottom:10,fontWeight:700}}>Your Formation</div>
+              {placed===0&&<div style={{padding:12,background:"rgba(126,45,38,0.105)",borderRadius:3,border:"1px solid rgba(126,45,38,0.3)",fontSize:12,color:"#7E2D26",marginBottom:10}}>No heroes assigned. Set formation in <strong>Tactics</strong> first.</div>}
 
               {/* 3-lane visual */}
               <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:10}}>
@@ -9448,12 +9455,12 @@ export default function App(){
                         const pwrCol = ps.score>=60?"#40614F":ps.score>=35?"#3C5A78":ps.score>0?"#8A6D3B":"#8A7F68";
                         return(
                           <div style={{padding:"6px 10px",background:`${pd.color}14`,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                            <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:pd.color}}>{pd.icon} {pd.label}</span>
+                            <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:pd.color}}>{pd.icon} {pd.label}</span>
                             <div style={{display:"flex",alignItems:"center",gap:8}}>
                               {ps.primaryHero&&<span style={{fontSize:8,color:"#40614F"}}>▲{ps.primaryHero.name.split(" ")[0]}</span>}
                               {ps.supportHero&&<span style={{fontSize:8,color:"#6E6350"}}>▼{ps.supportHero.name.split(" ")[0]}</span>}
-                              {assigned.length>0&&<span style={{fontSize:10,fontWeight:700,color:pwrCol}}>PWR {Math.round(ps.score)}{hasBonus?" ✦":hasPairing?" ✗":""}</span>}
-                              {posWarning&&<span style={{fontSize:9,color:"#9A5B2B"}}>⚠️ Spec</span>}
+                              {assigned.length>0&&<span style={{fontSize:10,fontWeight:700,color:pwrCol}}>PWR {Math.round(ps.score)}{hasBonus?" ":hasPairing?" ✗":""}</span>}
+                              {posWarning&&<span style={{fontSize:9,color:"#9A5B2B"}}>Spec</span>}
                               {!posWarning&&spec&&<span style={{fontSize:9,color:"#40614F"}}>✓</span>}
                             </div>
                           </div>
@@ -9474,7 +9481,7 @@ export default function App(){
                               <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}>
                                 <HeroAvatar race={h.race} size={15}/>
                                 <div style={{flex:1,minWidth:0}}>
-                                  <div style={{fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
+                                  <div style={{fontSize:11,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{h.name}</div>
                                   <div style={{fontSize:9,color:"#6E6350"}}>{h.role} · Lv {h.level}</div>
                                 </div>
                               </div>
@@ -9492,8 +9499,8 @@ export default function App(){
                                   <div style={{fontSize:9,fontWeight:700,color:fitCol,lineHeight:1.2}}>{fit?.fit==="ideal"?"✓":"—"}</div>
                                 </div>
                               </div>
-                              {h.injured&&<div style={{fontSize:8,color:"#7E2D26",marginTop:3}}>🩸 Injured</div>}
-                              {(h.fatigue||0)>=FATIGUE_WARN&&<div style={{fontSize:8,color:fatCol,marginTop:3}}>⚡ {fatigueLabel(h.fatigue||0).label}</div>}
+                              {h.injured&&<div style={{fontSize:8,color:"#7E2D26",marginTop:3}}>Injured</div>}
+                              {(h.fatigue||0)>=FATIGUE_WARN&&<div style={{fontSize:8,color:fatCol,marginTop:3}}>{fatigueLabel(h.fatigue||0).label}</div>}
                             </div>
                           );
                         })}
@@ -9506,14 +9513,14 @@ export default function App(){
               {/* Formation effects */}
               {formAnalysis.active.length>0&&(
                 <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)"}}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#23201A",marginBottom:4,fontFamily:"'IM Fell English SC',serif"}}>Active Synergies</div>
+                  <div style={{fontSize:10,fontWeight:700,color:"#23201A",marginBottom:4,fontFamily:"'Alegreya Sans',sans-serif"}}>Active Synergies</div>
                   {formAnalysis.active.map(s=><div key={s.id} style={{fontSize:10,color:s.negative?"#7E2D26":"#40614F",marginBottom:2}}>{s.icon} {s.name} ×{s.ratingMult}</div>)}
-                  <div style={{marginTop:5,fontSize:12,fontWeight:700,color:"#3C5A78"}}>⚡ Formation Rating: {formRating}</div>
+                  <div style={{marginTop:5,fontSize:12,fontWeight:700,color:"#3C5A78"}}>Formation Rating: {formRating}</div>
                 </div>
               )}
               {formAnalysis.active.length===0&&placed>0&&(
                 <div style={{padding:"9px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)"}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#3C5A78"}}>⚡ Formation Rating: {formRating}</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#3C5A78"}}>Formation Rating: {formRating}</div>
                   <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>No synergies active</div>
                 </div>
               )}
@@ -9531,12 +9538,12 @@ export default function App(){
                     {th&&(
                       <div style={{width:26,height:26,borderRadius:"50%",background:ink,color:"#E9E1CE",
                         display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,
-                        fontFamily:"'IM Fell English SC',serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
+                        fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,transform:"rotate(-8deg)",opacity:0.9}}>
                         {th.seal}
                       </div>
                     )}
                     <div style={{flex:1}}>
-                      <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:ink}}>A Letter Awaits Reply</div>
+                      <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:ink}}>A Letter Awaits Reply</div>
                       <div style={{fontSize:11,color:"#23201A"}}>{activeEvent.title}{th?` — ${th.sender}`:""}</div>
                     </div>
                     <div style={{fontSize:10,color:"#40614F",fontWeight:700}}>{activeEvent.rewardDesc}</div>
@@ -9549,8 +9556,8 @@ export default function App(){
                 );
               })()}
 
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,color:legendaryChallenger?"#7E2D26":"#9A5B2B",marginBottom:10,fontWeight:700}}>
-                {legendaryChallenger?"⚔️ Legendary Challenge":"This Week's Opponent"}
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,color:legendaryChallenger?"#7E2D26":"#9A5B2B",marginBottom:10,fontWeight:700}}>
+                {legendaryChallenger?"Legendary Challenge":"This Week's Opponent"}
               </div>
 
               {/* Legendary challenger banner */}
@@ -9617,7 +9624,7 @@ export default function App(){
                     {/* Opponent card */}
                     <div style={{padding:"14px 16px",background:"rgba(154,91,43,0.09)",borderRadius:3,border:"1px solid rgba(154,91,43,0.375)",marginBottom:12}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
-                        <span style={{fontSize:28}}>{spec?.icon||"⚔️"}</span>
+                        <span style={{fontSize:28}}>{spec?.icon||""}</span>
                         <div style={{flex:1}}>
                           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:16,color:"#23201A"}}>{opp.name}</div>
                           <div style={{fontSize:10,color:oppStarCol}}>{renderStars(oppStars)}
@@ -9654,9 +9661,9 @@ export default function App(){
                       {/* Per-phase win chances + position power */}
                       <div style={{display:"flex",gap:5,marginBottom:10}}>
                         {[
-                          {pos:"Vanguard",   icon:"🗡️",label:"VAN"},
-                          {pos:"Skirmisher", icon:"🏹",label:"SKR"},
-                          {pos:"Arbiter",    icon:"✨",label:"ARB"},
+                          {pos:"Vanguard",   icon:"",label:"VAN"},
+                          {pos:"Skirmisher", icon:"",label:"SKR"},
+                          {pos:"Arbiter",    icon:"",label:"ARB"},
                         ].map(({pos,icon,label})=>{
                           const p=posChances[pos];
                           const ps=posScoresPreview[pos];
@@ -9665,7 +9672,7 @@ export default function App(){
                           const hasBonus = ps.pairingMult > 1.0;
                           return(
                             <div key={pos} style={{flex:1,padding:"6px 4px",borderRadius:3,background:"rgba(60,52,38,0.054)",border:`1px solid ${fogged?"rgba(60,52,38,0.22)":col+"33"}`,textAlign:"center"}}>
-                              <div style={{fontSize:10}}><PositionIcon position={pos} size={11}/>{!fogged&&(hasBonus?" ✦":hasPairing?" ✗":"")}</div>
+                              <div style={{fontSize:10}}><PositionIcon position={pos} size={11}/>{!fogged&&(hasBonus?" ":hasPairing?" ✗":"")}</div>
                               <div style={{fontSize:9,color:"#6E6350"}}>{label}</div>
                               <div style={{fontSize:12,fontWeight:700,color:fogged?"#6E6350":col}}>{fogged?"?":`${Math.round(p*100)}%`}</div>
                               {ps.primaryHero&&<div style={{fontSize:7,color:"#40614F",marginTop:2}}>▲ {ps.primaryHero.name.split(" ")[0]}</div>}
@@ -9679,21 +9686,21 @@ export default function App(){
                       {/* Scouting fog — the unknown, and the way to know it */}
                       {fogged&&(
                         <div style={{padding:"10px 12px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px dashed rgba(60,90,120,0.375)",marginBottom:8}}>
-                          <div style={{fontSize:10,fontWeight:700,color:"#3C5A78",marginBottom:3}}>🕵️ Doctrine unknown</div>
+                          <div style={{fontSize:10,fontWeight:700,color:"#3C5A78",marginBottom:3}}>Doctrine unknown</div>
                           <div style={{fontSize:9,color:"#6E6350",lineHeight:1.5,marginBottom:8}}>
                             Their formation style and battle abilities are hidden. A scout report reveals exact power, win odds, specialisation and abilities.
                           </div>
                           <button onClick={()=>{
                               if(scoutCost>0){ if(gold<scoutCost) return; setGold(g=>g-scoutCost); }
                               setScheduledOpponent(o=>o?{...o,scouted:true}:o);
-                              addLog(`🔭 Scout report on ${opp.name}${scoutCost>0?` (−${scoutCost}g)`:" — the Observatory sees all"}.`,"info");
+                              addLog(`Scout report on ${opp.name}${scoutCost>0?` (−${scoutCost}g)`:" — the Observatory sees all"}.`,"info");
                             }}
                             disabled={scoutCost>0&&gold<scoutCost}
                             style={{width:"100%",padding:"8px 0",borderRadius:3,border:"1px solid rgba(60,90,120,0.525)",
                               cursor:(scoutCost>0&&gold<scoutCost)?"not-allowed":"pointer",
                               background:(scoutCost>0&&gold<scoutCost)?"rgba(60,52,38,0.054)":"rgba(60,90,120,0.18)",
-                              color:(scoutCost>0&&gold<scoutCost)?"#8A7F68":"#3C5A78",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11}}>
-                            {scoutCost===0?"🔭 Observatory Report — Free":`🔭 Send Scout — ${scoutCost}g`}
+                              color:(scoutCost>0&&gold<scoutCost)?"#8A7F68":"#3C5A78",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
+                            {scoutCost===0?"Observatory Report — Free":`Send Scout — ${scoutCost}g`}
                           </button>
                         </div>
                       )}
@@ -9707,7 +9714,7 @@ export default function App(){
                             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5,marginBottom:5}}>{spec.desc}</div>
                             {pen?(
                               <div style={{padding:"5px 8px",borderRadius:3,background:"rgba(126,45,38,0.12)",border:"1px solid rgba(126,45,38,0.3)"}}>
-                                <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>⚠️ Not countered — Enemy power +{Math.round(pen.penalty*100)}%</div>
+                                <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Not countered — Enemy power +{Math.round(pen.penalty*100)}%</div>
                                 <div style={{fontSize:9,color:"#6E6350",marginTop:2}}>{pen.reason}</div>
                                 <div style={{fontSize:9,color:"#3C5A78",marginTop:2}}>Fix: {spec.counter}</div>
                               </div>
@@ -9737,12 +9744,12 @@ export default function App(){
                               : 0;
                             const outcome = avg>=t.pass?'pass':avg>=t.soft?'soft':'hard';
                             const outcomeCol = outcome==='pass'?'#40614F':outcome==='soft'?'#9A5B2B':'#7E2D26';
-                            const outcomeLabel = outcome==='pass'?'✓ Mitigated':outcome==='soft'?'⚠️ Partial':'✗ Full effect';
+                            const outcomeLabel = outcome==='pass'?'✓ Mitigated':outcome==='soft'?'Partial':'✗ Full effect';
                             const effectText = outcome==='pass'?'No effect.':outcome==='soft'?ability.softDesc():ability.hardDesc();
                             return(
                               <div key={ability.id} style={{padding:"8px 10px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:`1px solid ${outcomeCol}33`,marginBottom:6}}>
                                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-                                  <span style={{fontSize:10,fontWeight:700,color:"#23201A"}}>{ability.icon} {ability.name}</span>
+                                  <span style={{fontSize:10,fontWeight:700,color:"#23201A"}}>{ability.name}</span>
                                   <span style={{fontSize:9,fontWeight:700,color:outcomeCol}}>{outcomeLabel}</span>
                                 </div>
                                 <div style={{fontSize:9,color:"#6E6350",marginBottom:4}}>{ability.desc}</div>
@@ -9783,7 +9790,7 @@ export default function App(){
                       const wcAdjCol=overallWC>=0.6?"#40614F":overallWC>=0.45?"#8A6D3B":overallWC>=0.25?"#9A5B2B":"#7E2D26";
                       return(
                         <div style={{padding:10,background:"rgba(95,75,102,0.075)",borderRadius:3,border:"1px solid rgba(95,75,102,0.15)",marginBottom:10}}>
-                          <div style={{fontSize:11,color:"#5F4B66",marginBottom:4}}>📊 Match Preview</div>
+                          <div style={{fontSize:11,color:"#5F4B66",marginBottom:4}}>Match Preview</div>
                           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                             <div style={{fontSize:11,color:"#6E6350"}}>
                               {fogged
@@ -9796,7 +9803,7 @@ export default function App(){
                             <div style={{fontSize:15,fontWeight:700,color:fogged?"#6E6350":wcAdjCol}}>{fogged?"? win":`${Math.round(overallWC*100)}% win`}</div>
                           </div>
                           {formAnalysis.positive.length>0&&<div style={{fontSize:10,color:"#40614F",marginTop:2}}>✓ {formAnalysis.positive.map(s=>s.name).join(", ")}</div>}
-                          {formAnalysis.negative.length>0&&<div style={{fontSize:10,color:"#7E2D26",marginTop:2}}>⚠️ {formAnalysis.negative.map(s=>s.name).join(", ")}</div>}
+                          {formAnalysis.negative.length>0&&<div style={{fontSize:10,color:"#7E2D26",marginTop:2}}>{formAnalysis.negative.map(s=>s.name).join(", ")}</div>}
                           {formAnalysis.raceSynergy&&<div style={{fontSize:10,marginTop:2}}><span style={{color:formAnalysis.raceSynergy.color}}>{formAnalysis.raceSynergy.icon} {formAnalysis.raceSynergy.name}</span><span style={{color:"#6E6350"}}> ×{formAnalysis.raceSynergy.ratingMult}</span></div>}
                           <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>Wages due: {wages}g · Tribute: +{weeklyRankIncome(playerTier, currentTierPosition)}g</div>
                         </div>
@@ -9814,14 +9821,14 @@ export default function App(){
                             background:battleReady?"#9A5B2B":"#DCCFAF",
                             color:battleReady?"#F0E8D5":"#C9BA98",
                             fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:14,
-                            opacity:battleReady?1:0.75}}>⚔️ GO TO BATTLE</button>
+                            opacity:battleReady?1:0.75}}>GO TO BATTLE</button>
                         {!battleReady&&<div style={{fontSize:10,color:"#9A5B2B",marginTop:6,textAlign:"center"}}>Assign at least 3 heroes in Tactics to fight</div>}
                       </>);
                     })()}
 
                     {missionResult&&(
                       <div style={{marginTop:10,padding:"8px 12px",background:"rgba(60,52,38,0.036)",borderRadius:3,border:"1px solid rgba(60,52,38,0.108)",fontSize:10,color:"#6E6350"}}>
-                        <span style={{color:missionResult.won?"#40614F":"#7E2D26",fontWeight:700,marginRight:8}}>{missionResult.won?"🏆 Last battle: Victory":"💀 Last battle: Defeat"}</span>
+                        <span style={{color:missionResult.won?"#40614F":"#7E2D26",fontWeight:700,marginRight:8}}>{missionResult.won?"Last battle: Victory":"Last battle: Defeat"}</span>
                         {missionResult.goldSwing>=0?"+":""}{missionResult.goldSwing.toLocaleString()}g · +{missionResult.heroXP} XP{levelUps.length>0&&` · ${levelUps.length} level-up(s)`}
                       </div>
                     )}
@@ -9857,7 +9864,7 @@ export default function App(){
                     </div>
                   </div>
                 )}
-                {!nextTierData&&<div style={{fontSize:10,color:currentTier.color}}>✨ All buildings unlocked</div>}
+                {!nextTierData&&<div style={{fontSize:10,color:currentTier.color}}>All buildings unlocked</div>}
               </div>
               <div style={{display:"flex",gap:4,marginTop:8,flexWrap:"wrap"}}>
                 {TIER_ORDER.map(tid=>{
@@ -9878,7 +9885,7 @@ export default function App(){
 
             {/* Buildings grouped by tier */}
             <div style={{marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:14,fontWeight:700,color:"#40614F"}}>🏰 Town Upgrades</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:14,fontWeight:700,color:"#40614F"}}>Town Upgrades</div>
               <div style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></div>
             </div>
 
@@ -9899,7 +9906,7 @@ export default function App(){
                       <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:8,opacity:0.55}}>
                         <BuildingIcon id={b.id} size={22}/>
                         <div style={{flex:1,minWidth:0}}>
-                          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#6E6350"}}>{b.name}</div>
+                          <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#6E6350"}}>{b.name}</div>
                           <div style={{fontSize:10,color:"#7A6F58"}}>{b.cost.toLocaleString()}g · locked</div>
                         </div>
                       </div>
@@ -9908,8 +9915,8 @@ export default function App(){
                         background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",
                         display:"flex",alignItems:"center",justifyContent:"center",gap:8,
                       }}>
-                        <span style={{fontSize:16}}>🔒</span>
-                        <span style={{fontSize:10,color:"#6E6350",fontFamily:"'IM Fell English SC',serif",textAlign:"center"}}>
+                        <span style={{fontSize:16}}></span>
+                        <span style={{fontSize:10,color:"#6E6350",fontFamily:"'Alegreya Sans',sans-serif",textAlign:"center"}}>
                           Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#4A4335"}}>{bTier?.name||"higher tier"}</b>
                         </span>
                       </div>
@@ -9925,8 +9932,8 @@ export default function App(){
                     <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:7}}>
                       <BuildingIcon id={b.id} size={24}/>
                       <div>
-                        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:b.built?"#40614F":"#23201A"}}>{b.name}</div>
-                        <div style={{fontSize:10,color:b.built?"#40614F":"#8A6D3B"}}>{b.built?"✅ Constructed":`${b.cost.toLocaleString()}g`}</div>
+                        <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:b.built?"#40614F":"#23201A"}}>{b.name}</div>
+                        <div style={{fontSize:10,color:b.built?"#40614F":"#8A6D3B"}}>{b.built?"Constructed":`${b.cost.toLocaleString()}g`}</div>
                       </div>
                     </div>
                     <div style={{fontSize:11,color:"#6E6350",marginBottom:9,lineHeight:1.5}}>{b.desc}</div>
@@ -9935,8 +9942,8 @@ export default function App(){
                         style={{width:"100%",padding:"6px 0",borderRadius:3,border:"none",
                           cursor:canAfford?"pointer":"not-allowed",
                           background:canAfford?"#40614F":"#E4DAC2",
-                          color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'IM Fell English SC',serif"}}>
-                        {canAfford?`🏗️ Build for ${b.cost.toLocaleString()}g`:"💸 Need More Gold"}
+                          color:canAfford?"#F0E8D5":"#95896F",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        {canAfford?`Build for ${b.cost.toLocaleString()}g`:"Need More Gold"}
                       </button>
                     )}
                   </div>
@@ -9946,11 +9953,11 @@ export default function App(){
 
             {/* Elite market unlock status */}
             <div style={{marginTop:18,padding:"12px 14px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:12,fontWeight:700,color:"#6E6350",marginBottom:8}}>⭐ Market Hero Tiers</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:12,fontWeight:700,color:"#6E6350",marginBottom:8}}>Market Hero Tiers</div>
               {[
-                {label:"Standard Heroes",  desc:"Always available",               tierReq:"iron",     icon:"🧑"},
-                {label:"Premium Heroes",   desc:"Grand Bazaar — Gold tier+",      tierReq:"gold",     icon:"⭐"},
-                {label:"Elite Heroes",     desc:"Pot 85+ — Platinum tier only",   tierReq:"platinum", icon:"💎"},
+                {label:"Standard Heroes",  desc:"Always available",               tierReq:"iron",     icon:""},
+                {label:"Premium Heroes",   desc:"Grand Bazaar — Gold tier+",      tierReq:"gold",     icon:""},
+                {label:"Elite Heroes",     desc:"Pot 85+ — Platinum tier only",   tierReq:"platinum", icon:""},
               ].map(({label,desc,tierReq,icon})=>{
                 const unlocked = TIER_ORDER.indexOf(playerTier) >= TIER_ORDER.indexOf(tierReq);
                 return(
@@ -9960,7 +9967,7 @@ export default function App(){
                       <div style={{fontSize:11,fontWeight:700,color:unlocked?"#23201A":"#6E6350"}}>{label}</div>
                       <div style={{fontSize:9,color:"#6E6350"}}>{desc}</div>
                     </div>
-                    <div style={{fontSize:10,fontWeight:700,color:unlocked?"#40614F":"#6E6350"}}>{unlocked?"✓ Unlocked":"🔒 Locked"}</div>
+                    <div style={{fontSize:10,fontWeight:700,color:unlocked?"#40614F":"#6E6350"}}>{unlocked?"✓ Unlocked":"Locked"}</div>
                   </div>
                 );
               })}
@@ -9978,7 +9985,7 @@ export default function App(){
               <div style={{marginBottom:28}}>
                 {/* Section header with urgency */}
                 <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:14}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:16,fontWeight:900,color:"#40614F"}}>💰 Offers</div>
+                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:16,fontWeight:900,color:"#40614F"}}>Offers</div>
                   <div style={{fontSize:11,color:"#6E6350"}}>{transferBids.length} offer{transferBids.length>1?"s":""} waiting · expire after 2 weeks</div>
                   <div style={{flex:1}}/>
                   <div style={{fontSize:11,color:"#8A6D3B",fontWeight:700}}>Treasury: {gold.toLocaleString()}g</div>
@@ -10005,13 +10012,13 @@ export default function App(){
                         {/* Above-market banner */}
                         {aboveValue&&(
                           <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(64,97,79,0.225),rgba(64,97,79,0.075))",borderBottom:"1px solid rgba(64,97,79,0.3)",display:"flex",alignItems:"center",gap:8}}>
-                            <span style={{fontSize:12}}>🔥</span>
+                            <span style={{fontSize:12}}></span>
                             <span style={{fontSize:11,fontWeight:700,color:"#40614F"}}>Above Market Value — {bid.pctOfValue}% of {bid.marketValue.toLocaleString()}g</span>
                           </div>
                         )}
                         {bid.freeTransfer&&(
                           <div style={{padding:"5px 16px",background:"linear-gradient(90deg,rgba(95,75,102,0.225),rgba(95,75,102,0.075))",borderBottom:"1px solid rgba(95,75,102,0.3)",display:"flex",alignItems:"center",gap:8}}>
-                            <span style={{fontSize:12}}>🕊️</span>
+                            <span style={{fontSize:12}}></span>
                             <span style={{fontSize:11,fontWeight:700,color:"#5F4B66"}}>Honourable Release — a rival will take them for a parting fee</span>
                           </div>
                         )}
@@ -10027,14 +10034,14 @@ export default function App(){
                                   <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,color:"#23201A"}}>{hero.name}</div>
                                   <div style={{fontSize:10,color:"#6E6350"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Lv {hero.level} · {agePhaseLabel(phase)}</div>
                                 </div>
-                                {bid.isListed&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.18)",padding:"2px 7px",borderRadius:3,border:"1px solid rgba(138,109,59,0.3)"}}>🕊️ Open to Offers</span>}
+                                {bid.isListed&&<span style={{fontSize:9,color:"#8A6D3B",background:"rgba(138,109,59,0.18)",padding:"2px 7px",borderRadius:3,border:"1px solid rgba(138,109,59,0.3)"}}>Open to Offers</span>}
                               </div>
 
                               {/* Mini stats */}
                               <div style={{display:"flex",gap:6,marginBottom:8}}>
-                                {[["⚔️ PWR",pwr,pwr>=40?"#40614F":pwr>=25?"#3C5A78":"#8A6D3B"],
-                                  ["💛 MRL",hero.morale,hero.morale>=70?"#40614F":hero.morale>=50?"#8A6D3B":"#9A5B2B"],
-                                  ["⚡ FAT",hero.fatigue||0,fatigueLabel(hero.fatigue||0).color],
+                                {[["PWR",pwr,pwr>=40?"#40614F":pwr>=25?"#3C5A78":"#8A6D3B"],
+                                  ["MRL",hero.morale,hero.morale>=70?"#40614F":hero.morale>=50?"#8A6D3B":"#9A5B2B"],
+                                  ["FAT",hero.fatigue||0,fatigueLabel(hero.fatigue||0).color],
                                 ].map(([label,val,col])=>(
                                   <div key={label} style={{padding:"4px 8px",borderRadius:3,background:"rgba(30,24,14,0.087)"}}>
                                     <span style={{fontSize:9,color:"#6E6350"}}>{label} </span>
@@ -10054,23 +10061,23 @@ export default function App(){
                                 ? <div style={{fontSize:10,color:"#5F4B66",marginBottom:4}}>Parting fee</div>
                                 : !aboveValue && <div style={{fontSize:10,color:"#6E6350",marginBottom:4}}>{bid.pctOfValue}% of market value</div>}
                               <div style={{fontSize:10,color:urgentExpiry?"#7E2D26":"#8A7F68",marginBottom:10}}>
-                                {urgentExpiry?"⚠️ Expires this week":"Expires in "+weeksLeft+" week"+(weeksLeft!==1?"s":"")}
+                                {urgentExpiry?"Expires this week":"Expires in "+weeksLeft+" week"+(weeksLeft!==1?"s":"")}
                               </div>
                               <div style={{display:"flex",flexDirection:"column",gap:5}}>
                                 <button onClick={()=>acceptBid(bid)}
                                   style={{padding:"10px 16px",borderRadius:3,border:"none",cursor:"pointer",
                                     background:"#40614F",
-                                    color:"#F0E8D5",fontWeight:900,fontSize:13,fontFamily:"'IM Fell English SC',serif",
+                                    color:"#F0E8D5",fontWeight:900,fontSize:13,fontFamily:"'Alegreya Sans',sans-serif",
                                     whiteSpace:"nowrap"}}>
                                   ✓ Accept {bid.offer.toLocaleString()}g
                                 </button>
                                 <div style={{display:"flex",gap:5}}>
                                   <button onClick={()=>{setDetailHero(hero);setPrevStats(null);}}
-                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
+                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#6E6350",fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
                                     View Hero
                                   </button>
                                   <button onClick={()=>declineBid(bid)}
-                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontSize:10,fontFamily:"'IM Fell English SC',serif"}}>
+                                    style={{flex:1,padding:"6px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",cursor:"pointer",background:"rgba(126,45,38,0.105)",color:"#7E2D26",fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
                                     ✗ Decline
                                   </button>
                                 </div>
@@ -10089,7 +10096,7 @@ export default function App(){
             {/* ══ RIVAL ROSTERS — scout a league rival, buy their notables ══ */}
             <div style={{marginBottom:28,borderTop:transferBids.length>0?"1px solid rgba(60,52,38,0.108)":"none",paddingTop:transferBids.length>0?20:0}}>
               <div style={{display:"flex",alignItems:"baseline",gap:10,marginBottom:4,flexWrap:"wrap"}}>
-                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>The Rival Rosters</div>
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>The Rival Rosters</div>
                 <span style={{fontSize:10,color:"#6E6350"}}>every league rival keeps six notables — scout a squad, then buy one out of their banner</span>
               </div>
               <div style={{fontSize:9,color:"#6E6350",marginBottom:12,fontStyle:"italic"}}>Rivals sell at a premium set by their manager's temperament — and never more than once a season. Poaching weakens their power.</div>
@@ -10105,7 +10112,7 @@ export default function App(){
                     <div key={t.name} style={{marginBottom:8,border:"1px solid rgba(60,90,120,0.3)",borderRadius:3,background:"rgba(60,90,120,0.045)",overflow:"hidden"}}>
                       <div style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px"}}>
                         <div style={{flex:1,minWidth:0}}>
-                          <span style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{t.name}</span>
+                          <span style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#23201A"}}>{t.name}</span>
                           <span style={{fontSize:10,color:"#6E6350",marginLeft:8,fontStyle:"italic"}}>{t.manager?`${t.manager.name}, ${t.manager.title}`:""}</span>
                           <span style={{fontSize:9,color:"#6E6350",marginLeft:8}}>Power ~{t.power}</span>
                           {sold&&<span style={{fontSize:8,fontWeight:700,color:"#9A5B2B",background:"rgba(154,91,43,0.15)",padding:"1px 6px",borderRadius:3,marginLeft:8}}>WILL NOT SELL AGAIN THIS SEASON</span>}
@@ -10115,8 +10122,8 @@ export default function App(){
                             style={{padding:"6px 14px",borderRadius:3,border:"1px solid rgba(60,90,120,0.5)",
                               cursor:gold<scoutCost?"not-allowed":"pointer",
                               background:gold<scoutCost?"rgba(60,52,38,0.054)":"rgba(60,90,120,0.15)",
-                              color:gold<scoutCost?"#8A7F68":"#3C5A78",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
-                            🔭 Scout Squad — {scoutCost}g
+                              color:gold<scoutCost?"#8A7F68":"#3C5A78",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10,whiteSpace:"nowrap"}}>
+                            Scout Squad — {scoutCost}g
                           </button>
                         ):(
                           <span style={{fontSize:9,fontWeight:700,color:"#3C5A78",letterSpacing:1}}>SQUAD REPORT FILED</span>
@@ -10134,7 +10141,7 @@ export default function App(){
                                 background:"rgba(60,52,38,0.045)",border:`1px solid ${isTal?"rgba(138,109,59,0.5)":"rgba(60,52,38,0.126)"}`}}>
                                 <HeroAvatar race={h.race} size={18}/>
                                 <div style={{flex:1,minWidth:0}}>
-                                  <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:11,color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                                     {h.name}{isTal&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,letterSpacing:1}}>★ TALISMAN</span>}
                                   </div>
                                   <div style={{fontSize:9,color:"#6E6350"}}><RoleIcon role={h.role} size={10}/> {h.role} · Lv {h.level} · PWR {Math.round(best)}</div>
@@ -10145,7 +10152,7 @@ export default function App(){
                                     style={{marginTop:2,padding:"3px 10px",borderRadius:3,border:"none",
                                       cursor:cantBuy?"not-allowed":"pointer",
                                       background:cantBuy?"rgba(60,52,38,0.12)":"#23201A",
-                                      color:cantBuy?"#8A7F68":"#F5EEDC",fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:9}}>
+                                      color:cantBuy?"#8A7F68":"#F5EEDC",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:9}}>
                                     Make Offer
                                   </button>
                                 </div>
@@ -10164,7 +10171,7 @@ export default function App(){
             <div style={{borderTop:"1px solid rgba(60,52,38,0.108)",paddingTop:20}}>
               {/* Header with roster count */}
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-                <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#8A6D3B"}}>🏪 Heroes For Hire</div>
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,fontWeight:700,color:"#8A6D3B"}}>Heroes For Hire</div>
                 <span style={{fontSize:11,color:"#6E6350"}}>Treasury: <b style={{color:"#8A6D3B"}}>{gold.toLocaleString()}g</b></span>
                 {/* Roster count — prominent when near cap */}
                 {(()=>{
@@ -10176,22 +10183,22 @@ export default function App(){
                       background:full?"rgba(154,91,43,0.15)":"rgba(60,52,38,0.072)",
                       padding:"2px 8px",borderRadius:3,
                       border:`1px solid ${full?"rgba(154,91,43,0.45)":"rgba(60,52,38,0.144)"}`}}>
-                      {full?"🚫":"👥"} {rCount}/{ROSTER_CAP} roster
+                      {full?"":""} {rCount}/{ROSTER_CAP} roster
                     </span>
                   );
                 })()}
                 {buildings.find(b=>b.id==="bazaar"&&b.built)&&(
-                  <span style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(64,97,79,0.27)"}}>🏪 Bazaar Active</span>
+                  <span style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(64,97,79,0.27)"}}>Bazaar Active</span>
                 )}
                 {buildings.find(b=>b.id==="scouts"&&b.built)&&(
-                  <span style={{fontSize:10,color:"#3C5A78",background:"rgba(60,90,120,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.27)"}}>🌠 Observatory Active</span>
+                  <span style={{fontSize:10,color:"#3C5A78",background:"rgba(60,90,120,0.12)",padding:"2px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.27)"}}>Observatory Active</span>
                 )}
                 <span style={{fontSize:10,color:"#8A7F68",marginLeft:"auto"}}>
                   {(()=>{
                     const hasNetwork=buildings.find(b=>b.id==="network"&&b.built);
                     const interval=hasNetwork?3:6;
                     const weeksLeft=interval-(week%interval)||interval;
-                    return `🔄 Refreshes in ${weeksLeft} week${weeksLeft!==1?"s":""}`;
+                    return `Refreshes in ${weeksLeft} week${weeksLeft!==1?"s":""}`;
                   })()}
                 </span>
               </div>
@@ -10241,12 +10248,12 @@ export default function App(){
                   <div style={{marginBottom:12,display:"flex",flexDirection:"column",gap:4}}>
                     {!hasBazaar&&premiumCount>0&&(
                       <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
-                        <span>🔒</span><span>{premiumCount} premium hero{premiumCount>1?"es":""} hidden — build Grand Bazaar (Gold tier) to access</span>
+                        <span></span><span>{premiumCount} premium hero{premiumCount>1?"es":""} hidden — build Grand Bazaar (Gold tier) to access</span>
                       </div>
                     )}
                     {!hasSanctum&&eliteCount>0&&(
                       <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
-                        <span>🔒</span><span>{eliteCount} elite hero{eliteCount>1?"es":""} hidden — build Elite Sanctum (Platinum tier) to access</span>
+                        <span></span><span>{eliteCount} elite hero{eliteCount>1?"es":""} hidden — build Elite Sanctum (Platinum tier) to access</span>
                       </div>
                     )}
                   </div>
@@ -10288,7 +10295,7 @@ export default function App(){
               {/* ══ YOUR SQUAD — list / renew / release without opening detail ══ */}
               <div style={{marginTop:20,paddingTop:16,borderTop:"1px solid rgba(60,52,38,0.072)"}}>
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:10,flexWrap:"wrap"}}>
-                  <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>👥 Your Squad</div>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:13,fontWeight:700,color:"#3C5A78"}}>Your Squad</div>
                   <span style={{fontSize:10,color:"#6E6350"}}>
                     Quick actions — open to offers, renew contract, or release. Next rival-offer cycle in ~{4-(week%4)} week{4-(week%4)===1?"":"s"}.
                   </span>
@@ -10307,10 +10314,10 @@ export default function App(){
                         <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
                           <HeroAvatar race={h.race} size={16}/>
                           <div style={{flex:1,minWidth:0}}>
-                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                            <div style={{fontSize:11,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif",color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                               {h.name}
-                              {listed&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,fontWeight:400}}>🕊️ Open</span>}
-                              {hasBid&&<span style={{fontSize:8,color:"#40614F",marginLeft:5,fontWeight:400}}>💰 Offer</span>}
+                              {listed&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,fontWeight:400}}>Open</span>}
+                              {hasBid&&<span style={{fontSize:8,color:"#40614F",marginLeft:5,fontWeight:400}}>Offer</span>}
                             </div>
                             <div style={{fontSize:9,color:"#6E6350"}}>
                               <RoleIcon role={h.role}/> {h.role} · Lv {h.level} · {h.value.toLocaleString()}g
@@ -10331,8 +10338,8 @@ export default function App(){
                               border:`1px solid ${listed?"rgba(138,109,59,0.55)":"rgba(60,52,38,0.22)"}`,
                               cursor:"pointer",
                               background:listed?"rgba(138,109,59,0.18)":"rgba(60,52,38,0.072)",
-                              color:listed?"#8A6D3B":"#6E6350",fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
-                            {listed?"✓ Open":"🕊️ Open"}
+                              color:listed?"#8A6D3B":"#6E6350",fontSize:9,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                            {listed?"✓ Open":"Open"}
                           </button>
                           <button onClick={()=>canRenew&&initiateEarlyRenewal(h)}
                             disabled={!canRenew}
@@ -10341,9 +10348,9 @@ export default function App(){
                               cursor:canRenew?"pointer":"not-allowed",
                               background:"rgba(60,90,120,0.09)",
                               color:canRenew?"#3C5A78":"#8A7F68",
-                              fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif",
+                              fontSize:9,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif",
                               opacity:canRenew?1:0.5}}>
-                            📋 Renew
+                            Renew
                           </button>
                           <button onClick={()=>{
                             const msg=contractExpired
@@ -10353,8 +10360,8 @@ export default function App(){
                           }}
                             style={{flex:1,padding:"5px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.3)",
                               cursor:"pointer",background:"rgba(126,45,38,0.075)",color:"#7E2D26",
-                              fontSize:9,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
-                            🚪 Release
+                              fontSize:9,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                            Release
                           </button>
                         </div>
                       </div>
@@ -10387,7 +10394,7 @@ export default function App(){
           return(
           <div style={{maxWidth:500}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#8A6D3B"}}>📒 Ledger</div>
+              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:15,fontWeight:700,color:"#8A6D3B"}}>Ledger</div>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={{fontSize:10,color:"#6E6350"}}>✓ Auto-saved</span>
                 <AbandonButton onAbandon={()=>{
@@ -10418,22 +10425,22 @@ export default function App(){
             {/* Persistence note */}
             <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
-                💾 <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
+                <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
             </div>
 
             {/* Last week */}
             <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
                 LAST WEEK {f?`(Week ${f.week})`:""}
               </div>
               {!f&&<div style={{fontSize:11,color:"#6E6350"}}>No activity recorded yet — complete a battle or rest week.</div>}
               {f&&<>
-                {row("⚔️ Battle earnings",  f.raidGold>0?"+"+f.raidGold.toLocaleString()+"g":"—",  f.raidGold>0?"#40614F":"#6E6350")}
-                {row("👑 Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#3C5A78", `${currentTier.icon} ${currentTier.name} · flat per tier`)}
-                {row("💸 Wages",            "−"+f.wages.toLocaleString()+"g",                             "#9A5B2B", `${heroes.filter(h=>!h.retired).length} heroes on contract`)}
+                {row("Battle earnings",  f.raidGold>0?"+"+f.raidGold.toLocaleString()+"g":"—",  f.raidGold>0?"#40614F":"#6E6350")}
+                {row("Tribute",          "+"+f.tribute.toLocaleString()+"g",                           "#3C5A78", `${currentTier.icon} ${currentTier.name} · flat per tier`)}
+                {row("Wages",            "−"+f.wages.toLocaleString()+"g",                             "#9A5B2B", `${heroes.filter(h=>!h.retired).length} heroes on contract`)}
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,marginTop:4}}>
-                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Net</div>
+                  <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>Net</div>
                   <div style={{fontSize:16,fontWeight:900,color:col(weekNet),fontFamily:"'IM Fell English SC',serif"}}>{g(weekNet)}</div>
                 </div>
               </>}
@@ -10441,36 +10448,36 @@ export default function App(){
 
             {/* Season to date */}
             <div style={{marginBottom:16,padding:"14px 16px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#6E6350",marginBottom:10,letterSpacing:0.5}}>
                 SEASON {season} TO DATE
               </div>
-              {row("⚔️ Battle earnings",  sf.raidGold>0?"+"+sf.raidGold.toLocaleString()+"g":"—",  "#40614F")}
-              {row("👑 Tribute",          "+"+sf.tribute.toLocaleString()+"g",                         "#3C5A78")}
-              {sf.eventGold>0&&row("✨ Event gold",   "+"+sf.eventGold.toLocaleString()+"g",           "#5F4B66")}
-              {row("💸 Wages",            "−"+sf.wages.toLocaleString()+"g",                           "#9A5B2B")}
-              {sf.signingCosts>0&&row("🤝 Signings",  "−"+sf.signingCosts.toLocaleString()+"g",        "#7E2D26", "hero acquisition costs")}
+              {row("Battle earnings",  sf.raidGold>0?"+"+sf.raidGold.toLocaleString()+"g":"—",  "#40614F")}
+              {row("Tribute",          "+"+sf.tribute.toLocaleString()+"g",                         "#3C5A78")}
+              {sf.eventGold>0&&row("Event gold",   "+"+sf.eventGold.toLocaleString()+"g",           "#5F4B66")}
+              {row("Wages",            "−"+sf.wages.toLocaleString()+"g",                           "#9A5B2B")}
+              {sf.signingCosts>0&&row("Signings",  "−"+sf.signingCosts.toLocaleString()+"g",        "#7E2D26", "hero acquisition costs")}
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:10,marginTop:4}}>
-                <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'IM Fell English SC',serif"}}>Season net</div>
+                <div style={{fontSize:12,fontWeight:700,color:"#23201A",fontFamily:"'Alegreya Sans',sans-serif"}}>Season net</div>
                 <div style={{fontSize:16,fontWeight:900,color:col(seasonNet),fontFamily:"'IM Fell English SC',serif"}}>{g(seasonNet)}</div>
               </div>
             </div>
 
             {/* Treasury */}
             <div style={{marginBottom:24,padding:"12px 16px",background:`${townColor}0d`,borderRadius:3,border:`1px solid ${townColor}33`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontSize:11,fontWeight:700,color:townColor}}>💰 Treasury</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:townColor}}>Treasury</div>
               <div style={{fontSize:22,fontWeight:900,color:townColor,fontFamily:"'IM Fell English SC',serif"}}>{gold.toLocaleString()}g</div>
             </div>
 
             {/* Realm Settings */}
             <div style={{padding:"14px 16px",background:"rgba(60,52,38,0.045)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
-              <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:12,color:"#6E6350",marginBottom:12,letterSpacing:1}}>⚙️ REALM SETTINGS</div>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#6E6350",marginBottom:12,letterSpacing:1}}>REALM SETTINGS</div>
               <div style={{marginBottom:10}}>
                 <div style={{fontSize:10,color:"#6E6350",marginBottom:5}}>Realm name</div>
                 <div style={{display:"flex",gap:6}}>
                   <input defaultValue={townName} id="realm-name-input" maxLength={28}
                     style={{flex:1,padding:"7px 10px",borderRadius:3,background:"rgba(60,52,38,0.108)",border:"1px solid rgba(60,52,38,0.22)",color:"#23201A",fontSize:12,outline:"none",fontFamily:"'Alegreya Sans',sans-serif"}}/>
                   <button onClick={()=>{const v=document.getElementById("realm-name-input").value.trim();if(v)setTownName(v);}}
-                    style={{padding:"7px 14px",borderRadius:3,border:"none",cursor:"pointer",background:`${townColor}22`,color:townColor,fontSize:11,fontWeight:700,fontFamily:"'IM Fell English SC',serif"}}>
+                    style={{padding:"7px 14px",borderRadius:3,border:"none",cursor:"pointer",background:`${townColor}22`,color:townColor,fontSize:11,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
                     Save
                   </button>
                 </div>
@@ -10495,7 +10502,7 @@ export default function App(){
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
                     <div style={{flex:1}}>
                       <div style={{fontSize:11,fontWeight:700,color:showHiddenStats?"#3C5A78":"#6E6350",marginBottom:3}}>
-                        {showHiddenStats?"👁️ Omniscient Mode":"🔒 Blind Scouting"}
+                        {showHiddenStats?"Omniscient Mode":"Blind Scouting"}
                       </div>
                       <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
                         {showHiddenStats
@@ -10506,7 +10513,7 @@ export default function App(){
                     <button onClick={()=>setShowHiddenStats(v=>!v)}
                       style={{flexShrink:0,padding:"7px 14px",borderRadius:3,border:`1px solid ${showHiddenStats?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
                         background:showHiddenStats?"rgba(60,90,120,0.18)":"rgba(60,52,38,0.09)",
-                        color:showHiddenStats?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif",whiteSpace:"nowrap"}}>
+                        color:showHiddenStats?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif",whiteSpace:"nowrap"}}>
                       {showHiddenStats?"Hide Stats":"Reveal Stats"}
                     </button>
                   </div>
@@ -10515,7 +10522,7 @@ export default function App(){
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12}}>
                     <div style={{flex:1}}>
                       <div style={{fontSize:11,fontWeight:700,color:scoutingFog?"#3C5A78":"#6E6350",marginBottom:3}}>
-                        {scoutingFog?"🕵️ Fog of War":"🗺️ Open Intelligence"}
+                        {scoutingFog?"Fog of War":"Open Intelligence"}
                       </div>
                       <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
                         {scoutingFog
@@ -10526,7 +10533,7 @@ export default function App(){
                     <button onClick={()=>setScoutingFog(v=>!v)}
                       style={{flexShrink:0,padding:"7px 14px",borderRadius:3,border:`1px solid ${scoutingFog?"rgba(60,90,120,0.45)":"rgba(60,52,38,0.264)"}`,cursor:"pointer",
                         background:scoutingFog?"rgba(60,90,120,0.18)":"rgba(60,52,38,0.09)",
-                        color:scoutingFog?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'IM Fell English SC',serif",whiteSpace:"nowrap"}}>
+                        color:scoutingFog?"#3C5A78":"#6E6350",fontSize:10,fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif",whiteSpace:"nowrap"}}>
                       {scoutingFog?"Disable Fog":"Enable Fog"}
                     </button>
                   </div>
@@ -10547,10 +10554,10 @@ export default function App(){
       {showMore&&(
         <div className="rm-more-overlay" onClick={()=>setShowMore(false)}>
           {[
-            {id:"Dominion",icon:"⚜️",label:"Dominion"},
-            {id:"Town",    icon:"🏰",label:"Town"},
-            {id:"Ledger",   icon:"📒",label:"Ledger"},
-            {id:"Guide",   icon:"📖",label:"Guide"},
+            {id:"Dominion",icon:"",label:"Dominion"},
+            {id:"Town",    icon:"",label:"Town"},
+            {id:"Ledger",   icon:"",label:"Ledger"},
+            {id:"Guide",   icon:"",label:"Guide"},
           ].map(({id,icon,label})=>(
             <button key={id} className={`rm-more-item${tab===id?" active":""}`}
               style={tab===id?{color:townColor,background:`${townColor}14`,borderColor:`${townColor}33`}:{}}
