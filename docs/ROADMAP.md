@@ -9,7 +9,7 @@ abilities (probe + regression guard) · Form & attributes-in-combat · injuries
 scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
 save/load fields · art direction & legibility · Squad Leader system ·
-game-speed vestige (removed — see below).
+Wandering Master / The Challenge / Emissary.
 
 ## Not yet reviewed — in priority order
 

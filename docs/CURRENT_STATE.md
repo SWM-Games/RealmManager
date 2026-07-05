@@ -1,6 +1,8 @@
 # Realm Manager — Current State
 
-*A systems reference. Accurate as of the full-audit-overhaul branch (2026-07).*
+*A systems reference. Accurate as of 2026-07, including the post-overhaul
+review pass (Squad Leader, game-speed removal, the special events). See
+`docs/ROADMAP.md` for the review ledger.*
 
 Realm Manager is a Football-Manager-style fantasy squad sim: run a realm's
 mercenary company through a five-tier league (Iron → Bronze → Silver → Gold →
