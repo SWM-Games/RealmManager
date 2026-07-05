@@ -3458,6 +3458,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
 
   const {effective, analysis} = calcFormationRating(formation);
   const hasBarracks = buildings.find(b=>b.id==="barracks"&&b.built);
+  const hasInfirmary = buildings.find(b=>b.id==="infirmary"&&b.built);
 
   // Specialisation penalty
   const specPenalty = calcSpecPenalty(enemy.specialisation, formation);
@@ -3623,6 +3624,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
     if(h.traits?.includes("Berserker") && !won) chance *= 1.5;
     if(h.traits?.includes("Glass Cannon"))      chance *= 2.0;
     if(h.traits?.includes("Resilient"))         chance *= 0.5;
+    if(hasInfirmary)                            chance *= 0.70; // Infirmary: -30% injury chance
     const injured = Math.random() < chance;
     if(injured) injuryCount++;
     return injured;

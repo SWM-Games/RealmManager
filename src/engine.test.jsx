@@ -400,3 +400,30 @@ describe("building tier caps", () => {
     expect(TIER_BUILD_SLOTS.silver).toBe(2);
   });
 });
+
+// ── infirmary injury reduction ───────────────────────────────────────────────
+describe("Infirmary injury reduction", () => {
+  it("cuts injuries roughly 30% vs no infirmary", () => {
+    const enemy = makeEnemy(90);
+    const infirmary = [{ id: "infirmary", tierRequired: "bronze", built: true }];
+    // Moderate fatigue + large N keeps injuries below the 2-per-raid cap, so the
+    // per-hero -30% shows through in the count (a saturated cap would mask it).
+    const N = 2000;
+    const countInjuries = (buildings) => {
+      let total = 0;
+      for (let i = 0; i < N; i++) {
+        const f = makeFormation("iron");
+        POS_KEYS.forEach(p => f[p].forEach(h => { h.fatigue = 60; }));
+        const sim = buildRaidSimulation(f, enemy, buildings, 1);
+        total += sim?.injuries?.length || 0;
+      }
+      return total;
+    };
+    const base = countInjuries(noBuildings);
+    const withInf = countInjuries(infirmary);
+    expect(base).toBeGreaterThan(0);
+    // expect ~0.70x; allow a generous band for RNG
+    expect(withInf).toBeLessThan(base * 0.85);
+    expect(withInf).toBeGreaterThan(base * 0.50);
+  });
+});
