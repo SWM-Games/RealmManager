@@ -1322,22 +1322,9 @@ function generateRandomEvent(heroes, week) {
 // score and increases injury risk. Bench rest recovers fatigue each week.
 // Endurance stat slows fatigue gain; Infirmary building speeds recovery.
 
-const GAME_SPEEDS = {
-  standard: {
-    id:           "standard",
-    label:        "",
-    tagline:      "The full manager experience",
-    seasonLength: 42,
-    rankStep:     1,
-    xpMult:       1.0,
-    ageMult:      1,
-  },
-};
-
-// Active game speed — read from save, defaults to standard
-// All time-sensitive constants reference this rather than raw values
-let ACTIVE_SPEED = GAME_SPEEDS.standard;
-function SEASON_LENGTH() { return ACTIVE_SPEED.seasonLength || 42; } // overwritten after save load
+// A season is 42 weeks. (A quicker game mode was once planned but abandoned —
+// the rebalancing cost outweighed the benefit — so this is a fixed constant.)
+const SEASON_LENGTH = 42;
 // 3 objectives per season, randomly selected from this pool.
 // All check against formation/raid data — no level gates.
 
@@ -3559,7 +3546,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
   // XP: explicit per-tier range, equal on win or loss — no penalty for fielding weaker heroes
   const tierData = Object.values(TIERS).find(t=>t.difficulty===playerRank) || TIERS.iron;
   const [xpMin, xpMax] = tierData.xpRange || [12, 20];
-  let heroXP = Math.round(rand(xpMin, xpMax) * (hasBarracks?1.2:1) * ACTIVE_SPEED.xpMult);
+  let heroXP = Math.round(rand(xpMin, xpMax) * (hasBarracks?1.2:1));
   // Losers collect a small purse too — no week is worth zero. This is the
   // anti-death-spiral valve: a cold streak stays survivable (sim-calibrated).
   let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(60,130)+enemy.difficulty*30;
@@ -6420,7 +6407,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
   ].sort((a,b)=>b.wins-a.wins||b.winPct-a.winPct);
 
   const playerPos = allTowns.findIndex(t=>t.isPlayer)+1;
-  const seasonPct = Math.round((seasonWeek/SEASON_LENGTH())*100);
+  const seasonPct = Math.round((seasonWeek/SEASON_LENGTH)*100);
   const isPlatinum = playerTier==="platinum";
   const isIron = playerTier==="iron";
   const nextTierId = TIER_ORDER[Math.min(TIER_ORDER.length-1, TIER_ORDER.indexOf(playerTier)+1)];
@@ -6438,7 +6425,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
               <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:currentTier.color}}>
                 <TierIcon tier={playerTier} size={14}/> {currentTier.name} League · Season {season}
               </div>
-              <div style={{fontSize:10,color:"#6E6350"}}>Week {seasonWeek} of {SEASON_LENGTH()} · {SEASON_LENGTH()-seasonWeek} remaining · {isPlatinum?"Finish 1st to win the campaign":"Top 2 promote · Bottom 2 relegate"}</div>
+              <div style={{fontSize:10,color:"#6E6350"}}>Week {seasonWeek} of {SEASON_LENGTH} · {SEASON_LENGTH-seasonWeek} remaining · {isPlatinum?"Finish 1st to win the campaign":"Top 2 promote · Bottom 2 relegate"}</div>
             </div>
             <div style={{textAlign:"right"}}>
               <div style={{fontSize:10,color:"#6E6350"}}>Position</div>
@@ -6455,7 +6442,7 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
           </div>
           {/* Run-in pressure — the table becomes a story in the closing weeks */}
           {(()=>{
-            const weeksLeft = SEASON_LENGTH()-seasonWeek;
+            const weeksLeft = SEASON_LENGTH-seasonWeek;
             if(weeksLeft>12||playerPlayed===0) return null;
             const pWins = playerRecord?.wins||0;
             let msg=null, col="#8A6D3B";
@@ -6760,7 +6747,6 @@ function saveGame(state) {
       activeEvent: state.activeEvent,
       showHiddenStats: state.showHiddenStats,
       signDiscount: state.signDiscount,
-      gameSpeed: state.gameSpeed,
       squadLeaderId: state.squadLeaderId,
       raceSynergyUsage: state.raceSynergyUsage,
       hallOfFame: state.hallOfFame,
@@ -6807,7 +6793,6 @@ function clearSave() {
 function SetupScreen({ onComplete }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(TOWN_COLORS[0].value);
-  const [speed, setSpeed] = useState("standard");
   const [nameError, setNameError] = useState(false);
   const [step, setStep] = useState("setup"); // "setup" | "boons"
   const [selectedBoons, setSelectedBoons] = useState(new Set());
@@ -6820,7 +6805,7 @@ function SetupScreen({ onComplete }) {
     if (availableBoons.length > 0) {
       setStep("boons");
     } else {
-      onComplete(trimmed, color, speed, []);
+      onComplete(trimmed, color, []);
     }
   };
 
@@ -6878,11 +6863,11 @@ function SetupScreen({ onComplete }) {
           </div>
 
           <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>onComplete(name.trim(), color, speed, [])}
+            <button onClick={()=>onComplete(name.trim(), color, [])}
               style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
               No Boons
             </button>
-            <button onClick={()=>onComplete(name.trim(), color, speed, [...selectedBoons])}
+            <button onClick={()=>onComplete(name.trim(), color, [...selectedBoons])}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
                 background:selectedBoons.size>0?"#9A5B2B":"rgba(60,52,38,0.108)",
                 color:selectedBoons.size>0?"#F0E8D5":"#8A7F68",
@@ -7105,7 +7090,7 @@ function GuideTab(){
 
       <Section id="loop" icon="" title="The Core Loop">
         <p style={{margin:"0 0 8px"}}>Each week you <b style={{color:"#23201A"}}>set your formation</b>, <b style={{color:"#23201A"}}>fight a battle</b>, and manage the aftermath. Winning earns gold and XP. Use gold to sign heroes, build your town, and grow your squad.</p>
-        <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#23201A"}}>{SEASON_LENGTH()} weeks</b>. At the end of each season the <b style={{color:"#40614F"}}>top 2 teams promote</b> to the next tier and the <b style={{color:"#7E2D26"}}>bottom 2 relegate</b>. The 5 tiers are Iron → Bronze → Silver → Gold → Platinum.</p>
+        <p style={{margin:"0 0 8px"}}>A season is <b style={{color:"#23201A"}}>{SEASON_LENGTH} weeks</b>. At the end of each season the <b style={{color:"#40614F"}}>top 2 teams promote</b> to the next tier and the <b style={{color:"#7E2D26"}}>bottom 2 relegate</b>. The 5 tiers are Iron → Bronze → Silver → Gold → Platinum.</p>
         <p style={{margin:0}}>You win by <b style={{color:"#8A6D3B"}}>finishing 1st in the Platinum League</b>. Each promotion unlocks new buildings and stronger heroes.</p>
       </Section>
 
@@ -7205,17 +7190,10 @@ export default function App(){
   const [townName,setTownName]       = useState(saved?.townName ?? "");
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
-  const [gameSpeed,setGameSpeed]     = useState(()=>{
-    const s = saved?.gameSpeed ?? "standard";
-    ACTIVE_SPEED = GAME_SPEEDS[s] ?? GAME_SPEEDS.standard;
-    return s;
-  });
 
-  const handleSetupComplete = (name, color, speed, selectedBoons=[]) => {
+  const handleSetupComplete = (name, color, selectedBoons=[]) => {
     setTownName(name);
     setTownColor(color);
-    ACTIVE_SPEED = GAME_SPEEDS[speed] ?? GAME_SPEEDS.standard;
-    setGameSpeed(speed);
     // Apply selected boons
     if(selectedBoons.length>0){
       let state = {
@@ -7422,12 +7400,12 @@ export default function App(){
                 townName,townColor,
                 listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,
-                signDiscount,gameSpeed,squadLeaderId,
+                signDiscount,squadLeaderId,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,gameSpeed,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -8524,7 +8502,7 @@ export default function App(){
     const finalRecord = isLegendary ? playerRecord
       : { wins: playerRecord.wins + (result.won?1:0), losses: playerRecord.losses + (result.won?0:1) };
     const newSeasonWeek=seasonWeek+1;
-    const seasonEnding = newSeasonWeek>=SEASON_LENGTH();
+    const seasonEnding = newSeasonWeek>=SEASON_LENGTH;
     if(seasonEnding && !campaignFell){
       // A bankruptcy defeat on the season's final week skips promotion pageantry —
       // endSeason would otherwise queue a second (victory-toned) ceremony over the defeat
@@ -9012,7 +8990,7 @@ export default function App(){
               const retiree=retirees.find(r=>r.id===retiredId);
               if(!retiree) return h;
               addLog(`${h.name} will be mentored by ${retiree.name} — +10 XP/week for a season.`,"success");
-              return {...h, mentorBonus:{mentorName:retiree.name,xpPerWeek:10,weeksLeft:SEASON_LENGTH()}};
+              return {...h, mentorBonus:{mentorName:retiree.name,xpPerWeek:10,weeksLeft:SEASON_LENGTH}};
             }));
           }
           setRetirees([]);
