@@ -9911,7 +9911,6 @@ export default function App(){
                         background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)",
                         display:"flex",alignItems:"center",justifyContent:"center",gap:8,
                       }}>
-                        <span style={{fontSize:16}}></span>
                         <span style={{fontSize:10,color:"#6E6350",fontFamily:"'Alegreya Sans',sans-serif",textAlign:"center"}}>
                           Promote to <TierIcon tier={b.tierRequired} size={11}/> <b style={{color:bTier?.color||"#4A4335"}}>{bTier?.name||"higher tier"}</b>
                         </span>
