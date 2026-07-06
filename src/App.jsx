@@ -59,6 +59,17 @@ const RESPONSIVE_CSS = `
     --pa-arbiter: #4A6178;
   }
 
+  /* ── NIGHT MODE ────────────────────────────────────────────────────────
+     The art is flat inks on paper — no photos, no gradients — so a root-level
+     colour inversion reads as the same printed matter on dark leather. Applied
+     to <html> specifically: a filter on any lower element would turn it into
+     the containing block for position:fixed children (detail panel, bottom
+     nav, modals) and break their anchoring. Verified fixed elements survive
+     the html-level filter. The html background is set explicitly so overscroll
+     inverts with the page instead of flashing white. */
+  html { background: #E9E1CE; }
+  html[data-theme="night"] { filter: invert(0.93) hue-rotate(180deg); }
+
   /* Page background dot-pattern lift */
   body::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.04;
@@ -6775,6 +6786,10 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
 }
 
 const SAVE_KEY    = "realm_manager_v2";
+// Device display preference — deliberately NOT in the save blob: night mode
+// follows the device (and its lighting), not the campaign, so it survives
+// New Legacy resets and applies to every save on this browser.
+const NIGHT_KEY   = "realm_manager_night";
 const NG_PLUS_KEY = "realm_manager_ng_plus";
 
 function loadNGPlus() {
@@ -7431,6 +7446,12 @@ export default function App(){
   const [emissaryFiredThisSeason,setEmissaryFiredThisSeason] = useState(saved?.emissaryFiredThisSeason ?? false);
   const [hintDismissed,setHintDismissed]       = useState(saved?.hintDismissed ?? false);
   const [leaderHintDismissed,setLeaderHintDismissed] = useState(saved?.leaderHintDismissed ?? false);
+  const [nightMode,setNightMode] = useState(()=>{try{return localStorage.getItem(NIGHT_KEY)==="1";}catch{return false;}});
+  useEffect(()=>{
+    if(nightMode) document.documentElement.dataset.theme="night";
+    else document.documentElement.removeAttribute("data-theme");
+    try{localStorage.setItem(NIGHT_KEY, nightMode?"1":"0");}catch{/* private browsing */}
+  },[nightMode]);
   const [signDiscount,setSignDiscount]         = useState(saved?.signDiscount ?? 0); // 0–1 discount on next signing // pending random event // recent enemy-vs-enemy results
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
@@ -10591,6 +10612,20 @@ export default function App(){
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
                 <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
+            </div>
+
+            {/* Display preference — device-level, not part of the campaign save */}
+            <div style={{marginBottom:16,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#6E6350",letterSpacing:0.5}}>NIGHT MODE</div>
+                <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>Darker page for evening play. A device setting — applies to every save on this browser.</div>
+              </div>
+              <button onClick={()=>setNightMode(v=>!v)}
+                style={{padding:"8px 18px",borderRadius:3,border:"1px solid rgba(60,52,38,0.33)",cursor:"pointer",
+                  background:nightMode?"#23201A":"rgba(60,52,38,0.072)",color:nightMode?"#F0E8D5":"#4A4335",
+                  fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,letterSpacing:1.5,textTransform:"uppercase",flexShrink:0}}>
+                {nightMode?"Night":"Day"}
+              </button>
             </div>
 
             {/* Last week */}
