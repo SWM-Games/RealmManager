@@ -1,8 +1,9 @@
 # Realm Manager — Current State
 
 *A systems reference. Accurate as of 2026-07, including the post-overhaul
-review pass (Squad Leader, game-speed removal, the special events). See
-`docs/ROADMAP.md` for the review ledger.*
+review pass (Squad Leader, game-speed removal, the special events, the
+buildings rework, and the Guide-tab accuracy pass). See `docs/ROADMAP.md` for
+the review ledger.*
 
 Realm Manager is a Football-Manager-style fantasy squad sim: run a realm's
 mercenary company through a five-tier league (Iron → Bronze → Silver → Gold →
@@ -135,22 +136,27 @@ two seasons of expiry and opens talks immediately.
 
 Week 1 ≈ 50% win chance; season 1 challenging (40–49%); late game 60–75%;
 bankruptcy (~3 weeks at ≤0 gold = campaign over) is a ~1% tail; gold plateaus
-at 80–95k as platinum wages catch up; platinum title around season 7–9.
+at 80–95k as platinum wages catch up; platinum title around season 7–9. The
+per-tier building cap (see Buildings) intentionally trims total player power:
+the post-cap sim runs a touch under these marks — platinum-endgame win ~59–66%
+and gold plateau ~100k — the accepted opportunity-cost of only 6 of 11
+buildings, not a regression.
 
 ## Art direction — "printed matter"
 
 Parchment + six printer's inks, IM Fell English SC (display ≥14px only) +
-Alegreya Sans, 37 engraved stroke glyphs (`Glyph` / `GLYPH_PATHS`) instead of
+Alegreya Sans, 38 engraved stroke glyphs (`Glyph` / `GLYPH_PATHS`) instead of
 emoji, letterpress panels (≤3px corners, no gradients/glows), rubber-stamp
 verdicts (`.rm-stamp`), dashed promotion/relegation rules in the standings,
 gazette-style Chronicle. Legacy dark-era saves self-heal their town color.
 
 ## Testing & tooling
 
-- `src/engine.test.jsx` — 29 tests: exchange-series calibration (statistical),
+- `src/engine.test.jsx` — 32 tests: exchange-series calibration (statistical),
   ability-threshold counterability (regression guard), growth-to-Potential,
   spec counters, tribute gradient, scars, trait chemistry, rival roster
-  calibration and pricing.
+  calibration and pricing, building tier caps, `migrateBuildings`, and the
+  Infirmary injury-rate reduction.
 - `scripts/balance-sim.mjs` — the balance harness; keep it in sync with
   formula changes and re-run.
 - CI (`.github/workflows/ci.yml`) on every PR; Vercel builds and previews

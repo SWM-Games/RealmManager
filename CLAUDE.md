@@ -4,7 +4,7 @@ Working rules for AI-assisted sessions on this repo. Read before touching anythi
 
 ## The one thing you must know
 
-**The live game is `src/App.jsx`** (~10,500 lines, single file by design).
+**The live game is `src/App.jsx`** (~10,700 lines, single file by design).
 A stale root-level copy (`realm-manager.jsx`) once trapped an entire audit into
 editing dead code; it has been deleted. If you ever see a second large JSX file,
 check `src/main.jsx` imports before believing it.
@@ -13,7 +13,7 @@ check `src/main.jsx` imports before believing it.
 
 ```
 npm run dev      # vite dev server on :5173 (.claude/launch.json has a config)
-npm test         # 29-test engine suite — MUST pass before any commit
+npm test         # 32-test engine suite — MUST pass before any commit
 npm run sim      # balance simulation: 300 campaigns x 10 seasons (~30s)
 npm run build    # production build (dist/ is gitignored, never commit it)
 npm run lint     # carries ~89 known legacy errors (unused vars, hook purity);
@@ -27,7 +27,10 @@ npm run lint     # carries ~89 known legacy errors (unused vars, hook purity);
    the mirrored formulas in `scripts/balance-sim.mjs` and re-run `npm run sim`.
    Healthy targets: week-1 win ~50%, season-1 40–50%, late-game 60–75%,
    bankruptcy low single digits, platinum around season 7–9, gold plateauing
-   80–95k.
+   80–95k. (Note: the per-tier building cap intentionally trades a few points
+   of late-game win rate and nudges the gold plateau up — with the cap the sim
+   shows platinum-endgame win ~59–66% and plateau ~100k. That drift is the
+   accepted opportunity-cost of the cap, not a regression to "fix".)
 2. **Stat-gated mechanics must be probed, not guessed.** Three systems shipped
    dead because thresholds were written by feel (specialisations never fired,
    Potential was unreachable, all 13 enemy abilities auto-failed). The house
@@ -47,14 +50,17 @@ npm run lint     # carries ~89 known legacy errors (unused vars, hook purity);
    - Type: IM Fell English SC at **display sizes only (≥14px)**; Alegreya Sans
      for everything ≤13px. It's a display face — tiny Fell is illegible.
    - **No emoji anywhere in the UI.** Icons come from the `Glyph` component
-     (37 engraved stroke marks, `GLYPH_PATHS`). Typographic marks are fine
+     (38 engraved stroke marks, `GLYPH_PATHS`). Typographic marks are fine
      (★ ✓ ✗ ⊕ ⊖ → ·). A sweep removed ~1,500 emoji chars; don't reintroduce.
    - Corners ≤3px, verdicts are `.rm-stamp` rubber stamps, buttons are solid
      letterpress blocks.
 5. **Save compatibility:** every new hero/town/state field needs a guard or a
-   load-time migration (pattern: `migrateTownColor`, town manager backfill in
-   the `tierEnemyTowns` initializer). New state must be added to BOTH
-   `saveGame`'s blob AND the autosave call/deps in the same commit.
+   load-time migration (patterns: `migrateTownColor`; `migrateBuildings` rebuilds
+   each building from the current `BUILDINGS` def carrying over only `built`, so
+   definition edits reach old saves; town manager backfill in the `tierEnemyTowns`
+   initializer). Static data persisted in a save blob (like building `desc`/`cost`)
+   freezes at save time — refresh it from code on load. New state must be added to
+   BOTH `saveGame`'s blob AND the autosave call/deps in the same commit.
 6. **`applyRaidResult` is the most dangerous function in the codebase** — a
    ~600-line weekly-resolution cascade where most historical crashes lived.
    Its catch block must always leave a playable state (clears modal, advances

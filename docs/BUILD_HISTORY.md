@@ -93,3 +93,40 @@ edge cases forced with crafted localStorage saves; 29 engine tests + CI gate
 regressions. Three systems were found "dead behind a plausible UI"
 (specialisations, Potential, abilities) — hence the standing rule: **probe,
 don't guess** (see CLAUDE.md).
+
+# Post-Overhaul Review Pass (July 2026, PRs #6–#11)
+
+The overhaul left a `docs/ROADMAP.md` ledger of unreviewed systems. This pass
+worked through them one PR at a time — each reviewed against the live game,
+fixed, verified, and merged.
+
+- **Squad Leader (#6):** the system was mechanically sound and save-safe, but
+  its hero-card badge was an empty `<span>` left by the emoji sweep — invisible,
+  so the game never taught that the role existed. Added a 38th engraved glyph (a
+  coronet) and surfaced it on cards + the detail panel.
+- **Game-speed vestige removed (#7):** a quicker game mode was concepted then
+  abandoned; the multi-speed plumbing (`GAME_SPEEDS`, `ACTIVE_SPEED`, xp/age/rank
+  multipliers, `setSpeed`, the `gameSpeed` save field) was deleted rather than
+  finished. `SEASON_LENGTH()` became a plain `const`.
+- **Wandering Master / The Challenge / Emissary (#8):** mechanics sound; the
+  Emissary modal was the lone gap — a pre-correspondence design with a banned
+  gradient header. Rebuilt as a sealed letter matching every other dispatch;
+  cleared leftover empty icon spans; wired the Challenge's decline penalty to
+  its def instead of a magic number.
+- **Buildings reworked (#10):** all 11 were wired, but permanent one-time buys
+  with no late-game opportunity cost. Added a per-tier build cap (1/1/2/1/1 = 6
+  of 11) with demolish-and-rebuild (no refund), buffed the weakest pick —
+  Infirmary (−30% injury chance) — to make Bronze a real 1-of-2, and re-simmed
+  (endgame win eased a few points, the accepted cost of fewer buildings). Review
+  surfaced two latent bugs: the "Full House" achievement was now unreachable
+  (reworked to "fill every slot"), and building `desc`/`cost` were frozen in
+  saves (added `migrateBuildings` to refresh definitions from code on load,
+  grandfathering over-cap saves). Built subagent-driven: fresh agent per task,
+  two-stage spec + code-quality review each.
+- **Guide-tab accuracy (#11):** read all eight sections against the live game.
+  Fixed two real inaccuracies (the Buildings section never mentioned the cap;
+  Objectives & Events wrongly implied a stat gate on event eligibility) plus
+  minor number corrections.
+
+Engine suite grew 29 → 32 (building tier caps, `migrateBuildings`, Infirmary
+injury-rate). Only **Retirement / mentorship** remains unreviewed.
