@@ -336,7 +336,9 @@ const RESPONSIVE_CSS = `
     overflow-y: auto; z-index: 300;
   }
   @media (max-width: 640px) {
-    .rm-detail-panel { width: 100vw !important; left: 0 !important; overflow-y: hidden !important; }
+    /* 100dvh (where supported) keeps the sheet inside the *visible* viewport —
+       with 100vh the bottom of the content hides behind mobile browser chrome. */
+    .rm-detail-panel { width: 100vw !important; left: 0 !important; overflow-y: hidden !important; height: 100dvh; }
     .rm-detail-close { font-size: 14px !important; padding: 10px 20px !important; min-height: 44px !important; }
     .rm-detail-header { padding: 10px 16px !important; }
   }
@@ -1910,6 +1912,29 @@ export function calcHeroCombatScore(hero, pos) {
   score *= stageCombatMult;
 
   return score;
+}
+
+// The lane weight tables above are combat-calibrated and their sums are NOT
+// equal (Vanguard 1.00, Skirmisher 0.94, Arbiter 0.98). Raw cross-lane score
+// comparisons therefore systematically vote against Skirmisher — probe showed
+// ~40% of Rangers/Rogues labelled Vanguard/Arbiter. Normalise by these sums
+// whenever comparing a hero's score ACROSS lanes; never use them in combat.
+const POSITION_WEIGHT_SUMS = Object.fromEntries(
+  Object.entries(POSITION_WEIGHTS).map(([p,w]) => [p, Object.values(w).reduce((a,b)=>a+b,0)])
+);
+
+// Best lane for a hero — used by the Squad "Best" label, position pills and
+// position filter. The hero's natural (ideal-role) lane wins unless another
+// lane's weight-normalised score beats it by >5%: enough to keep generation
+// noise from flipping the label, small enough that real signal (a fading
+// hero whose physical stats have decayed toward Arbiter territory) shows.
+export function bestPositionFor(hero){
+  const norm = {};
+  POS_KEYS.forEach(p => { norm[p] = calcHeroCombatScore(hero, p) / POSITION_WEIGHT_SUMS[p]; });
+  const home = POS_KEYS.find(p => POSITIONS[p].ideal.includes(hero.role)) || POS_KEYS[0];
+  let best = home;
+  POS_KEYS.forEach(p => { if(norm[p] > norm[best] * 1.05) best = p; });
+  return best;
 }
 
 export function analyseFormation(formation){
@@ -5066,7 +5091,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
           </div>
         </div>
         <button onClick={onClose} className="rm-detail-close" aria-label="Close"
-          style={{background:"transparent",border:"none",color:"#77653F",fontSize:18,cursor:"pointer",padding:6,display:"flex",alignItems:"center",lineHeight:1}}></button>
+          style={{background:"rgba(60,52,38,0.072)",border:"1px solid rgba(60,52,38,0.264)",borderRadius:3,color:"#4A4335",fontSize:16,fontWeight:700,cursor:"pointer",padding:"6px 12px",display:"flex",alignItems:"center",lineHeight:1,flexShrink:0}}>✗</button>
       </div>
       <div style={{padding:18,overflowY:"auto",height:"calc(100% - 88px)"}}>
 
@@ -5413,6 +5438,14 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
         }} style={{flex:1,padding:"7px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.375)",background:"rgba(126,45,38,0.12)",color:"#7E2D26",cursor:"pointer",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>Release</button>
       </div>
       )}
+
+      {/* Redundant escape at the end of the sheet — on mobile the panel is a
+          full-screen overlay above the bottom nav, so a reader who scrolled to
+          the bottom always has a way back without hunting for the header ✗. */}
+      <button onClick={onClose}
+        style={{width:"100%",marginTop:14,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.264)",cursor:"pointer",background:"rgba(60,52,38,0.072)",color:"#4A4335",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+        ✗ Close
+      </button>
       </div>{/* end scroll wrapper */}
     </div>
   );
@@ -5966,7 +5999,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                       style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#77653F",letterSpacing:1.5,padding:"6px 12px",background:"transparent",border:"1px solid rgba(138,109,59,0.3)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>{p?"Save":"Save Current"}</button>
                     {p&&(
                       <button onClick={()=>onClearPreset(idx)} title="Clear this preset"
-                        style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}></button>
+                        style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:"#7E2D26",letterSpacing:1.5,padding:"6px 8px",background:"transparent",border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",textTransform:"uppercase",borderRadius:0}}>✗ Clear</button>
                     )}
                   </div>
                 );
@@ -6209,7 +6242,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
                 {bench.map(h=>{
                   const dimmed=h.injured||(h.awayWeeks||0)>0;
-                  const bestPos = POS_KEYS.reduce((b,p)=>calcHeroCombatScore(h,p)>calcHeroCombatScore(h,b)?p:b, POS_KEYS[0]);
+                  const bestPos = bestPositionFor(h);
                   const bestColor = POSITIONS[bestPos]?.color || "#77653F";
                   return(
                     <div key={h.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",border:"1px solid rgba(138,109,59,0.18)",background:"rgba(138,109,59,0.04)",opacity:dimmed?0.55:1}}>
@@ -8950,7 +8983,7 @@ export default function App(){
   // filter pass via a Map so we don't recompute when sorting/filtering.
   const bestPosFor=(hero,cache)=>{
     if(cache&&cache.has(hero.id)) return cache.get(hero.id);
-    const best=POS_KEYS.reduce((b,p)=>calcHeroCombatScore(hero,p)>calcHeroCombatScore(hero,b)?p:b, POS_KEYS[0]);
+    const best=bestPositionFor(hero);
     if(cache) cache.set(hero.id,best);
     return best;
   };
@@ -9369,7 +9402,7 @@ export default function App(){
               {["All",...POS_KEYS].map(p=>{
                 const count = p==="All"
                   ? heroes.length
-                  : heroes.filter(h=>{const best=POS_KEYS.reduce((b,pos)=>calcHeroCombatScore(h,pos)>calcHeroCombatScore(h,b)?pos:b,POS_KEYS[0]); return best===p;}).length;
+                  : heroes.filter(h=>bestPositionFor(h)===p).length;
                 const isActive = filter.position === p;
                 return(
                   <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,position:p}))}>
