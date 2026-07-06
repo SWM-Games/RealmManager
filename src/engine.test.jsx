@@ -462,6 +462,26 @@ describe("migrateBuildings", () => {
   });
 });
 
+// ── scheduled opponent rotation ──────────────────────────────────────────────
+// Playtest: "next week's opponent is always the same one". With ~7 rival towns
+// a uniform pick repeats back-to-back every few weeks; generateScheduledOpponent
+// must exclude the just-fought town (excludeName) unless it's the only town.
+describe("scheduled opponent rotation", () => {
+  it("never schedules the just-fought town back-to-back", () => {
+    const towns = generateTierTowns("iron");
+    const exclude = towns[0].name;
+    for (let i = 0; i < 300; i++) {
+      const opp = generateScheduledOpponent(1, {}, towns, "iron", exclude);
+      expect(opp.name).not.toBe(exclude);
+    }
+  });
+  it("still returns a match when the excluded town is the only one", () => {
+    const towns = generateTierTowns("iron").slice(0, 1);
+    const opp = generateScheduledOpponent(1, {}, towns, "iron", towns[0].name);
+    expect(opp?.name).toBe(towns[0].name);
+  });
+});
+
 // ── best-position mapping ────────────────────────────────────────────────────
 // The Squad tab's "Best" label / position pills / filter use bestPositionFor.
 // Raw cross-lane score comparisons are biased (unequal lane weight sums) and

@@ -2589,10 +2589,16 @@ function simulateEnemyWeek(week, playerOpponentName, leagueTable, tierEnemyTowns
 
 // ─── SCHEDULED OPPONENT ──────────────────────────────────────────────────────
 // Picks the next AI opponent from the league table for the scheduled match
-export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
+export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId, excludeName = null) {
   if(!tierEnemyTowns || tierEnemyTowns.length === 0) return null;
-  const idx = Math.floor(Math.random() * tierEnemyTowns.length);
-  const town = tierEnemyTowns[idx];
+  // Never schedule the town we just fought — with only ~7 rivals a uniform
+  // pick repeats back-to-back every few weeks, which reads as a broken
+  // schedule. (Guard on length so a 1-town list can still produce a match.)
+  const pool = excludeName && tierEnemyTowns.length > 1
+    ? tierEnemyTowns.filter(t => t.name !== excludeName)
+    : tierEnemyTowns;
+  const idx = Math.floor(Math.random() * pool.length);
+  const town = pool[idx];
   const tier = TIERS[tierId] || TIERS.iron;
   // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*100
   const goldReward = rand(300,700) + tier.difficulty * 100;
@@ -5973,17 +5979,17 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               </div>
               <span className="pa-kicker">2 slots</span>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div className="rm-two-col" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               {[0,1].map(idx=>{
                 const p=formationPresets[idx]||null;
                 const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
                 const total=counts.reduce((a,n)=>a+n,0);
                 return(
                   <div key={idx} style={{
-                    padding:"14px 16px",display:"flex",alignItems:"center",gap:12,
+                    padding:"14px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",
                     border:p?"1px solid rgba(138,109,59,0.375)":"1px dashed rgba(138,109,59,0.3)",
                     background:p?"rgba(138,109,59,0.06)":"transparent"}}>
-                    <div style={{flex:1,minWidth:0}}>
+                    <div style={{flex:1,minWidth:110}}>
                       <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
                         Preset {idx+1}
                       </div>
@@ -6188,7 +6194,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
                           LV <span style={{color:"#3A3427"}}>{h.level}</span>
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
-                          <span style={{color:fatCol}} title="Fatigue">{fat}</span>
+                          FAT <span style={{color:fatCol}} title="Fatigue">{fat}</span>
                         </div>
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
@@ -8758,7 +8764,7 @@ export default function App(){
       }
     }
 
-    const nextOpp = generateScheduledOpponent(seasonWeek + 2, leagueTable, tierEnemyTowns, playerTier);
+    const nextOpp = generateScheduledOpponent(seasonWeek + 2, leagueTable, tierEnemyTowns, playerTier, raidEnemy.name);
     setScheduledOpponent(nextOpp);
     setWeek(w=>w+1);
 
@@ -8798,8 +8804,11 @@ export default function App(){
       setSeasonWeek(sw=>sw+1);
       setActiveSimulation(null);
       setPendingRaidEnemy(null);
+      // A legendary challenger normally clears after its raid; if we crashed
+      // before that point it would pin every future week to the same opponent.
+      setLegendaryChallenger(null);
       try {
-        setScheduledOpponent(generateScheduledOpponent(seasonWeek+2, leagueTable, tierEnemyTowns, playerTier));
+        setScheduledOpponent(generateScheduledOpponent(seasonWeek+2, leagueTable, tierEnemyTowns, playerTier, pendingRaidEnemy?.name));
       } catch { /* keep the old opponent if even this fails */ }
     }
   };
