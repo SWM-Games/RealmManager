@@ -59,6 +59,17 @@ const RESPONSIVE_CSS = `
     --pa-arbiter: #4A6178;
   }
 
+  /* ── NIGHT MODE ────────────────────────────────────────────────────────
+     The art is flat inks on paper — no photos, no gradients — so a root-level
+     colour inversion reads as the same printed matter on dark leather. Applied
+     to <html> specifically: a filter on any lower element would turn it into
+     the containing block for position:fixed children (detail panel, bottom
+     nav, modals) and break their anchoring. Verified fixed elements survive
+     the html-level filter. The html background is set explicitly so overscroll
+     inverts with the page instead of flashing white. */
+  html { background: #E9E1CE; }
+  html[data-theme="night"] { filter: invert(0.93) hue-rotate(180deg); }
+
   /* Page background dot-pattern lift */
   body::before {
     content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.04;
@@ -2589,10 +2600,16 @@ function simulateEnemyWeek(week, playerOpponentName, leagueTable, tierEnemyTowns
 
 // ─── SCHEDULED OPPONENT ──────────────────────────────────────────────────────
 // Picks the next AI opponent from the league table for the scheduled match
-export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId) {
+export function generateScheduledOpponent(weekNum, leagueTable, tierEnemyTowns, tierId, excludeName = null) {
   if(!tierEnemyTowns || tierEnemyTowns.length === 0) return null;
-  const idx = Math.floor(Math.random() * tierEnemyTowns.length);
-  const town = tierEnemyTowns[idx];
+  // Never schedule the town we just fought — with only ~7 rivals a uniform
+  // pick repeats back-to-back every few weeks, which reads as a broken
+  // schedule. (Guard on length so a 1-town list can still produce a match.)
+  const pool = excludeName && tierEnemyTowns.length > 1
+    ? tierEnemyTowns.filter(t => t.name !== excludeName)
+    : tierEnemyTowns;
+  const idx = Math.floor(Math.random() * pool.length);
+  const town = pool[idx];
   const tier = TIERS[tierId] || TIERS.iron;
   // Gold reward mirrors buildRaidSimulation formula: rand(300,700) + difficulty*100
   const goldReward = rand(300,700) + tier.difficulty * 100;
@@ -5879,7 +5896,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
 // ─── TACTICS TAB ─────────────────────────────────────────────────────────────
 
-function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset}){
+function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset,squadLeaderId}){
   // pickerOpen = { pos, slotIdx } | null
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
@@ -5963,6 +5980,19 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
           </div>
         </div>
 
+        {/* Benched leader warning — the leader's bonuses only fire when fielded,
+            and this is the screen where that decision is made */}
+        {(()=>{
+          const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+          if(!leaderHero || assignedIds.has(leaderHero.id)) return null;
+          return(
+            <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.36)",display:"flex",alignItems:"center",gap:8,fontSize:11,color:"#9A5B2B",fontFamily:"'Alegreya Sans',sans-serif"}}>
+              <Glyph id="leader" size={13} color="#9A5B2B"/>
+              <span><b>{leaderHero.name}</b> (Squad Leader) is on the bench — leader bonuses are inactive until fielded.</span>
+            </div>
+          );
+        })()}
+
         {/* Formation presets — save up to 2 formations and rotate them back in */}
         {formationPresets&&(
           <div style={{marginBottom:24}}>
@@ -5973,17 +6003,17 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               </div>
               <span className="pa-kicker">2 slots</span>
             </div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div className="rm-two-col" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               {[0,1].map(idx=>{
                 const p=formationPresets[idx]||null;
                 const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
                 const total=counts.reduce((a,n)=>a+n,0);
                 return(
                   <div key={idx} style={{
-                    padding:"14px 16px",display:"flex",alignItems:"center",gap:12,
+                    padding:"14px 16px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap",
                     border:p?"1px solid rgba(138,109,59,0.375)":"1px dashed rgba(138,109,59,0.3)",
                     background:p?"rgba(138,109,59,0.06)":"transparent"}}>
-                    <div style={{flex:1,minWidth:0}}>
+                    <div style={{flex:1,minWidth:110}}>
                       <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:p?"#8A6D3B":"#C9BA98",letterSpacing:2,textTransform:"uppercase",marginBottom:3}}>
                         Preset {idx+1}
                       </div>
@@ -6178,6 +6208,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
                           <span style={{overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</span>
+                          {h.id===squadLeaderId&&<span title="Squad Leader" style={{display:"inline-flex",flexShrink:0}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
                           {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:3,letterSpacing:0.5,whiteSpace:"nowrap"}}>Injured {h.injuryWeeks}w</span>}
                         </div>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
@@ -6188,7 +6219,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
                           LV <span style={{color:"#3A3427"}}>{h.level}</span>
                           <span style={{color:"#C9BA98",margin:"0 6px"}}>·</span>
-                          <span style={{color:fatCol}} title="Fatigue">{fat}</span>
+                          FAT <span style={{color:fatCol}} title="Fatigue">{fat}</span>
                         </div>
                       </div>
                       <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:3,flexShrink:0}}>
@@ -6755,6 +6786,10 @@ function DominionTab({season,seasonWeek,trophies,weeklyIncome,playerTier,tierPos
 }
 
 const SAVE_KEY    = "realm_manager_v2";
+// Device display preference — deliberately NOT in the save blob: night mode
+// follows the device (and its lighting), not the campaign, so it survives
+// New Legacy resets and applies to every save on this browser.
+const NIGHT_KEY   = "realm_manager_night";
 const NG_PLUS_KEY = "realm_manager_ng_plus";
 
 function loadNGPlus() {
@@ -6826,6 +6861,7 @@ function saveGame(state) {
       legendaryChallenger: state.legendaryChallenger,
       emissaryFiredThisSeason: state.emissaryFiredThisSeason,
       hintDismissed: state.hintDismissed,
+      leaderHintDismissed: state.leaderHintDismissed,
       bankruptcyWeeks: state.bankruptcyWeeks,
       lastWeekFinances: state.lastWeekFinances,
       seasonFinances: state.seasonFinances,
@@ -7409,6 +7445,13 @@ export default function App(){
   const [legendaryChallenger,setLegendaryChallenger] = useState(saved?.legendaryChallenger ?? null); // set when player accepts emissary
   const [emissaryFiredThisSeason,setEmissaryFiredThisSeason] = useState(saved?.emissaryFiredThisSeason ?? false);
   const [hintDismissed,setHintDismissed]       = useState(saved?.hintDismissed ?? false);
+  const [leaderHintDismissed,setLeaderHintDismissed] = useState(saved?.leaderHintDismissed ?? false);
+  const [nightMode,setNightMode] = useState(()=>{try{return localStorage.getItem(NIGHT_KEY)==="1";}catch{return false;}});
+  useEffect(()=>{
+    if(nightMode) document.documentElement.dataset.theme="night";
+    else document.documentElement.removeAttribute("data-theme");
+    try{localStorage.setItem(NIGHT_KEY, nightMode?"1":"0");}catch{/* private browsing */}
+  },[nightMode]);
   const [signDiscount,setSignDiscount]         = useState(saved?.signDiscount ?? 0); // 0–1 discount on next signing // pending random event // recent enemy-vs-enemy results
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
@@ -7476,11 +7519,11 @@ export default function App(){
                 listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,
                 signDiscount,squadLeaderId,
-                hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
+                hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -8758,7 +8801,7 @@ export default function App(){
       }
     }
 
-    const nextOpp = generateScheduledOpponent(seasonWeek + 2, leagueTable, tierEnemyTowns, playerTier);
+    const nextOpp = generateScheduledOpponent(seasonWeek + 2, leagueTable, tierEnemyTowns, playerTier, raidEnemy.name);
     setScheduledOpponent(nextOpp);
     setWeek(w=>w+1);
 
@@ -8798,8 +8841,11 @@ export default function App(){
       setSeasonWeek(sw=>sw+1);
       setActiveSimulation(null);
       setPendingRaidEnemy(null);
+      // A legendary challenger normally clears after its raid; if we crashed
+      // before that point it would pin every future week to the same opponent.
+      setLegendaryChallenger(null);
       try {
-        setScheduledOpponent(generateScheduledOpponent(seasonWeek+2, leagueTable, tierEnemyTowns, playerTier));
+        setScheduledOpponent(generateScheduledOpponent(seasonWeek+2, leagueTable, tierEnemyTowns, playerTier, pendingRaidEnemy?.name));
       } catch { /* keep the old opponent if even this fails */ }
     }
   };
@@ -9287,6 +9333,26 @@ export default function App(){
               </div>
             )}
 
+            {/* Squad Leader nudge — the mechanic hides behind a hero's profile,
+                so surface it once the squad has a few weeks of tenure */}
+            {!leaderHintDismissed && !squadLeaderId && week>=3 && (
+              <div style={{marginBottom:14,padding:"12px 14px",borderRadius:3,
+                background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.33)",
+                display:"flex",alignItems:"center",gap:10,position:"relative"}}>
+                <Glyph id="leader" size={18} color="#8A6D3B"/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>
+                    No Squad Leader appointed
+                  </div>
+                  <div style={{fontSize:10,color:"#4A4335",marginTop:2}}>
+                    Open a hero's profile to appoint one — while fielded, a leader grants morale each week, bonus XP, and softer morale losses on defeat. Long-serving veterans make the strongest leaders.
+                  </div>
+                </div>
+                <button onClick={()=>setLeaderHintDismissed(true)} aria-label="Dismiss"
+                  style={{background:"none",border:"none",cursor:"pointer",color:"#77653F",fontSize:14,lineHeight:1,padding:6,flexShrink:0}}>✗</button>
+              </div>
+            )}
+
             {/* ── EVENT RETURN BANNERS ───────────────────────────────────── */}
             {pendingEventReturns.map(ret=>{
               const th = EVENT_THEMES[ret.eventTheme];
@@ -9451,7 +9517,7 @@ export default function App(){
         )}
 
         {/* TACTICS */}
-        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
+        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset} squadLeaderId={squadLeaderId}/>}
 
         {/* DOMINION */}
         {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier, currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame} chronicleEntries={chronicleEntries}/>}
@@ -9587,6 +9653,27 @@ export default function App(){
                   <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>No synergies active</div>
                 </div>
               )}
+
+              {/* Squad Leader status — the bonuses are invisible in combat, so
+                  state them here where the battle decision is made */}
+              {(()=>{
+                const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+                if(!leaderHero) return null;
+                const fieldedIds = new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
+                const lb = calcLeaderBonuses(leaderHero);
+                const fielded = fieldedIds.has(leaderHero.id);
+                return fielded ? (
+                  <div style={{marginTop:8,padding:"8px 12px",borderRadius:3,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.33)",display:"flex",alignItems:"center",gap:8,fontSize:10,color:"#77653F"}}>
+                    <Glyph id="leader" size={13} color="#8A6D3B"/>
+                    <span><b style={{color:"#8A6D3B"}}>{leaderHero.name}</b> leads — +{lb.moralePerWeek} morale/wk to raiders · ×{lb.xpMult.toFixed(2)} XP · −{lb.defeatMoralePct}% morale loss on defeat</span>
+                  </div>
+                ) : (
+                  <div style={{marginTop:8,padding:"8px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.36)",display:"flex",alignItems:"center",gap:8,fontSize:10,color:"#9A5B2B"}}>
+                    <Glyph id="leader" size={13} color="#9A5B2B"/>
+                    <span><b>{leaderHero.name}</b> (Squad Leader) is not fielded — leader bonuses inactive this battle.</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* RIGHT: This week's scheduled opponent */}
@@ -10525,6 +10612,20 @@ export default function App(){
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
                 <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
+            </div>
+
+            {/* Display preference — device-level, not part of the campaign save */}
+            <div style={{marginBottom:16,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.144)",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:11,fontWeight:700,color:"#6E6350",letterSpacing:0.5}}>NIGHT MODE</div>
+                <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>Darker page for evening play. A device setting — applies to every save on this browser.</div>
+              </div>
+              <button onClick={()=>setNightMode(v=>!v)}
+                style={{padding:"8px 18px",borderRadius:3,border:"1px solid rgba(60,52,38,0.33)",cursor:"pointer",
+                  background:nightMode?"#23201A":"rgba(60,52,38,0.072)",color:nightMode?"#F0E8D5":"#4A4335",
+                  fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,letterSpacing:1.5,textTransform:"uppercase",flexShrink:0}}>
+                {nightMode?"Night":"Day"}
+              </button>
             </div>
 
             {/* Last week */}
