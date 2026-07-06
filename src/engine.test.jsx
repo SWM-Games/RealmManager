@@ -10,6 +10,7 @@ import {
   TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
   TIER_BUILD_SLOTS, builtInTier, buildingCapReached,
   BUILDINGS, migrateBuildings,
+  bestPositionFor, PHYSICAL_STATS,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -458,5 +459,44 @@ describe("migrateBuildings", () => {
     const m2 = migrateBuildings(partial);
     expect(m2.find(b => b.id === "barracks").built).toBe(true);
     expect(m2.find(b => b.id === "tavern").built).toBe(false);
+  });
+});
+
+// ── best-position mapping ────────────────────────────────────────────────────
+// The Squad tab's "Best" label / position pills / filter use bestPositionFor.
+// Raw cross-lane score comparisons are biased (unequal lane weight sums) and
+// noisy (stat generation is role-agnostic) — the probe showed ~40% of Rangers
+// labelled Vanguard/Arbiter. bestPositionFor normalises by lane weight sum and
+// only lets another lane displace the natural lane on a >5% margin. Measured:
+// 92–96% natural-lane mapping, and 97.6% of physically-halved Warriors still
+// flip off Vanguard (the real signal the label exists to surface).
+describe("bestPositionFor", () => {
+  const IDEAL = {
+    Warrior: "Vanguard", Paladin: "Vanguard",
+    Ranger: "Skirmisher", Rogue: "Skirmisher",
+    Mage: "Arbiter", Cleric: "Arbiter",
+  };
+  it("maps the large majority of every role to its natural lane", () => {
+    const N = 600;
+    Object.entries(IDEAL).forEach(([role, lane]) => {
+      let hit = 0;
+      for (let i = 0; i < N; i++) {
+        if (bestPositionFor(generateHero(i, false, false, false, role, null, "silver")) === lane) hit++;
+      }
+      // measured 92–96%; 85% floor leaves RNG room without letting the old
+      // ~60% Skirmisher regression back in
+      expect(hit / N, `${role} → ${lane}`).toBeGreaterThan(0.85);
+    });
+  });
+  it("still flips a physically decayed hero off their natural lane", () => {
+    const N = 300;
+    let flips = 0;
+    for (let i = 0; i < N; i++) {
+      const h = generateHero(i, false, false, false, "Warrior", null, "silver");
+      PHYSICAL_STATS.forEach(s => { h.stats[s] = Math.max(10, Math.round(h.stats[s] * 0.5)); });
+      if (bestPositionFor(h) !== "Vanguard") flips++;
+    }
+    // measured 97.6% — the margin must not be so wide it hides real decay
+    expect(flips / N).toBeGreaterThan(0.80);
   });
 });
