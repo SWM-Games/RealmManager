@@ -72,5 +72,6 @@ Infirmary) · Guide tab accuracy.
 - `applyRaidResult` (~600 lines of setState cascade) works and is guarded, but
   a pure-function week-resolver would make edge cases unit-testable.
 - Accessibility has never been audited (tap targets, contrast, focus states).
-- `deploy.yml` removed in favor of Vercel; the repo's GitHub Pages setting (if
-  still enabled) can be disabled in Settings to stop redundant build runs.
+- `deploy.yml` removed in favor of Vercel, but GitHub Pages is still enabled and
+  fires a redundant `github-pages` deployment on every push to `main` (confirmed
+  on the latest merges). Disable Pages in repo Settings to stop the wasted runs.
