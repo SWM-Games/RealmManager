@@ -5885,7 +5885,7 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
 // ─── TACTICS TAB ─────────────────────────────────────────────────────────────
 
-function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset}){
+function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset,onLoadPreset,onClearPreset,squadLeaderId}){
   // pickerOpen = { pos, slotIdx } | null
   const [pickerOpen,setPickerOpen]=useState(null);
   const [pickerSort,setPickerSort]=useState("fit"); // fit | name | combat | level
@@ -5968,6 +5968,19 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             <button className="pa-secondary" onClick={clearAll}>Clear All</button>
           </div>
         </div>
+
+        {/* Benched leader warning — the leader's bonuses only fire when fielded,
+            and this is the screen where that decision is made */}
+        {(()=>{
+          const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+          if(!leaderHero || assignedIds.has(leaderHero.id)) return null;
+          return(
+            <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.36)",display:"flex",alignItems:"center",gap:8,fontSize:11,color:"#9A5B2B",fontFamily:"'Alegreya Sans',sans-serif"}}>
+              <Glyph id="leader" size={13} color="#9A5B2B"/>
+              <span><b>{leaderHero.name}</b> (Squad Leader) is on the bench — leader bonuses are inactive until fielded.</span>
+            </div>
+          );
+        })()}
 
         {/* Formation presets — save up to 2 formations and rotate them back in */}
         {formationPresets&&(
@@ -6184,6 +6197,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#2A251C",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",display:"flex",alignItems:"center",gap:6}}>
                           <span style={{overflow:"hidden",textOverflow:"ellipsis"}}>{h.name}</span>
+                          {h.id===squadLeaderId&&<span title="Squad Leader" style={{display:"inline-flex",flexShrink:0}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
                           {h.injured&&<span style={{fontSize:9,fontWeight:700,color:"#7E2D26",background:"rgba(126,45,38,0.21)",padding:"1px 6px",borderRadius:3,letterSpacing:0.5,whiteSpace:"nowrap"}}>Injured {h.injuryWeeks}w</span>}
                         </div>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:500,color:"#77653F",letterSpacing:1.5,textTransform:"uppercase",marginTop:2}}>
@@ -6832,6 +6846,7 @@ function saveGame(state) {
       legendaryChallenger: state.legendaryChallenger,
       emissaryFiredThisSeason: state.emissaryFiredThisSeason,
       hintDismissed: state.hintDismissed,
+      leaderHintDismissed: state.leaderHintDismissed,
       bankruptcyWeeks: state.bankruptcyWeeks,
       lastWeekFinances: state.lastWeekFinances,
       seasonFinances: state.seasonFinances,
@@ -7415,6 +7430,7 @@ export default function App(){
   const [legendaryChallenger,setLegendaryChallenger] = useState(saved?.legendaryChallenger ?? null); // set when player accepts emissary
   const [emissaryFiredThisSeason,setEmissaryFiredThisSeason] = useState(saved?.emissaryFiredThisSeason ?? false);
   const [hintDismissed,setHintDismissed]       = useState(saved?.hintDismissed ?? false);
+  const [leaderHintDismissed,setLeaderHintDismissed] = useState(saved?.leaderHintDismissed ?? false);
   const [signDiscount,setSignDiscount]         = useState(saved?.signDiscount ?? 0); // 0–1 discount on next signing // pending random event // recent enemy-vs-enemy results
   const [activeBonuses,setActiveBonuses]       = useState(saved?.activeBonuses ?? []); // timed bonuses from events
   const [listedHeroIds,setListedHeroIds]       = useState(()=>new Set(saved?.listedHeroIds ?? []));
@@ -7482,11 +7498,11 @@ export default function App(){
                 listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,
                 signDiscount,squadLeaderId,
-                hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,raceSynergyUsage,bankruptcyWeeks});
+                hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -9296,6 +9312,26 @@ export default function App(){
               </div>
             )}
 
+            {/* Squad Leader nudge — the mechanic hides behind a hero's profile,
+                so surface it once the squad has a few weeks of tenure */}
+            {!leaderHintDismissed && !squadLeaderId && week>=3 && (
+              <div style={{marginBottom:14,padding:"12px 14px",borderRadius:3,
+                background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.33)",
+                display:"flex",alignItems:"center",gap:10,position:"relative"}}>
+                <Glyph id="leader" size={18} color="#8A6D3B"/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:12,color:"#8A6D3B"}}>
+                    No Squad Leader appointed
+                  </div>
+                  <div style={{fontSize:10,color:"#4A4335",marginTop:2}}>
+                    Open a hero's profile to appoint one — while fielded, a leader grants morale each week, bonus XP, and softer morale losses on defeat. Long-serving veterans make the strongest leaders.
+                  </div>
+                </div>
+                <button onClick={()=>setLeaderHintDismissed(true)} aria-label="Dismiss"
+                  style={{background:"none",border:"none",cursor:"pointer",color:"#77653F",fontSize:14,lineHeight:1,padding:6,flexShrink:0}}>✗</button>
+              </div>
+            )}
+
             {/* ── EVENT RETURN BANNERS ───────────────────────────────────── */}
             {pendingEventReturns.map(ret=>{
               const th = EVENT_THEMES[ret.eventTheme];
@@ -9460,7 +9496,7 @@ export default function App(){
         )}
 
         {/* TACTICS */}
-        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset}/>}
+        {tab==="Tactics"&&<TacticsTab heroes={heroes} formation={formation} setFormation={setFormation} formationPresets={formationPresets} onSavePreset={savePreset} onLoadPreset={loadPreset} onClearPreset={clearPreset} squadLeaderId={squadLeaderId}/>}
 
         {/* DOMINION */}
         {tab==="Dominion"&&<DominionTab season={season} seasonWeek={seasonWeek} trophies={trophies} weeklyIncome={weeklyRankIncome(playerTier, currentTierPosition)} playerTier={playerTier} tierPosition={currentTierPosition} tierEnemyTowns={tierEnemyTowns} townName={townName} townColor={townColor} formRating={formRating} leagueTable={leagueTable} playerRecord={playerRecord} matchLog={matchLog} hallOfFame={hallOfFame} chronicleEntries={chronicleEntries}/>}
@@ -9596,6 +9632,27 @@ export default function App(){
                   <div style={{fontSize:10,color:"#6E6350",marginTop:2}}>No synergies active</div>
                 </div>
               )}
+
+              {/* Squad Leader status — the bonuses are invisible in combat, so
+                  state them here where the battle decision is made */}
+              {(()=>{
+                const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+                if(!leaderHero) return null;
+                const fieldedIds = new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
+                const lb = calcLeaderBonuses(leaderHero);
+                const fielded = fieldedIds.has(leaderHero.id);
+                return fielded ? (
+                  <div style={{marginTop:8,padding:"8px 12px",borderRadius:3,background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.33)",display:"flex",alignItems:"center",gap:8,fontSize:10,color:"#77653F"}}>
+                    <Glyph id="leader" size={13} color="#8A6D3B"/>
+                    <span><b style={{color:"#8A6D3B"}}>{leaderHero.name}</b> leads — +{lb.moralePerWeek} morale/wk to raiders · ×{lb.xpMult.toFixed(2)} XP · −{lb.defeatMoralePct}% morale loss on defeat</span>
+                  </div>
+                ) : (
+                  <div style={{marginTop:8,padding:"8px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.36)",display:"flex",alignItems:"center",gap:8,fontSize:10,color:"#9A5B2B"}}>
+                    <Glyph id="leader" size={13} color="#9A5B2B"/>
+                    <span><b>{leaderHero.name}</b> (Squad Leader) is not fielded — leader bonuses inactive this battle.</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* RIGHT: This week's scheduled opponent */}
