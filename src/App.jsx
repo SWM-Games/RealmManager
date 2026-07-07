@@ -9245,13 +9245,10 @@ export default function App(){
               const fit = active.filter(h=>!h.injured && !(h.awayWeeks>0)).length;
               const fatigued = active.filter(h=>(h.fatigue||0)>=FATIGUE_WARN).length;
               return(
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:24,gap:14,flexWrap:"wrap"}}>
-                  <div>
-                    <h1 className="pa-h1">The Roster</h1>
-                    <div className="pa-rule"/>
-                    <div className="pa-sub">{active.length} heroes under contract · {fit} fit{fatigued>0?` · ${fatigued} fatigued`:""}</div>
-                  </div>
-                  <button className="pa-primary" onClick={()=>setTab("Hire")}>Sign Contract</button>
+                <div style={{marginBottom:24}}>
+                  <h1 className="pa-h1">The Roster</h1>
+                  <div className="pa-rule"/>
+                  <div className="pa-sub">{active.length} heroes under contract · {fit} fit{fatigued>0?` · ${fatigued} fatigued`:""}</div>
                 </div>
               );
             })()}
