@@ -5120,7 +5120,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   );
 }
 
-function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true}){
+function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true,onRetrain,retrainGold,retrainSeason,retrainBuildings}){
   const [tab,setTab]=useState("Combat");
   useEscapeKey(onClose, !!onClose);
   if(!hero)return null;
@@ -5455,6 +5455,52 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                 color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
               {isLeader?"Remove as Squad Leader":"Appoint as Squad Leader"}
             </button>
+          </div>
+        );
+      })()}
+
+      {/* Retraining — change role to a lane the stats now favour */}
+      {isOwned&&onRetrain&&(()=>{
+        const trainyardBuilt=retrainBuildings?.some(b=>b.id==="trainyard"&&b.built);
+        if(!trainyardBuilt) return null;
+        const homeLane=naturalLaneFor(hero.role);
+        if(hero.retraining){
+          return(
+            <div style={{marginTop:14,padding:"12px 14px",borderRadius:3,background:"rgba(60,90,120,0.09)",border:"1px solid rgba(60,90,120,0.3)"}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#3C5A78",letterSpacing:0.5,textTransform:"uppercase"}}>Retraining</div>
+              <div style={{fontSize:10,color:"#4A4335",marginTop:4}}>
+                Away at the Training Grounds — returns as a <b>{hero.retraining.toRole}</b> in {hero.awayWeeks} week{hero.awayWeeks!==1?"s":""}.
+              </div>
+            </div>
+          );
+        }
+        const chk=canRetrain(hero,retrainGold,retrainSeason,retrainBuildings);
+        const suggested=bestPositionFor(hero);
+        const options=POS_KEYS.filter(p=>p!==homeLane).flatMap(p=>POSITIONS[p].ideal.map(role=>({role,lane:p})));
+        return(
+          <div style={{marginTop:14,padding:"12px 14px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.144)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#6E6350",letterSpacing:0.5,textTransform:"uppercase"}}>Retraining</div>
+              <div style={{fontSize:10,fontWeight:700,color:"#77653F"}}>{retrainCost(hero).toLocaleString()}g · {RETRAIN_WEEKS}w away</div>
+            </div>
+            {suggested!==homeLane&&(
+              <div style={{fontSize:10,color:"#40614F",marginTop:4}}>⊕ Stats favour the {suggested} lane — a strong candidate.</div>
+            )}
+            {!chk.ok&&<div style={{fontSize:10,color:"#9A5B2B",marginTop:4}}>{chk.reason}</div>}
+            {chk.ok&&(
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
+                {options.map(({role,lane})=>(
+                  <button key={role} onClick={()=>onRetrain(hero,role)}
+                    style={{flex:"1 1 40%",padding:"7px 0",borderRadius:3,cursor:"pointer",
+                      border:`1px solid ${lane===suggested?"rgba(64,97,79,0.55)":"rgba(60,52,38,0.264)"}`,
+                      background:lane===suggested?"rgba(64,97,79,0.09)":"rgba(60,52,38,0.054)",
+                      color:lane===suggested?"#40614F":"#4A4335",
+                      fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10}}>
+                    → {role}<span style={{fontWeight:500,opacity:0.75}}> · {lane}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -7834,6 +7880,17 @@ export default function App(){
       return next;
     });
     addLog(`Preset ${idx+1} cleared.`,"info");
+  };
+
+  const startRetraining=(hero,toRole)=>{
+    const chk=canRetrain(hero,gold,season,buildings);
+    if(!chk.ok){addLog(chk.reason,"warning");return;}
+    const cost=retrainCost(hero);
+    if(!window.confirm(`Retrain ${hero.name} as a ${toRole}?\n\nCost: ${cost.toLocaleString()}g\nOut of action for ${RETRAIN_WEEKS} weeks.\nOnce per hero per season.`)) return;
+    setGold(g=>g-cost);
+    setHeroes(hs=>hs.map(h=>h.id===hero.id?{...h,awayWeeks:RETRAIN_WEEKS,retraining:{toRole},retrainedSeason:season}:h));
+    setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===hero.id?null:x);});return nf;});
+    addLog(`${hero.name} departs for the Training Grounds — retraining as ${toRole} (${cost.toLocaleString()}g, back in ${RETRAIN_WEEKS} weeks).`,"info");
   };
 
   const generateBids=(currentHeroes,currentWeek,listed)=>{
@@ -10884,6 +10941,10 @@ export default function App(){
           showHiddenStats={showHiddenStats}
           isLeader={squadLeaderId===detailHero?.id}
           onSetLeader={()=>setSquadLeaderId(id=>id===detailHero?.id?null:detailHero?.id)}
+          onRetrain={startRetraining}
+          retrainGold={gold}
+          retrainSeason={season}
+          retrainBuildings={buildings}
         />
       )}
     </div>
