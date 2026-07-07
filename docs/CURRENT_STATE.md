@@ -65,6 +65,17 @@ injuries, contracts, aging, market, league sim, events) → repeat.
   loss on defeat. Surfaced by a coronet glyph on hero cards, the detail panel,
   and a "Leader" stat-bar pill. NB: it's a set-and-forget appointment; the only
   live decision is whether to field a declining hero for the bonus.
+- **Retraining** (class change): gated behind the Training Grounds. A hero can
+  change role to either non-native lane (`startRetraining` →
+  `retraining:{toRole}` + `awayWeeks:4`; completion in `applyRaidResult`'s
+  bench-branch away tick — role swaps, +8 morale, chronicle entry). Cost 40%
+  of value (100g floor, `retrainCost`), once per hero per season
+  (`retrainedSeason`), needs >4 contract weeks; eligibility in `canRetrain`
+  (exported, tested). Stats/level/traits carry as-is. Position pills/filters/
+  bench labels are strictly role-derived (`naturalLaneFor`); the stat-based
+  `bestPositionFor` signal now only feeds the ⊕ retrain-candidate marker on
+  Squad cards and the suggested lane in the detail panel's Retraining section.
+  Spec: `docs/superpowers/specs/2026-07-07-retraining-design.md`.
 
 ## The league world
 
