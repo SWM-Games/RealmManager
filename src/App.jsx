@@ -8449,6 +8449,12 @@ export default function App(){
                 heroId: h.id,
               }]);
               pendingEvent = null;
+            } else if(h.retraining){
+              // Retraining complete — role changes, stats carry as-is
+              const toRole=h.retraining.toRole;
+              h={...h, role:toRole, retraining:null, morale:Math.min(100,(h.morale||70)+RETRAIN_RETURN_MORALE)};
+              addLog(`${h.name} returns from the Training Grounds a ${toRole} — new lease on life (+${RETRAIN_RETURN_MORALE} morale).`,"success");
+              addChronicle(`${h.name} retrained as a ${toRole}.`);
             } else {
               addLog(`${h.name} returned from "${h.awayEvent}".`,"success");
             }
