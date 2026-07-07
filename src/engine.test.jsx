@@ -11,6 +11,7 @@ import {
   TIER_BUILD_SLOTS, builtInTier, buildingCapReached,
   BUILDINGS, migrateBuildings,
   bestPositionFor, PHYSICAL_STATS, generateStartingSquad,
+  canRetrain, retrainCost, naturalLaneFor, RETRAIN_WEEKS,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -533,5 +534,54 @@ describe("bestPositionFor", () => {
     }
     // measured 97.6% — the margin must not be so wide it hides real decay
     expect(flips / N).toBeGreaterThan(0.80);
+  });
+});
+
+// ── retraining ───────────────────────────────────────────────────────────────
+describe("retraining eligibility", () => {
+  const trainyard = [{ id: "trainyard", tierRequired: "silver", built: true }];
+  const mkHero = (over = {}) => ({
+    ...generateHero(1, false, false, false, "Rogue", null, "iron"),
+    injured: false, awayWeeks: 0, retired: false,
+    contractWeeksLeft: 42, value: 1000, ...over,
+  });
+
+  it("natural lane derives from role", () => {
+    expect(naturalLaneFor("Warrior")).toBe("Vanguard");
+    expect(naturalLaneFor("Paladin")).toBe("Vanguard");
+    expect(naturalLaneFor("Ranger")).toBe("Skirmisher");
+    expect(naturalLaneFor("Rogue")).toBe("Skirmisher");
+    expect(naturalLaneFor("Mage")).toBe("Arbiter");
+    expect(naturalLaneFor("Cleric")).toBe("Arbiter");
+  });
+
+  it("cost is 40% of value with a 100g floor", () => {
+    expect(retrainCost(mkHero({ value: 1000 }))).toBe(400);
+    expect(retrainCost(mkHero({ value: 0 }))).toBe(100);
+  });
+
+  it("allows an eligible hero", () => {
+    expect(canRetrain(mkHero(), 5000, 1, trainyard).ok).toBe(true);
+  });
+
+  it("blocks every ineligible state", () => {
+    const cases = [
+      [mkHero(), 5000, 1, []],                                       // no trainyard
+      [mkHero({ injured: true }), 5000, 1, trainyard],               // injured
+      [mkHero({ awayWeeks: 2 }), 5000, 1, trainyard],                // away
+      [mkHero({ retired: true }), 5000, 1, trainyard],               // retired
+      [mkHero({ contractWeeksLeft: RETRAIN_WEEKS }), 5000, 1, trainyard], // short contract
+      [mkHero({ retrainedSeason: 1 }), 5000, 1, trainyard],          // same season
+      [mkHero({ value: 1000 }), 399, 1, trainyard],                  // can't afford
+    ];
+    cases.forEach(([h, gold, season, b]) => {
+      const r = canRetrain(h, gold, season, b);
+      expect(r.ok).toBe(false);
+      expect(r.reason).toBeTruthy();
+    });
+  });
+
+  it("allows a repeat retrain in a later season", () => {
+    expect(canRetrain(mkHero({ retrainedSeason: 1 }), 5000, 2, trainyard).ok).toBe(true);
   });
 });

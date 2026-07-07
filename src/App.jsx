@@ -1952,6 +1952,39 @@ export function bestPositionFor(hero){
   return best;
 }
 
+// ─── RETRAINING ──────────────────────────────────────────────────────────────
+// A hero whose stats favour another lane can change role: 40% of value,
+// RETRAIN_WEEKS out of action (reuses the awayWeeks machinery), once per
+// season, gated behind the Training Grounds. Stats/level/traits carry as-is —
+// the stats are the justification, not the reward. See
+// docs/superpowers/specs/2026-07-07-retraining-design.md.
+export const RETRAIN_WEEKS = 4;
+const RETRAIN_COST_PCT = 0.40;
+const RETRAIN_RETURN_MORALE = 8;
+
+export function naturalLaneFor(role){
+  return POS_KEYS.find(p => POSITIONS[p].ideal.includes(role)) || POS_KEYS[0];
+}
+
+export function retrainCost(hero){
+  return Math.max(100, Math.floor((hero.value || 0) * RETRAIN_COST_PCT));
+}
+
+// Returns {ok, reason} — reason is player-facing copy for the detail panel.
+export function canRetrain(hero, gold, season, buildings){
+  if(!buildings?.some(b => b.id === "trainyard" && b.built))
+    return { ok:false, reason:"Requires the Training Grounds" };
+  if(!hero || hero.retired)            return { ok:false, reason:"Not available" };
+  if(hero.injured)                     return { ok:false, reason:"Cannot retrain while injured" };
+  if((hero.awayWeeks || 0) > 0)        return { ok:false, reason:"Away from the realm" };
+  if((hero.contractWeeksLeft || 0) <= RETRAIN_WEEKS)
+    return { ok:false, reason:`Contract too short — needs more than ${RETRAIN_WEEKS} weeks left` };
+  if(hero.retrainedSeason === season)  return { ok:false, reason:"Already retrained this season" };
+  if(gold < retrainCost(hero))
+    return { ok:false, reason:`Costs ${retrainCost(hero).toLocaleString()}g — not enough gold` };
+  return { ok:true, reason:null };
+}
+
 export function analyseFormation(formation){
   // Race synergy — the only formation-wide multiplier now.
   // Role/race pairings are handled per-position in calcPositionScore.
