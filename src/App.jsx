@@ -1510,12 +1510,16 @@ function checkAchievements(data) {
 // Each new game guarantees one star prospect and occasionally a solid veteran.
 // The rest are standard heroes. Creates a run hook without hand-holding.
 
-function generateStartingSquad() {
+export function generateStartingSquad() {
   const squad = [];
 
   // ── STAR HERO (slot 0) ────────────────────────────────────────────────────
-  // Always early-to-mid Peak — their best years just beginning
-  const star = generateHero(0);
+  // Always early-to-mid Peak — their best years just beginning.
+  // id 100, NOT 0: hero ids flow through truthiness checks in places
+  // (leader lookups, serialized-preset counts) and id 0 reads as "empty".
+  // Pre-fix saves may still carry an id-0 foundling, so those checks also
+  // compare against null explicitly — keep both halves in place.
+  const star = generateHero(100);
   const starPot = rand(65, 80);
   const starCareerWk = stageToCareerWeek("peak", rand(5, 35)); // early Peak
   const { stage: starStage, stageProgress: starProgress } = careerWeekToStage(starCareerWk);
@@ -5983,7 +5987,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
         {/* Benched leader warning — the leader's bonuses only fire when fielded,
             and this is the screen where that decision is made */}
         {(()=>{
-          const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+          const leaderHero = squadLeaderId!=null ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
           if(!leaderHero || assignedIds.has(leaderHero.id)) return null;
           return(
             <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.36)",display:"flex",alignItems:"center",gap:8,fontSize:11,color:"#9A5B2B",fontFamily:"'Alegreya Sans',sans-serif"}}>
@@ -6006,7 +6010,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
             <div className="rm-two-col" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
               {[0,1].map(idx=>{
                 const p=formationPresets[idx]||null;
-                const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(Boolean).length):[0,0,0];
+                const counts=p?POS_KEYS.map(pp=>(p[pp]||[]).filter(id=>id!=null).length):[0,0,0];
                 const total=counts.reduce((a,n)=>a+n,0);
                 return(
                   <div key={idx} style={{
@@ -8187,7 +8191,7 @@ export default function App(){
 
     // Must be declared BEFORE heroes.map() — callbacks close over these
     const fatiguePctBonus = 0; // placeholder for future recovery-rate buffs (e.g. items/boons)
-    const leader=squadLeaderId?heroes.find(h=>h.id===squadLeaderId):null;
+    const leader=squadLeaderId!=null?heroes.find(h=>h.id===squadLeaderId):null;
     const leaderInFormation=leader&&raidedIds.has(leader.id);
 
     let updatedHeroes=heroes.map(h=>{
@@ -9089,7 +9093,7 @@ export default function App(){
     ["Week",          `${seasonWeek}`,                                                              "#3A3427"],
     ["Season",        `${season}`,                                                                  "#3A3427"],
     ...(ngPlus?.wins ? [["Run",`#${ngPlus.wins+1}`,"#8A6D3B"]] : []),
-    ...(squadLeaderId&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]}`,"#8A6D3B"]] : []),
+    ...(squadLeaderId!=null&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]}`,"#8A6D3B"]] : []),
     ["Formation",     `${placed}/6 · ${formRating}`,                                                "#77653F"],
     ["Squad",         `${heroes.filter(h=>!h.retired).length}/${ROSTER_CAP}`,                       heroes.filter(h=>!h.retired).length>=ROSTER_CAP?"#7E2D26":"#3A3427"],
     ...(unhappyCount>0   ? [["Unhappy",  `${unhappyCount}`, "#8A6D3B"]] : []),
@@ -9245,13 +9249,10 @@ export default function App(){
               const fit = active.filter(h=>!h.injured && !(h.awayWeeks>0)).length;
               const fatigued = active.filter(h=>(h.fatigue||0)>=FATIGUE_WARN).length;
               return(
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:24,gap:14,flexWrap:"wrap"}}>
-                  <div>
-                    <h1 className="pa-h1">The Roster</h1>
-                    <div className="pa-rule"/>
-                    <div className="pa-sub">{active.length} heroes under contract · {fit} fit{fatigued>0?` · ${fatigued} fatigued`:""}</div>
-                  </div>
-                  <button className="pa-primary" onClick={()=>setTab("Hire")}>Sign Contract</button>
+                <div style={{marginBottom:24}}>
+                  <h1 className="pa-h1">The Roster</h1>
+                  <div className="pa-rule"/>
+                  <div className="pa-sub">{active.length} heroes under contract · {fit} fit{fatigued>0?` · ${fatigued} fatigued`:""}</div>
                 </div>
               );
             })()}
@@ -9335,7 +9336,7 @@ export default function App(){
 
             {/* Squad Leader nudge — the mechanic hides behind a hero's profile,
                 so surface it once the squad has a few weeks of tenure */}
-            {!leaderHintDismissed && !squadLeaderId && week>=3 && (
+            {!leaderHintDismissed && squadLeaderId==null && week>=3 && (
               <div style={{marginBottom:14,padding:"12px 14px",borderRadius:3,
                 background:"rgba(138,109,59,0.075)",border:"1px solid rgba(138,109,59,0.33)",
                 display:"flex",alignItems:"center",gap:10,position:"relative"}}>
@@ -9657,7 +9658,7 @@ export default function App(){
               {/* Squad Leader status — the bonuses are invisible in combat, so
                   state them here where the battle decision is made */}
               {(()=>{
-                const leaderHero = squadLeaderId ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
+                const leaderHero = squadLeaderId!=null ? heroes.find(h=>h.id===squadLeaderId&&!h.retired) : null;
                 if(!leaderHero) return null;
                 const fieldedIds = new Set(POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean).map(h=>h.id)));
                 const lb = calcLeaderBonuses(leaderHero);

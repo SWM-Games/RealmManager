@@ -10,7 +10,7 @@ import {
   TIERS, TIER_ORDER, TIER_POSITION_BONUS, POS_KEYS, MAX_LEVEL,
   TIER_BUILD_SLOTS, builtInTier, buildingCapReached,
   BUILDINGS, migrateBuildings,
-  bestPositionFor, PHYSICAL_STATS,
+  bestPositionFor, PHYSICAL_STATS, generateStartingSquad,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -459,6 +459,21 @@ describe("migrateBuildings", () => {
     const m2 = migrateBuildings(partial);
     expect(m2.find(b => b.id === "barracks").built).toBe(true);
     expect(m2.find(b => b.id === "tavern").built).toBe(false);
+  });
+});
+
+// ── hero id hygiene ──────────────────────────────────────────────────────────
+// Hero ids flow through truthiness checks (leader lookups, serialized-preset
+// slot counts), so id 0 reads as "empty slot" / "no leader". The star foundling
+// once shipped with id 0 — a fielded foundling made saved presets show 5/6 and
+// an appointed foundling-leader silently gave no bonuses.
+describe("starting squad ids", () => {
+  it("never issues a falsy hero id", () => {
+    // (uniqueness isn't asserted: slots 4-7 draw Date.now()+i+rand ids whose
+    // ranges overlap, so rare collisions are a separate pre-existing issue)
+    for (let i = 0; i < 50; i++) {
+      generateStartingSquad().forEach(h => expect(h.id).toBeTruthy());
+    }
   });
 });
 
