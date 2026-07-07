@@ -4924,7 +4924,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
 // Parchment Codex hero card.
 // Maps to HeroCardC in the design handoff. Sharp-cornered (4px), hairline gold borders,
 // boxed sections separated by faint dividers, IM Fell English SC labels + Alegreya Sans numerals.
-function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential}){
+function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential,retrainCandidate}){
   const power = Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
   const avgMental=Math.round(STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length);
   const phase=agePhase(hero);
@@ -4963,6 +4963,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}></span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:4,display:"inline-flex"}}><Glyph id="leader" size={11} color="#8A6D3B"/></span>}
+            {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:4,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
           </div>
           <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
@@ -4995,6 +4996,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
             {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:5,display:"inline-flex"}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
+            {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:5,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
             {hero.fodder&&<span style={{fontSize:9,color:"#77653F",marginLeft:5}}></span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}} title="Open to offers"></span>}
@@ -9600,7 +9602,7 @@ export default function App(){
             </div>
 
             <div className="pa-grid">
-              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
+              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} retrainCandidate={buildings.some(b=>b.id==="trainyard"&&b.built)&&!h.retraining&&bestPositionFor(h)!==naturalLaneFor(h.role)} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
             </div>
           </div>
         )}
