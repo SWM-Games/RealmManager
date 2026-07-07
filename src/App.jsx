@@ -2353,7 +2353,7 @@ export const BUILDINGS = [
   { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
   { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
+  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
   { id:"network",   name:"Talent Network",    icon:"", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
   { id:"trading",   name:"Trading Post",      icon:"", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
@@ -7298,6 +7298,7 @@ function GuideTab(){
       <Section id="formation" icon="" title="Formation & Positions">
         <p style={{margin:"0 0 8px"}}>Three positions, 2 slots each. <b style={{color:"#7E2D26"}}>Vanguard</b> — frontline brawlers (Warriors, Paladins). <b style={{color:"#8A6D3B"}}>Skirmisher</b> — flankers and ambushers (Rangers, Rogues). <b style={{color:"#3C5A78"}}>Arbiter</b> — rear command (Mages, Clerics).</p>
         <p style={{margin:"0 0 8px"}}>Placing the <b style={{color:"#40614F"}}>ideal role</b> in the right position gives +10% to that hero's combat score. Pairing two ideal roles together (e.g. Warrior + Paladin in Vanguard) gives a further +7% pairing bonus. These are shown in the Tactics tab multiplier breakdown.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#40614F"}}>Retraining</b> — with the Training Grounds built, a hero whose stats favour another lane (marked ⊕ on their card) can change class from their profile: 40% of their value, 4 weeks out of action, once per hero per season. Stats carry over; only the role changes.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Race synergies</b> are separate — they apply to your whole formation rating when you have 3+ of compatible races, or 6 of the same race. Check the Race Composition panel in Tactics.</p>
         <p style={{margin:0}}>The Tactics tab shows <b style={{color:"#3C5A78"}}>Base → Effective</b> rating with a full multiplier breakdown. Click "Breakdown" to see exactly what's boosting or hurting your rating.</p>
       </Section>
@@ -7321,7 +7322,7 @@ function GuideTab(){
         {[
           ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
           ["Bronze",  [["Infirmary","Heroes suffer 30% fewer injuries; injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
-          ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
+          ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP; unlocks Retraining (class change)."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["Gold",    [["Grand Bazaar","Unlocks premium heroes in the market."],["Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["Platinum",[["Elite Sanctum","Unlocks elite heroes in the market."],["Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
         ].map(([tier,buildings])=>(
@@ -7367,6 +7368,7 @@ function GuideTab(){
           "Build the Observatory before spending big on market signings — knowing the bucket prevents expensive mistakes.",
           "The Tactics multiplier breakdown shows every bonus active. Use it to understand exactly what's driving your rating.",
           "Squad Leader bonus scales with tenure — a long-serving Fading hero in that role still adds real value.",
+          "Build the Training Grounds to retrain a hero whose stats favour another lane — 40% of their value, 4 weeks away, once per season.",
           "Check the Squad composition panel at the top of the Squad tab to spot race synergy opportunities.",
         ].map((tip,i)=>(
           <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(60,90,120,0.3)"}}>{tip}</p>
