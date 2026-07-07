@@ -6310,7 +6310,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
                 {bench.map(h=>{
                   const dimmed=h.injured||(h.awayWeeks||0)>0;
-                  const bestPos = bestPositionFor(h);
+                  const bestPos = naturalLaneFor(h.role);
                   const bestColor = POSITIONS[bestPos]?.color || "#77653F";
                   return(
                     <div key={h.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",border:"1px solid rgba(138,109,59,0.18)",background:"rgba(138,109,59,0.04)",opacity:dimmed?0.55:1}}>
@@ -6326,7 +6326,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
-                        <div className="pa-kicker">Best</div>
+                        <div className="pa-kicker">Lane</div>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
                       </div>
                     </div>
@@ -9064,21 +9064,13 @@ export default function App(){
 
   // Best position for a hero = the lane where they score highest. Cached per
   // filter pass via a Map so we don't recompute when sorting/filtering.
-  const bestPosFor=(hero,cache)=>{
-    if(cache&&cache.has(hero.id)) return cache.get(hero.id);
-    const best=bestPositionFor(hero);
-    if(cache) cache.set(hero.id,best);
-    return best;
-  };
+  // Position filter/pills are strictly role-derived (a Rogue is a Skirmisher,
+  // always) — stat-based lane signals live in the Retraining mechanic instead.
   const filtered=useMemo(()=>{
-    const bestCache=new Map();
     let h=[...heroes];
     if(filter.role!=="All")h=h.filter(x=>x.role===filter.role);
-    // Position filter = "show heroes whose best lane is X" (matches the POSITION
-    // pill counts). Previously this filtered by formation slot, which disagreed
-    // with the pill counts and surprised players.
     if(filter.position!=="All"){
-      h=h.filter(x=>bestPosFor(x,bestCache)===filter.position);
+      h=h.filter(x=>naturalLaneFor(x.role)===filter.position);
     }
     if(filter.race!=="All")h=h.filter(x=>x.race===filter.race);
     if(filter.status==="Fit")h=h.filter(x=>!x.injured&&!(x.awayWeeks>0));
@@ -9502,7 +9494,7 @@ export default function App(){
               {["All",...POS_KEYS].map(p=>{
                 const count = p==="All"
                   ? heroes.length
-                  : heroes.filter(h=>bestPositionFor(h)===p).length;
+                  : heroes.filter(h=>naturalLaneFor(h.role)===p).length;
                 const isActive = filter.position === p;
                 return(
                   <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,position:p}))}>
