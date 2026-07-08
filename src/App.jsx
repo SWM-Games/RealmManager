@@ -1952,6 +1952,39 @@ export function bestPositionFor(hero){
   return best;
 }
 
+// ─── RETRAINING ──────────────────────────────────────────────────────────────
+// A hero whose stats favour another lane can change role: 40% of value,
+// RETRAIN_WEEKS out of action (reuses the awayWeeks machinery), once per
+// season, gated behind the Training Grounds. Stats/level/traits carry as-is —
+// the stats are the justification, not the reward. See
+// docs/superpowers/specs/2026-07-07-retraining-design.md.
+export const RETRAIN_WEEKS = 4;
+const RETRAIN_COST_PCT = 0.40;
+const RETRAIN_RETURN_MORALE = 8;
+
+export function naturalLaneFor(role){
+  return POS_KEYS.find(p => POSITIONS[p].ideal.includes(role)) || POS_KEYS[0];
+}
+
+export function retrainCost(hero){
+  return Math.max(100, Math.floor((hero.value || 0) * RETRAIN_COST_PCT));
+}
+
+// Returns {ok, reason} — reason is player-facing copy for the detail panel.
+export function canRetrain(hero, gold, season, buildings){
+  if(!buildings?.some(b => b.id === "trainyard" && b.built))
+    return { ok:false, reason:"Requires the Training Grounds" };
+  if(!hero || hero.retired)            return { ok:false, reason:"Not available" };
+  if(hero.injured)                     return { ok:false, reason:"Cannot retrain while injured" };
+  if((hero.awayWeeks || 0) > 0)        return { ok:false, reason:"Away from the realm" };
+  if((hero.contractWeeksLeft || 0) <= RETRAIN_WEEKS)
+    return { ok:false, reason:`Contract too short — needs more than ${RETRAIN_WEEKS} weeks left` };
+  if(hero.retrainedSeason === season)  return { ok:false, reason:"Already retrained this season" };
+  if(gold < retrainCost(hero))
+    return { ok:false, reason:`Costs ${retrainCost(hero).toLocaleString()}g — not enough gold` };
+  return { ok:true, reason:null };
+}
+
 export function analyseFormation(formation){
   // Race synergy — the only formation-wide multiplier now.
   // Role/race pairings are handled per-position in calcPositionScore.
@@ -2320,7 +2353,7 @@ export const BUILDINGS = [
   { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
   { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP." },
+  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
   { id:"network",   name:"Talent Network",    icon:"", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
   { id:"trading",   name:"Trading Post",      icon:"", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
@@ -4891,7 +4924,7 @@ function WanderingMasterModal({event, heroes, gold, onAccept, onDecline}){
 // Parchment Codex hero card.
 // Maps to HeroCardC in the design handoff. Sharp-cornered (4px), hairline gold borders,
 // boxed sections separated by faint dividers, IM Fell English SC labels + Alegreya Sans numerals.
-function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential}){
+function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterFull,draggable,onDragStart,isListed,hasBid,isLeader,showHiddenStats,showScoutedPotential,retrainCandidate}){
   const power = Math.round(Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(hero,p))));
   const avgMental=Math.round(STAT_GROUPS.Mental.reduce((a,s)=>a+hero.stats[s],0)/STAT_GROUPS.Mental.length);
   const phase=agePhase(hero);
@@ -4930,6 +4963,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:4}}></span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:4,display:"inline-flex"}}><Glyph id="leader" size={11} color="#8A6D3B"/></span>}
+            {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:4,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:4}}></span>}
           </div>
           <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,color:"#77653F",letterSpacing:1.4,textTransform:"uppercase",marginTop:2}}>
@@ -4962,6 +4996,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
             {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:5,display:"inline-flex"}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
+            {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:5,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
             {hero.fodder&&<span style={{fontSize:9,color:"#77653F",marginLeft:5}}></span>}
             {isListed&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}} title="Open to offers"></span>}
@@ -5087,7 +5122,7 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   );
 }
 
-function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true}){
+function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onToggleListed,heroBids,onAcceptBid,onDeclineBid,showHiddenStats,isLeader,onSetLeader,isOwned=true,onRetrain,retrainGold,retrainSeason,retrainBuildings}){
   const [tab,setTab]=useState("Combat");
   useEscapeKey(onClose, !!onClose);
   if(!hero)return null;
@@ -5422,6 +5457,52 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
                 color:isLeader?"#8A6D3B":"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
               {isLeader?"Remove as Squad Leader":"Appoint as Squad Leader"}
             </button>
+          </div>
+        );
+      })()}
+
+      {/* Retraining — change role to a lane the stats now favour */}
+      {isOwned&&onRetrain&&(()=>{
+        const trainyardBuilt=retrainBuildings?.some(b=>b.id==="trainyard"&&b.built);
+        if(!trainyardBuilt) return null;
+        const homeLane=naturalLaneFor(hero.role);
+        if(hero.retraining){
+          return(
+            <div style={{marginTop:14,padding:"12px 14px",borderRadius:3,background:"rgba(60,90,120,0.09)",border:"1px solid rgba(60,90,120,0.3)"}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#3C5A78",letterSpacing:0.5,textTransform:"uppercase"}}>Retraining</div>
+              <div style={{fontSize:10,color:"#4A4335",marginTop:4}}>
+                Away at the Training Grounds — returns as a <b>{hero.retraining.toRole}</b> in {hero.awayWeeks} week{hero.awayWeeks!==1?"s":""}.
+              </div>
+            </div>
+          );
+        }
+        const chk=canRetrain(hero,retrainGold,retrainSeason,retrainBuildings);
+        const suggested=bestPositionFor(hero);
+        const options=POS_KEYS.filter(p=>p!==homeLane).flatMap(p=>POSITIONS[p].ideal.map(role=>({role,lane:p})));
+        return(
+          <div style={{marginTop:14,padding:"12px 14px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.144)"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",gap:8}}>
+              <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#6E6350",letterSpacing:0.5,textTransform:"uppercase"}}>Retraining</div>
+              <div style={{fontSize:10,fontWeight:700,color:"#77653F"}}>{retrainCost(hero).toLocaleString()}g · {RETRAIN_WEEKS}w away</div>
+            </div>
+            {suggested!==homeLane&&(
+              <div style={{fontSize:10,color:"#40614F",marginTop:4}}>⊕ Stats favour the {suggested} lane — a strong candidate.</div>
+            )}
+            {!chk.ok&&<div style={{fontSize:10,color:"#9A5B2B",marginTop:4}}>{chk.reason}</div>}
+            {chk.ok&&(
+              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
+                {options.map(({role,lane})=>(
+                  <button key={role} onClick={()=>onRetrain(hero,role)}
+                    style={{flex:"1 1 40%",padding:"7px 0",borderRadius:3,cursor:"pointer",
+                      border:`1px solid ${lane===suggested?"rgba(64,97,79,0.55)":"rgba(60,52,38,0.264)"}`,
+                      background:lane===suggested?"rgba(64,97,79,0.09)":"rgba(60,52,38,0.054)",
+                      color:lane===suggested?"#40614F":"#4A4335",
+                      fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:10}}>
+                    → {role}<span style={{fontWeight:500,opacity:0.75}}> · {lane}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -6277,7 +6358,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
               <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:10}}>
                 {bench.map(h=>{
                   const dimmed=h.injured||(h.awayWeeks||0)>0;
-                  const bestPos = bestPositionFor(h);
+                  const bestPos = naturalLaneFor(h.role);
                   const bestColor = POSITIONS[bestPos]?.color || "#77653F";
                   return(
                     <div key={h.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",border:"1px solid rgba(138,109,59,0.18)",background:"rgba(138,109,59,0.04)",opacity:dimmed?0.55:1}}>
@@ -6293,7 +6374,7 @@ function TacticsTab({heroes,formation,setFormation,formationPresets,onSavePreset
                         </div>
                       </div>
                       <div style={{textAlign:"right",flexShrink:0}}>
-                        <div className="pa-kicker">Best</div>
+                        <div className="pa-kicker">Lane</div>
                         <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontSize:9,fontWeight:700,color:bestColor,letterSpacing:1,textTransform:"uppercase",marginTop:3}}>{bestPos}</div>
                       </div>
                     </div>
@@ -7217,6 +7298,7 @@ function GuideTab(){
       <Section id="formation" icon="" title="Formation & Positions">
         <p style={{margin:"0 0 8px"}}>Three positions, 2 slots each. <b style={{color:"#7E2D26"}}>Vanguard</b> — frontline brawlers (Warriors, Paladins). <b style={{color:"#8A6D3B"}}>Skirmisher</b> — flankers and ambushers (Rangers, Rogues). <b style={{color:"#3C5A78"}}>Arbiter</b> — rear command (Mages, Clerics).</p>
         <p style={{margin:"0 0 8px"}}>Placing the <b style={{color:"#40614F"}}>ideal role</b> in the right position gives +10% to that hero's combat score. Pairing two ideal roles together (e.g. Warrior + Paladin in Vanguard) gives a further +7% pairing bonus. These are shown in the Tactics tab multiplier breakdown.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#40614F"}}>Retraining</b> — with the Training Grounds built, a hero whose stats favour another lane (marked ⊕ on their card) can change class from their profile: 40% of their value, 4 weeks out of action, once per hero per season. Stats carry over; only the role changes.</p>
         <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Race synergies</b> are separate — they apply to your whole formation rating when you have 3+ of compatible races, or 6 of the same race. Check the Race Composition panel in Tactics.</p>
         <p style={{margin:0}}>The Tactics tab shows <b style={{color:"#3C5A78"}}>Base → Effective</b> rating with a full multiplier breakdown. Click "Breakdown" to see exactly what's boosting or hurting your rating.</p>
       </Section>
@@ -7240,7 +7322,7 @@ function GuideTab(){
         {[
           ["Iron",    [["Barracks","Heroes earn +20% XP per battle."],["Tavern","All heroes +3 morale each week."]]],
           ["Bronze",  [["Infirmary","Heroes suffer 30% fewer injuries; injuries heal 1 week faster."],["Recovery Lodge","Bench heroes recover fatigue 60% faster."]]],
-          ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
+          ["Silver",  [["Training Grounds","Bench heroes earn 20% of that week's battle XP; unlocks Retraining (class change)."],["Talent Network","Market refreshes every 3 weeks instead of 6."],["Trading Post","Heroes open to offers sell at 120% value, bids 50% more frequent."]]],
           ["Gold",    [["Grand Bazaar","Unlocks premium heroes in the market."],["Observatory","Shows potential bucket for all market heroes before signing."]]],
           ["Platinum",[["Elite Sanctum","Unlocks elite heroes in the market."],["Hall of Legends","Each retired hero adds weekly morale, scaled by level (cap +20/wk)."]]],
         ].map(([tier,buildings])=>(
@@ -7286,6 +7368,7 @@ function GuideTab(){
           "Build the Observatory before spending big on market signings — knowing the bucket prevents expensive mistakes.",
           "The Tactics multiplier breakdown shows every bonus active. Use it to understand exactly what's driving your rating.",
           "Squad Leader bonus scales with tenure — a long-serving Fading hero in that role still adds real value.",
+          "Build the Training Grounds to retrain a hero whose stats favour another lane — 40% of their value, 4 weeks away, once per season.",
           "Check the Squad composition panel at the top of the Squad tab to spot race synergy opportunities.",
         ].map((tip,i)=>(
           <p key={i} style={{margin:"0 0 6px",paddingLeft:12,borderLeft:"2px solid rgba(60,90,120,0.3)"}}>{tip}</p>
@@ -7801,6 +7884,17 @@ export default function App(){
       return next;
     });
     addLog(`Preset ${idx+1} cleared.`,"info");
+  };
+
+  const startRetraining=(hero,toRole)=>{
+    const chk=canRetrain(hero,gold,season,buildings);
+    if(!chk.ok){addLog(chk.reason,"warning");return;}
+    const cost=retrainCost(hero);
+    if(!window.confirm(`Retrain ${hero.name} as a ${toRole}?\n\nCost: ${cost.toLocaleString()}g\nOut of action for ${RETRAIN_WEEKS} weeks.\nOnce per hero per season.`)) return;
+    setGold(g=>g-cost);
+    setHeroes(hs=>hs.map(h=>h.id===hero.id?{...h,awayWeeks:RETRAIN_WEEKS,retraining:{toRole},retrainedSeason:season}:h));
+    setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===hero.id?null:x);});return nf;});
+    addLog(`${hero.name} departs for the Training Grounds — retraining as ${toRole} (${cost.toLocaleString()}g, back in ${RETRAIN_WEEKS} weeks).`,"info");
   };
 
   const generateBids=(currentHeroes,currentWeek,listed)=>{
@@ -8359,6 +8453,12 @@ export default function App(){
                 heroId: h.id,
               }]);
               pendingEvent = null;
+            } else if(h.retraining){
+              // Retraining complete — role changes, stats carry as-is
+              const toRole=h.retraining.toRole;
+              h={...h, role:toRole, retraining:null, morale:Math.min(100,(h.morale||70)+RETRAIN_RETURN_MORALE)};
+              addLog(`${h.name} returns from the Training Grounds a ${toRole} — new lease on life (+${RETRAIN_RETURN_MORALE} morale).`,"success");
+              addChronicle(`${h.name} retrained as a ${toRole}.`);
             } else {
               addLog(`${h.name} returned from "${h.awayEvent}".`,"success");
             }
@@ -9031,21 +9131,13 @@ export default function App(){
 
   // Best position for a hero = the lane where they score highest. Cached per
   // filter pass via a Map so we don't recompute when sorting/filtering.
-  const bestPosFor=(hero,cache)=>{
-    if(cache&&cache.has(hero.id)) return cache.get(hero.id);
-    const best=bestPositionFor(hero);
-    if(cache) cache.set(hero.id,best);
-    return best;
-  };
+  // Position filter/pills are strictly role-derived (a Rogue is a Skirmisher,
+  // always) — stat-based lane signals live in the Retraining mechanic instead.
   const filtered=useMemo(()=>{
-    const bestCache=new Map();
     let h=[...heroes];
     if(filter.role!=="All")h=h.filter(x=>x.role===filter.role);
-    // Position filter = "show heroes whose best lane is X" (matches the POSITION
-    // pill counts). Previously this filtered by formation slot, which disagreed
-    // with the pill counts and surprised players.
     if(filter.position!=="All"){
-      h=h.filter(x=>bestPosFor(x,bestCache)===filter.position);
+      h=h.filter(x=>naturalLaneFor(x.role)===filter.position);
     }
     if(filter.race!=="All")h=h.filter(x=>x.race===filter.race);
     if(filter.status==="Fit")h=h.filter(x=>!x.injured&&!(x.awayWeeks>0));
@@ -9469,7 +9561,7 @@ export default function App(){
               {["All",...POS_KEYS].map(p=>{
                 const count = p==="All"
                   ? heroes.length
-                  : heroes.filter(h=>bestPositionFor(h)===p).length;
+                  : heroes.filter(h=>naturalLaneFor(h.role)===p).length;
                 const isActive = filter.position === p;
                 return(
                   <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,position:p}))}>
@@ -9512,7 +9604,7 @@ export default function App(){
             </div>
 
             <div className="pa-grid">
-              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
+              {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} retrainCandidate={buildings.some(b=>b.id==="trainyard"&&b.built)&&!h.retraining&&bestPositionFor(h)!==naturalLaneFor(h.role)} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
             </div>
           </div>
         )}
@@ -10859,6 +10951,10 @@ export default function App(){
           showHiddenStats={showHiddenStats}
           isLeader={squadLeaderId===detailHero?.id}
           onSetLeader={()=>setSquadLeaderId(id=>id===detailHero?.id?null:detailHero?.id)}
+          onRetrain={startRetraining}
+          retrainGold={gold}
+          retrainSeason={season}
+          retrainBuildings={buildings}
         />
       )}
     </div>
