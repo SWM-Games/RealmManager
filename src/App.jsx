@@ -7004,12 +7004,18 @@ function clearSave() {
 
 // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
 
+// Playtest gate: append ?dev to the URL to reveal testing controls (e.g. starting
+// in a higher tier to skip straight to Bronze). Invisible in normal play; safe to
+// ship because it only unlocks when the flag is present in the query string.
+const DEV_MODE = (() => { try { return new URLSearchParams(window.location.search).has("dev"); } catch { return false; } })();
+
 function SetupScreen({ onComplete }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(TOWN_COLORS[0].value);
   const [nameError, setNameError] = useState(false);
   const [step, setStep] = useState("setup"); // "setup" | "boons"
   const [selectedBoons, setSelectedBoons] = useState(new Set());
+  const [startTier, setStartTier] = useState("iron"); // dev-only: which tier a new game starts in
   const ng = loadNGPlus();
   const availableBoons = ng?.earnedBoons ?? [];
 
@@ -7019,7 +7025,7 @@ function SetupScreen({ onComplete }) {
     if (availableBoons.length > 0) {
       setStep("boons");
     } else {
-      onComplete(trimmed, color, []);
+      onComplete(trimmed, color, [], startTier);
     }
   };
 
@@ -7077,11 +7083,11 @@ function SetupScreen({ onComplete }) {
           </div>
 
           <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>onComplete(name.trim(), color, [])}
+            <button onClick={()=>onComplete(name.trim(), color, [], startTier)}
               style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
               No Boons
             </button>
-            <button onClick={()=>onComplete(name.trim(), color, [...selectedBoons])}
+            <button onClick={()=>onComplete(name.trim(), color, [...selectedBoons], startTier)}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
                 background:selectedBoons.size>0?"#9A5B2B":"rgba(60,52,38,0.108)",
                 color:selectedBoons.size>0?"#F0E8D5":"#8A7F68",
@@ -7187,6 +7193,25 @@ function SetupScreen({ onComplete }) {
           </div>
         </div>
 
+        {/* Dev-only: starting tier (playtest — skip straight to Bronze etc.) */}
+        {DEV_MODE&&(
+          <div style={{marginBottom:24,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.10)",border:"1px dashed rgba(154,91,43,0.5)"}}>
+            <div style={{fontSize:11,color:"#9A5B2B",fontWeight:700,letterSpacing:1,marginBottom:8}}>PLAYTEST · STARTING TIER</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {TIER_ORDER.map(tid=>(
+                <button key={tid} onClick={()=>setStartTier(tid)}
+                  style={{padding:"6px 12px",borderRadius:3,border:"none",cursor:"pointer",
+                    background:startTier===tid?"#9A5B2B":"rgba(60,52,38,0.072)",
+                    color:startTier===tid?"#F0E8D5":"#7A6F58",
+                    fontFamily:"'Alegreya Sans',sans-serif",fontWeight:startTier===tid?700:400,fontSize:11}}>
+                  {TIERS[tid].name}
+                </button>
+              ))}
+            </div>
+            {startTier!=="iron"&&<div style={{fontSize:9,color:"#6E6350",marginTop:6}}>Starts a fresh campaign seeded in {TIERS[startTier].name} with a 20,000g stipend to build a competitive squad.</div>}
+          </div>
+        )}
+
         {/* Preview */}
         <div style={{
           padding:"12px 14px", borderRadius:3, marginBottom:24,
@@ -7198,7 +7223,7 @@ function SetupScreen({ onComplete }) {
               <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:color}}>
                 {name.trim()||"Your Realm"}
               </div>
-              <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold</div>
+              <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{DEV_MODE&&startTier!=="iron"?`${TIERS[startTier].name} · Season 1 · 10 heroes · 20,000g starting gold`:"Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold"}</div>
             </div>
           </div>
         </div>
@@ -7409,7 +7434,7 @@ export default function App(){
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
 
-  const handleSetupComplete = (name, color, selectedBoons=[]) => {
+  const handleSetupComplete = (name, color, selectedBoons=[], startTier="iron") => {
     setTownName(name);
     setTownColor(color);
     // Apply selected boons
@@ -7438,6 +7463,23 @@ export default function App(){
         });
         saveNGPlus({...ng, earnedBoons:remaining});
       }
+    }
+    // Dev playtest: seed a fresh campaign directly into a higher tier so testing
+    // can start where it's valuable (Bronze+) instead of grinding out Iron. Only
+    // reachable via the ?dev URL flag. Overrides the tier-dependent state that the
+    // useState initializers (and the mount effect that scheduled an Iron opponent)
+    // set to Iron by default.
+    if(DEV_MODE && startTier && startTier!=="iron"){
+      const towns = generateTierTowns(startTier);
+      const table = {};
+      towns.forEach(e=>{ table[e.name]={wins:0,losses:0,power:e.power}; });
+      setPlayerTier(startTier);
+      setTierPosition(8);
+      setTierEnemyTowns(towns);
+      setLeagueTable(table);
+      setMarket(Array.from({length:12},(_,i)=>generateHero(1000+i,true,false,false,null,null,startTier)));
+      setGold(20000);
+      setScheduledOpponent(generateScheduledOpponent(1, table, towns, startTier));
     }
     setSetupDone(true);
   };
