@@ -23,14 +23,22 @@ npm run lint     # carries ~89 known legacy errors (unused vars, hook purity);
 ## Non-negotiable working rules
 
 1. **Balance numbers are simulation-calibrated.** If you touch tribute, XP
-   ranges, growth, Form, win/loss gold, injury rates or the phase cap, update
-   the mirrored formulas in `scripts/balance-sim.mjs` and re-run `npm run sim`.
-   Healthy targets: week-1 win ~50%, season-1 40–50%, late-game 60–75%,
-   bankruptcy low single digits, platinum around season 7–9, gold plateauing
-   80–95k. (Note: the per-tier building cap intentionally trades a few points
-   of late-game win rate and nudges the gold plateau up — with the cap the sim
-   shows platinum-endgame win ~59–66% and plateau ~100k. That drift is the
-   accepted opportunity-cost of the cap, not a regression to "fix".)
+   ranges, growth, Form, win/loss gold, injury rates, transfer fees, building
+   costs or the phase cap, update the mirrored formulas in
+   `scripts/balance-sim.mjs` and re-run `npm run sim`. Healthy targets: week-1
+   win ~50%, season-1 40–50%, late-game 60–75%, bankruptcy low single digits,
+   platinum around season 7–9.
+   (Note 1: the per-tier building cap intentionally trades a few points of
+   late-game win rate — the sim shows platinum-endgame win ~59–66%. That drift
+   is the accepted opportunity-cost of the cap, not a regression to "fix".)
+   (Note 2: the 2026-07 economy pass deliberately drained the late-game gold
+   pile. `TRANSFER_FEE_SCALE` (=6) made signings a real FM-style cost, building
+   costs now scale steeply by tier (iron ~1.4–1.8k → platinum 18–22k), and the
+   tribute position swing was compressed so TIER dominates POSITION. Combined,
+   the gold plateau moved from ~80–100k down to a ~20–75k range that DECLINES
+   in the endgame under spend pressure. That is the intended shape — do NOT
+   "restore" the old 80–95k plateau. Watch instead that bankruptcy stays ≤~3%
+   and platinum-endgame gold p10 doesn't fall through the floor.)
 2. **Stat-gated mechanics must be probed, not guessed.** Three systems shipped
    dead because thresholds were written by feel (specialisations never fired,
    Potential was unreachable, all 13 enemy abilities auto-failed). The house

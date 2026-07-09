@@ -28,14 +28,15 @@ const GROW_STATS = [...PHYSICAL, "Magic Resist", ...MENTAL, "Charisma", "Negotia
 
 // NEW tribute/xp values
 const TIERS = {
-  iron:     { powerMin: 67,  powerMax: 105, difficulty: 1, tributeBase: 105, xpRange: [20, 32] },
-  bronze:   { powerMin: 93,  powerMax: 147, difficulty: 2, tributeBase: 160, xpRange: [26, 40] },
-  silver:   { powerMin: 127, powerMax: 199, difficulty: 3, tributeBase: 260, xpRange: [32, 48] },
-  gold:     { powerMin: 167, powerMax: 262, difficulty: 4, tributeBase: 400, xpRange: [36, 70] },
-  platinum: { powerMin: 207, powerMax: 325, difficulty: 5, tributeBase: 560, xpRange: [45, 85] },
+  iron:     { powerMin: 67,  powerMax: 105, difficulty: 1, tributeBase: 170, xpRange: [20, 32] },
+  bronze:   { powerMin: 93,  powerMax: 147, difficulty: 2, tributeBase: 225, xpRange: [26, 40] },
+  silver:   { powerMin: 127, powerMax: 199, difficulty: 3, tributeBase: 325, xpRange: [32, 48] },
+  gold:     { powerMin: 167, powerMax: 262, difficulty: 4, tributeBase: 465, xpRange: [36, 70] },
+  platinum: { powerMin: 207, powerMax: 325, difficulty: 5, tributeBase: 625, xpRange: [45, 85] },
 };
 const TIER_ORDER = ["iron", "bronze", "silver", "gold", "platinum"];
-const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
+// Modest position swing so tier dominates placement (mirror of src/App.jsx)
+const TIER_POSITION_BONUS = [80, 58, 42, 28, 16, 6, 0, 0];
 const weeklyRankIncome = (tid, position) => TIERS[tid].tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position || 8) - 1)] || 0);
 
 // Transfer-fee scale (Football-Manager-style): a hero's signing fee should be a
@@ -240,7 +241,7 @@ function runCampaign(NSEASONS, opts) {
   const built = new Set();
   // [id, cost, tierIdx] — ordered so the strongest modeled pick per tier comes
   // first; the slot caps below stop the AI buying a tier's weaker buildings.
-  const BUILD_ORDER = [["barracks",1200,0],["tavern",1000,0],["lodge",1100,1],["infirmary",1000,1],["trainyard",1200,2],["network",1400,2],["trading",1600,2],["bazaar",1800,3],["scouts",2800,3],["sanctum",2200,4],["legends",2000,4]];
+  const BUILD_ORDER = [["barracks",1800,0],["tavern",1400,0],["lodge",3500,1],["infirmary",4000,1],["trainyard",6000,2],["network",7000,2],["trading",8000,2],["bazaar",14000,3],["scouts",18000,3],["sanctum",22000,4],["legends",18000,4]];
   const TIER_SLOTS = [1,1,2,1,1];          // iron, bronze, silver, gold, platinum
   const builtPerTier = [0,0,0,0,0];
   let towns = [];
@@ -307,7 +308,7 @@ function runCampaign(NSEASONS, opts) {
       // rewards — losers collect a small purse too (no week is worth zero)
       const hasBarracks = built.has("barracks");
       const heroXP = Math.round(rand(...T.xpRange) * (hasBarracks ? 1.2 : 1));
-      gold += won ? rand(300, 700) + T.difficulty * 100 : rand(60, 130) + T.difficulty * 30;
+      gold += won ? rand(300, 700) + T.difficulty * 100 : rand(50, 110) + T.difficulty * 25;
 
       // injuries (fatigue-driven + NEW floor on losses, cap 2)
       let injCount = 0;

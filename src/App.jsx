@@ -2050,17 +2050,19 @@ export function calcFormationRating(formation){
 export const TIERS = {
   // tributeBase values are sim-calibrated (scripts/balance-sim.mjs) together
   // with the loss purse and position bonus — retune there before changing here
-  iron:     { id:"iron",     name:"Iron",     icon:"",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
-  bronze:   { id:"bronze",   name:"Bronze",   icon:"",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:160, xpRange:[26,40] },
-  silver:   { id:"silver",   name:"Silver",   icon:"",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:260, xpRange:[32,48] },
-  gold:     { id:"gold",     name:"Gold",     icon:"",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:400, xpRange:[36,70] },
-  platinum: { id:"platinum", name:"Platinum", icon:"",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:560, xpRange:[45,85] },
+  iron:     { id:"iron",     name:"Iron",     icon:"",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:170, xpRange:[20,32] },
+  bronze:   { id:"bronze",   name:"Bronze",   icon:"",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:225, xpRange:[26,40] },
+  silver:   { id:"silver",   name:"Silver",   icon:"",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:325, xpRange:[32,48] },
+  gold:     { id:"gold",     name:"Gold",     icon:"",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:465, xpRange:[36,70] },
+  platinum: { id:"platinum", name:"Platinum", icon:"",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:625, xpRange:[45,85] },
 };
 export const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
 
-// Tribute = tierBase + position bonus (1st gets most, 8th gets base)
-// Position matters: the table is a weekly income race, not just a season-end verdict
-export const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
+// Tribute = tierBase + position bonus (1st gets most, 8th gets base).
+// The swing is deliberately modest so TIER dominates POSITION: promotion is the big
+// income reward, placement only a nudge. (A wide swing let 1st-in-Iron out-earn
+// mid-table Bronze, which read as backwards — a lower division paying more.)
+export const TIER_POSITION_BONUS = [80, 58, 42, 28, 16, 6, 0, 0];
 
 // Name pools — 15 per tier, thematically distinct
 const TIER_NAME_POOLS = {
@@ -2355,21 +2357,21 @@ export function calcRaceSynergy(formation) {
 
 export const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
-  { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
-  { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
+  { id:"barracks",  name:"Barracks",         icon:"", cost:1800, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
+  { id:"tavern",    name:"Tavern",            icon:"", cost:1400, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
-  { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"",  cost:4000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
+  { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:3500, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
-  { id:"network",   name:"Talent Network",    icon:"", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
+  { id:"trainyard", name:"Training Grounds",  icon:"", cost:6000, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
+  { id:"network",   name:"Talent Network",    icon:"", cost:7000, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
+  { id:"trading",   name:"Trading Post",      icon:"", cost:8000, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
-  { id:"bazaar",    name:"Grand Bazaar",      icon:"", cost:1800, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
-  { id:"scouts",    name:"Observatory",     icon:"", cost:2800, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
+  { id:"bazaar",    name:"Grand Bazaar",      icon:"", cost:14000, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
+  { id:"scouts",    name:"Observatory",     icon:"", cost:18000, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
   // ── PLATINUM ─────────────────────────────────────────────────────────────────
-  { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
-  { id:"legends",   name:"Hall of Legends",   icon:"", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
+  { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:22000, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
+  { id:"legends",   name:"Hall of Legends",   icon:"", cost:18000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
 // Per-tier build slots — you may construct only this many buildings per tier,
@@ -2570,9 +2572,8 @@ export function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
   return playerIdx + 1;
 }
 
-// Weekly tribute income — now flat per tier (no position bonus)
+// Weekly tribute income — tier base + a modest league-position bonus (1st earns most)
 export function weeklyRankIncome(tierId, position) {
-  // Weekly tribute income — tier base + league position bonus (1st earns most)
   const tier = TIERS[tierId] || TIERS.iron;
   return tier.tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position||8)-1)] || 0);
 }
@@ -3657,7 +3658,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
   let heroXP = Math.round(rand(xpMin, xpMax) * (hasBarracks?1.2:1));
   // Losers collect a small purse too — no week is worth zero. This is the
   // anti-death-spiral valve: a cold streak stays survivable (sim-calibrated).
-  let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(60,130)+enemy.difficulty*30;
+  let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(50,110)+enemy.difficulty*25;
 
   // Resolve enemy abilities — check stat thresholds, collect effects
   const abilityResults = (enemy.abilities||[]).map(ability => {
