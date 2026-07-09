@@ -581,13 +581,21 @@ function agePhase(hero) {
 function agePhaseLabel(p){ return {prospect:"Prospect",rising:"Rising",peak:"Peak",fading:"Fading",veteran:"Veteran"}[p]||p; }
 function agePhaseColor(p){ return {prospect:"#5F4B66",rising:"#3C5A78",peak:"#40614F",fading:"#8A6D3B",veteran:"#9A5B2B"}[p]||"#6E6350"; }
 
+// Transfer-fee scale (Football-Manager-style): a signing fee should be a real
+// multiple of the hero's annual wage, not a rounding error. Pre-scale the fee ran
+// ~11-15% of annual salary; this lifts a standard starter to ~1x annual wage, a raw
+// prospect to ~0.7x, and an elite star to several times it. Applied to every hero
+// value origin (calcHeroValue, generateHero, the starting star). MUST stay in sync
+// with scripts/balance-sim.mjs TRANSFER_FEE_SCALE — re-run `npm run sim` if changed.
+const TRANSFER_FEE_SCALE = 6;
+
 // Recalculate a hero's market value based on current stats and level.
 export function calcHeroValue(hero) {
   const ALL_STAT_KEYS = Object.values(STAT_GROUPS).flat();
   const statVals = ALL_STAT_KEYS.map(s=>hero.stats[s]||0);
   const avg = statVals.reduce((a,b)=>a+b,0)/statVals.length;
   const tier = hero.marketTier;
-  const base = Math.floor(avg * 7 * (1 + (hero.level||0) * 0.32));
+  const base = Math.floor(avg * 7 * (1 + (hero.level||0) * 0.32) * TRANSFER_FEE_SCALE);
   const mult = tier==="elite"?rand(22,28)/10 : tier==="premium"?rand(15,20)/10 : 1;
   return Math.max(100, Math.floor(base * mult));
 }
@@ -1542,7 +1550,7 @@ export function generateStartingSquad() {
     stats: starStats,
     traits: starTraits,
     level: 2, xp: xpForLevel(2),
-    value: Math.max(80, Math.floor(starAvg * 7 * (1 + 0 * 0.32) + rand(-20,20))),
+    value: Math.max(80, Math.floor(starAvg * 7 * (1 + 0 * 0.32) * TRANSFER_FEE_SCALE + rand(-20,20))),
     salary: Math.floor(starAvg*rand(13,16)/10),
     contractYears: starContract,
     contractWeeks: starContract*WEEKS_PER_CONTRACT_YEAR,
@@ -2770,8 +2778,8 @@ export function generateHero(id,forSale=false,premium=false,elite=false,forcedRo
   // Salary: base wage plus experience premium — a level 10 hero costs noticeably more than a level 0
   const salary=Math.floor(avgStat*rand(13,16)/10 + heroLevel*rand(6,10));
   const potBonus=Math.max(0,stats.Potential-50)*5;
-  // Value: matches calcHeroValue's level multiplier so recomputed value after level-up doesn't jump
-  const baseValue=Math.floor(avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3 + rand(-30,30));
+  // Value: matches calcHeroValue's level multiplier + fee scale so recomputed value after level-up doesn't jump
+  const baseValue=Math.floor((avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3) * TRANSFER_FEE_SCALE + rand(-30,30));
   const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
   // Contract length appropriate to career stage — veterans don't sign 4-year deals
   const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
@@ -6910,7 +6918,7 @@ function deserializeFormation(saved, heroes) {
 function saveGame(state) {
   try {
     const blob = {
-      v: 1,
+      v: 2,
       gold: state.gold,
       week: state.week,
       heroes: state.heroes,
@@ -6968,7 +6976,19 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const blob = JSON.parse(raw);
-    if (!blob || blob.v !== 1) return null;
+    if (!blob || (blob.v !== 1 && blob.v !== 2)) return null;
+    // v1 → v2: transfer fees were scaled up (TRANSFER_FEE_SCALE). Stored values are
+    // pre-scale, so multiply every persisted hero value to price old squads/market/
+    // rivals consistently with the new market. Free heroes (value 0) stay free.
+    if(blob.v === 1){
+      const scaleVal = h => (h && h.value>0) ? {...h, value: Math.round(h.value*TRANSFER_FEE_SCALE)} : h;
+      if(Array.isArray(blob.heroes)) blob.heroes = blob.heroes.map(scaleVal);
+      if(Array.isArray(blob.market)) blob.market = blob.market.map(scaleVal);
+      if(Array.isArray(blob.tierEnemyTowns)) blob.tierEnemyTowns = blob.tierEnemyTowns.map(t=> t&&Array.isArray(t.roster) ? {...t, roster: t.roster.map(scaleVal)} : t);
+      if(blob.seasonStartSnapshot&&Array.isArray(blob.seasonStartSnapshot.heroes)) blob.seasonStartSnapshot = {...blob.seasonStartSnapshot, heroes: blob.seasonStartSnapshot.heroes.map(scaleVal)};
+      if(Array.isArray(blob.transferBids)) blob.transferBids = blob.transferBids.map(b=> b&&b.offer>0 ? {...b, offer: Math.round(b.offer*TRANSFER_FEE_SCALE)} : b);
+      blob.v = 2;
+    }
     // Normalise heroes — ensure traits is always an array
     if(blob.heroes) blob.heroes = blob.heroes.map(h=>({...h, traits: Array.isArray(h.traits)?h.traits:[]}));
     return blob;

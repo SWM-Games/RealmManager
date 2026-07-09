@@ -38,6 +38,13 @@ const TIER_ORDER = ["iron", "bronze", "silver", "gold", "platinum"];
 const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
 const weeklyRankIncome = (tid, position) => TIERS[tid].tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position || 8) - 1)] || 0);
 
+// Transfer-fee scale (Football-Manager-style): a hero's signing fee should be a
+// real multiple of their annual wage, not a rounding error. Pre-scale the fee was
+// ~11-15% of annual salary; this lifts a standard hero to ~1x annual wage and a
+// star to several times it. Applied to every hero value origin. Keep in sync with
+// src/App.jsx TRANSFER_FEE_SCALE.
+const TRANSFER_FEE_SCALE = 6;
+
 const TIER_POT = {
   iron:     { standard: [30, 48], premium: [42, 58], elite: null },
   bronze:   { standard: [38, 56], premium: [50, 66], elite: null },
@@ -120,7 +127,7 @@ function makeHeroBase(pot, stage, progress, statLoFrac, statHiFrac, level, role,
     stage, stageProgress: progress, level, xp: xpForLevel(level),
     morale: rand(55, 85), fatigue: 0, injured: false, injuryWeeks: 0, retired: false,
     salary: Math.floor(avg * rand(13, 16) / 10 + level * rand(6, 10)),
-    value: Math.max(100, Math.floor(avg * 7)),
+    value: Math.max(100, Math.floor(avg * 7 * TRANSFER_FEE_SCALE)),
     contractWeeksLeft: rand(1, 3) * 42, weeksUnplayed: 0, fodder: false, marketTier: "standard",
   };
 }
@@ -159,7 +166,7 @@ function generateMarketHero(tierId, premium, elite) {
   const level = Math.min(MAX_LEVEL, rand(lvMin, lvMax) + tierLvBonus);
   const potBonus = Math.max(0, pot - 50) * 5;
   // NEW: price includes the level term (arbitrage fix)
-  const baseValue = Math.floor(avg * 7 * (1 + level * 0.32) + potBonus * 0.3 + rand(-30, 30));
+  const baseValue = Math.floor((avg * 7 * (1 + level * 0.32) + potBonus * 0.3) * TRANSFER_FEE_SCALE + rand(-30, 30));
   const valueMult = elite ? rand(22, 28) / 10 : premium ? rand(15, 20) / 10 : rand(10, 12) / 10;
   const isFree = !elite && !premium && stage === "prospect" && level === 0;
   const value = isFree ? 0 : Math.max(100, Math.floor(baseValue * valueMult));
@@ -174,7 +181,7 @@ function generateMarketHero(tierId, premium, elite) {
 function calcHeroValue(h) {
   const vals = ALL_STATS.map((s) => h.stats[s] || 0);
   const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-  const base = Math.floor(avg * 7 * (1 + (h.level || 0) * 0.32));
+  const base = Math.floor(avg * 7 * (1 + (h.level || 0) * 0.32) * TRANSFER_FEE_SCALE);
   const mult = h.marketTier === "elite" ? rand(22, 28) / 10 : h.marketTier === "premium" ? rand(15, 20) / 10 : 1;
   return Math.max(100, Math.floor(base * mult));
 }
