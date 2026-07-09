@@ -4732,7 +4732,7 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
                 By courier · to the Steward of {townName||"the Realm"}
               </div>
               <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:th.ink,paddingRight:48}}>{event.title}</div>
-              <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{th.label} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}</div>
+              <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{th.label} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}{event.stats?.length?` · tests ${event.stats.join(" + ")}`:""}</div>
               <div style={{fontSize:11.5,color:"#4A4335",lineHeight:1.65,fontStyle:"italic"}}>
                 {th.salutation}
               </div>
@@ -7900,7 +7900,7 @@ export default function App(){
   const generateBids=(currentHeroes,currentWeek,listed)=>{
     const bidding=[];
     currentHeroes.forEach(h=>{
-      if(h.injured||h.retired) return;
+      if(h.injured||h.retired||(h.awayWeeks||0)>0) return; // away heroes (events/retraining) aren't on the market
       const isListed=listed.has(h.id);
       const phase=agePhase(h);
 
@@ -8026,6 +8026,10 @@ export default function App(){
   }
 
   const resolveEventOutcome = (hero, eventDef) => {
+    // Harden against malformed/legacy pendingEvent blobs restored from an older
+    // save — missing reward/stats/theme once threw here and stranded the hero,
+    // re-resolving (and re-crashing) every subsequent week.
+    eventDef = { ...(eventDef||{}), reward:(eventDef&&eventDef.reward)||{}, stats:(eventDef&&eventDef.stats)||[] };
     const matchScore = calcMatchScore(hero, eventDef);
     const { success, partial, failure } = calcEventSuccessChance(matchScore);
     const roll = Math.random();
@@ -8144,7 +8148,7 @@ export default function App(){
     // The sender writes back — the return banner reads like a dispatch, not a receipt
     const themeDef = EVENT_THEMES[eventDef.theme];
     const report = themeDef
-      ? pick(themeDef.returnLines[outcome] || []).replace(/\{hero\}/g, hero.name.split(" ")[0])
+      ? (pick(themeDef.returnLines?.[outcome] || []) || "").replace(/\{hero\}/g, hero.name.split(" ")[0])
       : null;
 
     return { outcome, heroUpdates, notifications, goldGain: heroUpdates._goldGain||0, report };
@@ -8219,6 +8223,10 @@ export default function App(){
     if(!opponent){addLog("No opponent scheduled this week!","danger");return;}
     const placed=POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
     if(placed.length<3){addLog("Assign at least 3 heroes in Tactics first!","danger");return;}
+    // Re-validate eligibility at send time — the picker blocks away/injured heroes, but preset-load,
+    // save reload, and the weekly formation re-sync can leave one in the lineup.
+    const unavailable=placed.filter(h=>h.injured||(h.awayWeeks||0)>0);
+    if(unavailable.length){addLog(`${unavailable.map(h=>h.name).join(", ")} ${unavailable.length>1?"are":"is"} unavailable (injured or away) — clear them from Tactics first.`,"danger");return;}
 
     // Apply challenge modifier if active
     let battleOpponent = opponent;
@@ -8435,7 +8443,9 @@ export default function App(){
               const u = resolution.heroUpdates;
               if(u.stats)       h = {...h, stats: u.stats};
               if(u.traits)      h = {...h, traits: u.traits};
-              if(u.xp!=null)    { const newXP=u.xp; const newLv=Math.min(MAX_LEVEL,levelFromXp(newXP)); const newStats=newLv>h.level?growHeroStats({...h,level:h.level},newLv,buildings):h.stats; h={...h,xp:newXP,level:newLv,stats:{...h.stats,...newStats},value:calcHeroValue({...h,level:newLv})}; }
+              // resolveEventOutcome already grew stats (u.stats) and computed level/value —
+              // just carry them through. (Re-growing here double-counted the level-up gains.)
+              if(u.xp!=null)    { h = {...h, xp:u.xp, ...(u.level!=null?{level:u.level}:{}), ...(u.value!=null?{value:u.value}:{})}; }
               if(u.morale!=null)   h = {...h, morale: u.morale};
               if(u.fatigue!=null)  h = {...h, fatigue: u.fatigue};
               if(u.injured)        h = {...h, injured:true, injuryWeeks:u.injuryWeeks||1};
@@ -8846,7 +8856,10 @@ export default function App(){
 
     // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule).
     // Also record the player's match in the opponent's league row so their W/L tracks the actual outcome.
-    if(!isLegendary){
+    // Skip on the season-ending week: endSeason has already zeroed the new league table, and running
+    // the sim here would re-stamp a week of W/L onto the fresh standings (rivals showing games played
+    // before the new season starts).
+    if(!isLegendary && !seasonEnding){
       setLeagueTable(prev=>{
         const {updated,results}=simulateEnemyWeek(week+1,raidEnemy.name,prev,tierEnemyTowns);
         const oppRow=updated[raidEnemy.name]||{wins:0,losses:0,power:raidEnemy.power};
@@ -9017,23 +9030,32 @@ export default function App(){
     const newTier = TIERS[newTierId];
 
     // ── GENERATE NEW TIER TOWNS ───────────────────────────────────────────
-    // Top 2 AI promote out, bottom 2 relegate out, rest stay but power refreshes
-    const sortedAI = standings.filter(t=>!t.isPlayer);
-    const promotedOut = sortedAI.slice(0,2).map(t=>t.name); // top 2 AI leave
-    const relegatedOut = sortedAI.slice(-2).map(t=>t.name); // bottom 2 AI leave
-    const staying = (tierEnemyTowns||[]).filter(t=>!promotedOut.includes(t.name)&&!relegatedOut.includes(t.name));
+    const tierChanged = newTierIdx !== tierIdx;
+    let newTierTowns;
+    if(tierChanged){
+      // Player promoted/relegated into a different tier — it's an entirely new league,
+      // so draw a fresh set of 7 towns from the DESTINATION tier's own name pool.
+      // (Carrying the old tier's teams over is what made bronze reuse iron names.)
+      newTierTowns = generateTierTowns(newTierId, []).slice(0,7);
+    } else {
+      // Held position: top 2 AI promote out, bottom 2 relegate out, rest stay but power refreshes
+      const sortedAI = standings.filter(t=>!t.isPlayer);
+      const promotedOut = sortedAI.slice(0,2).map(t=>t.name); // top 2 AI leave
+      const relegatedOut = sortedAI.slice(-2).map(t=>t.name); // bottom 2 AI leave
+      const staying = (tierEnemyTowns||[]).filter(t=>!promotedOut.includes(t.name)&&!relegatedOut.includes(t.name));
 
-    // Refresh power of staying teams; rosters and squad reports expire with
-    // the season (scouting is seasonal work, and squads turn over)
-    const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax), roster:undefined, squadScouted:false, soldThisSeason:0}));
+      // Refresh power of staying teams; rosters and squad reports expire with
+      // the season (scouting is seasonal work, and squads turn over)
+      const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax), roster:undefined, squadScouted:false, soldThisSeason:0}));
 
-    // Generate replacements: 2 from tier above (promoted in from below), 2 from tier below (relegated from above)
-    const existingNames = refreshedStaying.map(t=>t.name);
-    const tierBelow = TIER_ORDER[Math.max(0, newTierIdx-1)];
-    const tierAbove = TIER_ORDER[Math.min(TIER_ORDER.length-1, newTierIdx+1)];
-    const newFromBelow = generateTierTowns(tierBelow, existingNames).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(newTier.powerMin,Math.round(newTier.powerMin*1.3))}));
-    const newFromAbove = generateTierTowns(tierAbove, [...existingNames,...newFromBelow.map(t=>t.name)]).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(Math.round(newTier.powerMax*0.7),newTier.powerMax)}));
-    const newTierTowns = [...refreshedStaying, ...newFromBelow, ...newFromAbove].slice(0,7);
+      // Generate replacements: 2 from tier above (promoted in from below), 2 from tier below (relegated from above)
+      const existingNames = refreshedStaying.map(t=>t.name);
+      const tierBelow = TIER_ORDER[Math.max(0, newTierIdx-1)];
+      const tierAbove = TIER_ORDER[Math.min(TIER_ORDER.length-1, newTierIdx+1)];
+      const newFromBelow = generateTierTowns(tierBelow, existingNames).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(newTier.powerMin,Math.round(newTier.powerMin*1.3))}));
+      const newFromAbove = generateTierTowns(tierAbove, [...existingNames,...newFromBelow.map(t=>t.name)]).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(Math.round(newTier.powerMax*0.7),newTier.powerMax)}));
+      newTierTowns = [...refreshedStaying, ...newFromBelow, ...newFromAbove].slice(0,7);
+    }
 
     // Build new league table
     const newLeagueTable = {};
