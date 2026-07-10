@@ -581,13 +581,21 @@ function agePhase(hero) {
 function agePhaseLabel(p){ return {prospect:"Prospect",rising:"Rising",peak:"Peak",fading:"Fading",veteran:"Veteran"}[p]||p; }
 function agePhaseColor(p){ return {prospect:"#5F4B66",rising:"#3C5A78",peak:"#40614F",fading:"#8A6D3B",veteran:"#9A5B2B"}[p]||"#6E6350"; }
 
+// Transfer-fee scale (Football-Manager-style): a signing fee should be a real
+// multiple of the hero's annual wage, not a rounding error. Pre-scale the fee ran
+// ~11-15% of annual salary; this lifts a standard starter to ~1x annual wage, a raw
+// prospect to ~0.7x, and an elite star to several times it. Applied to every hero
+// value origin (calcHeroValue, generateHero, the starting star). MUST stay in sync
+// with scripts/balance-sim.mjs TRANSFER_FEE_SCALE — re-run `npm run sim` if changed.
+const TRANSFER_FEE_SCALE = 6;
+
 // Recalculate a hero's market value based on current stats and level.
 export function calcHeroValue(hero) {
   const ALL_STAT_KEYS = Object.values(STAT_GROUPS).flat();
   const statVals = ALL_STAT_KEYS.map(s=>hero.stats[s]||0);
   const avg = statVals.reduce((a,b)=>a+b,0)/statVals.length;
   const tier = hero.marketTier;
-  const base = Math.floor(avg * 7 * (1 + (hero.level||0) * 0.32));
+  const base = Math.floor(avg * 7 * (1 + (hero.level||0) * 0.32) * TRANSFER_FEE_SCALE);
   const mult = tier==="elite"?rand(22,28)/10 : tier==="premium"?rand(15,20)/10 : 1;
   return Math.max(100, Math.floor(base * mult));
 }
@@ -1542,7 +1550,7 @@ export function generateStartingSquad() {
     stats: starStats,
     traits: starTraits,
     level: 2, xp: xpForLevel(2),
-    value: Math.max(80, Math.floor(starAvg * 7 * (1 + 0 * 0.32) + rand(-20,20))),
+    value: Math.max(80, Math.floor(starAvg * 7 * (1 + 0 * 0.32) * TRANSFER_FEE_SCALE + rand(-20,20))),
     salary: Math.floor(starAvg*rand(13,16)/10),
     contractYears: starContract,
     contractWeeks: starContract*WEEKS_PER_CONTRACT_YEAR,
@@ -2042,17 +2050,19 @@ export function calcFormationRating(formation){
 export const TIERS = {
   // tributeBase values are sim-calibrated (scripts/balance-sim.mjs) together
   // with the loss purse and position bonus — retune there before changing here
-  iron:     { id:"iron",     name:"Iron",     icon:"",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:105, xpRange:[20,32] },
-  bronze:   { id:"bronze",   name:"Bronze",   icon:"",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:160, xpRange:[26,40] },
-  silver:   { id:"silver",   name:"Silver",   icon:"",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:260, xpRange:[32,48] },
-  gold:     { id:"gold",     name:"Gold",     icon:"",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:400, xpRange:[36,70] },
-  platinum: { id:"platinum", name:"Platinum", icon:"",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:560, xpRange:[45,85] },
+  iron:     { id:"iron",     name:"Iron",     icon:"",  color:"#6B665C", powerMin:67,  powerMax:105, difficulty:1, tributeBase:170, xpRange:[20,32] },
+  bronze:   { id:"bronze",   name:"Bronze",   icon:"",  color:"#7D5A33", powerMin:93,  powerMax:147, difficulty:2, tributeBase:225, xpRange:[26,40] },
+  silver:   { id:"silver",   name:"Silver",   icon:"",  color:"#7D7A70", powerMin:127, powerMax:199, difficulty:3, tributeBase:325, xpRange:[32,48] },
+  gold:     { id:"gold",     name:"Gold",     icon:"",  color:"#8A6D3B", powerMin:167, powerMax:262, difficulty:4, tributeBase:465, xpRange:[36,70] },
+  platinum: { id:"platinum", name:"Platinum", icon:"",  color:"#5F4B66", powerMin:207, powerMax:325, difficulty:5, tributeBase:625, xpRange:[45,85] },
 };
 export const TIER_ORDER = ["iron","bronze","silver","gold","platinum"];
 
-// Tribute = tierBase + position bonus (1st gets most, 8th gets base)
-// Position matters: the table is a weekly income race, not just a season-end verdict
-export const TIER_POSITION_BONUS = [280, 200, 140, 80, 40, 0, 0, 0];
+// Tribute = tierBase + position bonus (1st gets most, 8th gets base).
+// The swing is deliberately modest so TIER dominates POSITION: promotion is the big
+// income reward, placement only a nudge. (A wide swing let 1st-in-Iron out-earn
+// mid-table Bronze, which read as backwards — a lower division paying more.)
+export const TIER_POSITION_BONUS = [80, 58, 42, 28, 16, 6, 0, 0];
 
 // Name pools — 15 per tier, thematically distinct
 const TIER_NAME_POOLS = {
@@ -2347,21 +2357,21 @@ export function calcRaceSynergy(formation) {
 
 export const BUILDINGS = [
   // ── IRON ─────────────────────────────────────────────────────────────────────
-  { id:"barracks",  name:"Barracks",         icon:"", cost:1200, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
-  { id:"tavern",    name:"Tavern",            icon:"", cost:1000, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
+  { id:"barracks",  name:"Barracks",         icon:"", cost:1800, tierRequired:"iron",     desc:"The drillmaster does not believe in rest. Heroes gain +20% XP from battles." },
+  { id:"tavern",    name:"Tavern",            icon:"", cost:1400, tierRequired:"iron",     desc:"Bad ale, good company. All heroes +3 morale each week." },
   // ── BRONZE ───────────────────────────────────────────────────────────────────
-  { id:"infirmary", name:"Infirmary",         icon:"",  cost:1000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
-  { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:1100, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
+  { id:"infirmary", name:"Infirmary",         icon:"",  cost:4000, tierRequired:"bronze",   desc:"Clean bandages, fewer prayers. Heroes suffer 30% fewer injuries, and injuries heal 1 week faster." },
+  { id:"lodge",     name:"Recovery Lodge",    icon:"", cost:3500, tierRequired:"bronze",   desc:"Hot springs and enforced quiet. Bench heroes recover fatigue 60% faster." },
   // ── SILVER ───────────────────────────────────────────────────────────────────
-  { id:"trainyard", name:"Training Grounds",  icon:"", cost:1200, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
-  { id:"network",   name:"Talent Network",    icon:"", cost:1400, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
-  { id:"trading",   name:"Trading Post",      icon:"", cost:1600, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
+  { id:"trainyard", name:"Training Grounds",  icon:"", cost:6000, tierRequired:"silver",   desc:"Nobody watches from the fence here. Bench heroes earn 20% of that week's battle XP, and heroes can retrain to a new class." },
+  { id:"network",   name:"Talent Network",    icon:"", cost:7000, tierRequired:"silver",   desc:"Ears in every tavern in the realm. Market refreshes every 3 weeks instead of every 6." },
+  { id:"trading",   name:"Trading Post",      icon:"", cost:8000, tierRequired:"silver",   desc:"Your merchants know what a hero is worth — and add a margin. Heroes open to offers sell at 120% value and attract bids 50% more often." },
   // ── GOLD ─────────────────────────────────────────────────────────────────────
-  { id:"bazaar",    name:"Grand Bazaar",      icon:"", cost:1800, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
-  { id:"scouts",    name:"Observatory",     icon:"", cost:2800, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
+  { id:"bazaar",    name:"Grand Bazaar",      icon:"", cost:14000, tierRequired:"gold",     desc:"Where ambition comes to be bought. Unlocks premium heroes in the market." },
+  { id:"scouts",    name:"Observatory",     icon:"", cost:18000, tierRequired:"gold",     desc:"The stars talk, if you pay attention. Reveals potential bucket (Low/Med/High/Elite) for all heroes in the market before signing." },
   // ── PLATINUM ─────────────────────────────────────────────────────────────────
-  { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:2200, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
-  { id:"legends",   name:"Hall of Legends",   icon:"", cost:2000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
+  { id:"sanctum",   name:"Elite Sanctum",     icon:"", cost:22000, tierRequired:"platinum", desc:"Legends don't answer letters. They answer this. Unlocks elite heroes in the market." },
+  { id:"legends",   name:"Hall of Legends",   icon:"", cost:18000, tierRequired:"platinum", desc:"The old guard never really leaves. Each retired hero adds weekly morale to your squad, scaled by their level. Cap: +20/week." },
 ];
 
 // Per-tier build slots — you may construct only this many buildings per tier,
@@ -2562,9 +2572,8 @@ export function calcTierPosition(wins, winRate, leagueTable, tierEnemyTowns) {
   return playerIdx + 1;
 }
 
-// Weekly tribute income — now flat per tier (no position bonus)
+// Weekly tribute income — tier base + a modest league-position bonus (1st earns most)
 export function weeklyRankIncome(tierId, position) {
-  // Weekly tribute income — tier base + league position bonus (1st earns most)
   const tier = TIERS[tierId] || TIERS.iron;
   return tier.tributeBase + (TIER_POSITION_BONUS[Math.max(0, (position||8)-1)] || 0);
 }
@@ -2770,8 +2779,8 @@ export function generateHero(id,forSale=false,premium=false,elite=false,forcedRo
   // Salary: base wage plus experience premium — a level 10 hero costs noticeably more than a level 0
   const salary=Math.floor(avgStat*rand(13,16)/10 + heroLevel*rand(6,10));
   const potBonus=Math.max(0,stats.Potential-50)*5;
-  // Value: matches calcHeroValue's level multiplier so recomputed value after level-up doesn't jump
-  const baseValue=Math.floor(avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3 + rand(-30,30));
+  // Value: matches calcHeroValue's level multiplier + fee scale so recomputed value after level-up doesn't jump
+  const baseValue=Math.floor((avgStat * 7 * (1 + heroLevel * 0.32) + potBonus*0.3) * TRANSFER_FEE_SCALE + rand(-30,30));
   const valueMult = elite ? rand(22,28)/10 : premium ? rand(15,20)/10 : forSale ? rand(10,12)/10 : 1;
   // Contract length appropriate to career stage — veterans don't sign 4-year deals
   const STAGE_CONTRACT_MAX = {prospect:3, rising:4, peak:4, fading:2, veteran:1};
@@ -3649,7 +3658,7 @@ export function buildRaidSimulation(formation, enemy, buildings, playerRank, ngP
   let heroXP = Math.round(rand(xpMin, xpMax) * (hasBarracks?1.2:1));
   // Losers collect a small purse too — no week is worth zero. This is the
   // anti-death-spiral valve: a cold streak stays survivable (sim-calibrated).
-  let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(60,130)+enemy.difficulty*30;
+  let goldSwing = won ? rand(300,700)+enemy.difficulty*100 : rand(50,110)+enemy.difficulty*25;
 
   // Resolve enemy abilities — check stat thresholds, collect effects
   const abilityResults = (enemy.abilities||[]).map(ability => {
@@ -4732,7 +4741,7 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
                 By courier · to the Steward of {townName||"the Realm"}
               </div>
               <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:th.ink,paddingRight:48}}>{event.title}</div>
-              <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{th.label} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}</div>
+              <div style={{fontSize:10,color:"#6E6350",marginBottom:8}}>{th.label} · {event.awayWeeks[0]} week{event.awayWeeks[0]>1?"s":""} away · {event.heroesNeeded} hero{event.heroesNeeded>1?"es":""}{event.stats?.length?` · tests ${event.stats.join(" + ")}`:""}</div>
               <div style={{fontSize:11.5,color:"#4A4335",lineHeight:1.65,fontStyle:"italic"}}>
                 {th.salutation}
               </div>
@@ -6910,7 +6919,7 @@ function deserializeFormation(saved, heroes) {
 function saveGame(state) {
   try {
     const blob = {
-      v: 1,
+      v: 2,
       gold: state.gold,
       week: state.week,
       heroes: state.heroes,
@@ -6968,7 +6977,19 @@ function loadGame() {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
     const blob = JSON.parse(raw);
-    if (!blob || blob.v !== 1) return null;
+    if (!blob || (blob.v !== 1 && blob.v !== 2)) return null;
+    // v1 → v2: transfer fees were scaled up (TRANSFER_FEE_SCALE). Stored values are
+    // pre-scale, so multiply every persisted hero value to price old squads/market/
+    // rivals consistently with the new market. Free heroes (value 0) stay free.
+    if(blob.v === 1){
+      const scaleVal = h => (h && h.value>0) ? {...h, value: Math.round(h.value*TRANSFER_FEE_SCALE)} : h;
+      if(Array.isArray(blob.heroes)) blob.heroes = blob.heroes.map(scaleVal);
+      if(Array.isArray(blob.market)) blob.market = blob.market.map(scaleVal);
+      if(Array.isArray(blob.tierEnemyTowns)) blob.tierEnemyTowns = blob.tierEnemyTowns.map(t=> t&&Array.isArray(t.roster) ? {...t, roster: t.roster.map(scaleVal)} : t);
+      if(blob.seasonStartSnapshot&&Array.isArray(blob.seasonStartSnapshot.heroes)) blob.seasonStartSnapshot = {...blob.seasonStartSnapshot, heroes: blob.seasonStartSnapshot.heroes.map(scaleVal)};
+      if(Array.isArray(blob.transferBids)) blob.transferBids = blob.transferBids.map(b=> b&&b.offer>0 ? {...b, offer: Math.round(b.offer*TRANSFER_FEE_SCALE)} : b);
+      blob.v = 2;
+    }
     // Normalise heroes — ensure traits is always an array
     if(blob.heroes) blob.heroes = blob.heroes.map(h=>({...h, traits: Array.isArray(h.traits)?h.traits:[]}));
     return blob;
@@ -6983,12 +7004,18 @@ function clearSave() {
 
 // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
 
+// Playtest gate: append ?dev to the URL to reveal testing controls (e.g. starting
+// in a higher tier to skip straight to Bronze). Invisible in normal play; safe to
+// ship because it only unlocks when the flag is present in the query string.
+const DEV_MODE = (() => { try { return new URLSearchParams(window.location.search).has("dev"); } catch { return false; } })();
+
 function SetupScreen({ onComplete }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(TOWN_COLORS[0].value);
   const [nameError, setNameError] = useState(false);
   const [step, setStep] = useState("setup"); // "setup" | "boons"
   const [selectedBoons, setSelectedBoons] = useState(new Set());
+  const [startTier, setStartTier] = useState("iron"); // dev-only: which tier a new game starts in
   const ng = loadNGPlus();
   const availableBoons = ng?.earnedBoons ?? [];
 
@@ -6998,7 +7025,7 @@ function SetupScreen({ onComplete }) {
     if (availableBoons.length > 0) {
       setStep("boons");
     } else {
-      onComplete(trimmed, color, []);
+      onComplete(trimmed, color, [], startTier);
     }
   };
 
@@ -7056,11 +7083,11 @@ function SetupScreen({ onComplete }) {
           </div>
 
           <div style={{display:"flex",gap:10}}>
-            <button onClick={()=>onComplete(name.trim(), color, [])}
+            <button onClick={()=>onComplete(name.trim(), color, [], startTier)}
               style={{flex:1,padding:"11px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.054)",color:"#6E6350",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11}}>
               No Boons
             </button>
-            <button onClick={()=>onComplete(name.trim(), color, [...selectedBoons])}
+            <button onClick={()=>onComplete(name.trim(), color, [...selectedBoons], startTier)}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",
                 background:selectedBoons.size>0?"#9A5B2B":"rgba(60,52,38,0.108)",
                 color:selectedBoons.size>0?"#F0E8D5":"#8A7F68",
@@ -7166,6 +7193,25 @@ function SetupScreen({ onComplete }) {
           </div>
         </div>
 
+        {/* Dev-only: starting tier (playtest — skip straight to Bronze etc.) */}
+        {DEV_MODE&&(
+          <div style={{marginBottom:24,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.10)",border:"1px dashed rgba(154,91,43,0.5)"}}>
+            <div style={{fontSize:11,color:"#9A5B2B",fontWeight:700,letterSpacing:1,marginBottom:8}}>PLAYTEST · STARTING TIER</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {TIER_ORDER.map(tid=>(
+                <button key={tid} onClick={()=>setStartTier(tid)}
+                  style={{padding:"6px 12px",borderRadius:3,border:"none",cursor:"pointer",
+                    background:startTier===tid?"#9A5B2B":"rgba(60,52,38,0.072)",
+                    color:startTier===tid?"#F0E8D5":"#7A6F58",
+                    fontFamily:"'Alegreya Sans',sans-serif",fontWeight:startTier===tid?700:400,fontSize:11}}>
+                  {TIERS[tid].name}
+                </button>
+              ))}
+            </div>
+            {startTier!=="iron"&&<div style={{fontSize:9,color:"#6E6350",marginTop:6}}>Starts a fresh campaign seeded in {TIERS[startTier].name} with a 20,000g stipend to build a competitive squad.</div>}
+          </div>
+        )}
+
         {/* Preview */}
         <div style={{
           padding:"12px 14px", borderRadius:3, marginBottom:24,
@@ -7177,7 +7223,7 @@ function SetupScreen({ onComplete }) {
               <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:color}}>
                 {name.trim()||"Your Realm"}
               </div>
-              <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold</div>
+              <div style={{fontSize:9,color:"#6E6350",marginTop:1}}>{DEV_MODE&&startTier!=="iron"?`${TIERS[startTier].name} · Season 1 · 10 heroes · 20,000g starting gold`:"Rank #9 of 9 · Season 1 · 10 heroes · 2,500g starting gold"}</div>
             </div>
           </div>
         </div>
@@ -7388,7 +7434,7 @@ export default function App(){
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
 
-  const handleSetupComplete = (name, color, selectedBoons=[]) => {
+  const handleSetupComplete = (name, color, selectedBoons=[], startTier="iron") => {
     setTownName(name);
     setTownColor(color);
     // Apply selected boons
@@ -7417,6 +7463,23 @@ export default function App(){
         });
         saveNGPlus({...ng, earnedBoons:remaining});
       }
+    }
+    // Dev playtest: seed a fresh campaign directly into a higher tier so testing
+    // can start where it's valuable (Bronze+) instead of grinding out Iron. Only
+    // reachable via the ?dev URL flag. Overrides the tier-dependent state that the
+    // useState initializers (and the mount effect that scheduled an Iron opponent)
+    // set to Iron by default.
+    if(DEV_MODE && startTier && startTier!=="iron"){
+      const towns = generateTierTowns(startTier);
+      const table = {};
+      towns.forEach(e=>{ table[e.name]={wins:0,losses:0,power:e.power}; });
+      setPlayerTier(startTier);
+      setTierPosition(8);
+      setTierEnemyTowns(towns);
+      setLeagueTable(table);
+      setMarket(Array.from({length:12},(_,i)=>generateHero(1000+i,true,false,false,null,null,startTier)));
+      setGold(20000);
+      setScheduledOpponent(generateScheduledOpponent(1, table, towns, startTier));
     }
     setSetupDone(true);
   };
@@ -7900,7 +7963,7 @@ export default function App(){
   const generateBids=(currentHeroes,currentWeek,listed)=>{
     const bidding=[];
     currentHeroes.forEach(h=>{
-      if(h.injured||h.retired) return;
+      if(h.injured||h.retired||(h.awayWeeks||0)>0) return; // away heroes (events/retraining) aren't on the market
       const isListed=listed.has(h.id);
       const phase=agePhase(h);
 
@@ -8026,6 +8089,10 @@ export default function App(){
   }
 
   const resolveEventOutcome = (hero, eventDef) => {
+    // Harden against malformed/legacy pendingEvent blobs restored from an older
+    // save — missing reward/stats/theme once threw here and stranded the hero,
+    // re-resolving (and re-crashing) every subsequent week.
+    eventDef = { ...(eventDef||{}), reward:(eventDef&&eventDef.reward)||{}, stats:(eventDef&&eventDef.stats)||[] };
     const matchScore = calcMatchScore(hero, eventDef);
     const { success, partial, failure } = calcEventSuccessChance(matchScore);
     const roll = Math.random();
@@ -8144,7 +8211,7 @@ export default function App(){
     // The sender writes back — the return banner reads like a dispatch, not a receipt
     const themeDef = EVENT_THEMES[eventDef.theme];
     const report = themeDef
-      ? pick(themeDef.returnLines[outcome] || []).replace(/\{hero\}/g, hero.name.split(" ")[0])
+      ? (pick(themeDef.returnLines?.[outcome] || []) || "").replace(/\{hero\}/g, hero.name.split(" ")[0])
       : null;
 
     return { outcome, heroUpdates, notifications, goldGain: heroUpdates._goldGain||0, report };
@@ -8219,6 +8286,10 @@ export default function App(){
     if(!opponent){addLog("No opponent scheduled this week!","danger");return;}
     const placed=POS_KEYS.flatMap(p=>(formation[p]||[]).filter(Boolean));
     if(placed.length<3){addLog("Assign at least 3 heroes in Tactics first!","danger");return;}
+    // Re-validate eligibility at send time — the picker blocks away/injured heroes, but preset-load,
+    // save reload, and the weekly formation re-sync can leave one in the lineup.
+    const unavailable=placed.filter(h=>h.injured||(h.awayWeeks||0)>0);
+    if(unavailable.length){addLog(`${unavailable.map(h=>h.name).join(", ")} ${unavailable.length>1?"are":"is"} unavailable (injured or away) — clear them from Tactics first.`,"danger");return;}
 
     // Apply challenge modifier if active
     let battleOpponent = opponent;
@@ -8435,7 +8506,9 @@ export default function App(){
               const u = resolution.heroUpdates;
               if(u.stats)       h = {...h, stats: u.stats};
               if(u.traits)      h = {...h, traits: u.traits};
-              if(u.xp!=null)    { const newXP=u.xp; const newLv=Math.min(MAX_LEVEL,levelFromXp(newXP)); const newStats=newLv>h.level?growHeroStats({...h,level:h.level},newLv,buildings):h.stats; h={...h,xp:newXP,level:newLv,stats:{...h.stats,...newStats},value:calcHeroValue({...h,level:newLv})}; }
+              // resolveEventOutcome already grew stats (u.stats) and computed level/value —
+              // just carry them through. (Re-growing here double-counted the level-up gains.)
+              if(u.xp!=null)    { h = {...h, xp:u.xp, ...(u.level!=null?{level:u.level}:{}), ...(u.value!=null?{value:u.value}:{})}; }
               if(u.morale!=null)   h = {...h, morale: u.morale};
               if(u.fatigue!=null)  h = {...h, fatigue: u.fatigue};
               if(u.injured)        h = {...h, injured:true, injuryWeeks:u.injuryWeeks||1};
@@ -8846,7 +8919,10 @@ export default function App(){
 
     // Simulate enemy-vs-enemy matches this week (skip for legendary — they're outside normal schedule).
     // Also record the player's match in the opponent's league row so their W/L tracks the actual outcome.
-    if(!isLegendary){
+    // Skip on the season-ending week: endSeason has already zeroed the new league table, and running
+    // the sim here would re-stamp a week of W/L onto the fresh standings (rivals showing games played
+    // before the new season starts).
+    if(!isLegendary && !seasonEnding){
       setLeagueTable(prev=>{
         const {updated,results}=simulateEnemyWeek(week+1,raidEnemy.name,prev,tierEnemyTowns);
         const oppRow=updated[raidEnemy.name]||{wins:0,losses:0,power:raidEnemy.power};
@@ -9017,23 +9093,32 @@ export default function App(){
     const newTier = TIERS[newTierId];
 
     // ── GENERATE NEW TIER TOWNS ───────────────────────────────────────────
-    // Top 2 AI promote out, bottom 2 relegate out, rest stay but power refreshes
-    const sortedAI = standings.filter(t=>!t.isPlayer);
-    const promotedOut = sortedAI.slice(0,2).map(t=>t.name); // top 2 AI leave
-    const relegatedOut = sortedAI.slice(-2).map(t=>t.name); // bottom 2 AI leave
-    const staying = (tierEnemyTowns||[]).filter(t=>!promotedOut.includes(t.name)&&!relegatedOut.includes(t.name));
+    const tierChanged = newTierIdx !== tierIdx;
+    let newTierTowns;
+    if(tierChanged){
+      // Player promoted/relegated into a different tier — it's an entirely new league,
+      // so draw a fresh set of 7 towns from the DESTINATION tier's own name pool.
+      // (Carrying the old tier's teams over is what made bronze reuse iron names.)
+      newTierTowns = generateTierTowns(newTierId, []).slice(0,7);
+    } else {
+      // Held position: top 2 AI promote out, bottom 2 relegate out, rest stay but power refreshes
+      const sortedAI = standings.filter(t=>!t.isPlayer);
+      const promotedOut = sortedAI.slice(0,2).map(t=>t.name); // top 2 AI leave
+      const relegatedOut = sortedAI.slice(-2).map(t=>t.name); // bottom 2 AI leave
+      const staying = (tierEnemyTowns||[]).filter(t=>!promotedOut.includes(t.name)&&!relegatedOut.includes(t.name));
 
-    // Refresh power of staying teams; rosters and squad reports expire with
-    // the season (scouting is seasonal work, and squads turn over)
-    const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax), roster:undefined, squadScouted:false, soldThisSeason:0}));
+      // Refresh power of staying teams; rosters and squad reports expire with
+      // the season (scouting is seasonal work, and squads turn over)
+      const refreshedStaying = staying.map(t=>({...t, wins:0, losses:0, power:rand(newTier.powerMin, newTier.powerMax), roster:undefined, squadScouted:false, soldThisSeason:0}));
 
-    // Generate replacements: 2 from tier above (promoted in from below), 2 from tier below (relegated from above)
-    const existingNames = refreshedStaying.map(t=>t.name);
-    const tierBelow = TIER_ORDER[Math.max(0, newTierIdx-1)];
-    const tierAbove = TIER_ORDER[Math.min(TIER_ORDER.length-1, newTierIdx+1)];
-    const newFromBelow = generateTierTowns(tierBelow, existingNames).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(newTier.powerMin,Math.round(newTier.powerMin*1.3))}));
-    const newFromAbove = generateTierTowns(tierAbove, [...existingNames,...newFromBelow.map(t=>t.name)]).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(Math.round(newTier.powerMax*0.7),newTier.powerMax)}));
-    const newTierTowns = [...refreshedStaying, ...newFromBelow, ...newFromAbove].slice(0,7);
+      // Generate replacements: 2 from tier above (promoted in from below), 2 from tier below (relegated from above)
+      const existingNames = refreshedStaying.map(t=>t.name);
+      const tierBelow = TIER_ORDER[Math.max(0, newTierIdx-1)];
+      const tierAbove = TIER_ORDER[Math.min(TIER_ORDER.length-1, newTierIdx+1)];
+      const newFromBelow = generateTierTowns(tierBelow, existingNames).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(newTier.powerMin,Math.round(newTier.powerMin*1.3))}));
+      const newFromAbove = generateTierTowns(tierAbove, [...existingNames,...newFromBelow.map(t=>t.name)]).slice(0,2).map(t=>({...t,tierId:newTierId,power:rand(Math.round(newTier.powerMax*0.7),newTier.powerMax)}));
+      newTierTowns = [...refreshedStaying, ...newFromBelow, ...newFromAbove].slice(0,7);
+    }
 
     // Build new league table
     const newLeagueTable = {};

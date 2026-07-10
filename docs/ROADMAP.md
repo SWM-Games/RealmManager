@@ -10,7 +10,8 @@ scouting / rival rosters · rival managers & grudges · race synergies ·
 contracts & negotiation · NG+/achievements/boons pipeline (traced clean) ·
 save/load fields · art direction & legibility · Squad Leader system ·
 Wandering Master / The Challenge / Emissary · buildings (per-tier caps +
-Infirmary) · Guide tab accuracy.
+Infirmary) · Guide tab accuracy · season-2 economy (FM transfer fees,
+tier-scaled building costs, tribute swing, loss purse) · event-return path.
 
 ## Not yet reviewed — in priority order
 
@@ -18,6 +19,21 @@ Infirmary) · Guide tab accuracy.
 
 ## Resolved
 
+- **Season-2 playtest pass (PR #17)** — a second human play (reached S2) found a
+  crash and five bugs, all fixed: the event-return crash (unguarded `pendingEvent`
+  deref that stranded and re-crashed the hero every week) + a double stat-grow
+  alongside it; offers arriving for heroes away on events; the event modal not
+  showing the tested attribute; the Dominion board pre-filled with W/L at season
+  start (enemy sim ran after `endSeason` zeroed the table); away/injured heroes
+  still sendable into combat (`startBattle` now re-validates); and team names
+  carrying across tiers (league now regenerates from the destination tier's pool).
+  Plus a balance pass: **FM-scaled transfer fees** (`TRANSFER_FEE_SCALE`=6, save
+  v1→v2 migration), **tier-scaled building costs**, a **compressed tribute swing**
+  (tier now dominates position), and a **lighter loss purse** — together pulling
+  the gold plateau down from ~80–100k to a declining ~20–75k endgame. Sim bands
+  held (bankruptcy 0–2%, platinum ~S8). Added a `?dev` starting-tier picker to
+  skip Iron in playtests. Engine suite 32 → 42. Supersedes the buildings note
+  below re: the gold plateau.
 - **Game-speed vestige (removed)** — a quicker game mode was once concepted
   but abandoned; the rebalancing cost outweighed the benefit. All plumbing is
   gone: `GAME_SPEEDS`, module-level `ACTIVE_SPEED`, the xp/age/rank multipliers,

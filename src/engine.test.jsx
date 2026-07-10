@@ -154,7 +154,7 @@ describe("weeklyRankIncome", () => {
   it("pays the position gradient on top of tier base", () => {
     expect(weeklyRankIncome("iron", 1)).toBe(TIERS.iron.tributeBase + TIER_POSITION_BONUS[0]);
     expect(weeklyRankIncome("iron", 8)).toBe(TIERS.iron.tributeBase);
-    expect(weeklyRankIncome("platinum", 1)).toBe(TIERS.platinum.tributeBase + 280);
+    expect(weeklyRankIncome("platinum", 1)).toBe(TIERS.platinum.tributeBase + TIER_POSITION_BONUS[0]);
   });
   it("defaults to bottom-rank income when position is missing", () => {
     expect(weeklyRankIncome("iron", undefined)).toBe(TIERS.iron.tributeBase);
