@@ -137,8 +137,14 @@ named sender** — five themes, five voices, five wax seals (Mad Herod Vance /
 Warden-Captain Brask / Lady Amaranthe Veil / Magister Hollowquill / an
 unsigned hand). Heroes are chosen by stat match ± trait×theme chemistry
 (Coward −20% in the arena; Greedy skims 15% of event gold, flagged in the
-picker). Returns arrive as dispatches written in the sender's voice with a
-Delivered / In Part / Undone stamp. Specials (mutually exclusive on the weekly
+picker). **Difficulty is tier-scaled** (`TIER_EVENT_REQ`, stamped as `reqScale`
+at generation): the flat stat midpoints are silver-calibrated, so the bar eases
+at low tiers and rises at high ones — a hero strong in the tested stats is
+Possible/Strong at any tier while a weak or off-stat pick is a Longshot. The
+picker shows each candidate's **tested-stat values** (colour-coded) alongside
+the confidence verdict, so choices reward diverse stat spreads. Returns arrive
+as dispatches written in the sender's voice with a Delivered / In Part / Undone
+stamp. Specials (mutually exclusive on the weekly
 roll): the **Emissary** (gold/platinum, once/season — an opt-in diff-6
 exhibition, now rendered as a sealed letter matching the rest of the
 correspondence), **The Challenge** (Battle-tab banner — next battle +30% enemy
