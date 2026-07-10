@@ -2,8 +2,9 @@
 
 *A systems reference. Accurate as of 2026-07, including the post-overhaul
 review pass (Squad Leader, game-speed removal, the special events, the
-buildings rework, and the Guide-tab accuracy pass). See `docs/ROADMAP.md` for
-the review ledger.*
+buildings rework, and the Guide-tab accuracy pass) and the season-2 playtest
+pass (event-return crash + five bug fixes, FM-scaled transfer fees, and the
+economy rebalance). See `docs/ROADMAP.md` for the review ledger.*
 
 Realm Manager is a Football-Manager-style fantasy squad sim: run a realm's
 mercenary company through a five-tier league (Iron → Bronze → Silver → Gold →
@@ -84,9 +85,12 @@ injuries, contracts, aging, market, league sim, events) → repeat.
   **head-to-head grudge book**, and 1–2 abilities.
 - League table simulated weekly: your opponent inherits the inverse of your
   result; other towns pair off with power-weighted outcomes.
-- **Tribute** = tier base (105/160/260/400/560) + live position bonus
-  (280/200/140/80/40/0/0/0). Win gold = rand(300,700)+difficulty×100; losses
-  pay a small purse (rand(60,130)+difficulty×30) — the anti-death-spiral valve.
+- **Tribute** = tier base (170/225/325/465/625) + a modest position bonus
+  (80/58/42/28/16/6/0/0). The swing is deliberately small so TIER dominates
+  POSITION — promotion is the big income jump, placement only a nudge (1st in
+  Iron 250 < 3rd in Bronze 267). Win gold = rand(300,700)+difficulty×100; losses
+  pay a small purse (rand(50,110)+difficulty×25) — the anti-death-spiral valve,
+  trimmed ~15% in the season-2 pass.
 - Season end: top-2 promote, bottom-2 relegate, AI towns rotate, rosters and
   squad reports expire.
 
@@ -94,6 +98,11 @@ injuries, contracts, aging, market, league sim, events) → repeat.
 
 - **Free agents**: 12, refresh every 6 weeks (3 with Talent Network); prices
   include the level term (no flip arbitrage); premium/elite gated by buildings.
+- **Transfer fees are Football-Manager-scaled** (`TRANSFER_FEE_SCALE`=6, applied
+  at every value origin): a signing costs a real multiple of the hero's annual
+  wage — raw prospect ~0.7×, solid starter ~1.3×, elite star ~4×+ — not the old
+  ~11–15% rounding error. `value` is the single market currency (buy cost, sale
+  income, rival bids), so all move together. Save schema v2 migrates old saves ×6.
 - **Rival rosters (FM-style poaching)**: every town keeps six notables (two per
   lane) generated on first scout and calibrated so their lanes sum to the
   town's power. Squad reports cost 40×difficulty+40 (halved by Observatory).
@@ -109,8 +118,10 @@ injuries, contracts, aging, market, league sim, events) → repeat.
 
 11 buildings across the five tiers, but only a capped number are buildable per
 tier (`TIER_BUILD_SLOTS` = Iron 1 / Bronze 1 / Silver 2 / Gold 1 / Platinum 1 =
-6 of 11), so each tier is an either/or. Demolishing frees a slot but refunds no
-gold; rebuilding pays full price. Effects: Barracks +20% battle XP · Tavern +3
+6 of 11), so each tier is an either/or. Costs scale steeply by tier (Iron
+~1.4–1.8k → Bronze ~3.5–4k → Silver 6–8k → Gold 14–18k → Platinum 18–22k) so
+each is a genuine multi-week save, not pocket change. Demolishing frees a slot
+but refunds no gold; rebuilding pays full price. Effects: Barracks +20% battle XP · Tavern +3
 morale/wk · Infirmary −30% injury chance + heal 1 wk faster · Recovery Lodge
 bench fatigue recovery +60% · Training Grounds bench +20% battle XP · Talent
 Network market refresh every 3 wks · Trading Post listed heroes 120% value &
@@ -146,12 +157,16 @@ two seasons of expiry and opens talks immediately.
 ## Economy guardrails (sim-verified)
 
 Week 1 ≈ 50% win chance; season 1 challenging (40–49%); late game 60–75%;
-bankruptcy (~3 weeks at ≤0 gold = campaign over) is a ~1% tail; gold plateaus
-at 80–95k as platinum wages catch up; platinum title around season 7–9. The
-per-tier building cap (see Buildings) intentionally trims total player power:
-the post-cap sim runs a touch under these marks — platinum-endgame win ~59–66%
-and gold plateau ~100k — the accepted opportunity-cost of only 6 of 11
-buildings, not a regression.
+bankruptcy (~3 weeks at ≤0 gold = campaign over) is a 0–2% tail; platinum title
+around season 8. The season-2 economy pass deliberately drained the late-game
+gold pile: FM-scaled transfer fees, steeply tier-scaled building costs, a
+compressed tribute swing and a lighter loss purse together moved the gold
+plateau down from ~80–100k to a ~20–75k range that DECLINES in the endgame under
+spend pressure — buildings and star signings are now meaningful sinks. This is
+the intended shape (do NOT "restore" the old plateau); watch instead that
+bankruptcy stays ≤~3% and platinum-endgame gold p10 holds off the floor. The
+per-tier building cap still trims total player power a touch (platinum-endgame
+win ~59–66%), the accepted cost of only 6 of 11 buildings.
 
 ## Art direction — "printed matter"
 
@@ -163,12 +178,16 @@ gazette-style Chronicle. Legacy dark-era saves self-heal their town color.
 
 ## Testing & tooling
 
-- `src/engine.test.jsx` — 32 tests: exchange-series calibration (statistical),
+- `src/engine.test.jsx` — 42 tests: exchange-series calibration (statistical),
   ability-threshold counterability (regression guard), growth-to-Potential,
   spec counters, tribute gradient, scars, trait chemistry, rival roster
   calibration and pricing, building tier caps, `migrateBuildings`, and the
   Infirmary injury-rate reduction.
 - `scripts/balance-sim.mjs` — the balance harness; keep it in sync with
-  formula changes and re-run.
+  formula changes (tribute, transfer fees, building costs, loss purse) and re-run.
+- **Dev playtest flag**: append `?dev` to the URL to reveal a starting-tier
+  picker on the setup screen — begin a fresh campaign in any tier (skip Iron)
+  with a 20,000g stipend. Gated behind the flag (`DEV_MODE`); invisible in
+  normal play.
 - CI (`.github/workflows/ci.yml`) on every PR; Vercel builds and previews
   every push; `dist/` untracked.

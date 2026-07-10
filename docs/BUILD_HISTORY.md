@@ -130,3 +130,57 @@ fixed, verified, and merged.
 
 Engine suite grew 29 → 32 (building tier caps, `migrateBuildings`, Infirmary
 injury-rate). Only **Retirement / mentorship** remains unreviewed.
+
+# Season-2 Playtest Pass (July 2026, PR #17)
+
+A second human playtest (reaching season 2, week ~5) surfaced a crash, five
+bugs, and three economy notes. Fixed and rebalanced in one pass, all
+sim-verified.
+
+**Bug fixes (`b31f404`):**
+- **Event-return crash** — `resolveEventOutcome` dereferenced a returning hero's
+  `pendingEvent.reward`/`.theme`/`returnLines[outcome]` unguarded. The throw was
+  swallowed by `applyRaidResult`'s catch but hero state never committed, so the
+  same hero re-resolved and re-crashed every subsequent week. Hardened the inputs
+  and the empty-`returnLines` `.replace`. Found a second bug alongside it: the
+  weekly away-tick re-grew stats from the old level after resolution had already
+  grown them (double-count) — now carries the resolved xp/level/value through.
+- **Offers for away heroes** — `generateBids` excluded only injured/retired; now
+  also `awayWeeks>0`, matching every other away check.
+- **Event tested-attribute hidden** — the pick-heroes modal never showed which
+  stats gated the outcome; now renders `· tests Strength + Endurance`.
+- **Dominion board pre-filled W/L at season start** — the enemy-vs-enemy sim block
+  ran after `endSeason` had zeroed the new table, re-stamping a week of results;
+  gated it with `!seasonEnding` (matching the player-record update above it).
+- **Away/injured heroes into combat** — only the picker UI blocked them;
+  `startBattle` now re-validates the lineup (preset-load, save reload, and the
+  weekly re-sync could reintroduce one).
+- **Team names carried across tiers** — on promotion/relegation the league is now
+  drawn fresh from the destination tier's own name pool instead of reusing the
+  previous tier's teams.
+
+**FM-style transfer fees (`f310495`):** signing fees ran ~11–15% of a hero's
+annual wage — trivial, so gold had no market sink. `TRANSFER_FEE_SCALE` (=6) at
+every value origin lifts fees to FM proportions (prospect ~0.7×, starter ~1.3×,
+elite ~4×+ annual wage). `value` is the single market currency, so buy/sell/bid
+scale together. Save schema bumped v1→v2 with a migration that scales every
+persisted value ×6 (free heroes stay free).
+
+**Economy pass (`6924d44`):** building costs scaled steeply by tier (were a flat
+~1–2.8k → iron 1.4–1.8k, bronze 3.5–4k, silver 6–8k, gold 14–18k, platinum
+18–22k); the tribute position swing compressed (`280→0` became `80→0`) with bases
+lifted so average income per tier is ~neutral but **tier now dominates position**
+(the playtest flagged 1st-in-Iron out-earning mid-Bronze — a lower division
+paying more); loss purse trimmed ~15%. Combined, the late-game gold pile drops
+from ~80–100k to a ~20–75k range that declines under endgame spend pressure —
+buildings and star signings are real sinks now. Sim holds the bands: bankruptcy
+0–2%, win rates in range, platinum ~S8. CLAUDE.md rule 1 updated so it isn't
+later "restored" as a regression.
+
+**Dev playtest tool (`f9f0cbe`):** a `?dev`-gated starting-tier picker on the
+setup screen — begin a fresh campaign in any tier (skip Iron, where the loop is
+settled) with a 20,000g stipend. Invisible without the flag; new games start in
+Iron as before.
+
+Engine suite grew 32 → 42. **Retirement / mentorship** remains the only
+unreviewed core system.
