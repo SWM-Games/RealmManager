@@ -8498,8 +8498,13 @@ export default function App(){
           if(awayWeeks<=0){
             awayEvent=null;
             if(pendingEvent){
+              // Snapshot the event NOW: `pendingEvent` is a `let` that gets nulled at
+              // the end of this block, and the setPendingEventReturns updater below runs
+              // deferred (during React's render). Reading pendingEvent.title inside that
+              // closure crashed — by the time it ran, the let was already null.
+              const ev = pendingEvent;
               // Resolve outcome — store in pendingEventReturns for banner display
-              const resolution = resolveEventOutcome(h, pendingEvent);
+              const resolution = resolveEventOutcome(h, ev);
               // Apply gold gain
               if(resolution.goldGain>0) setGold(g=>g+resolution.goldGain);
               // Apply hero updates from resolution
@@ -8512,19 +8517,22 @@ export default function App(){
               if(u.morale!=null)   h = {...h, morale: u.morale};
               if(u.fatigue!=null)  h = {...h, fatigue: u.fatigue};
               if(u.injured)        h = {...h, injured:true, injuryWeeks:u.injuryWeeks||1};
-              setPendingEventReturns(prev=>[...prev, {
+              // Build the banner object synchronously (ev is non-null here) so the
+              // deferred updater closes over a stable object, not the mutated `let`.
+              const returnBanner = {
                 id: `${h.id}_${Date.now()}`,
                 heroName: h.name,
                 heroIcon: RACE_ICONS[h.race]||"",
-                eventTitle: pendingEvent.title,
-                eventTheme: pendingEvent.theme,
+                eventTitle: ev.title,
+                eventTheme: ev.theme,
                 outcome: resolution.outcome,
                 notifications: resolution.notifications,
                 goldGain: resolution.goldGain,
                 report: resolution.report,
                 pendingStatChoice: u._pendingStatChoice||false,
                 heroId: h.id,
-              }]);
+              };
+              setPendingEventReturns(prev=>[...prev, returnBanner]);
               pendingEvent = null;
             } else if(h.retraining){
               // Retraining complete — role changes, stats carry as-is
