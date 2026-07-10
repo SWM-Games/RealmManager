@@ -1267,6 +1267,13 @@ const EVENT_STAT_MIDPOINTS = {
   "Charisma":50,"Negotiation":48,"Intimidation":48,"Reputation":45,
 };
 
+// Event difficulty scales with the player's tier. The midpoints above are
+// silver-calibrated (~50), so a low-tier squad would be a Longshot on every
+// event. reqScale (= target/50, stamped on each generated event) eases the bar
+// at low tiers and raises it at high tiers, so at any tier a hero *strong in the
+// tested stats* is Possible/Strong while a weak or off-stat hero is a Longshot.
+const TIER_EVENT_REQ = { iron: 32, bronze: 40, silver: 52, gold: 66, platinum: 80 };
+
 function calcRelativeStars(opponentPower, tierId) {
   const tier = TIERS[tierId];
   if(!tier) return 3;
@@ -1304,8 +1311,13 @@ function eventTraitMods(hero, eventDef) {
 export function calcMatchScore(hero, eventDef) {
   const stats = eventDef.stats || [];
   if(!stats.length) return 1.0;
+  // reqScale tracks the player's tier (stamped at generation). The flat midpoints
+  // are silver-calibrated, so without scaling a low-tier squad is a Longshot on
+  // everything. Scaling the bar to the tier keeps the "pick the right hero"
+  // tension (a hero strong in the tested stats clears it; a weak one doesn't).
+  const scale = eventDef.reqScale || 1;
   const heroAvg = stats.reduce((a,s) => a + (hero.stats[s]||0), 0) / stats.length;
-  const reqAvg  = stats.reduce((a,s) => a + (EVENT_STAT_MIDPOINTS[s]||50), 0) / stats.length;
+  const reqAvg  = stats.reduce((a,s) => a + (EVENT_STAT_MIDPOINTS[s]||50)*scale, 0) / stats.length;
   let score = reqAvg > 0 ? heroAvg / reqAvg : 1.0;
   eventTraitMods(hero, eventDef).forEach(({mod})=>{ score += mod; });
   return Math.max(0.1, score);
@@ -1329,15 +1341,17 @@ function getAvailableHeroes(heroes) {
   return heroes.filter(h => !h.injured && !h.retired && !(h.awayWeeks > 0));
 }
 
-function generateRandomEvent(heroes, week) {
+function generateRandomEvent(heroes, week, playerTier="silver") {
   const available = getAvailableHeroes(heroes);
   if(!available.length) return null;
-  // All events are always candidates — no qualification gate
+  // All events are always candidates — no qualification gate. Difficulty is
+  // tier-scaled via reqScale so bronze events are winnable with the right hero.
   const template = pick(RANDOM_EVENTS);
   const gold = template.reward.goldRange
     ? rand(...template.reward.goldRange)
     : 0;
-  return { ...template, gold, week, id:`${template.id}_${week}` };
+  const reqScale = (TIER_EVENT_REQ[playerTier] || 50) / 50;
+  return { ...template, gold, week, reqScale, id:`${template.id}_${week}` };
 }
 // Heroes accumulate fatigue (0–100) from raiding. High fatigue reduces combat
 // score and increases injury risk. Bench rest recovers fatigue each week.
@@ -4793,6 +4807,14 @@ function RandomEventModal({event, heroes, townName, onAccept, onDecline, onViewH
                 <HeroAvatar race={h.race} size={20}/>
                 <div style={{flex:1}}>
                   <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:13,color:"#23201A"}}>{h.name}</div>
+                  {/* Tested stats, per hero — so the player can pick on the actual numbers, not just the verdict */}
+                  <div style={{display:"flex",gap:8,fontSize:10.5,flexWrap:"wrap",marginTop:2}}>
+                    {(event.stats||[]).map(s=>{
+                      const v=Math.round(h.stats[s]||0);
+                      const col=v>=80?"#40614F":v>=60?"#3C5A78":v>=40?"#8A6D3B":"#7E2D26";
+                      return <span key={s} style={{color:"#6E6350"}}>{s} <b style={{color:col,fontVariantNumeric:"tabular-nums"}}>{v}</b></span>;
+                    })}
+                  </div>
                   <div style={{display:"flex",gap:8,fontSize:10,color:"#6E6350",flexWrap:"wrap",marginTop:2}}>
                     <span>{h.role} · Lv {h.level}</span>
                     <span style={{color:fc}}>{fl} fatigue</span>
@@ -8854,7 +8876,7 @@ export default function App(){
       }
       else if(!pendingChallenge){
         const availableHeroes=heroes.filter(h=>!h.retired&&!(h.awayWeeks>0)&&!h.injured);
-        const ev=generateRandomEvent(availableHeroes,week+1);
+        const ev=generateRandomEvent(availableHeroes,week+1,playerTier);
         if(ev){
           setActiveEvent(ev);
           addLog(`"${ev.title}" — check the Battle tab!`,"info");
