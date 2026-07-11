@@ -1,6 +1,7 @@
-# Squad screen filters — mobile rethink (design)
+# Squad screen filters + Dominion table order — mobile rethink (design)
 
-Date: 2026-07-11 · Status: approved (option D chosen from five mocked options)
+Date: 2026-07-11 · Status: approved (option D chosen from five mocked options;
+Dominion change added by user)
 
 ## Problem
 
@@ -64,6 +65,15 @@ Status selects (equal thirds), and a **Clear all filters** link that resets
 position, race, search, role, stage and status to defaults (sort is a view
 preference, not a filter — untouched).
 
+## Dominion tab — standings first
+
+The league table is the tab's most important content but on mobile it sits
+below the entire right rail (Tribute card, 8 recent results, 10 chronicle
+entries, trophies) because `.rm-dominion-right { order: -1 }` flips the
+sidebar above the standings under 640px. Remove the order flip: mobile
+renders standings (season progress → title-race callout → zone key → table)
+first, sidebar after. Desktop is unchanged (table already top-left).
+
 ## Out of scope / unchanged
 
 Hero card grid, detail panel, filter/sort semantics, the `filtered` memo
@@ -78,6 +88,12 @@ save format (filter state was never persisted).
   nothing filters invisibly; Clear all is one tap away.
 - 375px with all seven races at 2+: chips wrap to a second line — accepted
   (rare, composition-driven, still less than today's three).
+
+## Testing addition (Dominion)
+
+At 375px the standings table must be the first content block on the
+Dominion tab (after the tab's own season-progress header); the sidebar
+(tribute, results, chronicle, trophies) follows. Desktop layout unchanged.
 
 ## Testing
 
