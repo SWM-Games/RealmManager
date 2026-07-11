@@ -7087,7 +7087,6 @@ function SetupScreen({ onComplete }) {
 
     return (
       <div style={{position:"fixed",inset:0,background:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Alegreya Sans',sans-serif",overflowY:"auto",padding:"16px 0"}}>
-        <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet"/>
         <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3}}>
           <div style={{textAlign:"center",marginBottom:24}}>
             <div style={{fontSize:28,marginBottom:6}}></div>
@@ -7150,7 +7149,6 @@ function SetupScreen({ onComplete }) {
       zIndex:300, fontFamily:"'Alegreya Sans',sans-serif", overflowY:"auto",
       padding:"16px 0",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{
         width:"min(480px,92vw)", padding:"36px 32px",
         background:"rgba(60,52,38,0.045)",
@@ -9359,7 +9357,6 @@ export default function App(){
   return(
     <div style={{minHeight:"100vh",background:"#E9E1CE",color:"#3A3427",fontFamily:"'Alegreya Sans',sans-serif"}}>
       <InjectCSS/>
-      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       {/* was a starfield; now faint paper grain */}
       <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
 
