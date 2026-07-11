@@ -7837,6 +7837,10 @@ export default function App(){
 
   // ── AUTO-SAVE after any meaningful state change ───────────────────────────
   useEffect(()=>{
+    // No realm founded yet (home/setup screens) → nothing worth saving. Without
+    // this gate the mount-time autosave wrote a junk blob with townName:"" 400ms
+    // after every boot — which made Erase Legacy leave debris behind.
+    if(!setupDone) return;
     // Debounce slightly so rapid state updates don't thrash localStorage
     const t = setTimeout(()=>{
       saveGame({gold,week,heroes,buildings,formation,market,log,
@@ -7852,7 +7856,7 @@ export default function App(){
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
-  },[gold,week,heroes,buildings,formation,market,log,season,
+  },[setupDone,gold,week,heroes,buildings,formation,market,log,season,
      seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,retiredLegends,retirees,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
