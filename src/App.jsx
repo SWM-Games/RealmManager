@@ -1378,7 +1378,7 @@ const ACHIEVEMENTS = [
     boon: {
       id:     "iron_dynasty",
       name:   "Conqueror's Coffers",
-      desc:   "Begin the run with +1,000g — a generous war chest.",
+      desc:   "Begin the realm with +1,000g — a generous war chest.",
       icon:   "",
       apply:  (state)=>({...state, gold: (state.gold||4000)+1000 }),
     },
@@ -1400,13 +1400,13 @@ const ACHIEVEMENTS = [
   {
     id:       "full_house",
     name:     "Full House",
-    desc:     "Fill every build slot in one run",
+    desc:     "Fill every build slot in one realm",
     icon:     "",
     check:    (data)=>TIER_ORDER.every(t=>buildingCapReached(data.buildings, t)),
     boon: {
       id:     "full_house",
       name:   "Pre-Built Barracks",
-      desc:   "Start the run with the Barracks already constructed.",
+      desc:   "Start the realm with the Barracks already constructed.",
       icon:   "",
       apply:  (state)=>({...state, buildings: state.buildings.map(b=>b.id==="barracks"?{...b,built:true}:b)}),
     },
@@ -1414,7 +1414,7 @@ const ACHIEVEMENTS = [
   {
     id:       "legend_retires",
     name:     "Legend Retires",
-    desc:     "Have a hero reach Level 13 and retire in the same run",
+    desc:     "Have a hero reach Level 13 and retire in the same realm",
     icon:     "",
     check:    (data)=>data.retiredMax13,
     boon: {
@@ -1461,7 +1461,7 @@ const ACHIEVEMENTS = [
   {
     id:       "golden_vault",
     name:     "Golden Vault",
-    desc:     "Accumulate 100,000g at any point in a run",
+    desc:     "Accumulate 100,000g at any point in a realm",
     icon:     "",
     check:    (data)=>data.peakGold>=100000,
     boon: {
@@ -1475,7 +1475,7 @@ const ACHIEVEMENTS = [
   {
     id:       "ability_scout",
     name:     "Ability Scout",
-    desc:     "Successfully mitigate 100 enemy abilities in a run",
+    desc:     "Successfully mitigate 100 enemy abilities in a realm",
     icon:     "",
     check:    (data)=>(data.abilitiesMitigated||0)>=100,
     boon: {
@@ -1489,7 +1489,7 @@ const ACHIEVEMENTS = [
   {
     id:       "transfer_king",
     name:     "Banner Broker",
-    desc:     "Send 15 heroes to serve rival banners in a single run",
+    desc:     "Send 15 heroes to serve rival banners in a single realm",
     icon:     "",
     check:    (data)=>(data.heroesSold||0)>=15,
     boon: {
@@ -1507,7 +1507,7 @@ const ACHIEVEMENTS = [
   {
     id:       "synergy_master",
     name:     "Synergy Master",
-    desc:     "Win battles with 3 different race synergies active in one run",
+    desc:     "Win battles with 3 different race synergies active in one realm",
     icon:     "",
     check:    (data)=>Object.keys(data.raceSynergyUsage||{}).length>=3,
     boon: {
@@ -4463,7 +4463,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
           {allBoons.length>0&&(
             <div style={{padding:"10px 14px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:16,fontSize:10,color:"#3C5A78"}}>
-              <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when starting your next campaign.
+              <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when founding your next realm.
             </div>
           )}
 
@@ -4474,7 +4474,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
             </button>
             <button onClick={()=>onNewLegacy(allBoons)}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12}}>
-              Begin New Campaign
+              Found a New Realm
             </button>
           </div>
         </div>
@@ -7209,9 +7209,8 @@ function SetupScreen({ onComplete }) {
       <div style={{position:"fixed",inset:0,background:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Alegreya Sans',sans-serif",overflowY:"auto",padding:"16px 0"}}>
         <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3}}>
           <div style={{textAlign:"center",marginBottom:24}}>
-            <div style={{fontSize:28,marginBottom:6}}></div>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Legacy Boons</div>
-            <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate this run. Each can be used once. You can choose none for a clean start.</div>
+            <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate in this realm. Each can be used once. You can choose none for a clean start.</div>
           </div>
 
           <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:24}}>
@@ -7306,9 +7305,9 @@ function SetupScreen({ onComplete }) {
         {/* NG+ returning champion notice */}
         {ng?.wins>0&&(
           <div style={{marginBottom:20,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.12)",border:"1px solid rgba(154,91,43,0.45)"}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>New Legacy — Run #{ng.wins+1}</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>Your Legacy — Realm #{ng.wins+1}</div>
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
-              You've conquered the realm {ng.wins} time{ng.wins>1?"s":""}. Your unlocked game options are available below.
+              {ng.wins} conquest{ng.wins>1?"s":""} to your name. Boons from your Legacy are available below.
             </div>
           </div>
         )}
@@ -7396,7 +7395,7 @@ function SetupScreen({ onComplete }) {
             color:"#F0E8D5", fontFamily:"'IM Fell English SC',serif",
             fontWeight:900, fontSize:15, letterSpacing:1,
           }}>
-          Begin Your Legacy
+          Found the Realm
         </button>
       </div>
     </div>
@@ -7407,15 +7406,15 @@ function AbandonButton({onAbandon}){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)"}}>
-      <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Abandon this run?</div>
+      <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Abandon this realm?</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
-        Your run ends here. Achievements earned so far<br/>
-        and all boons are preserved for your next run.
+        Your realm falls. Achievements and boons earned<br/>
+        so far are preserved in your Legacy.
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{setConfirming(false);onAbandon();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
-          Yes, abandon run
+          Yes, abandon realm
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
@@ -7427,7 +7426,7 @@ function AbandonButton({onAbandon}){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
-      Abandon Run
+      Abandon Realm
     </button>
   );
 }
@@ -7436,17 +7435,17 @@ function NewGameButton(){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
-      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>This will erase everything:</div>
+      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>This will erase your Legacy:</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
-        • Current run progress and gold<br/>
+        • The current realm — progress and gold<br/>
         • All earned achievements and boons<br/>
-        • NG+ legacy history<br/>
+        • Your conquest history<br/>
         This cannot be undone.
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{clearSave();clearNGPlus();window.location.reload();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
-          Yes, start New Realm
+          Yes, erase everything
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
@@ -7458,7 +7457,7 @@ function NewGameButton(){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
-      New Realm
+      Erase Legacy
     </button>
   );
 }
@@ -9479,7 +9478,7 @@ export default function App(){
     ["Wages",         `${wages.toLocaleString()}g`,                                                 "#77653F"],
     ["Week",          `${seasonWeek}`,                                                              "#3A3427"],
     ["Season",        `${season}`,                                                                  "#3A3427"],
-    ...(ngPlus?.wins ? [["Run",`#${ngPlus.wins+1}`,"#8A6D3B"]] : []),
+    ...(ngPlus?.wins ? [["Realm",`#${ngPlus.wins+1}`,"#8A6D3B"]] : []),
     ...(squadLeaderId!=null&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]}`,"#8A6D3B"]] : []),
     ["Formation",     `${placed}/6 · ${formRating}`,                                                "#77653F"],
     ["Squad",         `${heroes.filter(h=>!h.retired).length}/${ROSTER_CAP}`,                       heroes.filter(h=>!h.retired).length>=ROSTER_CAP?"#7E2D26":"#3A3427"],
@@ -9544,6 +9543,7 @@ export default function App(){
               earnedBoons: allBoons,
             });
             clearSave();
+            try { sessionStorage.setItem(INTENT_KEY, "new"); } catch { /* private mode */ }
             window.location.reload();
           }}
         />
@@ -11006,7 +11006,7 @@ export default function App(){
             {/* Persistence note */}
             <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
-                <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
+                <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and your Legacy's earned boons persist across realms on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
             </div>
 
