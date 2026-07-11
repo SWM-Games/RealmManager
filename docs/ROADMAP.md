@@ -19,6 +19,21 @@ _(none — all systems reviewed)_
 
 ## Resolved
 
+- **Squad filters + Dominion order (mobile rethink)** — the Squad tab's
+  ~5–6 rows of filter chrome (race pills wrapping to three lines; a
+  hidden-scrollbar strip that pushed Stage/Status/Sort off-screen with no
+  affordance) became three fixed rows at every width: full-name position
+  pills; **race synergy chips** (only races with 2+ heroes, count-sorted —
+  the row doubles as which-synergies-are-in-reach intelligence; singletons
+  under an `Other ▾` overlay-select that self-heals as the roster changes;
+  zero-count races excluded); and a Sort chip + `More ▾` disclosure whose
+  badge counts active hidden filters so nothing filters invisibly, with
+  Clear all. Dominion: removed the mobile `order:-1` flip that buried the
+  league table below the whole sidebar — standings render first now. Spec:
+  `docs/superpowers/specs/2026-07-11-squad-filter-mobile-design.md`.
+  Follow-up candidate: the Hire tab's market bar still uses the old
+  hidden-scroll `rm-filter-bar` pattern.
+
 - **Front door + Legacy/Realm terminology** — the app now boots through a
   splash (plays every boot: the coronet inks itself in over ~1.4s, held 1.6s
   minimum, fonts gated up to a 2.5s offline cap, reduced-motion users skip

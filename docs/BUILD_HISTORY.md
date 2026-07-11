@@ -281,3 +281,30 @@ SetupScreen, with the IM Fell font popping in after first paint.
 Engine suite 47 → 50 (`realmSummary`). All six boot flows verified in the
 browser (first run, warm reload, continue, new-realm-with-save + Legacy
 survival, NG+ banner/boons, erase-everything leaves storage clean).
+
+### Squad filters + Dominion order — the mobile rethink
+
+A phone playtest flagged two things: Squad-tab filters "drop off the page"
+(the mobile secondary bar was a horizontal scroll strip with the scrollbar
+deliberately hidden — Stage/Status/Sort invisible, and silently active
+filters had no indicator) and the rest "take up too much space" (the race
+pill row alone wrapped to three lines). Rebuilt to the user's stated usage
+hierarchy (Position → Race → power/contract sort → rest rarely), option D
+of five mocked directions:
+
+- **Three fixed rows at every width.** Full-name position pills (compact
+  metrics under 640px keep one line at 375px); **race synergy chips** —
+  only races with 2+ heroes, count-sorted, glyph + name + count, so the row
+  doubles as which-synergies-are-in-reach intelligence; singletons live in
+  an `Other ▾` overlay-select (pill look, native picker) that self-heals as
+  the roster changes, zero-count races excluded; and `Sort: X ▾` +
+  `More ▾` disclosure (search/Role/Stage/Status + Clear all) whose badge
+  counts active hidden filters — the guarantee nothing filters invisibly.
+- **Dominion:** deleted the mobile `order:-1` that stacked the entire
+  sidebar (tribute, results, chronicle, trophies) above the league table.
+  The full 8-town table now fits the first viewport at 375px.
+
+The `filtered` memo and filter semantics are untouched — only the controls
+changed. Hire-tab market bar (same old pattern) left as a follow-up.
+Verified live at 375px and desktop: row counts, no horizontal overflow,
+chip/Other/badge/Clear-all interactions, table-first Dominion.
