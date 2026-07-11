@@ -21,9 +21,11 @@ wipes both.
 ## Boot flow
 
 A `screen` state machine (`boot → home → setup → game`) fronts the game. The
-splash gates on `document.fonts.ready` (2.5s offline fallback; skipped when
-the display face is already cached — fonts load from `index.html`, not
-component renders). Home offers Continue (summary via `realmSummary`,
+splash plays every boot — the coronet glyph inks itself in (stroke-dash) —
+held `BOOT_MIN_MS` (1.6s, enough for the draw to finish) and gated on
+`document.fonts.ready` up to a 2.5s offline cap (fonts load from
+`index.html`, not component renders). Reduced-motion users skip the
+artificial hold. Home offers Continue (summary via `realmSummary`,
 test-locked), Found a New Realm (confirm-guarded when a save exists; restarts
 via `clearSave()` + a `sessionStorage` intent flag + reload so the next boot
 lands directly in setup with fresh initializers), and a Legacy strip. The

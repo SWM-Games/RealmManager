@@ -251,12 +251,14 @@ The app finally has an entrance. Previously `App()` parsed the save in a
 SetupScreen, with the IM Fell font popping in after first paint.
 
 - **Boot splash:** a `screen` state machine (`boot → home → setup → game`) at
-  the top of `App()`. The splash gates on `document.fonts.ready` raced against
-  a 2.5s offline fallback, and is skipped entirely when `document.fonts.check`
-  says the display face is cached (no flash on warm reloads). The Google Fonts
-  `<link>` moved to `index.html` — it had been living inside App and
-  SetupScreen renders in three copies, one with a divergent URL missing most
-  weights, so nothing could ever have gated on it.
+  the top of `App()`. The splash plays every boot: the coronet glyph inks
+  itself in via stroke-dash (~1.4s) while the masthead settles, held to a
+  1.6s minimum and gated on `document.fonts.ready` up to a 2.5s offline cap.
+  (It originally skipped when fonts were cached; once the ink-draw animation
+  landed, always-play was the point — reduced-motion users skip the hold.)
+  The Google Fonts `<link>` moved to `index.html` — it had been living inside
+  App and SetupScreen renders in three copies, one with a divergent URL
+  missing most weights, so nothing could ever have gated on it.
 - **Home screen:** Continue (letterpress block in the realm colour; line
   formatted by the test-locked `realmSummary`), Found a New Realm
   (confirm-guarded when a save exists — restarts via `clearSave()` + a

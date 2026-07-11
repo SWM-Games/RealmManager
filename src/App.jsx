@@ -7074,9 +7074,13 @@ function requestNewRealm() {
   window.location.reload();
 }
 
-const DISPLAY_FONT_SPEC = '900 16px "IM Fell English SC"';
-function displayFontReady() {
-  try { return document.fonts.check(DISPLAY_FONT_SPEC); } catch { return true; }
+// The splash always plays: long enough for the coronet to finish inking
+// (draw ends ~1.4s), short enough to stay out of the way. Reduced-motion
+// users skip the artificial hold — for them it's a font gate only.
+const BOOT_MIN_MS = 1600;
+const BOOT_FONT_CAP_MS = 2500;
+function prefersReducedMotion() {
+  try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
 }
 
 // Splash while fonts load. Styled with fallback faces on purpose — it renders
@@ -7617,21 +7621,23 @@ export default function App(){
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
 
-  // Front door: boot (font gate) → home → setup|game. The intent flag lands a
-  // post-reload "new realm" boot directly in setup; a warm boot with cached
-  // fonts skips the splash.
+  // Front door: boot (splash) → home → setup|game. The intent flag lands a
+  // post-reload "new realm" boot directly in setup; every other boot plays
+  // the splash — held to BOOT_MIN_MS so the coronet finishes inking, gated
+  // on fonts up to BOOT_FONT_CAP_MS (offline → proceed with fallback faces).
   const [screen,setScreen] = useState(()=>{
     if(consumeIntent()==="new" && !saved?.townName) return "setup";
-    return displayFontReady() ? "home" : "boot";
+    return "boot";
   });
 
   useEffect(()=>{
     if(screen!=="boot") return;
-    let done=false;
-    const finish=()=>{ if(!done){ done=true; setScreen("home"); } };
-    const t=setTimeout(finish, 2500); // fonts CDN down/offline → proceed with fallback faces
-    try { document.fonts.ready.then(finish); } catch { finish(); }
-    return ()=>clearTimeout(t);
+    let fontsDone=false, minDone=prefersReducedMotion(), finished=false;
+    const tryFinish=()=>{ if(!finished && fontsDone && minDone){ finished=true; setScreen("home"); } };
+    const tMin=setTimeout(()=>{ minDone=true; tryFinish(); }, BOOT_MIN_MS);
+    const tCap=setTimeout(()=>{ fontsDone=true; tryFinish(); }, BOOT_FONT_CAP_MS);
+    try { document.fonts.ready.then(()=>{ fontsDone=true; tryFinish(); }); } catch { fontsDone=true; tryFinish(); }
+    return ()=>{ clearTimeout(tMin); clearTimeout(tCap); };
   },[screen]);
 
   const handleSetupComplete = (name, color, selectedBoons=[], startTier="iron") => {

@@ -20,8 +20,9 @@ _(none — all systems reviewed)_
 ## Resolved
 
 - **Front door + Legacy/Realm terminology** — the app now boots through a
-  font-gated splash (`document.fonts.ready` raced against 2.5s; skipped when
-  the display face is cached) into a home screen: Continue (letterpress block
+  splash (plays every boot: the coronet inks itself in over ~1.4s, held 1.6s
+  minimum, fonts gated up to a 2.5s offline cap, reduced-motion users skip
+  the hold) into a home screen: Continue (letterpress block
   in the realm colour via test-locked `realmSummary`), Found a New Realm
   (confirm-guarded when a save exists; restarts via clearSave + a
   sessionStorage intent flag + reload so the next boot lands in setup), and a
