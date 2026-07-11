@@ -9,8 +9,26 @@ economy rebalance). See `docs/ROADMAP.md` for the review ledger.*
 Realm Manager is a Football-Manager-style fantasy squad sim: run a realm's
 mercenary company through a five-tier league (Iron → Bronze → Silver → Gold →
 Platinum), one battle per week, 42-week seasons, top-2 promote / bottom-2
-relegate. Win condition: finish 1st in Platinum. NG+ "Legacy Boons" persist
-across runs. The entire game lives in `src/App.jsx`.
+relegate. Win condition: finish 1st in Platinum. The entire game lives in
+`src/App.jsx`.
+
+**Terminology:** your **Legacy** is the persistent account — achievements,
+boons, conquest count (the `realm_manager_ng_plus` blob). Each **Realm** is
+one playthrough (the `realm_manager_v2` blob, single slot). Legacy Boons
+persist across realms; "Erase Legacy" in the Ledger is the only thing that
+wipes both.
+
+## Boot flow
+
+A `screen` state machine (`boot → home → setup → game`) fronts the game. The
+splash gates on `document.fonts.ready` (2.5s offline fallback; skipped when
+the display face is already cached — fonts load from `index.html`, not
+component renders). Home offers Continue (summary via `realmSummary`,
+test-locked), Found a New Realm (confirm-guarded when a save exists; restarts
+via `clearSave()` + a `sessionStorage` intent flag + reload so the next boot
+lands directly in setup with fresh initializers), and a Legacy strip. The
+autosave effect is gated on `setupDone` so no blob is written while sitting
+on home/setup.
 
 ## The weekly loop
 

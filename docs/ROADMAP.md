@@ -19,6 +19,24 @@ _(none — all systems reviewed)_
 
 ## Resolved
 
+- **Front door + Legacy/Realm terminology** — the app now boots through a
+  font-gated splash (`document.fonts.ready` raced against 2.5s; skipped when
+  the display face is cached) into a home screen: Continue (letterpress block
+  in the realm colour via test-locked `realmSummary`), Found a New Realm
+  (confirm-guarded when a save exists; restarts via clearSave + a
+  sessionStorage intent flag + reload so the next boot lands in setup), and a
+  Legacy strip (conquests · boons · next realm number). Terminology split:
+  LEGACY = the persistent account (achievements, boons, conquest count — the
+  NG+ blob), REALM = one playthrough. The Ledger's everything-eraser (was
+  confusingly "New Realm") is now "Erase Legacy"; "Abandon Run" → "Abandon
+  Realm"; achievement/boon copy swept. Fonts moved to index.html (three
+  in-render <link> copies removed, one with a divergent URL). Autosave now
+  gates on setupDone — it used to write a junk townName:"" blob 400ms after
+  every boot spent on home/setup, which would have left debris after Erase
+  Legacy. Single save slot retained by design; the home screen abstracts
+  storage so multi-slot can come later. Spec:
+  `docs/superpowers/specs/2026-07-11-home-loading-legacy-design.md`.
+
 - **Retirement / mentorship flow (reviewed + fixed)** — traced end to end. The
   core loop was sound (veteran-end retirement trigger, ceremony, squad morale
   lift, Squad Leader unassign, "Legend Retires" achievement), but five defects
