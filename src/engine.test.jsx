@@ -12,6 +12,7 @@ import {
   BUILDINGS, migrateBuildings,
   bestPositionFor, PHYSICAL_STATS, generateStartingSquad,
   canRetrain, retrainCost, naturalLaneFor, RETRAIN_WEEKS,
+  legendMoraleBonus,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -583,5 +584,36 @@ describe("retraining eligibility", () => {
 
   it("allows a repeat retrain in a later season", () => {
     expect(canRetrain(mkHero({ retrainedSeason: 1 }), 5000, 2, trainyard).ok).toBe(true);
+  });
+});
+
+// ── Hall of Legends morale ────────────────────────────────────────────────────
+// Regression guard: this mechanic shipped dead once (retirees were dropped from
+// the roster before the bonus read it), so lock the shape — non-empty roll must
+// give a positive, level-scaled, capped bonus.
+describe("Hall of Legends morale", () => {
+  it("empty or missing roll gives no bonus", () => {
+    expect(legendMoraleBonus([])).toBe(0);
+    expect(legendMoraleBonus(undefined)).toBe(0);
+    expect(legendMoraleBonus(null)).toBe(0);
+  });
+
+  it("a single legend gives at least +1, scaling with level", () => {
+    expect(legendMoraleBonus([{ level: 0 }])).toBe(1);      // 1 + floor(0/3)
+    expect(legendMoraleBonus([{ level: 6 }])).toBe(3);      // 1 + floor(6/3)
+    expect(legendMoraleBonus([{ level: 12 }])).toBe(5);     // 1 + floor(12/3)
+  });
+
+  it("multiple legends accumulate", () => {
+    expect(legendMoraleBonus([{ level: 3 }, { level: 3 }])).toBe(4); // (1+1)+(1+1)
+  });
+
+  it("caps at +20 no matter how many legends retire", () => {
+    const many = Array.from({ length: 20 }, () => ({ level: 15 })); // 6 each → 120 raw
+    expect(legendMoraleBonus(many)).toBe(20);
+  });
+
+  it("tolerates a missing level field", () => {
+    expect(legendMoraleBonus([{}])).toBe(1);
   });
 });

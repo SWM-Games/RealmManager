@@ -3146,6 +3146,15 @@ function ageHero(hero, buildings) {
   return { hero:{...hero, stage:newStage, stageProgress:finalProgress, stats:newStats, morale:newMorale, retired}, events };
 }
 
+// Hall of Legends — retired heroes keep lifting squad morale from the sidelines.
+// Each legend contributes 1 + floor(level/3) morale/week, capped at +20 total.
+// Pure and exported so the mechanic is regression-locked (it once shipped dead:
+// the roster dropped retirees before the bonus was read, so it always saw zero).
+export function legendMoraleBonus(retiredLegends) {
+  if(!retiredLegends || retiredLegends.length === 0) return 0;
+  return Math.min(20, retiredLegends.reduce((sum, r) => sum + (1 + Math.floor((r.level || 0) / 3)), 0));
+}
+
 // ─── RAID SIMULATION ENGINE ───────────────────────────────────────────────────
 // Builds a full scripted play-by-play that resolves over ~30 seconds.
 // Outcome is pre-determined; events are generated from actual hero stats.
@@ -5216,7 +5225,7 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
       {/* Mentor bonus */}
       {hero.mentorBonus&&hero.mentorBonus.weeksLeft>0&&(
         <div style={{padding:"7px 10px",borderRadius:3,background:"rgba(154,91,43,0.105)",border:"1px solid rgba(154,91,43,0.375)",marginBottom:8,display:"flex",alignItems:"center",gap:8}}>
-          <span style={{fontSize:14}}></span>
+          <Glyph id="nav_guide" size={14} color="#9A5B2B"/>
           <div style={{flex:1}}>
             <div style={{fontSize:10,fontWeight:700,color:"#9A5B2B"}}>Mentored by {hero.mentorBonus.mentorName}</div>
             <div style={{fontSize:9,color:"#6E6350"}}>+{hero.mentorBonus.xpPerWeek} XP/week · {hero.mentorBonus.weeksLeft} weeks remaining</div>
@@ -5894,9 +5903,12 @@ function RetirementModal({retirees, heroes, formation, onDismiss}){
 
   // Find which position the retiree held
   const retiredPos = POS_KEYS.find(p=>(formation[p]||[]).some(h=>h&&h.id===retiree.id));
-  // Eligible mentees: active heroes, sorted by same position first, then lowest level
+  // Eligible mentees: active heroes, sorted by same position first, then lowest level.
+  // Exclude anyone already picked for another retiree this ceremony — mentorBonus is
+  // a single slot, so a double-assignment would silently drop one of the mentorships.
   const eligible = heroes
-    .filter(h=>!h.retired && h.id!==retiree.id)
+    .filter(h=>!h.retired && h.id!==retiree.id
+      && !Object.entries(mentees).some(([rid,mid])=>mid===h.id && rid!==retiree.id))
     .sort((a,b)=>{
       const aPos = POS_KEYS.find(p=>(formation[p]||[]).some(x=>x&&x.id===a.id));
       const bPos = POS_KEYS.find(p=>(formation[p]||[]).some(x=>x&&x.id===b.id));
@@ -6977,6 +6989,8 @@ function saveGame(state) {
       showHiddenStats: state.showHiddenStats,
       signDiscount: state.signDiscount,
       squadLeaderId: state.squadLeaderId,
+      retiredLegends: state.retiredLegends,
+      retirees: state.retirees,
       raceSynergyUsage: state.raceSynergyUsage,
       hallOfFame: state.hallOfFame,
       currentStreak: state.currentStreak,
@@ -7577,7 +7591,10 @@ export default function App(){
   const [enemy,setEnemy]             = useState(null);
   const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
   const [marketFilter,setMarketFilter] = useState({role:"All",race:"All",position:"All",stage:"All",sortBy:"Value"});
-  const [retirees,setRetirees]       = useState([]);
+  const [retirees,setRetirees]       = useState(saved?.retirees ?? []);
+  // Roll of the retired — persists their level-at-retirement so Hall of Legends
+  // has something to read (the heroes array drops them the week they retire).
+  const [retiredLegends,setRetiredLegends] = useState(saved?.retiredLegends ?? []);
   const [negotiationQueue,setNegotiationQueue] = useState(saved?.negotiationQueue ?? []);
   const [season,setSeason]               = useState(saved?.season ?? 1);
   const [seasonWeek,setSeasonWeek]       = useState(saved?.seasonWeek ?? 0);
@@ -7696,12 +7713,12 @@ export default function App(){
                 townName,townColor,
                 listedHeroIds:[...listedHeroIds],transferBids,formationPresets,seasonStartSnapshot,
                 leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,
-                signDiscount,squadLeaderId,
+                signDiscount,squadLeaderId,retiredLegends,retirees,
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
   },[gold,week,heroes,buildings,formation,market,log,season,
-     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
+     seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,retiredLegends,retirees,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
   const handleAccept=(hero,demand)=>{
@@ -8605,16 +8622,31 @@ export default function App(){
         const benchMoraleDelta = benchDecay + moraleDelta + (newWeeksUnplayed > 4 ? -1 : 0);
         const newMorale = Math.min(100, Math.max(0, h.morale + benchMoraleDelta));
 
+        // Mentor XP must level the mentee even while benched. The played path
+        // folds it into the level-up calc; here the XP was piling up while level,
+        // stats and value stayed frozen until the hero next played. Silent, like
+        // the Training Grounds bench-XP path below. (mentorXP is 0 when there's
+        // no active bonus, so unmentored bench heroes are untouched.)
+        const benchXPTotal = h.xp + mentorXP;
+        const benchNewLv   = mentorXP>0 ? Math.min(MAX_LEVEL, levelFromXp(benchXPTotal)) : h.level;
+        let   benchFinalStats = benchStats;
+        let   benchNewValue   = h.value;
+        if(benchNewLv > h.level){
+          benchFinalStats = growHeroStats({...h, stats: benchStats}, benchNewLv, buildings);
+          benchNewValue   = calcHeroValue({...h, level:benchNewLv, stats:benchFinalStats});
+        }
         return{...h,
           morale: newMorale,
           weeksUnplayed:newWeeksUnplayed,
           fatigue:newFatigue,awayWeeks,awayEvent,pendingEvent,
-          xp: mentorXP>0 ? h.xp+mentorXP : h.xp,
+          xp: benchXPTotal,
+          level: benchNewLv,
+          value: benchNewValue,
           mentorBonus:newMentorBonus,
           weeksInSquad:(h.weeksInSquad||0)+1,
           weeksInFormation: h.weeksInFormation||0, // doesn't increment on bench
           potentialRevealed: h.potentialRevealed||false,
-          stats: benchStats,
+          stats: benchFinalStats,
         };
       }
     });
@@ -8624,16 +8656,16 @@ export default function App(){
       addLog("Tavern: +3 morale to all heroes","info");
     }
 
-    // Hall of Legends — retired heroes contribute morale based on level at retirement
-    // Each retiree contributes 1 + floor(level/3) morale/week, capped at +20 total
-    if(buildings.find(b=>b.id==="legends"&&b.built)){
-      const retirees = updatedHeroes.filter(h=>h.retired);
-      if(retirees.length>0){
-        const legendBonus = Math.min(20, retirees.reduce((sum,h)=>sum+(1+Math.floor((h.level||0)/3)),0));
-        if(legendBonus>0){
-          updatedHeroes=updatedHeroes.map(h=>h.retired?h:{...h,morale:Math.min(100,h.morale+legendBonus)});
-          addLog(`Hall of Legends: +${legendBonus} morale from ${retirees.length} retired hero${retirees.length>1?"es":""}`, "info");
-        }
+    // Hall of Legends — retired heroes contribute morale based on level at retirement.
+    // Each legend contributes 1 + floor(level/3) morale/week, capped at +20 total.
+    // Reads the persisted `retiredLegends` roll: retirees are stripped from `heroes`
+    // the week they retire (updatedHeroes never holds them), and this year's retirees
+    // aren't aged until later in this pass, so they join the roll from next week on.
+    if(buildings.find(b=>b.id==="legends"&&b.built) && retiredLegends.length>0){
+      const legendBonus = legendMoraleBonus(retiredLegends);
+      if(legendBonus>0){
+        updatedHeroes=updatedHeroes.map(h=>({...h,morale:Math.min(100,h.morale+legendBonus)}));
+        addLog(`Hall of Legends: +${legendBonus} morale from ${retiredLegends.length} retired hero${retiredLegends.length>1?"es":""}`, "info");
       }
     }
 
@@ -8748,6 +8780,8 @@ export default function App(){
       });
       aged.splice(0,aged.length,...aged.map(h=>retirementAged.find(x=>x.id===h.id)||h));
       setRetirees(newRetirees);
+      // Enrol them on the Hall of Legends roll (level frozen at retirement)
+      setRetiredLegends(prev=>[...prev, ...newRetirees.map(r=>({id:r.id,name:r.name,race:r.race,role:r.role,level:r.level}))]);
       if(newRetirees.some(r=>r.id===squadLeaderId)) setSquadLeaderId(null);
     }
 
