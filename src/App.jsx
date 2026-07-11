@@ -7044,6 +7044,18 @@ function clearSave() {
   localStorage.removeItem(SAVE_KEY);
 }
 
+// Formats the home screen's Continue block from a parsed save blob.
+// Pure + exported so the engine suite can lock the shape.
+export function realmSummary(saved) {
+  if (!saved || !saved.townName) return null;
+  const tierName = TIERS[saved.playerTier]?.name ?? "Iron";
+  return {
+    name: saved.townName,
+    color: saved.townColor || "#8A6D3B",
+    line: `${tierName} · Season ${saved.season ?? 1}, Week ${saved.seasonWeek ?? 1} · ${(saved.gold ?? 0).toLocaleString()}g`,
+  };
+}
+
 // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
 
 // Playtest gate: append ?dev to the URL to reveal testing controls (e.g. starting
