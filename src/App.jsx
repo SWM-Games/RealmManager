@@ -379,7 +379,8 @@ const RESPONSIVE_CSS = `
   /* ── DOMINION ── */
   @media (max-width: 640px) {
     .rm-dominion-grid { grid-template-columns: 1fr !important; }
-    .rm-dominion-right { order: -1; }
+    /* Standings stay first — the table is the tab's most important content.
+       (An order:-1 flip used to put the whole sidebar above it on mobile.) */
   }
 
   /* ── FILTER BAR ── */
