@@ -184,3 +184,27 @@ Iron as before.
 
 Engine suite grew 32 → 42. **Retirement / mentorship** remains the only
 unreviewed core system.
+
+### Follow-ups from the ongoing playtest (PRs #18–#21)
+
+- **Crash reporter (#18):** wrapped `<App/>` in an `ErrorBoundary` (see
+  `src/main.jsx`). A render-phase throw now shows a readable card with the error
+  and a "Copy report" button (bundling error + save as JSON) instead of a blank
+  page — essential on mobile, where there's no console. Doubles as the diagnostic
+  that cracked the next bug.
+- **Event-return crash, the real fix (#19):** the "Continue after battle → blank
+  screen" crash was a closure over a mutated `let`. The away-return tick passed
+  `setPendingEventReturns` a functional updater reading `pendingEvent.title`, then
+  set `pendingEvent = null` on the next line; React runs the updater deferred, by
+  which point the `let` is null → uncaught render throw. (PR #17's
+  `resolveEventOutcome` hardening had aimed at the wrong function.) Fixed by
+  snapshotting the event and building the banner object synchronously. Diagnosed
+  by reproducing the reporter's actual save in a byte-exact local rebuild of the
+  shipped bundle.
+- **Events: stats + tiering (#20):** the picker now shows each candidate's
+  tested-stat values (colour-coded), and event difficulty is tier-scaled
+  (`TIER_EVENT_REQ` → `reqScale`) so low-tier squads aren't a Longshot on
+  everything.
+- **Preset skip (#21):** loading a formation preset no longer re-fields away or
+  injured heroes (`deserializeFormation(…, skipUnavailable=true)`); the slot is
+  left empty and the log reports how many were dropped.
