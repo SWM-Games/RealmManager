@@ -101,6 +101,8 @@ const RESPONSIVE_CSS = `
     text-transform:uppercase; padding:7px 14px; border-radius:0; cursor:pointer;
     border:1px solid rgba(138,109,59,0.33); background:transparent; color:var(--pa-muted);
     transition:border-color 0.15s, color 0.15s; display:inline-flex; align-items:center; gap:7px;
+    /* uniform height whether the pill holds text only or a 13px glyph */
+    min-height:29px; box-sizing:border-box;
   }
   .pa-pill:hover { color:var(--pa-parchment-bright); border-color:rgba(138,109,59,0.55); }
   .pa-pill.active { color:var(--pa-bg); background:var(--pa-gold); border-color:var(--pa-gold); }
@@ -402,7 +404,9 @@ const RESPONSIVE_CSS = `
   /* Compact pills so the full-name position row fits one line at 375px */
   @media (max-width: 640px) {
     .rm-sq-row { gap: 4px !important; }
-    .rm-sq-row .pa-pill { padding: 6px 7px; font-size: 9px; letter-spacing: 0.5px; gap: 4px; }
+    /* min-height matches the button touch-target rule below — the Sort and
+       Other chips are spans (overlay-select pattern) and sat 11px shorter */
+    .rm-sq-row .pa-pill { padding: 6px 7px; font-size: 9px; letter-spacing: 0.5px; gap: 4px; min-height: 36px; box-sizing: border-box; }
   }
 
   /* ── TOUCH TARGETS ── */
