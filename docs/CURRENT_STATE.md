@@ -16,7 +16,10 @@ across runs. The entire game lives in `src/App.jsx`.
 
 Set formation (Tactics) → optionally scout the opponent → fight (Battle) →
 weekly resolution (`applyRaidResult`: gold, XP, fatigue, morale, Form,
-injuries, contracts, aging, market, league sim, events) → repeat.
+injuries, contracts, aging, market, league sim, events) → repeat. Tactics has
+two saveable formation presets; loading one skips heroes who are currently away
+or injured (`deserializeFormation(…, skipUnavailable)`) so an ineligible hero
+isn't silently fielded — and `startBattle` re-validates the lineup at send time.
 
 ## Combat
 
@@ -195,5 +198,9 @@ gazette-style Chronicle. Legacy dark-era saves self-heal their town color.
   picker on the setup screen — begin a fresh campaign in any tier (skip Iron)
   with a 20,000g stipend. Gated behind the flag (`DEV_MODE`); invisible in
   normal play.
+- **Crash reporter**: `<App/>` is wrapped in an `ErrorBoundary` (`src/main.jsx`).
+  A render-phase throw shows a readable card with the error + a "Copy report"
+  button (error + save as JSON) instead of a blank page — the practical way to
+  get a repro off a mobile device, where there's no console.
 - CI (`.github/workflows/ci.yml`) on every PR; Vercel builds and previews
   every push; `dist/` untracked.
