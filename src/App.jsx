@@ -7080,16 +7080,26 @@ function displayFontReady() {
 }
 
 // Splash while fonts load. Styled with fallback faces on purpose — it renders
-// before the display font it is waiting for.
+// before the display font it is waiting for. The coronet inks itself in
+// (stroke-dash draw) while the press bar sweeps — printed-matter motion only:
+// no gradients, no glows, and everything stills under prefers-reduced-motion.
 function BootSplash() {
   return (
     <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:400,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-      <style>{`@keyframes rmBootSweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}`}</style>
-      <Glyph id="leader" size={34} color="#8A6D3B"/>
-      <div style={{fontFamily:"'IM Fell English SC',Georgia,serif",fontWeight:900,fontSize:22,color:"#23201A",letterSpacing:1,marginTop:10}}>Realm Manager</div>
-      <div style={{fontFamily:"'Alegreya Sans',system-ui,sans-serif",fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:3}}>FANTASY SQUAD SIMULATOR</div>
+      <style>{`
+        @keyframes rmBootSweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+        @keyframes rmBootDraw{to{stroke-dashoffset:0}}
+        @keyframes rmBootSettle{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        @media (prefers-reduced-motion: reduce){.rm-boot-anim{animation:none !important;stroke-dashoffset:0 !important;opacity:1 !important;transform:none !important}}
+      `}</style>
+      <svg width={34} height={34} viewBox="0 0 24 24" fill="none" stroke="#8A6D3B" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path className="rm-boot-anim" d={GLYPH_PATHS.leader}
+          style={{strokeDasharray:70,strokeDashoffset:70,animation:"rmBootDraw 1.3s ease-out 0.1s forwards"}}/>
+      </svg>
+      <div className="rm-boot-anim" style={{fontFamily:"'IM Fell English SC',Georgia,serif",fontWeight:900,fontSize:22,color:"#23201A",letterSpacing:1,marginTop:10,opacity:0,animation:"rmBootSettle 0.6s ease-out 0.35s forwards"}}>Realm Manager</div>
+      <div className="rm-boot-anim" style={{fontFamily:"'Alegreya Sans',system-ui,sans-serif",fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:3,opacity:0,animation:"rmBootSettle 0.6s ease-out 0.55s forwards"}}>FANTASY SQUAD SIMULATOR</div>
       <div style={{width:120,height:2,background:"rgba(60,52,38,0.15)",borderRadius:1,marginTop:22,overflow:"hidden"}}>
-        <div style={{width:"40%",height:"100%",background:"#8A6D3B",animation:"rmBootSweep 1.1s linear infinite"}}/>
+        <div className="rm-boot-anim" style={{width:"40%",height:"100%",background:"#8A6D3B",animation:"rmBootSweep 1.1s linear infinite"}}/>
       </div>
     </div>
   );
@@ -7107,21 +7117,34 @@ function HomeScreen({saved,onContinue,onNewRealm}){
   const hasLegacy=wins>0||boons>0;
   return(
     <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:390,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px",overflowY:"auto",fontFamily:"'Alegreya Sans',sans-serif"}}>
+      {/* Entrance motion: the masthead presses in like a stamp, the blocks
+          rise in staggered like laid type. Printed-matter rules hold — flat
+          ink only — and everything stills under prefers-reduced-motion. */}
+      <style>{`
+        @keyframes rmHomeStamp{from{opacity:0;transform:scale(1.08)}60%{opacity:1;transform:scale(0.99)}to{opacity:1;transform:scale(1)}}
+        @keyframes rmHomeRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .rm-home-stamp{animation:rmHomeStamp 0.5s ease-out both}
+        .rm-home-rise{animation:rmHomeRise 0.45s ease-out both}
+        @media (prefers-reduced-motion: reduce){.rm-home-stamp,.rm-home-rise{animation:none !important}}
+      `}</style>
       {/* paper grain, matching the in-game backdrop */}
       <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
       <div style={{width:"min(340px,92vw)",textAlign:"center"}}>
-        <Glyph id="leader" size={30} color="#8A6D3B"/>
-        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:"#23201A",letterSpacing:1,marginTop:8}}>Realm Manager</div>
-        <div style={{fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:2,marginBottom:26}}>FANTASY SQUAD SIMULATOR</div>
+        <div className="rm-home-stamp">
+          <Glyph id="leader" size={30} color="#8A6D3B"/>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:"#23201A",letterSpacing:1,marginTop:8}}>Realm Manager</div>
+          <div style={{fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:2,marginBottom:26}}>FANTASY SQUAD SIMULATOR</div>
+        </div>
 
         {summary&&(
-          <button onClick={onContinue}
-            style={{display:"block",width:"100%",padding:"13px 16px",borderRadius:3,border:"none",cursor:"pointer",background:summary.color,color:"#F0E8D5",textAlign:"left",marginBottom:10}}>
+          <button onClick={onContinue} className="rm-home-rise"
+            style={{display:"block",width:"100%",padding:"13px 16px",borderRadius:3,border:"none",cursor:"pointer",background:summary.color,color:"#F0E8D5",textAlign:"left",marginBottom:10,animationDelay:"0.2s"}}>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,letterSpacing:0.5}}>Continue — {summary.name}</div>
             <div style={{fontSize:10,opacity:0.85,marginTop:3,fontFamily:"'Alegreya Sans',sans-serif"}}>{summary.line}</div>
           </button>
         )}
 
+        <div className="rm-home-rise" style={{animationDelay:summary?"0.32s":"0.2s"}}>
         {!confirming?(
           <button onClick={()=>{ summary?setConfirming(true):onNewRealm(); }}
             style={{display:"block",width:"100%",padding:summary?"11px 16px":"13px 16px",borderRadius:3,cursor:"pointer",
@@ -7150,9 +7173,10 @@ function HomeScreen({saved,onContinue,onNewRealm}){
             </div>
           </div>
         )}
+        </div>
 
         {hasLegacy&&(
-          <div style={{borderTop:"1px solid rgba(60,52,38,0.15)",marginTop:26,paddingTop:12}}>
+          <div className="rm-home-rise" style={{borderTop:"1px solid rgba(60,52,38,0.15)",marginTop:26,paddingTop:12,animationDelay:"0.44s"}}>
             <div style={{fontSize:9,letterSpacing:2,color:"#8A6D3B",fontWeight:700}}>YOUR LEGACY</div>
             <div style={{fontSize:10,color:"#6E6350",marginTop:4}}>
               {wins} conquest{wins===1?"":"s"} · {boons} boon{boons===1?"":"s"} earned · Realm #{wins+1} awaits
