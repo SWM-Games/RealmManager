@@ -15,9 +15,30 @@ tier-scaled building costs, tribute swing, loss purse) · event-return path.
 
 ## Not yet reviewed — in priority order
 
-1. **Retirement / mentorship flow** — never reviewed end to end.
+_(none — all systems reviewed)_
 
 ## Resolved
+
+- **Retirement / mentorship flow (reviewed + fixed)** — traced end to end. The
+  core loop was sound (veteran-end retirement trigger, ceremony, squad morale
+  lift, Squad Leader unassign, "Legend Retires" achievement), but five defects
+  surfaced. **Hall of Legends was dead** — the 18k Platinum building filtered
+  `updatedHeroes` for `h.retired`, but retirees are stripped from `heroes` the
+  week they retire (and this year's aren't aged until later in the same pass),
+  so the filter was always empty (the rule #2 "shipped dead, never probed"
+  pattern the buildings review missed). Fixed with a persisted `retiredLegends`
+  roll (level frozen at retirement) feeding a pure, test-locked
+  `legendMoraleBonus`. **Benched mentees never levelled** — the bench mentor
+  path added XP but skipped `levelFromXp`/`growHeroStats`, so level, stats and
+  value froze until the hero next played (unlike the played path and Training
+  Grounds); now recomputed silently. **Duplicate mentee** — the same hero could
+  be picked to mentor two simultaneous retirees but `mentorBonus` is one slot,
+  silently dropping one; the modal now excludes already-chosen mentees.
+  **`retirees` wasn't persisted** — a reload mid-ceremony lost the assignment;
+  added to the save blob + autosave deps (and loaded via `saved?.retirees`).
+  Plus an emoji-sweep empty `<span>` in the mentor card → `Glyph`. Engine suite
+  42 → 47 (new Hall of Legends morale guard). Sim unaffected (it explicitly
+  models neither mentors nor the Legends morale effect).
 
 - **Season-2 playtest pass (PR #17)** — a second human play (reached S2) found a
   crash and five bugs, all fixed: the event-return crash (unguarded `pendingEvent`
