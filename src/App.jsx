@@ -6928,12 +6928,18 @@ function serializeFormation(formation) {
   return out;
 }
 
-function deserializeFormation(saved, heroes) {
+function deserializeFormation(saved, heroes, skipUnavailable = false) {
   const out = {};
   POS_KEYS.forEach(p => {
-    out[p] = (saved[p] || [null, null]).map(id =>
-      id === null ? null : heroes.find(h => h.id === id) || null
-    );
+    out[p] = (saved[p] || [null, null]).map(id => {
+      if (id === null) return null;
+      const h = heroes.find(hh => hh.id === id) || null;
+      // When loading a preset, don't re-field heroes who are currently away or
+      // injured — leave the slot empty so the player fills it, instead of quietly
+      // seating an ineligible hero they then have to hunt down and remove.
+      if (skipUnavailable && h && (h.injured || (h.awayWeeks || 0) > 0)) return null;
+      return h;
+    });
   });
   return out;
 }
@@ -7959,8 +7965,12 @@ export default function App(){
   const loadPreset=(idx)=>{
     const p=formationPresets[idx];
     if(!p){addLog(`Preset ${idx+1} is empty.`,"warning");return;}
-    setFormation(deserializeFormation(p,heroes));
-    addLog(`↻ Loaded Preset ${idx+1}.`,"success");
+    // Count saved slots whose hero is now unavailable — they'll be left empty.
+    const savedIds=POS_KEYS.flatMap(pos=>(p[pos]||[]).filter(id=>id!==null));
+    const skipped=savedIds.filter(id=>{const h=heroes.find(hh=>hh.id===id);return h&&(h.injured||(h.awayWeeks||0)>0);}).length;
+    setFormation(deserializeFormation(p,heroes,true));
+    if(skipped>0) addLog(`↻ Loaded Preset ${idx+1} — ${skipped} unavailable hero${skipped>1?"es":""} (away/injured) left out; fill the empty slots.`,"warning");
+    else addLog(`↻ Loaded Preset ${idx+1}.`,"success");
   };
   const clearPreset=(idx)=>{
     setFormationPresets(prev=>{
