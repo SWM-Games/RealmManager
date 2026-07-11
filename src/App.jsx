@@ -398,6 +398,13 @@ const RESPONSIVE_CSS = `
     .rm-bench-grid { grid-template-columns: repeat(2, 1fr) !important; }
   }
 
+  /* ── SQUAD FILTER ROWS ── */
+  /* Compact pills so the full-name position row fits one line at 375px */
+  @media (max-width: 640px) {
+    .rm-sq-row { gap: 4px !important; }
+    .rm-sq-row .pa-pill { padding: 6px 7px; font-size: 9px; letter-spacing: 0.5px; gap: 4px; }
+  }
+
   /* ── TOUCH TARGETS ── */
   @media (max-width: 640px) {
     button { min-height: 36px; }
@@ -7756,6 +7763,7 @@ export default function App(){
   const [showMore,setShowMore] = useState(false);
   const [enemy,setEnemy]             = useState(null);
   const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
+  const [moreFiltersOpen,setMoreFiltersOpen] = useState(false);
   const [marketFilter,setMarketFilter] = useState({role:"All",race:"All",position:"All",stage:"All",sortBy:"Value"});
   const [retirees,setRetirees]       = useState(saved?.retirees ?? []);
   // Roll of the retired — persists their level-at-retirement so Hall of Legends
@@ -9893,9 +9901,8 @@ export default function App(){
               );
             })()}
 
-            {/* POSITION pill row — primary filter */}
-            <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8,alignItems:"center"}}>
-              <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Position</span>
+            {/* Row 1 — position pills, full names, one line at 375px */}
+            <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center"}}>
               {["All",...POS_KEYS].map(p=>{
                 const count = p==="All"
                   ? heroes.length
@@ -9903,43 +9910,88 @@ export default function App(){
                 const isActive = filter.position === p;
                 return(
                   <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,position:p}))}>
-                    {p!=="All"&&<PositionIcon position={p} size={13}/>}
                     {p}<span className="ct">{count}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* RACE pill row — secondary primary filter (replaces dropdown) */}
+            {/* Row 2 — race synergy chips: races with 2+ heroes get a chip (the
+                only ones worth filtering for — pacts need multiples); singletons
+                collapse into the Other select. The row doubles as roster
+                intelligence: which synergies are within reach. Derived from the
+                live roster every render, so chips demote/graduate automatically. */}
             {(()=>{
               const RACES_LIST = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
+              const counts = Object.fromEntries(RACES_LIST.map(r=>[r,heroes.filter(h=>h.race===r).length]));
+              const chipRaces  = RACES_LIST.filter(r=>counts[r]>=2).sort((a,b)=>counts[b]-counts[a]);
+              const otherRaces = RACES_LIST.filter(r=>counts[r]<2);
+              const otherCount = otherRaces.reduce((a,r)=>a+counts[r],0);
+              const otherActive = otherRaces.includes(filter.race);
               return(
-                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12,alignItems:"center"}}>
-                  <span className="pa-kicker" style={{marginRight:8,minWidth:60}}>Race</span>
-                  {["All",...RACES_LIST].map(r=>{
-                    const count = r==="All" ? heroes.length : heroes.filter(h=>h.race===r).length;
-                    const isActive = filter.race === r;
-                    return(
-                      <button key={r} className={`pa-pill${isActive?" active":""}`} onClick={()=>setFilter(f=>({...f,race:r}))}>
-                        {r}<span className="ct">{count}</span>
-                      </button>
-                    );
-                  })}
+                <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center",flexWrap:"wrap"}}>
+                  <button className={`pa-pill${filter.race==="All"?" active":""}`} onClick={()=>setFilter(f=>({...f,race:"All"}))}>
+                    All<span className="ct">{heroes.length}</span>
+                  </button>
+                  {chipRaces.map(r=>(
+                    <button key={r} className={`pa-pill${filter.race===r?" active":""}`} title={r} onClick={()=>setFilter(f=>({...f,race:r}))}>
+                      <HeroAvatar race={r} size={13}/>{r}<span className="ct">{counts[r]}</span>
+                    </button>
+                  ))}
+                  {otherRaces.length>0&&(
+                    <span className={`pa-pill${otherActive?" active":""}`} style={{position:"relative"}}>
+                      {otherActive?filter.race:"Other"}<span className="ct">{otherActive?"":otherCount}</span>{" ▾"}
+                      <select value={otherActive?filter.race:""} onChange={e=>{ if(e.target.value) setFilter(f=>({...f,race:e.target.value})); }}
+                        aria-label="Filter by other race"
+                        style={{position:"absolute",inset:0,opacity:0,cursor:"pointer",width:"100%"}}>
+                        <option value="" disabled>Other races</option>
+                        {otherRaces.map(r=><option key={r} value={r}>{`${r} (${counts[r]})`}</option>)}
+                      </select>
+                    </span>
+                  )}
                 </div>
               );
             })()}
 
-            {/* Secondary filters — slimmer row */}
-            <div className="rm-filter-bar" style={{marginBottom:14}}>
-              <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))} style={{...IS,width:160,minWidth:0,maxWidth:"100%"}}/>
-              <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={IS}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
-              <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={IS}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
-              <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={IS}><option value="All">All Statuses</option>{["Fit","Injured","Away","Unhappy","Renewing"].map(v=><option key={v} value={v}>{v}</option>)}</select>
-              <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
-                {["Value","Level","XP","Stage","Morale","Contract","Combat","Fatigue","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
-              </select>
-              <span className="pa-kicker" style={{flexShrink:0,letterSpacing:1.5}}>{filtered.length} shown</span>
-            </div>
+            {/* Row 3 — sort chip + badged More-filters disclosure + shown count.
+                The badge is the guarantee that nothing filters the roster
+                invisibly while the panel is collapsed. */}
+            {(()=>{
+              const hiddenActive = (filter.search.trim()?1:0)+(filter.role!=="All"?1:0)+(filter.phase!=="All"?1:0)+(filter.status!=="All"?1:0);
+              return(
+                <>
+                  <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:moreFiltersOpen?6:14,alignItems:"center"}}>
+                    <span className="pa-pill" style={{position:"relative"}}>
+                      {`Sort: ${filter.sortBy}`}{" ▾"}
+                      <select value={filter.sortBy} onChange={e=>setFilter(f=>({...f,sortBy:e.target.value}))}
+                        aria-label="Sort heroes by"
+                        style={{position:"absolute",inset:0,opacity:0,cursor:"pointer",width:"100%"}}>
+                        {["Value","Level","XP","Stage","Morale","Contract","Combat","Fatigue","Salary",...(showHiddenStats?["Potential"]:[])].map(s=><option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </span>
+                    <button className={`pa-pill${hiddenActive>0?" active":""}`} onClick={()=>setMoreFiltersOpen(o=>!o)}>
+                      {`More${hiddenActive>0?` (${hiddenActive})`:""} ${moreFiltersOpen?"▴":"▾"}`}
+                    </button>
+                    <span className="pa-kicker" style={{marginLeft:"auto",flexShrink:0,letterSpacing:1.5}}>{filtered.length} shown</span>
+                  </div>
+                  {moreFiltersOpen&&(
+                    <div style={{marginBottom:14,padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.07)",border:"1px solid rgba(138,109,59,0.3)"}}>
+                      <input placeholder="Search name/trait…" value={filter.search} onChange={e=>setFilter(f=>({...f,search:e.target.value}))}
+                        style={{...IS,width:"100%",boxSizing:"border-box",marginBottom:7}}/>
+                      <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+                        <select value={filter.role} onChange={e=>setFilter(f=>({...f,role:e.target.value}))} style={{...IS,flex:1,minWidth:90}}><option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}</select>
+                        <select value={filter.phase} onChange={e=>setFilter(f=>({...f,phase:e.target.value}))} style={{...IS,flex:1,minWidth:90}}><option value="All">All Stages</option>{["prospect","rising","peak","fading","veteran"].map(p=><option key={p} value={p}>{agePhaseLabel(p)}</option>)}</select>
+                        <select value={filter.status} onChange={e=>setFilter(f=>({...f,status:e.target.value}))} style={{...IS,flex:1,minWidth:90}}><option value="All">All Statuses</option>{["Fit","Injured","Away","Unhappy","Renewing"].map(v=><option key={v} value={v}>{v}</option>)}</select>
+                      </div>
+                      <button onClick={()=>setFilter(f=>({...f,position:"All",race:"All",search:"",role:"All",phase:"All",status:"All"}))}
+                        style={{background:"none",border:"none",cursor:"pointer",color:"#7E2D26",fontSize:11,padding:0,textDecoration:"underline",fontFamily:"'Alegreya Sans',sans-serif"}}>
+                        Clear all filters
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             <div className="pa-grid">
               {filtered.map(h=><HeroCard key={h.id} hero={h} selected={detailHero?.id===h.id} isListed={listedHeroIds.has(h.id)} hasBid={transferBids.some(b=>b.heroId===h.id)} isLeader={squadLeaderId===h.id} showHiddenStats={showHiddenStats} retrainCandidate={buildings.some(b=>b.id==="trainyard"&&b.built)&&!h.retraining&&bestPositionFor(h)!==naturalLaneFor(h.role)} onClick={()=>{setDetailHero(h);setPrevStats(null);}}/>)}
