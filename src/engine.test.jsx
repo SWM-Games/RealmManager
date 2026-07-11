@@ -12,7 +12,7 @@ import {
   BUILDINGS, migrateBuildings,
   bestPositionFor, PHYSICAL_STATS, generateStartingSquad,
   canRetrain, retrainCost, naturalLaneFor, RETRAIN_WEEKS,
-  legendMoraleBonus,
+  legendMoraleBonus, realmSummary,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -615,5 +615,27 @@ describe("Hall of Legends morale", () => {
 
   it("tolerates a missing level field", () => {
     expect(legendMoraleBonus([{}])).toBe(1);
+  });
+});
+
+// ── Home screen realm summary ─────────────────────────────────────────────────
+describe("realmSummary", () => {
+  it("returns null when there is no save or no town name", () => {
+    expect(realmSummary(null)).toBe(null);
+    expect(realmSummary({})).toBe(null);
+    expect(realmSummary({ gold: 500 })).toBe(null);
+  });
+
+  it("formats tier, season, week and gold from the blob", () => {
+    const s = realmSummary({ townName: "Ironveil", townColor: "#3C5A78", playerTier: "silver", season: 3, seasonWeek: 12, gold: 14200 });
+    expect(s.name).toBe("Ironveil");
+    expect(s.color).toBe("#3C5A78");
+    expect(s.line).toBe("Silver · Season 3, Week 12 · 14,200g");
+  });
+
+  it("falls back safely on a sparse blob", () => {
+    const s = realmSummary({ townName: "Duskhollow" });
+    expect(s.color).toBe("#8A6D3B");
+    expect(s.line).toBe("Iron · Season 1, Week 1 · 0g");
   });
 });

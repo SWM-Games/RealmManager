@@ -243,3 +243,41 @@ unassign, "Legend Retires" achievement); five defects fixed:
 
 Engine suite 42 → 47 (Hall of Legends morale guard). Sim untouched — it models
 neither mentors nor the Legends morale effect, so rule 1 needs no mirror.
+
+### The front door: splash, home screen, Legacy/Realm terminology
+
+The app finally has an entrance. Previously `App()` parsed the save in a
+`useMemo` and either dumped the player into the game mid-week or showed
+SetupScreen, with the IM Fell font popping in after first paint.
+
+- **Boot splash:** a `screen` state machine (`boot → home → setup → game`) at
+  the top of `App()`. The splash plays every boot: the coronet glyph inks
+  itself in via stroke-dash (~1.4s) while the masthead settles, held to a
+  1.6s minimum and gated on `document.fonts.ready` up to a 2.5s offline cap.
+  (It originally skipped when fonts were cached; once the ink-draw animation
+  landed, always-play was the point — reduced-motion users skip the hold.)
+  The Google Fonts `<link>` moved to `index.html` — it had been living inside
+  App and SetupScreen renders in three copies, one with a divergent URL
+  missing most weights, so nothing could ever have gated on it.
+- **Home screen:** Continue (letterpress block in the realm colour; line
+  formatted by the test-locked `realmSummary`), Found a New Realm
+  (confirm-guarded when a save exists — restarts via `clearSave()` + a
+  `sessionStorage` intent flag + reload, reusing the proven full-reload
+  pattern so none of the ~60 `useState(saved…)` initializers leak stale
+  state), and a Legacy strip (conquests · boons · next realm number).
+- **Terminology:** LEGACY = the persistent account (achievements, boons,
+  conquest count — the NG+ blob); REALM = one playthrough. The Ledger's
+  everything-eraser (confusingly labelled "New Realm") is now **Erase
+  Legacy**; "Abandon Run" → **Abandon Realm**; status pill "Run #N" →
+  "Realm #N"; setup banner "New Legacy — Run #N" → "Your Legacy — Realm #N";
+  the LegacyCeremony restart routes through the intent flag (straight to
+  setup, no home bounce) and its CTA reads "Found a New Realm"; achievement/
+  boon descriptions swept run → realm. In-fiction military "campaign" wording
+  kept deliberately.
+- **Autosave gate:** the mount-time autosave used to write a junk blob with
+  `townName: ""` 400ms after every boot spent on home/setup — pre-existing,
+  but it would have left debris after Erase Legacy. Now gated on `setupDone`.
+
+Engine suite 47 → 50 (`realmSummary`). All six boot flows verified in the
+browser (first run, warm reload, continue, new-realm-with-save + Legacy
+survival, NG+ banner/boons, erase-everything leaves storage clean).

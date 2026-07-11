@@ -1378,7 +1378,7 @@ const ACHIEVEMENTS = [
     boon: {
       id:     "iron_dynasty",
       name:   "Conqueror's Coffers",
-      desc:   "Begin the run with +1,000g — a generous war chest.",
+      desc:   "Begin the realm with +1,000g — a generous war chest.",
       icon:   "",
       apply:  (state)=>({...state, gold: (state.gold||4000)+1000 }),
     },
@@ -1400,13 +1400,13 @@ const ACHIEVEMENTS = [
   {
     id:       "full_house",
     name:     "Full House",
-    desc:     "Fill every build slot in one run",
+    desc:     "Fill every build slot in one realm",
     icon:     "",
     check:    (data)=>TIER_ORDER.every(t=>buildingCapReached(data.buildings, t)),
     boon: {
       id:     "full_house",
       name:   "Pre-Built Barracks",
-      desc:   "Start the run with the Barracks already constructed.",
+      desc:   "Start the realm with the Barracks already constructed.",
       icon:   "",
       apply:  (state)=>({...state, buildings: state.buildings.map(b=>b.id==="barracks"?{...b,built:true}:b)}),
     },
@@ -1414,7 +1414,7 @@ const ACHIEVEMENTS = [
   {
     id:       "legend_retires",
     name:     "Legend Retires",
-    desc:     "Have a hero reach Level 13 and retire in the same run",
+    desc:     "Have a hero reach Level 13 and retire in the same realm",
     icon:     "",
     check:    (data)=>data.retiredMax13,
     boon: {
@@ -1461,7 +1461,7 @@ const ACHIEVEMENTS = [
   {
     id:       "golden_vault",
     name:     "Golden Vault",
-    desc:     "Accumulate 100,000g at any point in a run",
+    desc:     "Accumulate 100,000g at any point in a realm",
     icon:     "",
     check:    (data)=>data.peakGold>=100000,
     boon: {
@@ -1475,7 +1475,7 @@ const ACHIEVEMENTS = [
   {
     id:       "ability_scout",
     name:     "Ability Scout",
-    desc:     "Successfully mitigate 100 enemy abilities in a run",
+    desc:     "Successfully mitigate 100 enemy abilities in a realm",
     icon:     "",
     check:    (data)=>(data.abilitiesMitigated||0)>=100,
     boon: {
@@ -1489,7 +1489,7 @@ const ACHIEVEMENTS = [
   {
     id:       "transfer_king",
     name:     "Banner Broker",
-    desc:     "Send 15 heroes to serve rival banners in a single run",
+    desc:     "Send 15 heroes to serve rival banners in a single realm",
     icon:     "",
     check:    (data)=>(data.heroesSold||0)>=15,
     boon: {
@@ -1507,7 +1507,7 @@ const ACHIEVEMENTS = [
   {
     id:       "synergy_master",
     name:     "Synergy Master",
-    desc:     "Win battles with 3 different race synergies active in one run",
+    desc:     "Win battles with 3 different race synergies active in one realm",
     icon:     "",
     check:    (data)=>Object.keys(data.raceSynergyUsage||{}).length>=3,
     boon: {
@@ -4463,7 +4463,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
 
           {allBoons.length>0&&(
             <div style={{padding:"10px 14px",borderRadius:3,background:"rgba(60,90,120,0.075)",border:"1px solid rgba(60,90,120,0.3)",marginBottom:16,fontSize:10,color:"#3C5A78"}}>
-              <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when starting your next campaign.
+              <b>{allBoons.length} game option{allBoons.length>1?"s":""}</b> unlocked — available when founding your next realm.
             </div>
           )}
 
@@ -4474,7 +4474,7 @@ function LegacyCeremony({data, townName, townColor, onPlayOn, onNewLegacy}){
             </button>
             <button onClick={()=>onNewLegacy(allBoons)}
               style={{flex:2,padding:"11px 0",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:900,fontSize:12}}>
-              Begin New Campaign
+              Found a New Realm
             </button>
           </div>
         </div>
@@ -7044,6 +7044,154 @@ function clearSave() {
   localStorage.removeItem(SAVE_KEY);
 }
 
+// Formats the home screen's Continue block from a parsed save blob.
+// Pure + exported so the engine suite can lock the shape.
+export function realmSummary(saved) {
+  if (!saved || !saved.townName) return null;
+  const tierName = TIERS[saved.playerTier]?.name ?? "Iron";
+  return {
+    name: saved.townName,
+    color: saved.townColor || "#8A6D3B",
+    line: `${tierName} · Season ${saved.season ?? 1}, Week ${saved.seasonWeek ?? 1} · ${(saved.gold ?? 0).toLocaleString()}g`,
+  };
+}
+
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+// Transient handoff for "start a new realm": set before the reload, consumed
+// on the next boot so the player lands directly in setup. sessionStorage, not
+// part of any save blob.
+const INTENT_KEY = "rm_intent";
+function consumeIntent() {
+  try {
+    const v = sessionStorage.getItem(INTENT_KEY);
+    if (v) sessionStorage.removeItem(INTENT_KEY);
+    return v;
+  } catch { return null; }
+}
+function requestNewRealm() {
+  clearSave(); // the Legacy blob (NG+) is untouched
+  try { sessionStorage.setItem(INTENT_KEY, "new"); } catch { /* private mode */ }
+  window.location.reload();
+}
+
+// The splash always plays: long enough for the coronet to finish inking
+// (draw ends ~1.4s), short enough to stay out of the way. Reduced-motion
+// users skip the artificial hold — for them it's a font gate only.
+const BOOT_MIN_MS = 1600;
+const BOOT_FONT_CAP_MS = 2500;
+function prefersReducedMotion() {
+  try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
+}
+
+// Splash while fonts load. Styled with fallback faces on purpose — it renders
+// before the display font it is waiting for. The coronet inks itself in
+// (stroke-dash draw) while the press bar sweeps — printed-matter motion only:
+// no gradients, no glows, and everything stills under prefers-reduced-motion.
+function BootSplash() {
+  return (
+    <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:400,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+      <style>{`
+        @keyframes rmBootSweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+        @keyframes rmBootDraw{to{stroke-dashoffset:0}}
+        @keyframes rmBootSettle{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+        @media (prefers-reduced-motion: reduce){.rm-boot-anim{animation:none !important;stroke-dashoffset:0 !important;opacity:1 !important;transform:none !important}}
+      `}</style>
+      <svg width={34} height={34} viewBox="0 0 24 24" fill="none" stroke="#8A6D3B" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path className="rm-boot-anim" d={GLYPH_PATHS.leader}
+          style={{strokeDasharray:70,strokeDashoffset:70,animation:"rmBootDraw 1.3s ease-out 0.1s forwards"}}/>
+      </svg>
+      <div className="rm-boot-anim" style={{fontFamily:"'IM Fell English SC',Georgia,serif",fontWeight:900,fontSize:22,color:"#23201A",letterSpacing:1,marginTop:10,opacity:0,animation:"rmBootSettle 0.6s ease-out 0.35s forwards"}}>Realm Manager</div>
+      <div className="rm-boot-anim" style={{fontFamily:"'Alegreya Sans',system-ui,sans-serif",fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:3,opacity:0,animation:"rmBootSettle 0.6s ease-out 0.55s forwards"}}>FANTASY SQUAD SIMULATOR</div>
+      <div style={{width:120,height:2,background:"rgba(60,52,38,0.15)",borderRadius:1,marginTop:22,overflow:"hidden"}}>
+        <div className="rm-boot-anim" style={{width:"40%",height:"100%",background:"#8A6D3B",animation:"rmBootSweep 1.1s linear infinite"}}/>
+      </div>
+    </div>
+  );
+}
+
+// The front door. Continue resumes the saved realm; Found a New Realm starts
+// over (confirm-guarded when a realm exists — the Legacy is always kept); the
+// Legacy strip shows meta-progress that survives across realms.
+function HomeScreen({saved,onContinue,onNewRealm}){
+  const [confirming,setConfirming]=useState(false);
+  const ng=loadNGPlus();
+  const summary=realmSummary(saved);
+  const wins=ng?.wins??0;
+  const boons=(ng?.earnedBoons??[]).length;
+  const hasLegacy=wins>0||boons>0;
+  return(
+    <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:390,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px",overflowY:"auto",fontFamily:"'Alegreya Sans',sans-serif"}}>
+      {/* Entrance motion: the masthead presses in like a stamp, the blocks
+          rise in staggered like laid type. Printed-matter rules hold — flat
+          ink only — and everything stills under prefers-reduced-motion. */}
+      <style>{`
+        @keyframes rmHomeStamp{from{opacity:0;transform:scale(1.08)}60%{opacity:1;transform:scale(0.99)}to{opacity:1;transform:scale(1)}}
+        @keyframes rmHomeRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .rm-home-stamp{animation:rmHomeStamp 0.5s ease-out both}
+        .rm-home-rise{animation:rmHomeRise 0.45s ease-out both}
+        @media (prefers-reduced-motion: reduce){.rm-home-stamp,.rm-home-rise{animation:none !important}}
+      `}</style>
+      {/* paper grain, matching the in-game backdrop */}
+      <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
+      <div style={{width:"min(340px,92vw)",textAlign:"center"}}>
+        <div className="rm-home-stamp">
+          <Glyph id="leader" size={30} color="#8A6D3B"/>
+          <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:"#23201A",letterSpacing:1,marginTop:8}}>Realm Manager</div>
+          <div style={{fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:2,marginBottom:26}}>FANTASY SQUAD SIMULATOR</div>
+        </div>
+
+        {summary&&(
+          <button onClick={onContinue} className="rm-home-rise"
+            style={{display:"block",width:"100%",padding:"13px 16px",borderRadius:3,border:"none",cursor:"pointer",background:summary.color,color:"#F0E8D5",textAlign:"left",marginBottom:10,animationDelay:"0.2s"}}>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,letterSpacing:0.5}}>Continue — {summary.name}</div>
+            <div style={{fontSize:10,opacity:0.85,marginTop:3,fontFamily:"'Alegreya Sans',sans-serif"}}>{summary.line}</div>
+          </button>
+        )}
+
+        <div className="rm-home-rise" style={{animationDelay:summary?"0.32s":"0.2s"}}>
+        {!confirming?(
+          <button onClick={()=>{ summary?setConfirming(true):onNewRealm(); }}
+            style={{display:"block",width:"100%",padding:summary?"11px 16px":"13px 16px",borderRadius:3,cursor:"pointer",
+              border:summary?"1px solid rgba(60,52,38,0.28)":"none",
+              background:summary?"rgba(60,52,38,0.07)":"#8A6D3B",
+              color:summary?"#4A4335":"#F0E8D5",
+              fontFamily:summary?"'Alegreya Sans',sans-serif":"'IM Fell English SC',serif",
+              fontWeight:summary?700:900,fontSize:summary?12:15,letterSpacing:summary?0:1}}>
+            Found a New Realm
+          </button>
+        ):(
+          <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)",textAlign:"left"}}>
+            <div style={{fontSize:11,color:"#9A5B2B",fontWeight:700,marginBottom:4}}>Abandon {summary.name}?</div>
+            <div style={{fontSize:10,color:"#4A4335",lineHeight:1.5,marginBottom:8}}>
+              Your current realm will be abandoned. Your Legacy — achievements and boons — is kept.
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={onNewRealm}
+                style={{fontSize:11,padding:"6px 12px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                Found a New Realm
+              </button>
+              <button onClick={()=>setConfirming(false)}
+                style={{fontSize:11,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        </div>
+
+        {hasLegacy&&(
+          <div className="rm-home-rise" style={{borderTop:"1px solid rgba(60,52,38,0.15)",marginTop:26,paddingTop:12,animationDelay:"0.44s"}}>
+            <div style={{fontSize:9,letterSpacing:2,color:"#8A6D3B",fontWeight:700}}>YOUR LEGACY</div>
+            <div style={{fontSize:10,color:"#6E6350",marginTop:4}}>
+              {wins} conquest{wins===1?"":"s"} · {boons} boon{boons===1?"":"s"} earned · Realm #{wins+1} awaits
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
 
 // Playtest gate: append ?dev to the URL to reveal testing controls (e.g. starting
@@ -7087,12 +7235,10 @@ function SetupScreen({ onComplete }) {
 
     return (
       <div style={{position:"fixed",inset:0,background:"#E9E1CE",display:"flex",alignItems:"center",justifyContent:"center",zIndex:300,fontFamily:"'Alegreya Sans',sans-serif",overflowY:"auto",padding:"16px 0"}}>
-        <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400;1,700&display=swap" rel="stylesheet"/>
         <div style={{width:"min(520px,92vw)",padding:"32px 28px",background:"rgba(60,52,38,0.045)",border:"1px solid rgba(138,109,59,0.3)",borderRadius:3}}>
           <div style={{textAlign:"center",marginBottom:24}}>
-            <div style={{fontSize:28,marginBottom:6}}></div>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Legacy Boons</div>
-            <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate this run. Each can be used once. You can choose none for a clean start.</div>
+            <div style={{fontSize:11,color:"#6E6350"}}>Choose which boons to activate in this realm. Each can be used once. You can choose none for a clean start.</div>
           </div>
 
           <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:24}}>
@@ -7150,7 +7296,6 @@ function SetupScreen({ onComplete }) {
       zIndex:300, fontFamily:"'Alegreya Sans',sans-serif", overflowY:"auto",
       padding:"16px 0",
     }}>
-      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       <div style={{
         width:"min(480px,92vw)", padding:"36px 32px",
         background:"rgba(60,52,38,0.045)",
@@ -7188,9 +7333,9 @@ function SetupScreen({ onComplete }) {
         {/* NG+ returning champion notice */}
         {ng?.wins>0&&(
           <div style={{marginBottom:20,padding:"10px 14px",borderRadius:3,background:"rgba(154,91,43,0.12)",border:"1px solid rgba(154,91,43,0.45)"}}>
-            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>New Legacy — Run #{ng.wins+1}</div>
+            <div style={{fontSize:11,fontWeight:700,color:"#9A5B2B",marginBottom:3}}>Your Legacy — Realm #{ng.wins+1}</div>
             <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
-              You've conquered the realm {ng.wins} time{ng.wins>1?"s":""}. Your unlocked game options are available below.
+              {ng.wins} conquest{ng.wins>1?"s":""} to your name. Boons from your Legacy are available below.
             </div>
           </div>
         )}
@@ -7278,7 +7423,7 @@ function SetupScreen({ onComplete }) {
             color:"#F0E8D5", fontFamily:"'IM Fell English SC',serif",
             fontWeight:900, fontSize:15, letterSpacing:1,
           }}>
-          Begin Your Legacy
+          Found the Realm
         </button>
       </div>
     </div>
@@ -7289,15 +7434,15 @@ function AbandonButton({onAbandon}){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)"}}>
-      <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Abandon this run?</div>
+      <div style={{fontSize:10,color:"#9A5B2B",fontWeight:700}}>Abandon this realm?</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
-        Your run ends here. Achievements earned so far<br/>
-        and all boons are preserved for your next run.
+        Your realm falls. Achievements and boons earned<br/>
+        so far are preserved in your Legacy.
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{setConfirming(false);onAbandon();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
-          Yes, abandon run
+          Yes, abandon realm
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
@@ -7309,7 +7454,7 @@ function AbandonButton({onAbandon}){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(154,91,43,0.45)",background:"rgba(154,91,43,0.105)",color:"#9A5B2B",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
-      Abandon Run
+      Abandon Realm
     </button>
   );
 }
@@ -7318,17 +7463,17 @@ function NewGameButton(){
   const [confirming,setConfirming]=useState(false);
   if(confirming) return(
     <div style={{display:"flex",flexDirection:"column",gap:6,padding:"10px 12px",borderRadius:3,background:"rgba(126,45,38,0.09)",border:"1px solid rgba(126,45,38,0.3)"}}>
-      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>This will erase everything:</div>
+      <div style={{fontSize:10,color:"#7E2D26",fontWeight:700}}>This will erase your Legacy:</div>
       <div style={{fontSize:9,color:"#4A4335",lineHeight:1.5}}>
-        • Current run progress and gold<br/>
+        • The current realm — progress and gold<br/>
         • All earned achievements and boons<br/>
-        • NG+ legacy history<br/>
+        • Your conquest history<br/>
         This cannot be undone.
       </div>
       <div style={{display:"flex",gap:6}}>
         <button onClick={()=>{clearSave();clearNGPlus();window.location.reload();}}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"none",background:"#7E2D26",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
-          Yes, start New Realm
+          Yes, erase everything
         </button>
         <button onClick={()=>setConfirming(false)}
           style={{fontSize:10,padding:"4px 10px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
@@ -7340,7 +7485,7 @@ function NewGameButton(){
   return(
     <button onClick={()=>setConfirming(true)}
       style={{fontSize:10,padding:"5px 12px",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",background:"rgba(126,45,38,0.105)",color:"#7E2D26",cursor:"pointer",fontFamily:"'Alegreya Sans',sans-serif"}}>
-      New Realm
+      Erase Legacy
     </button>
   );
 }
@@ -7476,6 +7621,25 @@ export default function App(){
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
 
+  // Front door: boot (splash) → home → setup|game. The intent flag lands a
+  // post-reload "new realm" boot directly in setup; every other boot plays
+  // the splash — held to BOOT_MIN_MS so the coronet finishes inking, gated
+  // on fonts up to BOOT_FONT_CAP_MS (offline → proceed with fallback faces).
+  const [screen,setScreen] = useState(()=>{
+    if(consumeIntent()==="new" && !saved?.townName) return "setup";
+    return "boot";
+  });
+
+  useEffect(()=>{
+    if(screen!=="boot") return;
+    let fontsDone=false, minDone=prefersReducedMotion(), finished=false;
+    const tryFinish=()=>{ if(!finished && fontsDone && minDone){ finished=true; setScreen("home"); } };
+    const tMin=setTimeout(()=>{ minDone=true; tryFinish(); }, BOOT_MIN_MS);
+    const tCap=setTimeout(()=>{ fontsDone=true; tryFinish(); }, BOOT_FONT_CAP_MS);
+    try { document.fonts.ready.then(()=>{ fontsDone=true; tryFinish(); }); } catch { fontsDone=true; tryFinish(); }
+    return ()=>{ clearTimeout(tMin); clearTimeout(tCap); };
+  },[screen]);
+
   const handleSetupComplete = (name, color, selectedBoons=[], startTier="iron") => {
     setTownName(name);
     setTownColor(color);
@@ -7524,6 +7688,7 @@ export default function App(){
       setScheduledOpponent(generateScheduledOpponent(1, table, towns, startTier));
     }
     setSetupDone(true);
+    setScreen("game");
   };
 
   const [gold,setGold]               = useState(saved?.gold ?? 2500);
@@ -7702,6 +7867,10 @@ export default function App(){
 
   // ── AUTO-SAVE after any meaningful state change ───────────────────────────
   useEffect(()=>{
+    // No realm founded yet (home/setup screens) → nothing worth saving. Without
+    // this gate the mount-time autosave wrote a junk blob with townName:"" 400ms
+    // after every boot — which made Erase Legacy leave debris behind.
+    if(!setupDone) return;
     // Debounce slightly so rapid state updates don't thrash localStorage
     const t = setTimeout(()=>{
       saveGame({gold,week,heroes,buildings,formation,market,log,
@@ -7717,7 +7886,7 @@ export default function App(){
                 hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,raceSynergyUsage,bankruptcyWeeks});
     }, 400);
     return ()=>clearTimeout(t);
-  },[gold,week,heroes,buildings,formation,market,log,season,
+  },[setupDone,gold,week,heroes,buildings,formation,market,log,season,
      seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,retiredLegends,retirees,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
@@ -9343,7 +9512,7 @@ export default function App(){
     ["Wages",         `${wages.toLocaleString()}g`,                                                 "#77653F"],
     ["Week",          `${seasonWeek}`,                                                              "#3A3427"],
     ["Season",        `${season}`,                                                                  "#3A3427"],
-    ...(ngPlus?.wins ? [["Run",`#${ngPlus.wins+1}`,"#8A6D3B"]] : []),
+    ...(ngPlus?.wins ? [["Realm",`#${ngPlus.wins+1}`,"#8A6D3B"]] : []),
     ...(squadLeaderId!=null&&heroes.find(h=>h.id===squadLeaderId) ? [["Leader",`${heroes.find(h=>h.id===squadLeaderId).name.split(" ")[0]}`,"#8A6D3B"]] : []),
     ["Formation",     `${placed}/6 · ${formRating}`,                                                "#77653F"],
     ["Squad",         `${heroes.filter(h=>!h.retired).length}/${ROSTER_CAP}`,                       heroes.filter(h=>!h.retired).length>=ROSTER_CAP?"#7E2D26":"#3A3427"],
@@ -9352,14 +9521,22 @@ export default function App(){
     ...(contractWarnings>0?[["Expiring", `${contractWarnings}`,"#8A6D3B"]] : []),
   ];
 
-  if(!setupDone){
+  if(screen==="boot"){
+    return <BootSplash/>;
+  }
+  if(screen==="home"){
+    return <HomeScreen saved={saved} onContinue={()=>setScreen("game")} onNewRealm={()=>{
+      if(saved?.townName) requestNewRealm();   // reload → intent flag → setup, fresh initializers
+      else setScreen("setup");                  // nothing to clear — no reload needed
+    }}/>;
+  }
+  if(screen==="setup"||!setupDone){
     return <SetupScreen onComplete={handleSetupComplete}/>;
   }
 
   return(
     <div style={{minHeight:"100vh",background:"#E9E1CE",color:"#3A3427",fontFamily:"'Alegreya Sans',sans-serif"}}>
       <InjectCSS/>
-      <link href="https://fonts.googleapis.com/css2?family=IM Fell English SC:wght@400;500;700;900&family=Alegreya Sans:wght@300;400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
       {/* was a starfield; now faint paper grain */}
       <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
 
@@ -9400,6 +9577,7 @@ export default function App(){
               earnedBoons: allBoons,
             });
             clearSave();
+            try { sessionStorage.setItem(INTENT_KEY, "new"); } catch { /* private mode */ }
             window.location.reload();
           }}
         />
@@ -10862,7 +11040,7 @@ export default function App(){
             {/* Persistence note */}
             <div style={{marginBottom:14,padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.108)"}}>
               <div style={{fontSize:10,color:"#6E6350",lineHeight:1.5}}>
-                <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and earned boons persist across runs on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
+                <strong style={{color:"#4A4335"}}>Save data is stored in your browser.</strong> Progress and your Legacy's earned boons persist across realms on this device and browser. Clearing browser data or switching devices will reset your save. There is no cloud sync.
               </div>
             </div>
 
