@@ -9925,7 +9925,8 @@ export default function App(){
               const RACES_LIST = ["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
               const counts = Object.fromEntries(RACES_LIST.map(r=>[r,heroes.filter(h=>h.race===r).length]));
               const chipRaces  = RACES_LIST.filter(r=>counts[r]>=2).sort((a,b)=>counts[b]-counts[a]);
-              const otherRaces = RACES_LIST.filter(r=>counts[r]<2);
+              // Singletons only — a race with zero heroes is nothing to filter by
+              const otherRaces = RACES_LIST.filter(r=>counts[r]===1);
               const otherCount = otherRaces.reduce((a,r)=>a+counts[r],0);
               const otherActive = otherRaces.includes(filter.race);
               return(
