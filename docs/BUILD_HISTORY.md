@@ -182,8 +182,9 @@ setup screen — begin a fresh campaign in any tier (skip Iron, where the loop i
 settled) with a 20,000g stipend. Invisible without the flag; new games start in
 Iron as before.
 
-Engine suite grew 32 → 42. **Retirement / mentorship** remains the only
-unreviewed core system.
+Engine suite grew 32 → 42. **Retirement / mentorship** was the last unreviewed
+core system — now reviewed and fixed in #22 (below), leaving no core system
+unreviewed.
 
 ### Follow-ups from the ongoing playtest (PRs #18–#21)
 
@@ -208,3 +209,37 @@ unreviewed core system.
 - **Preset skip (#21):** loading a formation preset no longer re-fields away or
   injured heroes (`deserializeFormation(…, skipUnavailable=true)`); the slot is
   left empty and the log reports how many were dropped.
+
+### Retirement / mentorship review (PR #22)
+
+The last unreviewed core system, traced end to end. The core loop was sound
+(veteran-end retirement trigger, ceremony, squad morale lift, Squad Leader
+unassign, "Legend Retires" achievement); five defects fixed:
+
+- **Hall of Legends was dead.** The 18k Platinum building filtered
+  `updatedHeroes` for `h.retired`, but retirees are stripped from `heroes` the
+  week they retire, and this season's aren't aged until later in the *same*
+  `applyRaidResult` pass — so the filter was always empty and the building did
+  nothing. Classic rule-2 "shipped dead, never probed" (the buildings review's
+  "all 11 wired and useful" was wrong here). Fixed with a persisted
+  `retiredLegends` roll (level frozen at retirement) feeding a pure, exported
+  `legendMoraleBonus` — now regression-locked in `engine.test.jsx`. Legends join
+  the roll the week after they retire.
+- **Benched mentees never levelled.** The bench mentor path added `+10 XP/wk`
+  but skipped `levelFromXp`/`growHeroStats`, so level, stats and value froze
+  until the hero next played (unlike the played path and Training Grounds) —
+  worst for the developing prospects mentorship targets. Now recomputed on the
+  bench, silently (matching the Training Grounds bench-XP precedent).
+- **Duplicate mentee.** The same hero could be assigned to mentor two
+  simultaneous retirees, but `mentorBonus` is a single slot, so one mentorship
+  was silently dropped. The ceremony modal now excludes already-chosen mentees.
+- **`retirees` wasn't persisted.** Autosave fires the instant a hero retires
+  (heroes changes), writing a blob without `retirees`, so a reload mid-ceremony
+  lost the mentorship assignment (the retiree already gone from the roster).
+  Added `retirees` + `retiredLegends` to the save blob and autosave deps, loaded
+  via `saved?.retirees` / `saved?.retiredLegends`.
+- **Cosmetic:** an emoji-sweep empty `<span>` in the mentor-bonus card → a
+  `nav_guide` Glyph.
+
+Engine suite 42 → 47 (Hall of Legends morale guard). Sim untouched — it models
+neither mentors nor the Legends morale effect, so rule 1 needs no mirror.
