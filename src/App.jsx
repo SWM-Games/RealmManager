@@ -7056,6 +7056,114 @@ export function realmSummary(saved) {
   };
 }
 
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+// Transient handoff for "start a new realm": set before the reload, consumed
+// on the next boot so the player lands directly in setup. sessionStorage, not
+// part of any save blob.
+const INTENT_KEY = "rm_intent";
+function consumeIntent() {
+  try {
+    const v = sessionStorage.getItem(INTENT_KEY);
+    if (v) sessionStorage.removeItem(INTENT_KEY);
+    return v;
+  } catch { return null; }
+}
+function requestNewRealm() {
+  clearSave(); // the Legacy blob (NG+) is untouched
+  try { sessionStorage.setItem(INTENT_KEY, "new"); } catch { /* private mode */ }
+  window.location.reload();
+}
+
+const DISPLAY_FONT_SPEC = '900 16px "IM Fell English SC"';
+function displayFontReady() {
+  try { return document.fonts.check(DISPLAY_FONT_SPEC); } catch { return true; }
+}
+
+// Splash while fonts load. Styled with fallback faces on purpose — it renders
+// before the display font it is waiting for.
+function BootSplash() {
+  return (
+    <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:400,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+      <style>{`@keyframes rmBootSweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}`}</style>
+      <Glyph id="leader" size={34} color="#8A6D3B"/>
+      <div style={{fontFamily:"'IM Fell English SC',Georgia,serif",fontWeight:900,fontSize:22,color:"#23201A",letterSpacing:1,marginTop:10}}>Realm Manager</div>
+      <div style={{fontFamily:"'Alegreya Sans',system-ui,sans-serif",fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:3}}>FANTASY SQUAD SIMULATOR</div>
+      <div style={{width:120,height:2,background:"rgba(60,52,38,0.15)",borderRadius:1,marginTop:22,overflow:"hidden"}}>
+        <div style={{width:"40%",height:"100%",background:"#8A6D3B",animation:"rmBootSweep 1.1s linear infinite"}}/>
+      </div>
+    </div>
+  );
+}
+
+// The front door. Continue resumes the saved realm; Found a New Realm starts
+// over (confirm-guarded when a realm exists — the Legacy is always kept); the
+// Legacy strip shows meta-progress that survives across realms.
+function HomeScreen({saved,onContinue,onNewRealm}){
+  const [confirming,setConfirming]=useState(false);
+  const ng=loadNGPlus();
+  const summary=realmSummary(saved);
+  const wins=ng?.wins??0;
+  const boons=(ng?.earnedBoons??[]).length;
+  const hasLegacy=wins>0||boons>0;
+  return(
+    <div style={{position:"fixed",inset:0,background:"#E9E1CE",zIndex:390,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"24px 16px",overflowY:"auto",fontFamily:"'Alegreya Sans',sans-serif"}}>
+      {/* paper grain, matching the in-game backdrop */}
+      <div style={{position:"fixed",inset:0,backgroundImage:"radial-gradient(1px 1px at 12% 20%,rgba(60,52,38,0.10) 0%,transparent 100%),radial-gradient(1px 1px at 68% 50%,rgba(60,52,38,0.08) 0%,transparent 100%),radial-gradient(1px 1px at 38% 78%,rgba(60,52,38,0.07) 0%,transparent 100%)",pointerEvents:"none"}}/>
+      <div style={{width:"min(340px,92vw)",textAlign:"center"}}>
+        <Glyph id="leader" size={30} color="#8A6D3B"/>
+        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:26,color:"#23201A",letterSpacing:1,marginTop:8}}>Realm Manager</div>
+        <div style={{fontSize:10,letterSpacing:2,color:"#6E6350",marginTop:2,marginBottom:26}}>FANTASY SQUAD SIMULATOR</div>
+
+        {summary&&(
+          <button onClick={onContinue}
+            style={{display:"block",width:"100%",padding:"13px 16px",borderRadius:3,border:"none",cursor:"pointer",background:summary.color,color:"#F0E8D5",textAlign:"left",marginBottom:10}}>
+            <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:15,letterSpacing:0.5}}>Continue — {summary.name}</div>
+            <div style={{fontSize:10,opacity:0.85,marginTop:3,fontFamily:"'Alegreya Sans',sans-serif"}}>{summary.line}</div>
+          </button>
+        )}
+
+        {!confirming?(
+          <button onClick={()=>{ summary?setConfirming(true):onNewRealm(); }}
+            style={{display:"block",width:"100%",padding:summary?"11px 16px":"13px 16px",borderRadius:3,cursor:"pointer",
+              border:summary?"1px solid rgba(60,52,38,0.28)":"none",
+              background:summary?"rgba(60,52,38,0.07)":"#8A6D3B",
+              color:summary?"#4A4335":"#F0E8D5",
+              fontFamily:summary?"'Alegreya Sans',sans-serif":"'IM Fell English SC',serif",
+              fontWeight:summary?700:900,fontSize:summary?12:15,letterSpacing:summary?0:1}}>
+            Found a New Realm
+          </button>
+        ):(
+          <div style={{padding:"12px 14px",borderRadius:3,background:"rgba(154,91,43,0.09)",border:"1px solid rgba(154,91,43,0.3)",textAlign:"left"}}>
+            <div style={{fontSize:11,color:"#9A5B2B",fontWeight:700,marginBottom:4}}>Abandon {summary.name}?</div>
+            <div style={{fontSize:10,color:"#4A4335",lineHeight:1.5,marginBottom:8}}>
+              Your current realm will be abandoned. Your Legacy — achievements and boons — is kept.
+            </div>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={onNewRealm}
+                style={{fontSize:11,padding:"6px 12px",borderRadius:3,border:"none",background:"#9A5B2B",color:"#F0E8D5",cursor:"pointer",fontWeight:700,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                Found a New Realm
+              </button>
+              <button onClick={()=>setConfirming(false)}
+                style={{fontSize:11,padding:"6px 12px",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",background:"rgba(60,52,38,0.072)",color:"#6E6350",cursor:"pointer"}}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        {hasLegacy&&(
+          <div style={{borderTop:"1px solid rgba(60,52,38,0.15)",marginTop:26,paddingTop:12}}>
+            <div style={{fontSize:9,letterSpacing:2,color:"#8A6D3B",fontWeight:700}}>YOUR LEGACY</div>
+            <div style={{fontSize:10,color:"#6E6350",marginTop:4}}>
+              {wins} conquest{wins===1?"":"s"} · {boons} boon{boons===1?"":"s"} earned · Realm #{wins+1} awaits
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── SETUP SCREEN ────────────────────────────────────────────────────────────
 
 // Playtest gate: append ?dev to the URL to reveal testing controls (e.g. starting
@@ -7486,6 +7594,23 @@ export default function App(){
   const [townColor,setTownColor]     = useState(migrateTownColor(saved?.townColor));
   const [setupDone,setSetupDone]     = useState(!!(saved?.townName));
 
+  // Front door: boot (font gate) → home → setup|game. The intent flag lands a
+  // post-reload "new realm" boot directly in setup; a warm boot with cached
+  // fonts skips the splash.
+  const [screen,setScreen] = useState(()=>{
+    if(consumeIntent()==="new" && !saved?.townName) return "setup";
+    return displayFontReady() ? "home" : "boot";
+  });
+
+  useEffect(()=>{
+    if(screen!=="boot") return;
+    let done=false;
+    const finish=()=>{ if(!done){ done=true; setScreen("home"); } };
+    const t=setTimeout(finish, 2500); // fonts CDN down/offline → proceed with fallback faces
+    try { document.fonts.ready.then(finish); } catch { finish(); }
+    return ()=>clearTimeout(t);
+  },[screen]);
+
   const handleSetupComplete = (name, color, selectedBoons=[], startTier="iron") => {
     setTownName(name);
     setTownColor(color);
@@ -7534,6 +7659,7 @@ export default function App(){
       setScheduledOpponent(generateScheduledOpponent(1, table, towns, startTier));
     }
     setSetupDone(true);
+    setScreen("game");
   };
 
   const [gold,setGold]               = useState(saved?.gold ?? 2500);
@@ -9362,7 +9488,16 @@ export default function App(){
     ...(contractWarnings>0?[["Expiring", `${contractWarnings}`,"#8A6D3B"]] : []),
   ];
 
-  if(!setupDone){
+  if(screen==="boot"){
+    return <BootSplash/>;
+  }
+  if(screen==="home"){
+    return <HomeScreen saved={saved} onContinue={()=>setScreen("game")} onNewRealm={()=>{
+      if(saved?.townName) requestNewRealm();   // reload → intent flag → setup, fresh initializers
+      else setScreen("setup");                  // nothing to clear — no reload needed
+    }}/>;
+  }
+  if(screen==="setup"||!setupDone){
     return <SetupScreen onComplete={handleSetupComplete}/>;
   }
 
