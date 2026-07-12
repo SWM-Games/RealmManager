@@ -8258,6 +8258,25 @@ export default function App(){
     addLog(`Squad report on ${townName} (−${cost}g) — six notables identified${hasObservatory?" (Observatory rate)":""}.`,"info");
   };
 
+  // Deep scout: name a rival notable and the spies bring back their whole
+  // ledger — explicit stats, traits, career stage — instead of the bundled
+  // PWR number. Priced per head; the flag lives on the roster entry so it
+  // expires with the roster at season end. Hidden stats stay hidden: even a
+  // paid informant can't read Potential or Form off a training yard.
+  const deepScoutRivalHero=(townName, heroId)=>{
+    const town=tierEnemyTowns.find(t=>t.name===townName);
+    const hero=town?.roster?.find(h=>h.id===heroId);
+    if(!town||!hero||hero.detailScouted) return;
+    const hasObservatory=buildings.find(b=>b.id==="scouts"&&b.built);
+    const cost=Math.round((25*(TIERS[playerTier]?.difficulty||1)+25)*(hasObservatory?0.5:1));
+    if(gold<cost){ addLog(`A detailed report on ${hero.name} costs ${cost}g — the coffers can't cover it.`,"warning"); return; }
+    setGold(g=>g-cost);
+    setTierEnemyTowns(ts=>ts.map(t=>t.name===townName
+      ? {...t, roster:t.roster.map(h=>h.id===heroId?{...h, detailScouted:true}:h)}
+      : t));
+    addLog(`Detailed report on ${hero.name} of ${townName} (−${cost}g)${hasObservatory?" (Observatory rate)":""}.`,"info");
+  };
+
   const buyRivalHero=(townName, heroId)=>{
     const town=tierEnemyTowns.find(t=>t.name===townName);
     const hero=town?.roster?.find(h=>h.id===heroId);
@@ -10986,6 +11005,7 @@ export default function App(){
               {(()=>{
                 const hasObservatory=buildings.find(b=>b.id==="scouts"&&b.built);
                 const scoutCost=Math.round((40*(TIERS[playerTier]?.difficulty||1)+40)*(hasObservatory?0.5:1));
+                const deepCost=Math.round((25*(TIERS[playerTier]?.difficulty||1)+25)*(hasObservatory?0.5:1));
                 const rosterFull=heroes.filter(x=>!x.retired).length>=ROSTER_CAP;
                 return (tierEnemyTowns||[]).map(t=>{
                   const scores=(t.roster||[]).map(h=>Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))));
@@ -11020,25 +11040,58 @@ export default function App(){
                             const price=rivalAskingPrice(t,h,isTal);
                             const cantBuy=sold||rosterFull||gold<price;
                             return(
-                              <div key={h.id} style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:3,
+                              <div key={h.id} style={{display:"flex",flexDirection:"column",gap:0,padding:"8px 10px",borderRadius:3,
                                 background:"rgba(60,52,38,0.045)",border:`1px solid ${isTal?"rgba(138,109,59,0.5)":"rgba(60,52,38,0.126)"}`}}>
-                                <HeroAvatar race={h.race} size={18}/>
-                                <div style={{flex:1,minWidth:0}}>
-                                  <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                                    {h.name}{isTal&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,letterSpacing:1}}>★ TALISMAN</span>}
+                                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                  <HeroAvatar race={h.race} size={18}/>
+                                  <div style={{flex:1,minWidth:0}}>
+                                    <div style={{fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:11,color:"#23201A",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                                      {h.name}{isTal&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,letterSpacing:1}}>★ TALISMAN</span>}
+                                    </div>
+                                    <div style={{fontSize:9,color:"#6E6350"}}><RoleIcon role={h.role} size={10}/> {h.role} · Lv {h.level} · PWR {Math.round(best)}</div>
                                   </div>
-                                  <div style={{fontSize:9,color:"#6E6350"}}><RoleIcon role={h.role} size={10}/> {h.role} · Lv {h.level} · PWR {Math.round(best)}</div>
+                                  <div style={{textAlign:"right"}}>
+                                    <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B"}}>{price.toLocaleString()}g</div>
+                                    <div style={{display:"flex",gap:4,marginTop:2,justifyContent:"flex-end"}}>
+                                      {!h.detailScouted&&(
+                                        <button onClick={()=>deepScoutRivalHero(t.name,h.id)} disabled={gold<deepCost}
+                                          title="A detailed report: explicit stats, traits and career stage"
+                                          style={{padding:"3px 8px",borderRadius:3,border:"1px solid rgba(60,90,120,0.5)",
+                                            cursor:gold<deepCost?"not-allowed":"pointer",
+                                            background:gold<deepCost?"rgba(60,52,38,0.054)":"rgba(60,90,120,0.12)",
+                                            color:gold<deepCost?"#8A7F68":"#3C5A78",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:9,whiteSpace:"nowrap"}}>
+                                          Scout — {deepCost}g
+                                        </button>
+                                      )}
+                                      <button onClick={()=>buyRivalHero(t.name,h.id)} disabled={cantBuy}
+                                        style={{padding:"3px 10px",borderRadius:3,border:"none",
+                                          cursor:cantBuy?"not-allowed":"pointer",
+                                          background:cantBuy?"rgba(60,52,38,0.12)":"#23201A",
+                                          color:cantBuy?"#8A7F68":"#F5EEDC",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:9}}>
+                                        Make Offer
+                                      </button>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div style={{textAlign:"right"}}>
-                                  <div style={{fontSize:11,fontWeight:700,color:"#8A6D3B"}}>{price.toLocaleString()}g</div>
-                                  <button onClick={()=>buyRivalHero(t.name,h.id)} disabled={cantBuy}
-                                    style={{marginTop:2,padding:"3px 10px",borderRadius:3,border:"none",
-                                      cursor:cantBuy?"not-allowed":"pointer",
-                                      background:cantBuy?"rgba(60,52,38,0.12)":"#23201A",
-                                      color:cantBuy?"#8A7F68":"#F5EEDC",fontFamily:"'Alegreya Sans',sans-serif",fontWeight:700,fontSize:9}}>
-                                    Make Offer
-                                  </button>
-                                </div>
+                                {/* The detailed report — explicit attributes instead of the
+                                    bundled PWR. Potential and Form stay hidden by design. */}
+                                {h.detailScouted&&(
+                                  <div style={{marginTop:7,paddingTop:7,borderTop:"1px dashed rgba(60,90,120,0.35)"}}>
+                                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:5,flexWrap:"wrap"}}>
+                                      <span style={{fontSize:8,fontWeight:700,letterSpacing:1.2,color:"#3C5A78"}}>SCOUTED</span>
+                                      <span style={{fontSize:9,color:"#5F4B66"}}>{(h.traits||[]).join(" · ")||"No known traits"}</span>
+                                      <span style={{fontSize:9,color:agePhaseColor(agePhase(h)),marginLeft:"auto"}}>{agePhaseLabel(agePhase(h))} · {h.salary}g/wk wages</span>
+                                    </div>
+                                    <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"3px 8px"}}>
+                                      {[...PHYSICAL_STATS,"Magic Resist",...["Tactics","Composure","Leadership","Determination","Adaptability"]].map(s=>(
+                                        <div key={s} style={{display:"flex",justifyContent:"space-between",fontSize:9}}>
+                                          <span style={{color:"#6E6350",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s}</span>
+                                          <span style={{color:"#23201A",fontWeight:700,marginLeft:4}}>{h.stats?.[s]??"—"}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             );
                           })}
