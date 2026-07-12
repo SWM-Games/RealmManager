@@ -5078,9 +5078,10 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   const fatColor = (hero.fatigue||0) > 70 ? "#9A5B2B" : (hero.fatigue||0) > 40 ? "#8A6D3B" : "#4A6B45";
   const morColor = hero.morale > 70 ? "#4A6B45" : hero.morale > 40 ? "#8A6D3B" : "#9A5B2B";
 
-  // Border priority: selected > hasBid > negotiating > contract urgent / injured > faint
+  // Border priority: selected > hasBid > departing > negotiating > contract urgent / injured > faint
   const borderColor = selected ? "rgba(138,109,59,0.55)"
     : hasBid ? "rgba(74,107,69,0.45)"
+    : hero.refusesToSign ? "rgba(126,45,38,0.45)"
     : hero.negotiationPending ? "rgba(138,109,59,0.55)"
     : contractUrgent ? "rgba(126,45,38,0.45)"
     : hero.injured ? "rgba(126,45,38,0.45)"
@@ -5138,7 +5139,9 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
-            {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
+            {hero.refusesToSign
+              ? <span style={{fontSize:8,color:"#7E2D26",marginLeft:5,fontWeight:700,letterSpacing:0.5}}>DEPARTING</span>
+              : hero.negotiationPending&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,fontWeight:700,letterSpacing:0.5}}>RENEWING</span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:5,display:"inline-flex"}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
             {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:5,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
