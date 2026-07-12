@@ -58,8 +58,18 @@ _(none — all systems reviewed)_
   (count-sorted, no Other needed), Sort chip + badged More (Role/Stage) with
   clear-all, shared `marketFiltered` memo feeding both the count and the
   grid. The hidden-scroll `rm-filter-bar` CSS pattern is deleted entirely.
-  Player note (2026-07-11): the squad filter layout is better but "still not
-  perfect" — revisit after more phone play.
+  **Round two (2026-07-12, from a phone screenshot):** on a real roster the
+  three rows still ran to ~4 (race chips wrapping, stranded Other, dead
+  space in the sort row). The Squad tab moved to a **summary row + inline
+  drawer** (option D of four mocked directions): one row of chrome
+  (`Filters ▾ / Sort ▾ / N shown`; the chip names a single active filter,
+  counts beyond that — two names wrapped the row in the mock), with
+  position pills, race synergy chips and the refine controls (search /
+  Role / Stage / Status, inking when non-default) inside a ~320px brass
+  drawer with Clear all + Done. Filters apply live. The Hire tab keeps the
+  three-row chrome for now — its filter set is smaller and its rows behave;
+  converge it on the drawer if the Squad version proves out in play. Spec:
+  `docs/superpowers/specs/2026-07-12-squad-filter-drawer-design.md`.
 
 - **Front door + Legacy/Realm terminology** — the app now boots through a
   splash (plays every boot: the coronet inks itself in over ~1.4s, held 1.6s
