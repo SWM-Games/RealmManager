@@ -32,7 +32,9 @@ _(none — all systems reviewed)_
   league table below the whole sidebar — standings render first now. Spec:
   `docs/superpowers/specs/2026-07-11-squad-filter-mobile-design.md`.
   Follow-up candidate: the Hire tab's market bar still uses the old
-  hidden-scroll `rm-filter-bar` pattern.
+  hidden-scroll `rm-filter-bar` pattern. Player note (2026-07-11): the squad
+  filter layout is better but "still not perfect" — revisit after more phone
+  play.
 
 - **Front door + Legacy/Realm terminology** — the app now boots through a
   splash (plays every boot: the coronet inks itself in over ~1.4s, held 1.6s
