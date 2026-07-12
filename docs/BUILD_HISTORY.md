@@ -376,3 +376,23 @@ Verified live at 375px and desktop: single 36px summary row at 0–5 active
 filters, full label progression without wrapping, 320px drawer with the
 first card visible below, live filtering, select inking, Clear all, no
 horizontal overflow.
+
+### Hire drawer convergence + rival deep-scouting
+
+Two playtest asks in one sitting. The Hire tab's market bar converged on
+the Squad tab's summary-row + drawer (identical chrome both tabs: one row
+closed, POSITION / RACE / REFINE drawer, live filters, Clear all + Done).
+And the Rival Rosters gained **per-head deep scouting**: the squad report
+still identifies the six notables at PWR-summary level, but a detailed
+report (25 × difficulty + 25 gold — 50g Iron to ~125g Platinum, Observatory
+halves it like the squad report) expands a notable's row into the ledger a
+poaching decision actually needs — explicit combat and mental attributes,
+traits, career stage, wages. Potential and Form stay hidden by design (the
+hidden-stat sanctity holds even for paid informants). The `detailScouted`
+flag rides the roster entry inside `tierEnemyTowns` (already persisted) and
+expires with the seasonal roster reset — no migration. Both verified live
+at 375px: exact gold deduction, persistence across reload, no overflow.
+
+Session close note: the player flagged that the promised 8–10-battle
+Potential reveal never visibly happens in play — logged on the ROADMAP as
+the next review candidate (suspected fourth "dead behind a plausible UI").
