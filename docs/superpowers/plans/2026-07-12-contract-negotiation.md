@@ -12,13 +12,11 @@
 
 ---
 
-### Task 1: Fix the sim renewal bug + re-baseline
+### Task 1: Re-baseline the sim ✓ (done — no bug)
 
-**Files:** `scripts/balance-sim.mjs` (~line 362)
-
-- [ ] Step 1: `h.salary = d;` → `h.salary = d.salary;`
-- [ ] Step 2: `npm run sim` — record the corrected baseline bands (bankruptcy, win rates, gold percentiles) in the commit message. Expect bankruptcy to move; that's the truth surfacing, not a regression.
-- [ ] Step 3: Commit (`Sim: renewals assigned the calcDemand object as salary`).
+The suspected `h.salary = d` bug was a false alarm: the sim's local
+`calcDemand` returns a number. Baseline recorded 2026-07-12: bankruptcy
+1%/3% (baseline/optimized), platinum ~S8, endgame gold declining 26–54k.
 
 ### Task 2: Engine functions (TDD)
 

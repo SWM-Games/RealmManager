@@ -15,10 +15,10 @@ Date: 2026-07-12 · Status: approved (three mockup iterations with the user)
 3. **Expired contracts are limbo.** The hero plays on at full salary
    indefinitely, −15 morale/week after 3 ignored weeks, with a hidden walkout
    roll under 20 morale. Nothing explains the rules.
-4. **Pre-existing sim bug found during review:** `scripts/balance-sim.mjs`
-   renewal does `h.salary = d` where `d = calcDemand(h)` is an OBJECT —
-   corrupting wage sums (NaN propagation) and silently defeating bankruptcy
-   detection. The sim's economy bands are suspect until re-baselined.
+4. ~~Suspected sim bug~~ — **verified false alarm**: the sim has its own
+   `calcDemand` (returns a plain number), so `h.salary = d` is correct there.
+   Baseline re-run 2026-07-12 confirms healthy bands (bankruptcy 1–3%,
+   platinum ~S8, declining endgame gold).
 
 ## Decisions (user)
 
@@ -109,9 +109,10 @@ Stubborn goes straight to Final Terms; patience clamps 1–4.
 
 ## Balance (rule 1)
 
-- Fix the sim renewal bug (`h.salary = d` → `d.salary`), then **re-baseline**
-  before the behavior change to learn the true current bands.
-- Mirror the new outcome: sim renews at `round(d.salary × 0.93)` (one decent
+- Baseline recorded 2026-07-12 (pre-change): bankruptcy 1%/3%
+  (baseline/optimized strategies), platinum ~S8, endgame gold declining
+  26–54k median.
+- Mirror the new outcome: sim renews at `round(d × 0.93)` (one decent
   concession — the achievable norm), keeping contract length rand(1–3)
   seasons. Re-run `npm run sim`; watch bankruptcy ≤~3% and the declining
   20–75k endgame gold shape. Tune the 0.93 factor only if bands break.
