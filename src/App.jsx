@@ -385,16 +385,6 @@ const RESPONSIVE_CSS = `
        (An order:-1 flip used to put the whole sidebar above it on mobile.) */
   }
 
-  /* ── FILTER BAR ── */
-  .rm-filter-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-  @media (max-width: 640px) {
-    .rm-filter-bar { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 6px; }
-    .rm-filter-bar::-webkit-scrollbar { display: none; }
-    .rm-filter-bar select { flex-shrink: 0; min-width: 90px; font-size: 12px; }
-    .rm-filter-bar input { flex-shrink: 0; min-width: 130px; font-size: 12px; }
-    .rm-filter-bar span { flex-shrink: 0; }
-  }
-
   /* ── BENCH GRID ── */
   @media (max-width: 640px) {
     .rm-bench-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -7962,6 +7952,7 @@ export default function App(){
   const [enemy,setEnemy]             = useState(null);
   const [filter,setFilter]           = useState({role:"All",race:"All",position:"All",sortBy:"Value",search:"",status:"All",phase:"All"});
   const [moreFiltersOpen,setMoreFiltersOpen] = useState(false);
+  const [marketMoreOpen,setMarketMoreOpen] = useState(false);
   const [marketFilter,setMarketFilter] = useState({role:"All",race:"All",position:"All",stage:"All",sortBy:"Value"});
   const [retirees,setRetirees]       = useState(saved?.retirees ?? []);
   // Roll of the retired — persists their level-at-retirement so Hall of Legends
@@ -9672,6 +9663,26 @@ export default function App(){
     return h;
   },[heroes,filter]);
 
+  // Market list after tier locks + filters + sort — shared by the Hire tab's
+  // "N shown" count and the card grid so they can't drift apart
+  const marketFiltered=useMemo(()=>{
+    const hasBazaar=buildings.find(b=>b.id==="bazaar"&&b.built);
+    const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
+    const mSorts={Value:h=>-h.value,Combat:h=>-Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))),Salary:h=>h.salary,Level:h=>-h.level,Stage:h=>stageToCareerWeek(h.stage||"prospect",h.stageProgress||0),Potential:h=>-h.stats.Potential};
+    return market
+      .filter(h=>{
+        if(h.marketTier==="elite") return !!hasSanctum;
+        if(h.marketTier==="premium") return !!hasBazaar;
+        return true;
+      })
+      .filter(h=>marketFilter.role==="All"||h.role===marketFilter.role)
+      .filter(h=>marketFilter.race==="All"||h.race===marketFilter.race)
+      // Position filter: show heroes whose role is the natural fit for that lane
+      .filter(h=>marketFilter.position==="All"||(POSITIONS[marketFilter.position]?.ideal||[]).includes(h.role))
+      .filter(h=>marketFilter.stage==="All"||h.stage===marketFilter.stage)
+      .sort((a,b)=>(mSorts[marketFilter.sortBy]||mSorts.Value)(a)-(mSorts[marketFilter.sortBy]||mSorts.Value)(b));
+  },[market,marketFilter,buildings]);
+
   const {effective:formRating,analysis:formAnalysis}=calcFormationRating(formation);
   const wages=heroes.reduce((a,h)=>a+h.salary,0);
   const builtN=buildings.filter(b=>b.built).length;
@@ -11053,9 +11064,8 @@ export default function App(){
                 </span>
               </div>
 
-              {/* POSITION pill row — primary market filter */}
-              <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
-                <span className="pa-kicker" style={{marginRight:8}}>Position</span>
+              {/* Row 1 — position pills (same chrome as the Squad tab) */}
+              <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center"}}>
                 {["All",...POS_KEYS].map(p=>{
                   const count = p==="All"
                     ? market.length
@@ -11063,29 +11073,71 @@ export default function App(){
                   const isActive = marketFilter.position === p;
                   return(
                     <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,position:p}))}>
-                      {p!=="All"&&<PositionIcon position={p} size={13}/>}
                       {p}<span className="ct">{count}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* Secondary market filters */}
-              <div className="rm-filter-bar" style={{marginBottom:10}}>
-                <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={IS}>
-                  <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
-                </select>
-                <select value={marketFilter.race} onChange={e=>setMarketFilter(f=>({...f,race:e.target.value}))} style={IS}>
-                  <option value="All">All Races</option>{["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"].map(r=><option key={r} value={r}>{r}</option>)}
-                </select>
-                <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={IS}>
-                  <option value="All">All Stages</option>
-                  {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
-                </select>
-                <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))} style={IS}>
-                  {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s}>{s}</option>)}
-                </select>
-              </div>
+              {/* Row 2 — race chips for races actually on offer this rotation
+                  (no Other control: an absent race has nothing to filter) */}
+              {(()=>{
+                const RACES_LIST=["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
+                const counts=Object.fromEntries(RACES_LIST.map(r=>[r,market.filter(h=>h.race===r).length]));
+                const present=RACES_LIST.filter(r=>counts[r]>0).sort((a,b)=>counts[b]-counts[a]);
+                return(
+                  <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center",flexWrap:"wrap"}}>
+                    <button className={`pa-pill${marketFilter.race==="All"?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,race:"All"}))}>
+                      All<span className="ct">{market.length}</span>
+                    </button>
+                    {present.map(r=>(
+                      <button key={r} className={`pa-pill${marketFilter.race===r?" active":""}`} title={r} onClick={()=>setMarketFilter(f=>({...f,race:r}))}>
+                        <HeroAvatar race={r} size={13}/>{r}<span className="ct">{counts[r]}</span>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Row 3 — sort chip + badged disclosure + shown count */}
+              {(()=>{
+                const hiddenActive=(marketFilter.role!=="All"?1:0)+(marketFilter.stage!=="All"?1:0);
+                return(
+                  <>
+                    <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:marketMoreOpen?6:12,alignItems:"center"}}>
+                      <span className="pa-pill" style={{position:"relative"}}>
+                        {`Sort: ${marketFilter.sortBy}`}{" ▾"}
+                        <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))}
+                          aria-label="Sort market by"
+                          style={{position:"absolute",inset:0,opacity:0,cursor:"pointer",width:"100%"}}>
+                          {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </span>
+                      <button className={`pa-pill${hiddenActive>0?" active":""}`} onClick={()=>setMarketMoreOpen(o=>!o)}>
+                        {`More${hiddenActive>0?` (${hiddenActive})`:""} ${marketMoreOpen?"▴":"▾"}`}
+                      </button>
+                      <span className="pa-kicker" style={{marginLeft:"auto",flexShrink:0,letterSpacing:1.5}}>{marketFiltered.length} shown</span>
+                    </div>
+                    {marketMoreOpen&&(
+                      <div style={{marginBottom:12,padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.07)",border:"1px solid rgba(138,109,59,0.3)"}}>
+                        <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
+                          <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{...IS,flex:1,minWidth:90}}>
+                            <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
+                          </select>
+                          <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{...IS,flex:1,minWidth:90}}>
+                            <option value="All">All Stages</option>
+                            {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
+                          </select>
+                        </div>
+                        <button onClick={()=>setMarketFilter(f=>({...f,position:"All",race:"All",role:"All",stage:"All"}))}
+                          style={{background:"none",border:"none",cursor:"pointer",color:"#7E2D26",fontSize:11,padding:0,textDecoration:"underline",fontFamily:"'Alegreya Sans',sans-serif"}}>
+                          Clear all filters
+                        </button>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               {/* Locked tier callout */}
               {(()=>{
@@ -11097,13 +11149,13 @@ export default function App(){
                 return(
                   <div style={{marginBottom:12,display:"flex",flexDirection:"column",gap:4}}>
                     {!hasBazaar&&premiumCount>0&&(
-                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
-                        <span></span><span>{premiumCount} premium hero{premiumCount>1?"es":""} hidden — build Grand Bazaar (Gold tier) to access</span>
+                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350"}}>
+                        {premiumCount} premium hero{premiumCount>1?"es":""} hidden — build Grand Bazaar (Gold tier) to access
                       </div>
                     )}
                     {!hasSanctum&&eliteCount>0&&(
-                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350",display:"flex",alignItems:"center",gap:8}}>
-                        <span></span><span>{eliteCount} elite hero{eliteCount>1?"es":""} hidden — build Elite Sanctum (Platinum tier) to access</span>
+                      <div style={{padding:"8px 12px",borderRadius:3,background:"rgba(60,52,38,0.036)",border:"1px solid rgba(60,52,38,0.126)",fontSize:10,color:"#6E6350"}}>
+                        {eliteCount} elite hero{eliteCount>1?"es":""} hidden — build Elite Sanctum (Platinum tier) to access
                       </div>
                     )}
                   </div>
@@ -11112,24 +11164,9 @@ export default function App(){
 
               <div className="pa-grid">
                 {(()=>{
-                  const hasBazaar=buildings.find(b=>b.id==="bazaar"&&b.built);
-                  const hasSanctum=buildings.find(b=>b.id==="sanctum"&&b.built);
                   const hasScouts=buildings.find(b=>b.id==="scouts"&&b.built);
-                  const mSorts={Value:h=>-h.value,Combat:h=>-Math.max(...POS_KEYS.map(p=>calcHeroCombatScore(h,p))),Salary:h=>h.salary,Level:h=>-h.level,Stage:h=>stageToCareerWeek(h.stage||"prospect",h.stageProgress||0),Potential:h=>-h.stats.Potential};
-                  const filtered = market
-                    .filter(h=>{
-                      if(h.marketTier==="elite") return !!hasSanctum;
-                      if(h.marketTier==="premium") return !!hasBazaar;
-                      return true;
-                    })
-                    .filter(h=>marketFilter.role==="All"||h.role===marketFilter.role)
-                    .filter(h=>marketFilter.race==="All"||h.race===marketFilter.race)
-                    // Position filter: show heroes whose role is the natural fit for that lane
-                    .filter(h=>marketFilter.position==="All"||(POSITIONS[marketFilter.position]?.ideal||[]).includes(h.role))
-                    .filter(h=>marketFilter.stage==="All"||h.stage===marketFilter.stage)
-                    .sort((a,b)=>(mSorts[marketFilter.sortBy]||mSorts.Value)(a)-(mSorts[marketFilter.sortBy]||mSorts.Value)(b));
-                  if(filtered.length===0) return <div style={{color:"#6E6350",fontSize:13,padding:8}}>No heroes match your filters.</div>;
-                  return filtered.map(h=>(
+                  if(marketFiltered.length===0) return <div style={{color:"#6E6350",fontSize:13,padding:8}}>No heroes match your filters.</div>;
+                  return marketFiltered.map(h=>(
                     <div key={h.id}>
                       <HeroCard hero={h} selected={detailHero?.id===h.id}
                         onClick={()=>setDetailHero(h)} showBuy
