@@ -19,6 +19,28 @@ _(none — all systems reviewed)_
 
 ## Resolved
 
+- **Contract negotiation rework (one-sitting haggle)** — player playtest
+  verdict on the old flow: "clunky... a counter takes a week... every one came
+  back with the same wage demand but less years." All three confirmed in code:
+  rejected counters re-queued at the next weekly resolution; `calcDemand` was
+  stateless (identical salary every round, or higher once the reject morale
+  hit tripped the low-morale premium) with `rand()` years per modal open; and
+  expired contracts sat in an unexplained limbo (indefinite play at full
+  salary, hidden walkout dice under 20 morale). Replaced with a deterministic
+  haggle sitting: live **willingness gauge** (zones: sign ≥85 / haggle 45–84 /
+  insult <45), **hidden patience worded as a mood** (a visible counter would
+  make max-haggling free — erosion varies by offer quality and trait),
+  concessions with memory ("came down from Xg"), trait temperaments (Loyal
+  patient+generous, Greedy 95%-floor, Stubborn take-it-or-leave-it,
+  Hot-headed storms out), **Final Terms** when patience is spent, **hard
+  walkout** on refusal (never re-signs, `refusesToSign`, departs at contract
+  end — deterministic, no dice), and **expiry as a hard deadline** (settle
+  that week or they leave; no postpone once expired). Engine functions pure +
+  test-locked (65 tests); sim mirrored at 93%-of-ask renewals (bankruptcy
+  1%/3% → 0%/0%, bands held); Guide rewritten. Two emoji-sweep leftovers
+  fixed in passing (invisible roster negotiation chip). Spec:
+  `docs/superpowers/specs/2026-07-12-contract-negotiation-design.md`.
+
 - **Squad filters + Dominion order (mobile rethink)** — the Squad tab's
   ~5–6 rows of filter chrome (race pills wrapping to three lines; a
   hidden-scrollbar strip that pushed Stage/Status/Sort off-screen with no

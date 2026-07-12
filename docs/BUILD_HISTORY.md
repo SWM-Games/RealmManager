@@ -308,3 +308,43 @@ The `filtered` memo and filter semantics are untouched — only the controls
 changed. Hire-tab market bar (same old pattern) left as a follow-up.
 Verified live at 375px and desktop: row counts, no horizontal overflow,
 chip/Other/badge/Clear-all interactions, table-first Dominion.
+
+### Contract negotiation — the one-sitting haggle
+
+A phone playtest called the old flow "clunky": a rejected counter cost a
+week (+−15 morale), demands came back identical every round (stateless
+`calcDemand`, or *higher* once the reject morale-hit tripped the low-morale
+premium) with years re-rolled `rand()` per modal open, and expired contracts
+sat in unexplained limbo (indefinite full-salary play, −15/wk after three
+ignored weeks, hidden walkout dice under 20 morale). All confirmed in code.
+
+Replaced wholesale, per a three-iteration mockup review with the user:
+
+- **The sitting** resolves everything in one go. A live willingness gauge
+  (deterministic; zones sign/haggle/insult) responds to salary/years
+  steppers; their ask concedes within the sitting ("came down from Xg" —
+  concessions have memory now); trait temperaments are worded on-card
+  (Loyal patient+generous, Greedy 95%-of-ask floor, Stubborn take-it-or-
+  leave-it, Hot-headed storms out with a squad-morale ripple).
+- **Patience is hidden**, worded as a mood ("growing restless…") — the user's
+  own catch: a visible round counter makes max-haggling free. Erosion varies
+  by offer quality (insults cost double) and trait, so remaining rounds are
+  genuinely unknowable.
+- **Patience out → Final Terms → hard walkout**: refuse and they never
+  re-sign (`refusesToSign`, falsy-default save-safe), playing out the
+  contract and departing at the weekly resolution — deterministic, replacing
+  the old morale dice. **Expiry is a hard deadline**: no Postpone once
+  expired; unresolved that week → departure (mutual parting, no ripple).
+- Engine functions (`negotiationProfile/Willingness/Respond`) are pure,
+  exported, and band-probed with generated rosters (rule 2); suite 50 → 65.
+  Sim mirrors renewals at 93% of the ask — bands held (bankruptcy 1%/3% →
+  0%/0%, platinum ~S8, declining endgame gold). Guide rewritten; "weekly
+  tick" phrasing swept for "when the week ends" (user copy rule). Two more
+  emoji-sweep empty spans found (the roster card's negotiation indicator had
+  been invisible since the sweep) → worded RENEWING/DEPARTING chips.
+- Verified live at 375px with crafted saves: haggle→concession→sign, insult
+  →mood shift, Stubborn straight to Final Terms, refuse→DEPARTING chip→
+  actual departure through a real battle's weekly resolution (rule 6), and
+  pre-expiry Postpone. A false alarm during review (sim renewal "object
+  assignment" bug) was verified false — the sim's local calcDemand returns a
+  number; corrected in the spec.
