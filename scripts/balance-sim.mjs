@@ -359,7 +359,10 @@ function runCampaign(NSEASONS, opts) {
         h.contractWeeksLeft = Math.max(0, h.contractWeeksLeft - 1);
         if (h.contractWeeksLeft === 0) {
           if (h.fodder || (h.stage === "veteran" && h.level < 8)) { h.retired = true; }
-          else { const d = calcDemand(h); h.salary = d; h.contractWeeksLeft = rand(1, 3) * 42; h.morale = Math.min(100, h.morale + 20); }
+          // Renewal at 93% of the ask — the one-concession norm under the
+          // haggle-sitting negotiation (2026-07 rework); +15 morale matches
+          // handleSign in src/App.jsx.
+          else { const d = calcDemand(h); h.salary = Math.round(d * 0.93); h.contractWeeksLeft = rand(1, 3) * 42; h.morale = Math.min(100, h.morale + 15); }
         }
         ageHeroWeekly(h);
       }

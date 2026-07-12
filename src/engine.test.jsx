@@ -13,6 +13,7 @@ import {
   bestPositionFor, PHYSICAL_STATS, generateStartingSquad,
   canRetrain, retrainCost, naturalLaneFor, RETRAIN_WEEKS,
   legendMoraleBonus, realmSummary,
+  calcDemand, negotiationProfile, negotiationWillingness, negotiationRespond,
 } from "./App.jsx";
 
 // ── fixtures ────────────────────────────────────────────────────────────────
@@ -637,5 +638,160 @@ describe("realmSummary", () => {
     const s = realmSummary({ townName: "Duskhollow" });
     expect(s.color).toBe("#8A6D3B");
     expect(s.line).toBe("Iron · Season 1, Week 1 · 0g");
+  });
+});
+
+// ── Contract negotiation engine ───────────────────────────────────────────────
+// The haggle sitting is deterministic by design: the willingness gauge is the
+// player's one precise instrument, so these bands must stay alive and exact.
+describe("negotiation engine", () => {
+  // A mid-career hero with controllable knobs. Stats chosen so the salary
+  // demand is comfortably positive and Negotiation stays below the >40
+  // hard-bargainer threshold unless a test raises it.
+  // salary 60 ≈ the generation scale (avgStat × ~1.2) so calcDemand's raise
+  // sits above the current-salary floor and concessions have room to move
+  const mkHero = (over = {}, statsOver = {}) => ({
+    id: 1, name: "Test Hero", role: "Warrior", race: "Human",
+    level: 6, salary: 60, morale: 70, traits: [],
+    stage: "peak", stageProgress: 40,
+    stats: { Strength: 60, Agility: 55, Endurance: 58, Accuracy: 56, Defense: 57,
+      "Magic Power": 20, "Magic Resist": 30,
+      Tactics: 42, Composure: 45, Leadership: 40, Determination: 44, Adaptability: 41,
+      Form: 6, Potential: 70, Charisma: 30, Negotiation: 20, Intimidation: 30,
+      Reputation: 20, ...statsOver },
+    ...over,
+  });
+
+  it("profile: patience base 3, Loyal +1, Hot-headed -1, low morale -1, Stubborn locks to 1, clamped 1-4", () => {
+    expect(negotiationProfile(mkHero()).patience).toBe(3);
+    expect(negotiationProfile(mkHero({ traits: ["Loyal"] })).patience).toBe(4);
+    expect(negotiationProfile(mkHero({ traits: ["Hot-headed"] })).patience).toBe(2);
+    expect(negotiationProfile(mkHero({ morale: 30 })).patience).toBe(2);
+    expect(negotiationProfile(mkHero({ traits: ["Stubborn"], morale: 30 })).patience).toBe(1);
+    expect(negotiationProfile(mkHero({ traits: ["Hot-headed"], morale: 30 })).patience).toBe(1); // floor
+  });
+
+  it("profile: preferred years are deterministic by phase, Negotiation>40 shortens", () => {
+    expect(negotiationProfile(mkHero({ stage: "peak" })).prefYears).toBe(3);
+    expect(negotiationProfile(mkHero({ stage: "rising" })).prefYears).toBe(3);
+    expect(negotiationProfile(mkHero({ stage: "prospect" })).prefYears).toBe(2);
+    expect(negotiationProfile(mkHero({ stage: "fading" })).prefYears).toBe(2);
+    expect(negotiationProfile(mkHero({ stage: "veteran" })).prefYears).toBe(1);
+    expect(negotiationProfile(mkHero({ stage: "veteran" }, { Negotiation: 60 })).prefYears).toBe(1); // min 1
+    expect(negotiationProfile(mkHero({ stage: "peak" }, { Negotiation: 60 })).prefYears).toBe(2);
+  });
+
+  it("calcDemand years now come from the profile (no random re-roll)", () => {
+    const h = mkHero({ stage: "peak" });
+    for (let i = 0; i < 10; i++) expect(calcDemand(h).years).toBe(3);
+  });
+
+  it("willingness: meeting the ask at preferred years always signs (>=85)", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const w = negotiationWillingness(h, d, { salary: d.salary, years: d.years });
+    expect(w).toBeGreaterThanOrEqual(85);
+  });
+
+  it("willingness: 90% of the ask lands in the haggle band for an average-morale hero", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const w = negotiationWillingness(h, d, { salary: Math.round(d.salary * 0.9), years: d.years });
+    expect(w).toBeGreaterThanOrEqual(45);
+    expect(w).toBeLessThan(85);
+  });
+
+  it("willingness: 65% of the ask is insulting", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const w = negotiationWillingness(h, d, { salary: Math.round(d.salary * 0.65), years: d.years });
+    expect(w).toBeLessThan(45);
+  });
+
+  it("willingness: years mismatch drags the gauge down", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const at = (years) => negotiationWillingness(h, d, { salary: d.salary, years });
+    expect(at(1)).toBeLessThan(at(3));
+  });
+
+  it("respond: signs at the offer when willingness is in the sign zone", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const r = negotiationRespond(h, d, d, { salary: d.salary, years: d.years }, 3);
+    expect(r.outcome).toBe("sign");
+  });
+
+  it("respond: a haggle offer concedes the ask toward the offer and costs one patience", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const offer = { salary: Math.round(d.salary * 0.88), years: d.years };
+    const r = negotiationRespond(h, d, d, offer, 3);
+    expect(r.outcome).toBe("haggle");
+    expect(r.patienceCost).toBe(1);
+    expect(r.newDemand.salary).toBeLessThan(d.salary);
+    expect(r.newDemand.salary).toBeGreaterThan(offer.salary);
+  });
+
+  it("respond: an insulting offer costs two patience, stings morale, concedes nothing", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const r = negotiationRespond(h, d, d, { salary: Math.round(d.salary * 0.5), years: d.years }, 3);
+    expect(r.outcome).toBe("insulted");
+    expect(r.patienceCost).toBe(2);
+    expect(r.moraleDelta).toBeLessThan(0);
+    expect(r.newDemand.salary).toBe(d.salary);
+  });
+
+  it("respond: Hot-headed pays +1 patience on any non-sign response", () => {
+    const h = mkHero({ traits: ["Hot-headed"] });
+    const d = calcDemand(h);
+    const r = negotiationRespond(h, d, d, { salary: Math.round(d.salary * 0.88), years: d.years }, 3);
+    expect(r.patienceCost).toBe(2);
+  });
+
+  it("respond: Greedy concessions floor at 95% of the original ask", () => {
+    const h = mkHero({ traits: ["Greedy"] });
+    const d = calcDemand(h);
+    // grind several rounds of aggressive-but-not-insulting offers
+    let cur = d;
+    for (let i = 0; i < 5; i++) {
+      const offer = { salary: Math.round(cur.salary * 0.88), years: cur.years };
+      const r = negotiationRespond(h, cur, d, offer, 4);
+      if (r.outcome !== "haggle") break;
+      cur = r.newDemand;
+    }
+    expect(cur.salary).toBeGreaterThanOrEqual(Math.floor(d.salary * 0.95));
+  });
+
+  it("respond: Stubborn never concedes salary", () => {
+    const h = mkHero({ traits: ["Stubborn"] });
+    const d = calcDemand(h);
+    const r = negotiationRespond(h, d, d, { salary: Math.round(d.salary * 0.88), years: d.years }, 3);
+    expect(r.outcome).not.toBe("sign");
+    expect(r.newDemand.salary).toBe(d.salary);
+  });
+
+  it("is fully deterministic — identical inputs give identical outputs", () => {
+    const h = mkHero();
+    const d = calcDemand(h);
+    const offer = { salary: Math.round(d.salary * 0.9), years: 2 };
+    const a = negotiationRespond(h, d, d, offer, 3);
+    const b = negotiationRespond(h, d, d, offer, 3);
+    expect(a).toEqual(b);
+    expect(negotiationWillingness(h, d, offer)).toBe(negotiationWillingness(h, d, offer));
+  });
+
+  it("bands stay alive for tier-calibrated squads (rule 2 probe)", () => {
+    // Real generated heroes: meeting the ask must sign; a fair haggle (92%)
+    // must never insult. Guards against threshold drift.
+    const roster = generateRivalRoster({ name: "Probe", power: 150, tierId: "gold" }, "gold");
+    roster.slice(0, 4).forEach((h) => {
+      const hero = { ...h, morale: 70, salary: h.salary || 300 };
+      const d = calcDemand(hero);
+      expect(negotiationWillingness(hero, d, { salary: d.salary, years: d.years })).toBeGreaterThanOrEqual(85);
+      const w92 = negotiationWillingness(hero, d, { salary: Math.round(d.salary * 0.92), years: d.years });
+      expect(w92).toBeGreaterThanOrEqual(45);
+    });
   });
 });

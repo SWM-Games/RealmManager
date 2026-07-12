@@ -654,7 +654,8 @@ export const MAX_LEVEL = 15;
 //   morale    = combat readiness, fluctuates with wins/losses
 //   happiness = loyalty/satisfaction, driven by management decisions
 //
-// Low happiness causes:  -15% stat contribution per tier below 50, morale drain, eventual walkout
+// Low happiness causes: -15% stat contribution per tier below 50, morale drain,
+// and harder contract talks (higher demands, less patience at the table)
 // High happiness causes:  +10% stat bonus, XP boost, clutch factor increase
 
 
@@ -704,9 +705,9 @@ export function calcDemand(hero) {
     base = Math.floor(base * (1 + negPremium));
   }
 
-  // High Negotiation heroes prefer shorter contracts — they keep options open
-  const negYearsReduction = negStat > 40 ? 1 : 0;
-  const years = Math.max(1, (phase==="peak"||phase==="rising" ? rand(2,4) : rand(1,2)) - negYearsReduction);
+  // Preferred term is deterministic (was rand() re-rolled per modal open,
+  // which read as the hero changing their mind for no reason)
+  const years = negotiationPrefYears(hero);
 
   // Fading and veteran heroes: demand can be below current salary
   // (they're grateful for the work — but they'll take a pay cut)
@@ -716,6 +717,95 @@ export function calcDemand(hero) {
     : hero.salary;                    // won't accept less than what they have
 
   return { salary: Math.max(minSalary, base), years, negStat };
+}
+
+// ─── NEGOTIATION ENGINE ───────────────────────────────────────────────────────
+// One-sitting haggle: the willingness gauge is the player's precise instrument,
+// patience is a hidden budget worded as a mood. Everything here is DETERMINISTIC
+// (no dice) so the gauge can be trusted and the bands can be regression-tested.
+
+function negotiationPrefYears(hero) {
+  const phase = agePhase(hero);
+  const base = { prospect: 2, rising: 3, peak: 3, fading: 2, veteran: 1 }[phase] ?? 2;
+  const negStat = hero.stats?.["Negotiation"] || 0;
+  // High Negotiation heroes prefer shorter contracts — they keep options open
+  return Math.max(1, base - (negStat > 40 ? 1 : 0));
+}
+
+export function negotiationProfile(hero) {
+  let patience = 3;
+  if (hero.traits?.includes("Loyal"))      patience += 1;
+  if (hero.traits?.includes("Hot-headed")) patience -= 1;
+  if (hero.morale < 40)                    patience -= 1;
+  if (hero.traits?.includes("Stubborn"))   patience = 1; // take it or leave it
+  patience = Math.max(1, Math.min(4, patience));
+
+  // Concession rate: how far they move toward your offer per haggle round
+  let concession = 0.35 + (hero.morale - 50) / 400;
+  if (hero.traits?.includes("Loyal"))    concession += 0.10;
+  if (hero.traits?.includes("Greedy"))   concession -= 0.25;
+  concession = Math.max(0.15, Math.min(0.6, concession));
+  if (hero.traits?.includes("Stubborn")) concession = 0;
+
+  return { patience, prefYears: negotiationPrefYears(hero), concession };
+}
+
+// 0–100 willingness for a drafted offer against their current ask.
+// ≥85 they sign · 45–84 they haggle · <45 it's insulting.
+export const NEGOTIATION_SIGN_AT = 85;
+export const NEGOTIATION_INSULT_BELOW = 45;
+export function negotiationWillingness(hero, demand, offer) {
+  const D = demand.salary, S = offer.salary;
+  const prefYears = negotiationPrefYears(hero);
+  // 40 base + 60-point sweep across 70%→100% of the ask: meeting it reads
+  // ~100, 90% reads low-80s (haggle), at-or-under 70% reads under 45 (insult)
+  const salaryPart = 60 * Math.max(0, Math.min(1, (S - 0.7 * D) / (0.3 * D)));
+  let w = 40 + salaryPart
+    - 8 * Math.abs((offer.years || 1) - prefYears)
+    + (hero.morale - 60) / 4;
+  if (hero.traits?.includes("Loyal"))  w += 8;
+  if (hero.traits?.includes("Greedy")) w -= 8;
+  if ((hero.stats?.["Negotiation"] || 0) > 40) w -= 6; // knows their worth
+  return Math.max(0, Math.min(100, Math.round(w)));
+}
+
+// Deterministic response to an offer. sessionDemand = their current ask
+// (concessions accumulate within the sitting); originalDemand anchors the
+// Greedy floor. Returns the outcome, their (possibly conceded) new ask, the
+// patience this round cost, and any morale sting.
+export function negotiationRespond(hero, sessionDemand, originalDemand, offer, patienceLeft) {
+  const w = negotiationWillingness(hero, sessionDemand, offer);
+  const hotHeaded = hero.traits?.includes("Hot-headed");
+
+  // Meeting (or beating) their own ask always signs — the Meet Ask button
+  // must never bounce off trait penalties in the gauge
+  if (offer.salary >= sessionDemand.salary && offer.years === sessionDemand.years) {
+    return { outcome: "sign", newDemand: { ...sessionDemand }, patienceCost: 0, moraleDelta: 0, willingness: Math.max(w, NEGOTIATION_SIGN_AT) };
+  }
+
+  if (w >= NEGOTIATION_SIGN_AT) {
+    return { outcome: "sign", newDemand: { ...sessionDemand }, patienceCost: 0, moraleDelta: 0, willingness: w };
+  }
+
+  if (w >= NEGOTIATION_INSULT_BELOW) {
+    const { concession, prefYears } = negotiationProfile(hero);
+    let newSalary = Math.round(sessionDemand.salary - (sessionDemand.salary - offer.salary) * concession);
+    // The salary floors from calcDemand still bind
+    const phase = agePhase(hero);
+    const minSalary = ["fading","veteran"].includes(phase) ? Math.floor(hero.salary * 0.7) : hero.salary;
+    newSalary = Math.max(minSalary, newSalary);
+    if (hero.traits?.includes("Greedy")) newSalary = Math.max(newSalary, Math.floor(originalDemand.salary * 0.95));
+    // Years: they'll move one step toward your term if it's within reach
+    let newYears = sessionDemand.years;
+    if (offer.years !== sessionDemand.years && Math.abs(offer.years - prefYears) <= 1) {
+      newYears = sessionDemand.years + Math.sign(offer.years - sessionDemand.years);
+    }
+    return { outcome: "haggle", newDemand: { ...sessionDemand, salary: newSalary, years: newYears },
+      patienceCost: 1 + (hotHeaded ? 1 : 0), moraleDelta: 0, willingness: w };
+  }
+
+  return { outcome: "insulted", newDemand: { ...sessionDemand },
+    patienceCost: 2 + (hotHeaded ? 1 : 0), moraleDelta: -5, willingness: w };
 }
 
 
@@ -2431,13 +2521,13 @@ const TRAIT_EFFECTS = {
   "Blessed":      {color:"#8A6D3B", desc:"+3% power"},
   "Cursed":       {color:"#5F4B66", desc:"−5% power · random form drain each week · +15% XP (suffering teaches)"},
   "Brave":        {color:"#40614F", desc:"Immune to morale loss on defeat"},
-  "Iron Will":    {color:"#3C5A78", desc:"Morale floor at 50 during combat · never walks out"},
+  "Iron Will":    {color:"#3C5A78", desc:"Morale floor at 50 during combat"},
   "Eagle Eye":    {color:"#8A6D3B", desc:"Accuracy weighted ×1.5 in combat score"},
   "Calm":         {color:"#3C5A78", desc:"Composure weighted ×1.5 in combat score"},
   "Night Vision": {color:"#5F4B66", desc:"+4% win chance when your team is the underdog"},
-  "Loyal":        {color:"#40614F", desc:"−12% contract demands · very unlikely to walk out"},
+  "Loyal":        {color:"#40614F", desc:"−12% contract demands · patient and generous at the negotiating table"},
   "Greedy":       {color:"#9A5B2B", desc:"+20% contract salary demand"},
-  "Hot-headed":   {color:"#7E2D26", desc:"2.5× walkout risk at low morale · walks out immediately if contract rejected"},
+  "Hot-headed":   {color:"#7E2D26", desc:"Quick to take offence in contract talks · storms out on the spot if talks collapse"},
   "Stubborn":     {color:"#8A6D3B", desc:"+10% contract demand · won't accept counter-offers"},
   "Coward":       {color:"#6E6350",    desc:"Morale swings halved (good and bad)"},
   "Inspiring":    {color:"#8A6D3B", desc:"+10% morale swings for squad · bigger morale boost on retirement"},
@@ -4306,7 +4396,9 @@ function ContractBar({hero}){
     <div style={{marginBottom:6}}>
       <div style={{display:"flex",justifyContent:"space-between",fontSize:10,marginBottom:2}}>
         <span style={{color:col}}>Contract: {seasonsLeft} season{parseFloat(seasonsLeft)!==1?"s":""} left</span>
-        {hero.negotiationPending&&<span style={{fontSize:9,color:"#9A5B2B",fontWeight:700,animation:"pulse 1s infinite"}}>RENEWAL PENDING</span>}
+        {hero.refusesToSign
+          ? <span style={{fontSize:9,color:"#7E2D26",fontWeight:700}}>{(hero.contractWeeksLeft||0)<=0?"DEPARTING THIS WEEK":`DEPARTING · ${hero.contractWeeksLeft}W`}</span>
+          : hero.negotiationPending&&<span style={{fontSize:9,color:"#9A5B2B",fontWeight:700,animation:"pulse 1s infinite"}}>RENEWAL PENDING</span>}
       </div>
       <div style={{height:4,background:"#DFD3B8",borderRadius:2,overflow:"hidden"}}>
         <div style={{height:"100%",width:`${pct}%`,background:`${col}`,borderRadius:2,transition:"width 0.5s"}}/>
@@ -4986,9 +5078,10 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
   const fatColor = (hero.fatigue||0) > 70 ? "#9A5B2B" : (hero.fatigue||0) > 40 ? "#8A6D3B" : "#4A6B45";
   const morColor = hero.morale > 70 ? "#4A6B45" : hero.morale > 40 ? "#8A6D3B" : "#9A5B2B";
 
-  // Border priority: selected > hasBid > negotiating > contract urgent / injured > faint
+  // Border priority: selected > hasBid > departing > negotiating > contract urgent / injured > faint
   const borderColor = selected ? "rgba(138,109,59,0.55)"
     : hasBid ? "rgba(74,107,69,0.45)"
+    : hero.refusesToSign ? "rgba(126,45,38,0.45)"
     : hero.negotiationPending ? "rgba(138,109,59,0.55)"
     : contractUrgent ? "rgba(126,45,38,0.45)"
     : hero.injured ? "rgba(126,45,38,0.45)"
@@ -5046,7 +5139,9 @@ function HeroCard({hero,selected,onClick,compact,showBuy,onBuy,canAfford,rosterF
           <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#3A3427",letterSpacing:0.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
             {hero.name}
             {hero.injured&&<span style={{fontSize:9,color:"#7E2D26",marginLeft:5}}></span>}
-            {hero.negotiationPending&&<span style={{fontSize:9,color:"#8A6D3B",marginLeft:5}}></span>}
+            {hero.refusesToSign
+              ? <span style={{fontSize:8,color:"#7E2D26",marginLeft:5,fontWeight:700,letterSpacing:0.5}}>DEPARTING</span>
+              : hero.negotiationPending&&<span style={{fontSize:8,color:"#8A6D3B",marginLeft:5,fontWeight:700,letterSpacing:0.5}}>RENEWING</span>}
             {isLeader&&<span title="Squad Leader" style={{marginLeft:5,display:"inline-flex"}}><Glyph id="leader" size={12} color="#8A6D3B"/></span>}
             {retrainCandidate&&<span title="Stats favour another lane — see Retraining in their profile" style={{marginLeft:5,fontSize:10,color:"#40614F",fontWeight:700}}>⊕</span>}
             {hero.foundling&&showHiddenStats&&<span style={{fontSize:9,color:"#5F4B66",marginLeft:5}}></span>}
@@ -5607,73 +5702,172 @@ function HeroDetail({hero,prevStats,onClose,onRelease,onEarlyRenew,isListed,onTo
 
 // ─── NEGOTIATION MODAL ───────────────────────────────────────────────────────
 
-function NegotiationModal({pending, heroes, gold, onAccept, onCounter, onReject, onDelay}){
-  if(!pending||pending.length===0)return null;
+// One-sitting haggle. Session state (their current ask, remaining patience)
+// lives here and resets per hero — deliberately NOT persisted: a reload
+// restarts the sitting fresh. Patience is shown only as a worded mood, never
+// a count (a visible counter would make max-haggling free). All responses
+// come from the deterministic negotiationRespond engine.
+function NegotiationModal({pending, heroes, onSign, onCollapse, onPostpone, onSting}){
+  const first = pending && pending.length>0 ? pending[0] : null;
   // Resolve the LIVE hero — queue entries are snapshots from when they were
   // queued, and demands must reflect current level/morale/stats
-  const hero=(heroes||[]).find(h=>h.id===pending[0].id)||pending[0];
-  const demand=calcDemand(hero);
-  const canAffordWeekly=gold>demand.salary*4; // rough check
-  const {color:hColor}=moraleLabel(hero.morale);
-  const counterSalary=Math.floor(demand.salary*0.85);
-  const counterYears=Math.max(1,demand.years-1);
+  const hero = first ? ((heroes||[]).find(h=>h.id===first.id)||first) : null;
+
+  const [session,setSession] = useState(null); // {heroId, originalDemand, demand, patienceLeft, patienceMax, offer, lastOutcome}
+  useEffect(()=>{
+    if(!hero) { setSession(null); return; }
+    if(session?.heroId===hero.id) return;
+    const d = calcDemand(hero);
+    const prof = negotiationProfile(hero);
+    setSession({ heroId:hero.id, originalDemand:d, demand:d, patienceLeft:prof.patience, patienceMax:prof.patience,
+      offer:{salary:d.salary, years:d.years}, lastOutcome:null });
+  },[hero?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if(!hero||!session||session.heroId!==hero.id) return null;
+
+  const { demand, originalDemand, patienceLeft, offer } = session;
+  const expired = (hero.contractWeeksLeft||0)<=0;
+  const finalTerms = patienceLeft<=0;
+  const {label:mLabel, color:hColor}=moraleLabel(hero.morale);
+  const w = negotiationWillingness(hero, demand, offer);
+  const zone = w>=NEGOTIATION_SIGN_AT ? "sign" : w>=NEGOTIATION_INSULT_BELOW ? "haggle" : "insult";
+  const salaryStep = Math.max(5, Math.round(originalDemand.salary*0.025/5)*5);
+  const conceded = demand.salary < originalDemand.salary;
+  const departLine = expired ? "they depart when the week ends" : `they depart when their contract ends (${hero.contractWeeksLeft}w)`;
+
+  const mood = patienceLeft>=3 ? `${hero.name.split(" ")[0]} is listening — open to fair terms.`
+    : patienceLeft===2 ? "Engaged, but their patience is thinning."
+    : patienceLeft===1 ? "Growing restless — another poor offer could end these talks."
+    : "";
+
+  const setOffer=(patch)=>setSession(s=>({...s, offer:{...s.offer, ...patch}}));
+  const makeOffer=()=>{
+    const r = negotiationRespond(hero, demand, originalDemand, offer, patienceLeft);
+    if(r.outcome==="sign"){ onSign(hero, {salary:offer.salary, years:offer.years}); return; }
+    if(r.moraleDelta) onSting(hero, r.moraleDelta);
+    setSession(s=>({...s, demand:r.newDemand, patienceLeft:s.patienceLeft-r.patienceCost, lastOutcome:r.outcome}));
+  };
+
+  const verdict = zone==="sign" ? "They would sign these terms."
+    : zone==="haggle" ? "They would haggle — expect them to come down."
+    : "Insulting — offering this will sour the room.";
+
+  const stepper=(label, value, onMinus, onPlus, display)=>(
+    <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+      <span style={{fontSize:10,color:"#4A4335",width:52,flexShrink:0}}>{label}</span>
+      <button onClick={onMinus} style={{width:30,height:30,border:"1px solid #A39781",borderRadius:3,background:"rgba(60,52,38,0.05)",color:"#4A4335",fontSize:14,cursor:"pointer",flexShrink:0}}>−</button>
+      <div style={{flex:1,textAlign:"center",fontSize:13,fontWeight:700,color:"#23201A"}}>{display??value}</div>
+      <button onClick={onPlus} style={{width:30,height:30,border:"1px solid #A39781",borderRadius:3,background:"rgba(60,52,38,0.05)",color:"#4A4335",fontSize:14,cursor:"pointer",flexShrink:0}}>+</button>
+    </div>
+  );
 
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.56)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}}>
-      <div className="rm-neg-modal" style={{background:"#DFD3B8",border:"1px solid rgba(154,91,43,0.525)",borderRadius:3,padding:28,maxWidth:500,width:"92%",boxShadow:"0 2px 12px rgba(60,52,38,0.3)"}}>
-        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:"#8A6D3B",marginBottom:4}}>Contract Negotiation</div>
-        <div style={{fontSize:11,color:"#6E6350",marginBottom:18}}>{hero.name} is seeking a new contract.</div>
+    <div style={{position:"fixed",inset:0,background:"rgba(30,24,14,0.56)",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)",overflowY:"auto",padding:"16px 0"}}>
+      <div className="rm-neg-modal" style={{background:"#DFD3B8",border:"1px solid rgba(154,91,43,0.525)",borderRadius:3,padding:"22px 24px",maxWidth:500,width:"92%",boxShadow:"0 2px 12px rgba(60,52,38,0.3)",maxHeight:"92vh",overflowY:"auto"}}>
+        <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:900,fontSize:18,color:finalTerms?"#7E2D26":"#8A6D3B",marginBottom:4}}>{finalTerms?"Final Terms":"Contract Negotiation"}</div>
+        <div style={{fontSize:11,color:"#6E6350",marginBottom:14}}>
+          {hero.name} {expired
+            ? <>— contract <b style={{color:"#7E2D26"}}>expired</b>. No deal this week and they depart.</>
+            : <>seeks a new contract · expires in {hero.contractWeeksLeft}w</>}
+        </div>
 
-        <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:18,padding:"12px 14px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
+        <div style={{display:"flex",gap:12,alignItems:"center",marginBottom:14,padding:"10px 12px",background:"rgba(60,52,38,0.054)",borderRadius:3,border:"1px solid rgba(60,52,38,0.126)"}}>
           <HeroAvatar race={hero.race} size={28}/>
           <div style={{flex:1}}>
             <div style={{fontFamily:"'IM Fell English SC',serif",fontWeight:700,fontSize:14,color:"#23201A"}}>{hero.name}</div>
-            <div style={{fontSize:11,color:"#6E6350"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Level {hero.level} · {agePhaseLabel(agePhase(hero))}</div>
-            <div style={{fontSize:10,color:hColor,marginTop:2}}>{moraleLabel(hero.morale).label}</div>
+            <div style={{fontSize:11,color:"#6E6350"}}>{hero.race} <RoleIcon role={hero.role}/> {hero.role} · Level {hero.level} · {agePhaseLabel(agePhase(hero))} · <span style={{color:hColor}}>{mLabel} ({hero.morale})</span></div>
             <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:4}}>
               {hero.traits.map(t=><span key={t} style={{fontSize:9,background:"rgba(95,75,102,0.15)",color:"#5F4B66",padding:"1px 6px",borderRadius:3}}>{t}</span>)}
             </div>
           </div>
         </div>
 
-        <div style={{marginBottom:18}}>
-          <div style={{fontSize:12,color:"#6E6350",marginBottom:10}}>Their demand:</div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            {[["Current salary",`${hero.salary}g/wk`],["Demanded salary",`${demand.salary}g/wk`,demand.salary>hero.salary?"#9A5B2B":"#40614F"],
-              ["Contract length",`${demand.years} season${demand.years>1?"s":""}`],["Total cost",`${(demand.salary*WEEKS_PER_CONTRACT_YEAR*demand.years).toLocaleString()}g`]
-            ].map(([k,v,c="#23201A"])=>(
-              <div key={k} style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"8px 10px",border:"1px solid rgba(60,52,38,0.126)"}}>
-                <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{k}</div>
-                <div style={{fontSize:14,fontWeight:700,color:c}}>{v}</div>
-              </div>
-            ))}
+        {/* Willingness gauge — the player's one precise instrument */}
+        <div style={{fontSize:9,letterSpacing:1.5,color:"#8A6D3B",fontWeight:700,marginBottom:4}}>WILLINGNESS TO SIGN</div>
+        <div style={{height:10,background:"rgba(60,52,38,0.12)",border:"1px solid rgba(60,52,38,0.25)",borderRadius:2,position:"relative",marginBottom:3}}>
+          <div style={{position:"absolute",left:0,top:0,bottom:0,width:`${w}%`,background:zone==="sign"?"#40614F":zone==="haggle"?"#8A6D3B":"#7E2D26",transition:"width 0.25s"}}/>
+          <div style={{position:"absolute",top:-2,bottom:-2,width:1,background:"#7E2D26",left:`${NEGOTIATION_SIGN_AT}%`}}/>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:8,color:"#6E6350",marginBottom:10}}>
+          <span>insulting</span><span>would haggle</span><span>would sign ›</span>
+        </div>
+
+        {/* Mood — worded patience, never a count */}
+        {!finalTerms&&(
+          <div style={{fontSize:11,color:patienceLeft===1?"#9A5B2B":"#4A4335",marginBottom:12,padding:"6px 9px",background:patienceLeft===1?"rgba(154,91,43,0.07)":"rgba(60,52,38,0.05)",borderRadius:3}}>
+            {session.lastOutcome==="insulted"&&<b>That offer soured the room. </b>}{mood}
+          </div>
+        )}
+        {finalTerms&&(
+          <div style={{fontSize:11,color:"#7E2D26",marginBottom:12,padding:"7px 10px",background:"rgba(126,45,38,0.08)",border:"1px solid rgba(126,45,38,0.25)",borderRadius:3}}>
+            Their patience is <b>spent</b> — this is their final offer. Refuse and they never re-sign: {departLine}.
+          </div>
+        )}
+
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
+          <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"8px 10px",border:"1px solid rgba(60,52,38,0.126)"}}>
+            <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>{finalTerms?"FINAL OFFER":"THEIR ASK"}{conceded?` (came down from ${originalDemand.salary}g)`:""}</div>
+            <div style={{fontSize:14,fontWeight:700,color:demand.salary>hero.salary?"#9A5B2B":"#40614F"}}>{demand.salary}g/wk · {demand.years}s</div>
+          </div>
+          <div style={{background:"rgba(60,52,38,0.054)",borderRadius:3,padding:"8px 10px",border:"1px solid rgba(60,52,38,0.126)"}}>
+            <div style={{fontSize:9,color:"#6E6350",marginBottom:2}}>CURRENT</div>
+            <div style={{fontSize:14,fontWeight:700,color:"#23201A"}}>{hero.salary}g/wk</div>
           </div>
         </div>
 
-        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>Greedy: demands are inflated. They won't accept anything far below this.</div>}
-        {hero.traits?.includes("Loyal")&&<div style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>✓ Loyal: will accept a reasonable counter-offer without walking out.</div>}
-        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:10}}>Hot-headed: reject this and they leave immediately — no second chance.</div>}
-        {}
+        {!finalTerms&&(
+          <div style={{background:"rgba(138,109,59,0.08)",border:"1px solid rgba(138,109,59,0.35)",borderRadius:3,padding:"10px 12px",marginBottom:12}}>
+            <div style={{fontSize:9,letterSpacing:1.5,color:"#8A6D3B",fontWeight:700,marginBottom:8}}>YOUR OFFER</div>
+            {stepper("Salary", offer.salary,
+              ()=>setOffer({salary:Math.max(salaryStep, offer.salary-salaryStep)}),
+              ()=>setOffer({salary:offer.salary+salaryStep}),
+              `${offer.salary}g/wk`)}
+            {stepper("Length", offer.years,
+              ()=>setOffer({years:Math.max(1, offer.years-1)}),
+              ()=>setOffer({years:Math.min(4, offer.years+1)}),
+              `${offer.years} season${offer.years>1?"s":""}`)}
+            <div style={{fontSize:10,color:"#6E6350",textAlign:"center",marginTop:2}}>Total: {(offer.salary*WEEKS_PER_CONTRACT_YEAR*offer.years).toLocaleString()}g over {offer.years} season{offer.years>1?"s":""}</div>
+            <div style={{fontSize:10,fontWeight:700,textAlign:"center",marginTop:3,color:zone==="sign"?"#40614F":zone==="haggle"?"#8A6D3B":"#7E2D26"}}>{verdict}</div>
+          </div>
+        )}
 
-        <div className="rm-neg-buttons" style={{display:"flex",gap:8}}>
-          <button onClick={()=>onAccept(hero,demand)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
-            ✓ Accept<br/><span style={{fontSize:9,fontWeight:400}}>{demand.salary}g/wk · {demand.years}s</span>
-          </button>
-          {!hero.traits?.includes("Stubborn")&&(
-            <button onClick={()=>onCounter(hero,{salary:counterSalary,years:counterYears})} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(154,91,43,0.55)",cursor:"pointer",background:"rgba(154,91,43,0.15)",color:"#9A5B2B",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
-              ↔ Counter<br/><span style={{fontSize:9,fontWeight:400}}>{counterSalary}g/wk · {counterYears}yr</span>
+        {hero.traits?.includes("Loyal")&&<div style={{fontSize:10,color:"#40614F",background:"rgba(64,97,79,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:8}}>✓ Loyal: patient at the table and concedes generously.</div>}
+        {hero.traits?.includes("Greedy")&&<div style={{fontSize:10,color:"#7E2D26",background:"rgba(126,45,38,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:8}}>Greedy: will barely move off their ask.</div>}
+        {hero.traits?.includes("Stubborn")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:8}}>Stubborn: take it or leave it — they won't haggle.</div>}
+        {hero.traits?.includes("Hot-headed")&&<div style={{fontSize:10,color:"#9A5B2B",background:"rgba(154,91,43,0.105)",padding:"6px 10px",borderRadius:3,marginBottom:8}}>Hot-headed: quick to take offence at the table.</div>}
+
+        {!finalTerms?(
+          <>
+            <div className="rm-neg-buttons" style={{display:"flex",gap:8,marginBottom:8}}>
+              <button onClick={makeOffer} style={{flex:1.3,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#8A6D3B",color:"#F0E8D5",fontWeight:900,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                Make Offer<br/><span style={{fontSize:9,fontWeight:400}}>{offer.salary}g/wk · {offer.years}s</span>
+              </button>
+              <button onClick={()=>onSign(hero,{salary:demand.salary,years:demand.years})} style={{flex:1,padding:"10px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                Meet Ask<br/><span style={{fontSize:9,fontWeight:400}}>{demand.salary}g/wk · {demand.years}s</span>
+              </button>
+            </div>
+            <button onClick={()=>onCollapse(hero)}
+              style={{width:"100%",padding:"8px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.1)",color:"#7E2D26",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+              End Talks — they will never re-sign
             </button>
-          )}
-          <button onClick={()=>onReject(hero)} style={{flex:1,padding:"10px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.12)",color:"#7E2D26",fontWeight:700,fontSize:12,fontFamily:"'Alegreya Sans',sans-serif"}}>
-            ✗ Reject<br/><span style={{fontSize:9,fontWeight:400}}>–10 morale</span>
-          </button>
-        </div>
-        {onDelay&&(
-          <button onClick={()=>onDelay(hero)}
-            style={{width:"100%",marginTop:8,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",
-              background:"rgba(60,52,38,0.045)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
-            Decide Later — they'll stew on it (−6 morale{(hero.negotiationIgnoredWeeks||0)>=1?", patience wearing thin":""})
-          </button>
+            {!expired&&(
+              <button onClick={()=>onPostpone(hero)}
+                style={{width:"100%",marginTop:8,padding:"7px 0",borderRadius:3,border:"1px solid rgba(60,52,38,0.22)",cursor:"pointer",background:"rgba(60,52,38,0.045)",color:"#6E6350",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                Postpone Talks — they'll notice (−4 morale)
+              </button>
+            )}
+          </>
+        ):(
+          <>
+            <button onClick={()=>onSign(hero,{salary:demand.salary,years:demand.years})}
+              style={{width:"100%",padding:"11px 0",borderRadius:3,border:"none",cursor:"pointer",background:"#40614F",color:"#F0E8D5",fontWeight:900,fontSize:13,fontFamily:"'Alegreya Sans',sans-serif",marginBottom:8}}>
+              Sign Final Offer<br/><span style={{fontSize:9,fontWeight:400}}>{demand.salary}g/wk · {demand.years} season{demand.years>1?"s":""}</span>
+            </button>
+            <button onClick={()=>onCollapse(hero)}
+              style={{width:"100%",padding:"8px 0",borderRadius:3,border:"1px solid rgba(126,45,38,0.45)",cursor:"pointer",background:"rgba(126,45,38,0.1)",color:"#7E2D26",fontWeight:700,fontSize:10,fontFamily:"'Alegreya Sans',sans-serif"}}>
+              Refuse — {departLine} (still sellable until then)
+            </button>
+          </>
         )}
       </div>
     </div>
@@ -7550,8 +7744,8 @@ function GuideTab(){
 
       <Section id="heroes" icon="" title="Hero Management">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#9A5B2B"}}>Fatigue</b> builds every battle (+15–25) and recovers on the bench (-25/week). Above 88 fatigue heroes lose effectiveness and risk injury. Rotate your bench regularly — the Recovery Lodge speeds this up.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and drifts −0.5/week toward a floor of 40 (it won't passively fall below that). A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons depending on career stage. A warning fires 6 weeks before expiry. You can renew early within 2 seasons of expiry. Releasing a hero at contract end costs no morale penalty — plan your releases around expiry dates.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and drifts −0.5/week toward a floor of 40 (it won't passively fall below that). Low morale also hardens contract talks — an unhappy hero demands more and loses patience faster. The Tavern gives +3 morale/week to all heroes.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons by career stage, with a warning 6 weeks before expiry and early renewal available within 2 seasons of it. Talks resolve in one sitting: their <b>willingness gauge</b> shows exactly how your offer lands, and each pushy offer wears their hidden patience — traits set the temperament (Loyal concedes generously, Greedy barely moves, Stubborn won't haggle at all, Hot-headed storms out). Run their patience dry and you'll face final terms: refuse those and they <b>never re-sign</b>, playing out the contract and departing. An expired contract is a hard deadline — settle terms that week or they leave. Releasing a hero at contract end costs no morale penalty.</p>
         <p style={{margin:0}}><b style={{color:"#8A6D3B"}}>Traits</b> give small bonuses and penalties — combat (+3–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
       </Section>
 
@@ -7903,61 +8097,51 @@ export default function App(){
      seasonWeek,trophies,playerTier,tierPosition,tierEnemyTowns,scheduledOpponent,negotiationQueue,townName,townColor,listedHeroIds,transferBids,formationPresets,seasonStartSnapshot,leagueTable,playerRecord,matchLog,activeEvent,showHiddenStats,scoutingFog,chronicleEntries,signDiscount,squadLeaderId,retiredLegends,retirees,raceSynergyUsage,hallOfFame,currentStreak,legendaryChallenger,emissaryFiredThisSeason,hintDismissed,leaderHintDismissed,bankruptcyWeeks]);
 
   // ── CONTRACT NEGOTIATION HANDLERS ─────────────────────────────────────────
-  const handleAccept=(hero,demand)=>{
+  const handleSign=(hero,terms)=>{
     setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
-      ...h, salary:demand.salary, contractYears:demand.years,
-      contractWeeks:demand.years*WEEKS_PER_CONTRACT_YEAR,
-      contractWeeksLeft:demand.years*WEEKS_PER_CONTRACT_YEAR,
+      ...h, salary:terms.salary, contractYears:terms.years,
+      contractWeeks:terms.years*WEEKS_PER_CONTRACT_YEAR,
+      contractWeeksLeft:terms.years*WEEKS_PER_CONTRACT_YEAR,
       negotiationPending:false, negotiationIgnoredWeeks:0,
-      morale:Math.min(100,h.morale+20),
+      morale:Math.min(100,h.morale+15),
     }));
     setNegotiationQueue(q=>q.slice(1));
-    addLog(`Signed ${hero.name}: ${demand.salary}g/wk for ${demand.years} season${demand.years>1?"s":""}.`,"success");
+    addLog(`Signed ${hero.name}: ${terms.salary}g/wk for ${terms.years} season${terms.years>1?"s":""}.`,"success");
   };
 
-  const handleCounter=(hero,counter)=>{
-    // Hero accepts counter if Loyal, or if happiness > 50, or random chance
-    const accepts=hero.traits?.includes("Loyal")||(hero.morale>50&&Math.random()<0.6);
-    if(accepts){
-      setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
-        ...h, salary:counter.salary, contractYears:counter.years,
-        contractWeeks:counter.years*WEEKS_PER_CONTRACT_YEAR,
-        contractWeeksLeft:counter.years*WEEKS_PER_CONTRACT_YEAR,
-        negotiationPending:false, negotiationIgnoredWeeks:0,
-        morale:Math.min(100,h.morale+10),
-      }));
-      setNegotiationQueue(q=>q.slice(1));
-      addLog(`${hero.name} accepted the counter-offer: ${counter.salary}g/wk for ${counter.years} season${counter.years>1?"s":""}.`,"success");
-    } else {
-      setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
-        ...h, morale:Math.max(10,h.morale-15),
-        negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
-      }));
-      setNegotiationQueue(q=>q.slice(1));
-      addLog(`${hero.name} rejected the counter-offer. Morale taking a hit.`,"warning");
-    }
+  // An insulting offer at the table stings — the gauge reads live morale, so
+  // the room visibly cools
+  const handleNegotiationSting=(hero,delta)=>{
+    setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{...h, morale:Math.max(10,h.morale+delta)}));
   };
 
-  const handleReject=(hero)=>{
+  // Talks over for good: they will never re-sign. Hot-headed heroes with
+  // weeks still on the contract storm out on the spot; everyone else plays
+  // out their term (or, if already expired, departs when the week ends).
+  const handleCollapse=(hero)=>{
     const hotHeaded=hero.traits?.includes("Hot-headed");
-    if(hotHeaded){
-      // Immediate walkout
-      setHeroes(hs=>hs.filter(h=>h.id!==hero.id));
+    if(hotHeaded&&(hero.contractWeeksLeft||0)>0){
+      setHeroes(hs=>applySquadMoraleEvent(hs.filter(h=>h.id!==hero.id),hero,formation,"walkout"));
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(h=>h&&h.id===hero.id?null:h);});return nf;});
-      addLog(`${hero.name} (Hot-headed) walked out immediately after contract rejection!`,"danger");
       if(squadLeaderId===hero.id) setSquadLeaderId(null);
+      addLog(`${hero.name} (Hot-headed) stormed out of the talks and the realm in the same hour! The squad is rattled.`,"danger");
+      addChronicle(`${hero.name} stormed out over a failed contract.`);
     } else {
       setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
-        ...h, morale:Math.max(10,h.morale-18),
-        negotiationPending:true, negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
+        ...h, refusesToSign:true, negotiationPending:false,
+        morale:Math.max(10,h.morale-10),
       }));
-      addLog(`${hero.name} rejected. Very unhappy. Contract dispute ongoing.`,"danger");
+      addLog((hero.contractWeeksLeft||0)<=0
+        ? `${hero.name} will not re-sign. They depart when the week ends.`
+        : `${hero.name} will not re-sign. They will see out the contract (${hero.contractWeeksLeft}w) and depart.`,"danger");
     }
-    setNegotiationQueue(q=>q.slice(1));
+    setNegotiationQueue(q=>q.filter(x=>x.id!==hero.id));
   };
 
   const initiateEarlyRenewal = (hero) => {
-    // Only available within 2 seasons of expiry and when not already pending
+    // Only available within 2 seasons of expiry and when not already pending.
+    // Collapsed talks are final — no reopening.
+    if(hero.refusesToSign) return;
     if(hero.negotiationPending) return;
     if((hero.contractWeeksLeft||0) > WEEKS_PER_CONTRACT_YEAR * 2) return;
     setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{...h, negotiationPending:true, negotiationIgnoredWeeks:0}));
@@ -7967,10 +8151,11 @@ export default function App(){
     addLog(`${hero.name} called in for early contract talks.`,"info");
   };
 
-  const handleDelay=(hero)=>{
-    // "Decide later" — the dispute clock ticks and the hero stews
+  const handlePostpone=(hero)=>{
+    // Push the sitting to next week — only offered while the contract has
+    // weeks left (expiry is a hard deadline)
     setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
-      ...h, morale:Math.max(10,h.morale-6),
+      ...h, morale:Math.max(10,h.morale-4),
       negotiationIgnoredWeeks:(h.negotiationIgnoredWeeks||0)+1,
     }));
     setNegotiationQueue(q=>q.slice(1));
@@ -8889,44 +9074,36 @@ export default function App(){
     }
 
     updatedHeroes=updatedHeroes.map(h=>{
+      // A hero who spent this whole week expired-and-unsigned has hit the
+      // hard deadline (the sitting offers no postpone once expired; this
+      // backstop only fires if the player never resolved the modal)
+      const wasExpiredAllWeek = h.negotiationPending && !h.refusesToSign && (h.contractWeeksLeft||0)===0;
       const wLeft=Math.max(0,(h.contractWeeksLeft||0)-1);
       let negotiationPending=h.negotiationPending, negotiationIgnoredWeeks=h.negotiationIgnoredWeeks||0;
-      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`${h.name}'s contract has expired! Renewal required.`,"warning");}
+      if(h.refusesToSign){
+        return{...h,contractWeeksLeft:wLeft,negotiationPending:false,negotiationIgnoredWeeks};
+      }
+      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`${h.name}'s contract has expired — settle terms this week or they depart.`,"warning");}
       if(wLeft===1&&!negotiationPending){addLog(`${h.name}'s contract expires next week — prepare for renewal.`,"warning");}
       if(wLeft===6&&!negotiationPending){addLog(`${h.name}'s contract expires in 6 weeks.`,"info");}
-      // Dispute clock: only ticks on weeks the hero was ALREADY waiting when
-      // this one began (testing the flag we just set double-counted week one)
-      if(h.negotiationPending&&wLeft===0){negotiationIgnoredWeeks++;if(negotiationIgnoredWeeks>=3){return{...h,contractWeeksLeft:0,negotiationPending,negotiationIgnoredWeeks,morale:Math.max(0,h.morale-15)};}}
-      return{...h,contractWeeksLeft:wLeft,negotiationPending,negotiationIgnoredWeeks};
+      return{...h,contractWeeksLeft:wLeft,negotiationPending,negotiationIgnoredWeeks,...(wasExpiredAllWeek?{_deadline:true}:{})};
     });
 
-    const walkouts=updatedHeroes.filter(h=>{
-      if(h.contractWeeksLeft!==0) return false;
-      if(h.retired) return false;
-      if(h.traits?.includes("Iron Will")) return false;
-      if(h.morale>=20) return false;
-      // Weekly walkout chance scales from 0% at morale 20 down to 35% at morale 0
-      const baseChance = Math.pow((20 - h.morale) / 20, 1.5) * 0.35;
-      const chance = h.traits?.includes("Loyal") ? baseChance * 0.15
-        : h.traits?.includes("Hot-headed") ? Math.min(0.95, baseChance * 2.5)
-        : baseChance;
-      return Math.random() < chance;
-    });
-    walkouts.forEach(h=>{
-      const walkLine = h.traits?.includes("Hot-headed")
-        ? `${h.name} kicked the barracks door off its hinges on the way out. The squad is rattled.`
-        : h.traits?.includes("Greedy")
-        ? `${h.name} walked out, leaving only a note about wages. The squad is rattled.`
-        : pick([
-            `${h.name} walked out! The squad is rattled.`,
-            `${h.name} packed in the night and was gone by dawn. The squad is rattled.`,
-            `${h.name} left their colours folded on the bunk. The squad is rattled.`,
-          ]);
-      addLog(walkLine,"danger");
-      addChronicle(`${h.name} walked out on the realm.`);
-      updatedHeroes=applySquadMoraleEvent(updatedHeroes.filter(x=>x.id!==h.id),h,formation,"walkout");
+    // Contract departures — deterministic, no dice. Two ways out: talks
+    // collapsed (refusesToSign) and the contract has run down, or the hard
+    // deadline backstop above. A lapsed contract is a mutual parting — no
+    // squad morale ripple (unlike a walkout).
+    const departures=updatedHeroes.filter(h=>!h.retired&&(
+      (h.refusesToSign&&(h.contractWeeksLeft||0)<=0) || h._deadline
+    ));
+    departures.forEach(h=>{
+      addLog(`${h.name}'s contract has lapsed. They gathered their things and took their leave.`,"danger");
+      addChronicle(`${h.name} departed when their contract lapsed.`);
+      updatedHeroes=updatedHeroes.filter(x=>x.id!==h.id);
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===h.id?null:x);});return nf;});
       setNegotiationQueue(q=>q.filter(x=>x.id!==h.id)); // no ghost negotiations
+      setListedHeroIds(ids=>{const n=new Set(ids);n.delete(h.id);return n;});
+      setTransferBids(bids=>bids.filter(b=>b.heroId!==h.id));
       if(squadLeaderId===h.id) setSquadLeaderId(null);
     });
 
@@ -8946,7 +9123,7 @@ export default function App(){
       return nh;
     });
 
-    const newNeg=aged.filter(h=>h.negotiationPending&&!negotiationQueue.find(x=>x.id===h.id));
+    const newNeg=aged.filter(h=>h.negotiationPending&&!h.refusesToSign&&!negotiationQueue.find(x=>x.id===h.id));
     if(newNeg.length>0)setNegotiationQueue(q=>[...q,...newNeg.filter(x=>!q.find(y=>y.id===x.id))]);
     // Prune queue entries whose hero is gone (sold mid-week, walked, retired)
     const livingIds=new Set(aged.filter(h=>!h.retired).map(h=>h.id));
@@ -9568,7 +9745,7 @@ export default function App(){
           }
           setRetirees([]);
         }}/>
-      <NegotiationModal pending={negotiationQueue} heroes={heroes} gold={gold} onAccept={handleAccept} onCounter={handleCounter} onReject={handleReject} onDelay={handleDelay}/>
+      <NegotiationModal pending={negotiationQueue} heroes={heroes} onSign={handleSign} onCollapse={handleCollapse} onPostpone={handlePostpone} onSting={handleNegotiationSting}/>
       {activeSimulation&&<RaidSimulationModal simulation={activeSimulation} enemy={pendingRaidEnemy} onComplete={applyRaidResult}/>}
       {weekSummary&&!activeSimulation&&<WeeklySummary summary={weekSummary} onDismiss={()=>setWeekSummary(null)} townColor={townColor}/>}
       {seasonSummary&&!activeSimulation&&!legacyCeremony&&<SeasonSummaryModal summary={seasonSummary} onDismiss={()=>setSeasonSummary(null)} townColor={townColor}/>}
@@ -10979,7 +11156,7 @@ export default function App(){
                     const hasBid = transferBids.some(b=>b.heroId===h.id);
                     const weeksLeft = h.contractWeeksLeft||0;
                     const contractExpired = weeksLeft === 0;
-                    const canRenew = !h.negotiationPending && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
+                    const canRenew = !h.negotiationPending && !h.refusesToSign && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
                     return(
                       <div key={h.id} style={{padding:"8px 10px",borderRadius:3,
                         background:listed?"rgba(138,109,59,0.06)":hasBid?"rgba(64,97,79,0.06)":"rgba(60,52,38,0.045)",

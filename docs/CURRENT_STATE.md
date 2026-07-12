@@ -176,12 +176,26 @@ power, ×2 rewards, or decline for −8 squad morale), and the **Wandering Maste
 
 ## Contracts
 
-calcDemand scales with combat/mental averages, level, career phase, morale and
-Negotiation. Expiry → negotiation queue → modal (live hero data): Accept /
-Counter (hidden for Stubborn) / Reject (Hot-headed walks instantly) / **Decide
-Later** (−6 morale, dispute clock ticks). Three disputed weeks → −15 morale/wk;
-morale <20 with expired contract → walkout risk. Early renewal available within
-two seasons of expiry and opens talks immediately.
+`calcDemand` scales with combat/mental averages, level, career phase, morale
+and Negotiation; preferred term is deterministic by phase (peak/rising 3,
+prospect/fading 2, veteran 1; Negotiation>40 −1). Talks are a **one-sitting
+haggle** (2026-07 rework, fully deterministic — no dice): a live willingness
+gauge (`negotiationWillingness`, zones sign ≥85 / haggle 45–84 / insult <45)
+responds to salary/years steppers; each non-sign offer burns hidden patience
+(`negotiationProfile`: base 3, Loyal +1, Hot-headed −1, morale<40 −1,
+Stubborn locked to 1) worded as a mood, never a count; haggle-zone offers
+make them concede toward you (`negotiationRespond`, rate by morale/traits,
+Greedy floored at 95% of the original ask, Stubborn never moves); insults
+cost 2 patience and −5 morale. Patience out → **Final Terms**: sign or they
+never re-sign (`refusesToSign` — plays out the contract, departs at the
+weekly resolution, DEPARTING chip on the card, still sellable; Hot-headed
+with weeks left storms out instantly with a squad-morale ripple). Contract
+expiry is a **hard deadline**: the sitting has no Postpone once expired; no
+deal that week → departure (mutual parting, no ripple). Postpone (pre-expiry
+only) −4 morale, re-queues next week. Early renewal within two seasons of
+expiry, blocked once talks have collapsed. Sim mirrors renewals at 93% of
+the ask. Meeting their exact ask always signs (short-circuit past trait
+gauge penalties).
 
 ## Economy guardrails (sim-verified)
 
