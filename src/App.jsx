@@ -2520,13 +2520,13 @@ const TRAIT_EFFECTS = {
   "Blessed":      {color:"#8A6D3B", desc:"+3% power"},
   "Cursed":       {color:"#5F4B66", desc:"−5% power · random form drain each week · +15% XP (suffering teaches)"},
   "Brave":        {color:"#40614F", desc:"Immune to morale loss on defeat"},
-  "Iron Will":    {color:"#3C5A78", desc:"Morale floor at 50 during combat · never walks out"},
+  "Iron Will":    {color:"#3C5A78", desc:"Morale floor at 50 during combat"},
   "Eagle Eye":    {color:"#8A6D3B", desc:"Accuracy weighted ×1.5 in combat score"},
   "Calm":         {color:"#3C5A78", desc:"Composure weighted ×1.5 in combat score"},
   "Night Vision": {color:"#5F4B66", desc:"+4% win chance when your team is the underdog"},
-  "Loyal":        {color:"#40614F", desc:"−12% contract demands · very unlikely to walk out"},
+  "Loyal":        {color:"#40614F", desc:"−12% contract demands · patient and generous at the negotiating table"},
   "Greedy":       {color:"#9A5B2B", desc:"+20% contract salary demand"},
-  "Hot-headed":   {color:"#7E2D26", desc:"2.5× walkout risk at low morale · walks out immediately if contract rejected"},
+  "Hot-headed":   {color:"#7E2D26", desc:"Quick to take offence in contract talks · storms out on the spot if talks collapse"},
   "Stubborn":     {color:"#8A6D3B", desc:"+10% contract demand · won't accept counter-offers"},
   "Coward":       {color:"#6E6350",    desc:"Morale swings halved (good and bad)"},
   "Inspiring":    {color:"#8A6D3B", desc:"+10% morale swings for squad · bigger morale boost on retirement"},
@@ -8117,10 +8117,10 @@ export default function App(){
   const handleCollapse=(hero)=>{
     const hotHeaded=hero.traits?.includes("Hot-headed");
     if(hotHeaded&&(hero.contractWeeksLeft||0)>0){
-      setHeroes(hs=>hs.filter(h=>h.id!==hero.id));
+      setHeroes(hs=>applySquadMoraleEvent(hs.filter(h=>h.id!==hero.id),hero,formation,"walkout"));
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(h=>h&&h.id===hero.id?null:h);});return nf;});
       if(squadLeaderId===hero.id) setSquadLeaderId(null);
-      addLog(`${hero.name} (Hot-headed) stormed out of the talks and the realm in the same hour!`,"danger");
+      addLog(`${hero.name} (Hot-headed) stormed out of the talks and the realm in the same hour! The squad is rattled.`,"danger");
       addChronicle(`${hero.name} stormed out over a failed contract.`);
     } else {
       setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{
@@ -8135,7 +8135,9 @@ export default function App(){
   };
 
   const initiateEarlyRenewal = (hero) => {
-    // Only available within 2 seasons of expiry and when not already pending
+    // Only available within 2 seasons of expiry and when not already pending.
+    // Collapsed talks are final — no reopening.
+    if(hero.refusesToSign) return;
     if(hero.negotiationPending) return;
     if((hero.contractWeeksLeft||0) > WEEKS_PER_CONTRACT_YEAR * 2) return;
     setHeroes(hs=>hs.map(h=>h.id!==hero.id?h:{...h, negotiationPending:true, negotiationIgnoredWeeks:0}));
@@ -9068,44 +9070,36 @@ export default function App(){
     }
 
     updatedHeroes=updatedHeroes.map(h=>{
+      // A hero who spent this whole week expired-and-unsigned has hit the
+      // hard deadline (the sitting offers no postpone once expired; this
+      // backstop only fires if the player never resolved the modal)
+      const wasExpiredAllWeek = h.negotiationPending && !h.refusesToSign && (h.contractWeeksLeft||0)===0;
       const wLeft=Math.max(0,(h.contractWeeksLeft||0)-1);
       let negotiationPending=h.negotiationPending, negotiationIgnoredWeeks=h.negotiationIgnoredWeeks||0;
-      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`${h.name}'s contract has expired! Renewal required.`,"warning");}
+      if(h.refusesToSign){
+        return{...h,contractWeeksLeft:wLeft,negotiationPending:false,negotiationIgnoredWeeks};
+      }
+      if(wLeft===0&&!negotiationPending){negotiationPending=true;negotiationIgnoredWeeks=0;addLog(`${h.name}'s contract has expired — settle terms this week or they depart.`,"warning");}
       if(wLeft===1&&!negotiationPending){addLog(`${h.name}'s contract expires next week — prepare for renewal.`,"warning");}
       if(wLeft===6&&!negotiationPending){addLog(`${h.name}'s contract expires in 6 weeks.`,"info");}
-      // Dispute clock: only ticks on weeks the hero was ALREADY waiting when
-      // this one began (testing the flag we just set double-counted week one)
-      if(h.negotiationPending&&wLeft===0){negotiationIgnoredWeeks++;if(negotiationIgnoredWeeks>=3){return{...h,contractWeeksLeft:0,negotiationPending,negotiationIgnoredWeeks,morale:Math.max(0,h.morale-15)};}}
-      return{...h,contractWeeksLeft:wLeft,negotiationPending,negotiationIgnoredWeeks};
+      return{...h,contractWeeksLeft:wLeft,negotiationPending,negotiationIgnoredWeeks,...(wasExpiredAllWeek?{_deadline:true}:{})};
     });
 
-    const walkouts=updatedHeroes.filter(h=>{
-      if(h.contractWeeksLeft!==0) return false;
-      if(h.retired) return false;
-      if(h.traits?.includes("Iron Will")) return false;
-      if(h.morale>=20) return false;
-      // Weekly walkout chance scales from 0% at morale 20 down to 35% at morale 0
-      const baseChance = Math.pow((20 - h.morale) / 20, 1.5) * 0.35;
-      const chance = h.traits?.includes("Loyal") ? baseChance * 0.15
-        : h.traits?.includes("Hot-headed") ? Math.min(0.95, baseChance * 2.5)
-        : baseChance;
-      return Math.random() < chance;
-    });
-    walkouts.forEach(h=>{
-      const walkLine = h.traits?.includes("Hot-headed")
-        ? `${h.name} kicked the barracks door off its hinges on the way out. The squad is rattled.`
-        : h.traits?.includes("Greedy")
-        ? `${h.name} walked out, leaving only a note about wages. The squad is rattled.`
-        : pick([
-            `${h.name} walked out! The squad is rattled.`,
-            `${h.name} packed in the night and was gone by dawn. The squad is rattled.`,
-            `${h.name} left their colours folded on the bunk. The squad is rattled.`,
-          ]);
-      addLog(walkLine,"danger");
-      addChronicle(`${h.name} walked out on the realm.`);
-      updatedHeroes=applySquadMoraleEvent(updatedHeroes.filter(x=>x.id!==h.id),h,formation,"walkout");
+    // Contract departures — deterministic, no dice. Two ways out: talks
+    // collapsed (refusesToSign) and the contract has run down, or the hard
+    // deadline backstop above. A lapsed contract is a mutual parting — no
+    // squad morale ripple (unlike a walkout).
+    const departures=updatedHeroes.filter(h=>!h.retired&&(
+      (h.refusesToSign&&(h.contractWeeksLeft||0)<=0) || h._deadline
+    ));
+    departures.forEach(h=>{
+      addLog(`${h.name}'s contract has lapsed. They gathered their things and took their leave.`,"danger");
+      addChronicle(`${h.name} departed when their contract lapsed.`);
+      updatedHeroes=updatedHeroes.filter(x=>x.id!==h.id);
       setFormation(f=>{const nf={};POS_KEYS.forEach(p=>{nf[p]=(f[p]||[]).map(x=>x&&x.id===h.id?null:x);});return nf;});
       setNegotiationQueue(q=>q.filter(x=>x.id!==h.id)); // no ghost negotiations
+      setListedHeroIds(ids=>{const n=new Set(ids);n.delete(h.id);return n;});
+      setTransferBids(bids=>bids.filter(b=>b.heroId!==h.id));
       if(squadLeaderId===h.id) setSquadLeaderId(null);
     });
 
@@ -9125,7 +9119,7 @@ export default function App(){
       return nh;
     });
 
-    const newNeg=aged.filter(h=>h.negotiationPending&&!negotiationQueue.find(x=>x.id===h.id));
+    const newNeg=aged.filter(h=>h.negotiationPending&&!h.refusesToSign&&!negotiationQueue.find(x=>x.id===h.id));
     if(newNeg.length>0)setNegotiationQueue(q=>[...q,...newNeg.filter(x=>!q.find(y=>y.id===x.id))]);
     // Prune queue entries whose hero is gone (sold mid-week, walked, retired)
     const livingIds=new Set(aged.filter(h=>!h.retired).map(h=>h.id));
@@ -11158,7 +11152,7 @@ export default function App(){
                     const hasBid = transferBids.some(b=>b.heroId===h.id);
                     const weeksLeft = h.contractWeeksLeft||0;
                     const contractExpired = weeksLeft === 0;
-                    const canRenew = !h.negotiationPending && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
+                    const canRenew = !h.negotiationPending && !h.refusesToSign && weeksLeft > 0 && weeksLeft <= WEEKS_PER_CONTRACT_YEAR * 2;
                     return(
                       <div key={h.id} style={{padding:"8px 10px",borderRadius:3,
                         background:listed?"rgba(138,109,59,0.06)":hasBid?"rgba(64,97,79,0.06)":"rgba(60,52,38,0.045)",
