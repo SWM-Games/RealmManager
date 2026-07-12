@@ -15,7 +15,21 @@ tier-scaled building costs, tribute swing, loss purse) · event-return path.
 
 ## Not yet reviewed — in priority order
 
-_(none — all systems reviewed)_
+1. **Potential reveal — suspected dead-behind-plausible-UI (player report
+   2026-07-12).** The Guide and hero cards say Potential reveals after 8–10
+   battles, and the machinery exists (`potentialRevealed` flips at 8–10
+   `weeksInFormation`, the detail panel gates on
+   `hero.potentialRevealed || showHiddenStats`) — but the player reports
+   never seeing it in real play: "we reference 8-10 battles reveals
+   potential but I can't see this at all (hidden stats staying hidden)."
+   Review per rule 2 (probe, don't guess): does `weeksInFormation` actually
+   accrue as players expect (injured weeks don't count; bench doesn't
+   count — 8–10 *fielded* weeks may be far more than 8–10 battles of
+   ownership)? Does the revealed value surface anywhere a player actually
+   looks (it may live only in the detail panel's hidden-stats section)?
+   Is the reveal ever announced (log line / card moment), or does it flip
+   silently? This would be the fourth system found dead behind a plausible
+   UI.
 
 ## Resolved
 
