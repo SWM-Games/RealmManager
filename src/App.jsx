@@ -654,7 +654,8 @@ export const MAX_LEVEL = 15;
 //   morale    = combat readiness, fluctuates with wins/losses
 //   happiness = loyalty/satisfaction, driven by management decisions
 //
-// Low happiness causes:  -15% stat contribution per tier below 50, morale drain, eventual walkout
+// Low happiness causes: -15% stat contribution per tier below 50, morale drain,
+// and harder contract talks (higher demands, less patience at the table)
 // High happiness causes:  +10% stat bonus, XP boost, clutch factor increase
 
 
@@ -7740,8 +7741,8 @@ function GuideTab(){
 
       <Section id="heroes" icon="" title="Hero Management">
         <p style={{margin:"0 0 8px"}}><b style={{color:"#9A5B2B"}}>Fatigue</b> builds every battle (+15–25) and recovers on the bench (-25/week). Above 88 fatigue heroes lose effectiveness and risk injury. Rotate your bench regularly — the Recovery Lodge speeds this up.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and drifts −0.5/week toward a floor of 40 (it won't passively fall below that). A hero below 20 morale with an expired contract may walk out. The Tavern gives +3 morale/week to all heroes.</p>
-        <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons depending on career stage. A warning fires 6 weeks before expiry. You can renew early within 2 seasons of expiry. Releasing a hero at contract end costs no morale penalty — plan your releases around expiry dates.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#5F4B66"}}>Morale</b> swings up on wins, down on losses, and drifts −0.5/week toward a floor of 40 (it won't passively fall below that). Low morale also hardens contract talks — an unhappy hero demands more and loses patience faster. The Tavern gives +3 morale/week to all heroes.</p>
+        <p style={{margin:"0 0 8px"}}><b style={{color:"#3C5A78"}}>Contracts</b> last 1–4 seasons by career stage, with a warning 6 weeks before expiry and early renewal available within 2 seasons of it. Talks resolve in one sitting: their <b>willingness gauge</b> shows exactly how your offer lands, and each pushy offer wears their hidden patience — traits set the temperament (Loyal concedes generously, Greedy barely moves, Stubborn won't haggle at all, Hot-headed storms out). Run their patience dry and you'll face final terms: refuse those and they <b>never re-sign</b>, playing out the contract and departing. An expired contract is a hard deadline — settle terms that week or they leave. Releasing a hero at contract end costs no morale penalty.</p>
         <p style={{margin:0}}><b style={{color:"#8A6D3B"}}>Traits</b> give small bonuses and penalties — combat (+3–7%), fatigue, morale, or contract modifiers. Conflicting trait pairs are blocked at generation. Check the trait badge on any hero for exact effects.</p>
       </Section>
 
