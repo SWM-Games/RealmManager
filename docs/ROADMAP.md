@@ -53,10 +53,13 @@ _(none — all systems reviewed)_
   Clear all. Dominion: removed the mobile `order:-1` flip that buried the
   league table below the whole sidebar — standings render first now. Spec:
   `docs/superpowers/specs/2026-07-11-squad-filter-mobile-design.md`.
-  Follow-up candidate: the Hire tab's market bar still uses the old
-  hidden-scroll `rm-filter-bar` pattern. Player note (2026-07-11): the squad
-  filter layout is better but "still not perfect" — revisit after more phone
-  play.
+  Follow-up done (2026-07-12): the Hire tab's market bar now uses the same
+  three-row chrome — position pills, race chips for races actually on offer
+  (count-sorted, no Other needed), Sort chip + badged More (Role/Stage) with
+  clear-all, shared `marketFiltered` memo feeding both the count and the
+  grid. The hidden-scroll `rm-filter-bar` CSS pattern is deleted entirely.
+  Player note (2026-07-11): the squad filter layout is better but "still not
+  perfect" — revisit after more phone play.
 
 - **Front door + Legacy/Realm terminology** — the app now boots through a
   splash (plays every boot: the coronet inks itself in over ~1.4s, held 1.6s
