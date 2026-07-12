@@ -704,9 +704,9 @@ export function calcDemand(hero) {
     base = Math.floor(base * (1 + negPremium));
   }
 
-  // High Negotiation heroes prefer shorter contracts — they keep options open
-  const negYearsReduction = negStat > 40 ? 1 : 0;
-  const years = Math.max(1, (phase==="peak"||phase==="rising" ? rand(2,4) : rand(1,2)) - negYearsReduction);
+  // Preferred term is deterministic (was rand() re-rolled per modal open,
+  // which read as the hero changing their mind for no reason)
+  const years = negotiationPrefYears(hero);
 
   // Fading and veteran heroes: demand can be below current salary
   // (they're grateful for the work — but they'll take a pay cut)
@@ -716,6 +716,95 @@ export function calcDemand(hero) {
     : hero.salary;                    // won't accept less than what they have
 
   return { salary: Math.max(minSalary, base), years, negStat };
+}
+
+// ─── NEGOTIATION ENGINE ───────────────────────────────────────────────────────
+// One-sitting haggle: the willingness gauge is the player's precise instrument,
+// patience is a hidden budget worded as a mood. Everything here is DETERMINISTIC
+// (no dice) so the gauge can be trusted and the bands can be regression-tested.
+
+function negotiationPrefYears(hero) {
+  const phase = agePhase(hero);
+  const base = { prospect: 2, rising: 3, peak: 3, fading: 2, veteran: 1 }[phase] ?? 2;
+  const negStat = hero.stats?.["Negotiation"] || 0;
+  // High Negotiation heroes prefer shorter contracts — they keep options open
+  return Math.max(1, base - (negStat > 40 ? 1 : 0));
+}
+
+export function negotiationProfile(hero) {
+  let patience = 3;
+  if (hero.traits?.includes("Loyal"))      patience += 1;
+  if (hero.traits?.includes("Hot-headed")) patience -= 1;
+  if (hero.morale < 40)                    patience -= 1;
+  if (hero.traits?.includes("Stubborn"))   patience = 1; // take it or leave it
+  patience = Math.max(1, Math.min(4, patience));
+
+  // Concession rate: how far they move toward your offer per haggle round
+  let concession = 0.35 + (hero.morale - 50) / 400;
+  if (hero.traits?.includes("Loyal"))    concession += 0.10;
+  if (hero.traits?.includes("Greedy"))   concession -= 0.25;
+  concession = Math.max(0.15, Math.min(0.6, concession));
+  if (hero.traits?.includes("Stubborn")) concession = 0;
+
+  return { patience, prefYears: negotiationPrefYears(hero), concession };
+}
+
+// 0–100 willingness for a drafted offer against their current ask.
+// ≥85 they sign · 45–84 they haggle · <45 it's insulting.
+export const NEGOTIATION_SIGN_AT = 85;
+export const NEGOTIATION_INSULT_BELOW = 45;
+export function negotiationWillingness(hero, demand, offer) {
+  const D = demand.salary, S = offer.salary;
+  const prefYears = negotiationPrefYears(hero);
+  // 40 base + 60-point sweep across 70%→100% of the ask: meeting it reads
+  // ~100, 90% reads low-80s (haggle), at-or-under 70% reads under 45 (insult)
+  const salaryPart = 60 * Math.max(0, Math.min(1, (S - 0.7 * D) / (0.3 * D)));
+  let w = 40 + salaryPart
+    - 8 * Math.abs((offer.years || 1) - prefYears)
+    + (hero.morale - 60) / 4;
+  if (hero.traits?.includes("Loyal"))  w += 8;
+  if (hero.traits?.includes("Greedy")) w -= 8;
+  if ((hero.stats?.["Negotiation"] || 0) > 40) w -= 6; // knows their worth
+  return Math.max(0, Math.min(100, Math.round(w)));
+}
+
+// Deterministic response to an offer. sessionDemand = their current ask
+// (concessions accumulate within the sitting); originalDemand anchors the
+// Greedy floor. Returns the outcome, their (possibly conceded) new ask, the
+// patience this round cost, and any morale sting.
+export function negotiationRespond(hero, sessionDemand, originalDemand, offer, patienceLeft) {
+  const w = negotiationWillingness(hero, sessionDemand, offer);
+  const hotHeaded = hero.traits?.includes("Hot-headed");
+
+  // Meeting (or beating) their own ask always signs — the Meet Ask button
+  // must never bounce off trait penalties in the gauge
+  if (offer.salary >= sessionDemand.salary && offer.years === sessionDemand.years) {
+    return { outcome: "sign", newDemand: { ...sessionDemand }, patienceCost: 0, moraleDelta: 0, willingness: Math.max(w, NEGOTIATION_SIGN_AT) };
+  }
+
+  if (w >= NEGOTIATION_SIGN_AT) {
+    return { outcome: "sign", newDemand: { ...sessionDemand }, patienceCost: 0, moraleDelta: 0, willingness: w };
+  }
+
+  if (w >= NEGOTIATION_INSULT_BELOW) {
+    const { concession, prefYears } = negotiationProfile(hero);
+    let newSalary = Math.round(sessionDemand.salary - (sessionDemand.salary - offer.salary) * concession);
+    // The salary floors from calcDemand still bind
+    const phase = agePhase(hero);
+    const minSalary = ["fading","veteran"].includes(phase) ? Math.floor(hero.salary * 0.7) : hero.salary;
+    newSalary = Math.max(minSalary, newSalary);
+    if (hero.traits?.includes("Greedy")) newSalary = Math.max(newSalary, Math.floor(originalDemand.salary * 0.95));
+    // Years: they'll move one step toward your term if it's within reach
+    let newYears = sessionDemand.years;
+    if (offer.years !== sessionDemand.years && Math.abs(offer.years - prefYears) <= 1) {
+      newYears = sessionDemand.years + Math.sign(offer.years - sessionDemand.years);
+    }
+    return { outcome: "haggle", newDemand: { ...sessionDemand, salary: newSalary, years: newYears },
+      patienceCost: 1 + (hotHeaded ? 1 : 0), moraleDelta: 0, willingness: w };
+  }
+
+  return { outcome: "insulted", newDemand: { ...sessionDemand },
+    patienceCost: 2 + (hotHeaded ? 1 : 0), moraleDelta: -5, willingness: w };
 }
 
 
