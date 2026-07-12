@@ -348,3 +348,31 @@ Replaced wholesale, per a three-iteration mockup review with the user:
   pre-expiry Postpone. A false alarm during review (sim renewal "object
   assignment" bug) was verified false — the sim's local calcDemand returns a
   number; corrected in the spec.
+
+### Squad filters, round two — the summary row + drawer
+
+A phone screenshot of a real roster showed the three-row chrome still
+failing in practice: four races at 2+ (one named Dragonborn) wrapped the
+race chips over two lines with a stranded `Other` on a third, and the sort
+row was mostly dead space — ~4 roomy rows before the first card. Four
+directions were mocked in night mode against that exact roster (flowing
+toolbar, segmented strips, two-row smart merge, summary row + drawer); the
+user picked the drawer, then probed its two risks — drawer length and the
+many-filters state — with dedicated mocks before approving.
+
+The Squad tab now shows **one row of chrome**: a `Filters ▾` chip that acts
+as the receipt (one active filter shows its name, more show a count — the
+mock caught that two names wrap the row), the `Sort ▾` overlay-select, and
+the shown count. Everything else lives in an inline ~320px brass drawer —
+POSITION pills, RACE synergy chips (logic unchanged), REFINE (search +
+Role/Stage/Status, inking when non-default) — with Clear all + Done.
+Filters apply live; the drawer's height is constant because active states
+ink existing controls rather than adding anything. Also fixed the mock-
+found summary-wrap risk before it shipped, and the Hire tab deliberately
+keeps the three-row chrome (smaller filter set, rows behave) pending play
+verdict on the drawer.
+
+Verified live at 375px and desktop: single 36px summary row at 0–5 active
+filters, full label progression without wrapping, 320px drawer with the
+first card visible below, live filtering, select inking, Clear all, no
+horizontal overflow.
