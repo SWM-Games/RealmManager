@@ -11086,80 +11086,97 @@ export default function App(){
                 </span>
               </div>
 
-              {/* Row 1 — position pills (same chrome as the Squad tab) */}
-              <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center"}}>
-                {["All",...POS_KEYS].map(p=>{
-                  const count = p==="All"
-                    ? market.length
-                    : market.filter(h=>(POSITIONS[p]?.ideal||[]).includes(h.role)).length;
-                  const isActive = marketFilter.position === p;
-                  return(
-                    <button key={p} className={`pa-pill${isActive?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,position:p}))}>
-                      {p}<span className="ct">{count}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Row 2 — race chips for races actually on offer this rotation
-                  (no Other control: an absent race has nothing to filter) */}
+              {/* Summary row + drawer — same pattern as the Squad tab. The
+                  Filters chip names one active filter, counts beyond that;
+                  Sort stays out here; filters apply live, Done just closes. */}
               {(()=>{
-                const RACES_LIST=["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
-                const counts=Object.fromEntries(RACES_LIST.map(r=>[r,market.filter(h=>h.race===r).length]));
-                const present=RACES_LIST.filter(r=>counts[r]>0).sort((a,b)=>counts[b]-counts[a]);
+                const active=[
+                  ...(marketFilter.position!=="All"?[marketFilter.position]:[]),
+                  ...(marketFilter.race!=="All"?[marketFilter.race]:[]),
+                  ...(marketFilter.role!=="All"?[marketFilter.role]:[]),
+                  ...(marketFilter.stage!=="All"?[agePhaseLabel(marketFilter.stage)]:[]),
+                ];
+                const label = active.length===0 ? "Filters"
+                  : active.length===1 ? `Filters: ${active[0]}`
+                  : `Filters (${active.length})`;
                 return(
-                  <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:6,alignItems:"center",flexWrap:"wrap"}}>
-                    <button className={`pa-pill${marketFilter.race==="All"?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,race:"All"}))}>
-                      All<span className="ct">{market.length}</span>
+                  <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:marketMoreOpen?6:12,alignItems:"center"}}>
+                    <button className={`pa-pill${(active.length>0||marketMoreOpen)?" active":""}`} onClick={()=>setMarketMoreOpen(o=>!o)}>
+                      {`${label} ${marketMoreOpen?"▴":"▾"}`}
                     </button>
-                    {present.map(r=>(
-                      <button key={r} className={`pa-pill${marketFilter.race===r?" active":""}`} title={r} onClick={()=>setMarketFilter(f=>({...f,race:r}))}>
-                        <HeroAvatar race={r} size={13}/>{r}<span className="ct">{counts[r]}</span>
-                      </button>
-                    ))}
+                    <span className="pa-pill" style={{position:"relative"}}>
+                      {`Sort: ${marketFilter.sortBy}`}{" ▾"}
+                      <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))}
+                        aria-label="Sort market by"
+                        style={{position:"absolute",inset:0,opacity:0,cursor:"pointer",width:"100%"}}>
+                        {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </span>
+                    <span className="pa-kicker" style={{marginLeft:"auto",flexShrink:0,letterSpacing:1.5}}>{marketFiltered.length} shown</span>
                   </div>
                 );
               })()}
 
-              {/* Row 3 — sort chip + badged disclosure + shown count */}
-              {(()=>{
-                const hiddenActive=(marketFilter.role!=="All"?1:0)+(marketFilter.stage!=="All"?1:0);
-                return(
-                  <>
-                    <div className="rm-sq-row" style={{display:"flex",gap:5,marginBottom:marketMoreOpen?6:12,alignItems:"center"}}>
-                      <span className="pa-pill" style={{position:"relative"}}>
-                        {`Sort: ${marketFilter.sortBy}`}{" ▾"}
-                        <select value={marketFilter.sortBy} onChange={e=>setMarketFilter(f=>({...f,sortBy:e.target.value}))}
-                          aria-label="Sort market by"
-                          style={{position:"absolute",inset:0,opacity:0,cursor:"pointer",width:"100%"}}>
-                          {["Value","Combat","Salary","Level","Stage",...(buildings.find(b=>b.id==="scouts"&&b.built)?["Potential"]:[])].map(s=><option key={s} value={s}>{s}</option>)}
-                        </select>
-                      </span>
-                      <button className={`pa-pill${hiddenActive>0?" active":""}`} onClick={()=>setMarketMoreOpen(o=>!o)}>
-                        {`More${hiddenActive>0?` (${hiddenActive})`:""} ${marketMoreOpen?"▴":"▾"}`}
-                      </button>
-                      <span className="pa-kicker" style={{marginLeft:"auto",flexShrink:0,letterSpacing:1.5}}>{marketFiltered.length} shown</span>
-                    </div>
-                    {marketMoreOpen&&(
-                      <div style={{marginBottom:12,padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.07)",border:"1px solid rgba(138,109,59,0.3)"}}>
-                        <div style={{display:"flex",gap:6,marginBottom:8,flexWrap:"wrap"}}>
-                          <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{...IS,flex:1,minWidth:90}}>
-                            <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
-                          </select>
-                          <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{...IS,flex:1,minWidth:90}}>
-                            <option value="All">All Stages</option>
-                            {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
-                          </select>
-                        </div>
-                        <button onClick={()=>setMarketFilter(f=>({...f,position:"All",race:"All",role:"All",stage:"All"}))}
-                          style={{background:"none",border:"none",cursor:"pointer",color:"#7E2D26",fontSize:11,padding:0,textDecoration:"underline",fontFamily:"'Alegreya Sans',sans-serif"}}>
-                          Clear all filters
+              {marketMoreOpen&&(
+                <div style={{marginBottom:12,padding:"10px 12px",borderRadius:3,background:"rgba(138,109,59,0.07)",border:"1px solid rgba(138,109,59,0.3)"}}>
+                  <div className="pa-kicker" style={{color:"#8A6D3B",marginBottom:6}}>Position</div>
+                  <div className="rm-sq-row" style={{display:"flex",gap:4,flexWrap:"wrap",marginBottom:10,alignItems:"center"}}>
+                    {["All",...POS_KEYS].map(p=>{
+                      const count = p==="All"
+                        ? market.length
+                        : market.filter(h=>(POSITIONS[p]?.ideal||[]).includes(h.role)).length;
+                      return(
+                        <button key={p} className={`pa-pill${marketFilter.position===p?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,position:p}))}>
+                          {p}<span className="ct">{count}</span>
                         </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Races actually on offer this rotation — an absent race has
+                      nothing to filter */}
+                  <div className="pa-kicker" style={{color:"#8A6D3B",marginBottom:6}}>Race</div>
+                  {(()=>{
+                    const RACES_LIST=["Human","Elf","Dwarf","Half-Orc","Gnome","Tiefling","Dragonborn"];
+                    const counts=Object.fromEntries(RACES_LIST.map(r=>[r,market.filter(h=>h.race===r).length]));
+                    const present=RACES_LIST.filter(r=>counts[r]>0).sort((a,b)=>counts[b]-counts[a]);
+                    return(
+                      <div className="rm-sq-row" style={{display:"flex",gap:4,marginBottom:10,alignItems:"center",flexWrap:"wrap"}}>
+                        <button className={`pa-pill${marketFilter.race==="All"?" active":""}`} onClick={()=>setMarketFilter(f=>({...f,race:"All"}))}>
+                          All<span className="ct">{market.length}</span>
+                        </button>
+                        {present.map(r=>(
+                          <button key={r} className={`pa-pill${marketFilter.race===r?" active":""}`} title={r} onClick={()=>setMarketFilter(f=>({...f,race:r}))}>
+                            <HeroAvatar race={r} size={13}/>{r}<span className="ct">{counts[r]}</span>
+                          </button>
+                        ))}
                       </div>
-                    )}
-                  </>
-                );
-              })()}
+                    );
+                  })()}
+
+                  <div className="pa-kicker" style={{color:"#8A6D3B",marginBottom:6}}>Refine</div>
+                  <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+                    <select value={marketFilter.role} onChange={e=>setMarketFilter(f=>({...f,role:e.target.value}))} style={{...IS,flex:1,minWidth:90,...(marketFilter.role!=="All"?{border:"1px solid #8A6D3B",color:"#8A6D3B",fontWeight:700}:{})}}>
+                      <option value="All">All Roles</option>{ROLES.map(r=><option key={r} value={r}>{r}</option>)}
+                    </select>
+                    <select value={marketFilter.stage} onChange={e=>setMarketFilter(f=>({...f,stage:e.target.value}))} style={{...IS,flex:1,minWidth:90,...(marketFilter.stage!=="All"?{border:"1px solid #8A6D3B",color:"#8A6D3B",fontWeight:700}:{})}}>
+                      <option value="All">All Stages</option>
+                      {["prospect","rising","peak","fading","veteran"].map(s=><option key={s} value={s}>{agePhaseLabel(s)}</option>)}
+                    </select>
+                  </div>
+
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <button onClick={()=>setMarketFilter(f=>({...f,position:"All",race:"All",role:"All",stage:"All"}))}
+                      style={{background:"none",border:"none",cursor:"pointer",color:"#7E2D26",fontSize:11,padding:0,textDecoration:"underline",fontFamily:"'Alegreya Sans',sans-serif"}}>
+                      Clear all
+                    </button>
+                    <button onClick={()=>setMarketMoreOpen(false)}
+                      style={{padding:"7px 18px",borderRadius:3,border:"none",cursor:"pointer",background:"#8A6D3B",color:"#F0E8D5",fontWeight:700,fontSize:11,fontFamily:"'Alegreya Sans',sans-serif"}}>
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Locked tier callout */}
               {(()=>{
